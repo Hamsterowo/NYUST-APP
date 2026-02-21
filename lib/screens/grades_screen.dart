@@ -5,6 +5,7 @@ import '../providers/data_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/skeleton_loading.dart';
 import 'graduation_screen.dart';
 
 class GradesScreen extends StatefulWidget {
@@ -112,7 +113,15 @@ class _GradesScreenState extends State<GradesScreen> {
 
   Widget _buildGradesContent(DataProvider data, ColorScheme colorScheme) {
     if (data.isLoadingGrades) {
-      return const Center(child: CircularProgressIndicator());
+      // 骨架框架
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: const [
+          GradesSkeletonCard(),
+          GradesSkeletonCard(),
+          GradesSkeletonCard(),
+        ],
+      );
     }
 
     if (data.gradesFailed && data.gradesData == null) {

@@ -34,10 +34,13 @@ class DataProvider with ChangeNotifier {
   bool isLoadingSchedule = false;
   bool scheduleFailed = false;
 
-  /// 登入後呼叫，預先載入全部資料
+  /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）
   Future<void> prefetchAll() async {
-    // 並發同時載入，節省時間
-    await Future.wait([fetchGrades(), fetchGraduation(), fetchSchedule()]);
+    await fetchGrades();
+    await Future.delayed(const Duration(milliseconds: 200));
+    await fetchGraduation();
+    await Future.delayed(const Duration(milliseconds: 200));
+    await fetchSchedule();
   }
 
   /// 清除所有快取（登出時呼叫）

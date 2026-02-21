@@ -6,6 +6,7 @@ import '../models/schedule_event.dart';
 import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/skeleton_loading.dart';
 
 class GraduationContent extends StatelessWidget {
   const GraduationContent({super.key});
@@ -16,7 +17,7 @@ class GraduationContent extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (data.isLoadingGraduation) {
-      return const Center(child: CircularProgressIndicator());
+      return const GraduationSkeletonView();
     }
 
     if (data.graduationFailed && data.graduationData == null) {
@@ -355,7 +356,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _buildBody(DataProvider data) {
     if (data.isLoadingSchedule && data.scheduleData.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const ScheduleSkeletonGrid();
     }
 
     if (data.scheduleFailed && data.scheduleData.isEmpty) {
