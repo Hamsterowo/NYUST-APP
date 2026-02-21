@@ -6,26 +6,33 @@ void showTopSnackBar(
   bool isError = false,
 }) {
   final overlay = Overlay.of(context);
-  final overlayEntry = OverlayEntry(
-    builder: (context) => TopSnackBarWidget(message: message, isError: isError),
+  late OverlayEntry overlayEntry;
+
+  overlayEntry = OverlayEntry(
+    builder: (context) => TopSnackBarWidget(
+      message: message,
+      isError: isError,
+      onDismissed: () {
+        if (overlayEntry.mounted) {
+          overlayEntry.remove();
+        }
+      },
+    ),
   );
 
   overlay.insert(overlayEntry);
-
-  // Remove after duration
-  Future.delayed(Duration(seconds: 3), () {
-    overlayEntry.remove();
-  });
 }
 
 class TopSnackBarWidget extends StatefulWidget {
   final String message;
   final bool isError;
+  final VoidCallback onDismissed;
 
   const TopSnackBarWidget({
     Key? key,
     required this.message,
     this.isError = false,
+    required this.onDismissed,
   }) : super(key: key);
 
   @override
@@ -41,18 +48,31 @@ class _TopSnackBarWidgetState extends State<TopSnackBarWidget>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(
+        milliseconds: 500,
+      ), // Slightly slower for smoothness
       vsync: this,
     );
-    _offsetAnimation = Tween<Offset>(
-      begin: const Offset(0.0, -1.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _offsetAnimation =
+        Tween<Offset>(begin: const Offset(0.0, -1.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Curves.easeOutCubic, // Smoother entry curve
+            reverseCurve: Curves.easeInCubic, // Accelerate out
+          ),
+        );
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        widget.onDismissed();
+      }
+    });
 
     _controller.forward();
 
     // Start reverse animation before removal
-    Future.delayed(Duration(milliseconds: 2500), () {
+    Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted) {
         _controller.reverse();
       }
@@ -80,7 +100,7 @@ class _TopSnackBarWidgetState extends State<TopSnackBarWidget>
           color: Colors.transparent,
           child: Center(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
                 color: widget.isError
                     ? colorScheme.errorContainer
@@ -88,9 +108,9 @@ class _TopSnackBarWidgetState extends State<TopSnackBarWidget>
                 borderRadius: BorderRadius.circular(30), // Capsule shape
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26,
+                    color: Colors.black.withOpacity(0.2),
                     blurRadius: 8,
-                    offset: Offset(0, 4),
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -105,7 +125,7 @@ class _TopSnackBarWidgetState extends State<TopSnackBarWidget>
                         ? colorScheme.onErrorContainer
                         : colorScheme.onPrimaryContainer,
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Flexible(
                     child: Text(
                       widget.message,

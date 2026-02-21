@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/data_provider.dart';
 import 'providers/navigation_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/grades_screen.dart';
@@ -11,6 +12,13 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
+          create: (ctx) => DataProvider(
+            ctx.read<AuthProvider>().api,
+            ctx.read<AuthProvider>(),
+          ),
+          update: (ctx, auth, prev) => prev ?? DataProvider(auth.api, auth),
+        ),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ],
       child: MyApp(),
@@ -25,7 +33,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'NYUST Portal',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),

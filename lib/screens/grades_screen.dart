@@ -1,49 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/data_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
-import 'graduation_screen.dart'; // Import GraduationScreen
+import '../widgets/custom_app_bar.dart';
+import 'graduation_screen.dart';
 
 class GradesScreen extends StatefulWidget {
   const GradesScreen({super.key});
 
   @override
-  _GradesScreenState createState() => _GradesScreenState();
+  State<GradesScreen> createState() => _GradesScreenState();
 }
 
 class _GradesScreenState extends State<GradesScreen> {
-  int _selectedSegment = 0; // 0: Current, 1: All, 2: Graduation
+  int _selectedSegment = 0;
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final data = context.watch<DataProvider>();
     final colorScheme = Theme.of(context).colorScheme;
 
     if (!auth.isLoggedIn) {
       return Scaffold(
-        appBar: AppBar(title: Text('成績查詢')),
+        appBar: const CustomAppBar(title: '成績查詢'),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.lock_outline, size: 64, color: colorScheme.outline),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 '登入使用所有功能',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               FilledButton.tonal(
                 onPressed: () {
-                  context.read<NavigationProvider>().setIndex(
-                    3,
-                  ); // Switch to Profile tab
+                  context.read<NavigationProvider>().setIndex(3);
                   showTopSnackBar(context, '請在此登入以查看成績');
                 },
-                child: Text('前往登入'),
+                child: const Text('前往登入'),
               ),
             ],
           ),
@@ -52,13 +53,22 @@ class _GradesScreenState extends State<GradesScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_selectedSegment == 2 ? '畢業學分' : '成績查詢'),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(80),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      appBar: CustomAppBar(
+        title: _selectedSegment == 2 ? '畢業學分' : '成績查詢',
+        onRefresh: data.isLoadingGrades
+            ? null
+            : () {
+                if (_selectedSegment == 2) {
+                  data.fetchGraduation();
+                } else {
+                  data.fetchGrades();
+                }
+              },
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             child: SizedBox(
               width: double.infinity,
               child: SegmentedButton<int>(
@@ -81,253 +91,247 @@ class _GradesScreenState extends State<GradesScreen> {
                 ],
                 selected: <int>{_selectedSegment},
                 onSelectionChanged: (Set<int> newSelection) {
-                  setState(() {
-                    _selectedSegment = newSelection.first;
-                  });
+                  setState(() => _selectedSegment = newSelection.first);
                 },
                 showSelectedIcon: false,
-                style: ButtonStyle(visualDensity: VisualDensity.comfortable),
+                style: const ButtonStyle(
+                  visualDensity: VisualDensity.comfortable,
+                ),
               ),
             ),
           ),
-        ),
+          Expanded(
+            child: _selectedSegment == 2
+                ? const GraduationContent()
+                : _buildGradesContent(data, colorScheme),
+          ),
+        ],
       ),
-      body: _selectedSegment == 2
-          ? const GraduationContent()
-          : _buildGradesView(context),
     );
   }
 
-  Widget _buildGradesView(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final colorScheme = Theme.of(context).colorScheme;
+  Widget _buildGradesContent(DataProvider data, ColorScheme colorScheme) {
+    if (data.isLoadingGrades) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return FutureBuilder<Map<String, dynamic>>(
-      future: auth.api.getGrades(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+    if (data.gradesFailed && data.gradesData == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              '無法載入成績',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            const Text('請確認網路連線後重試', style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 24),
+            FilledButton.tonal(
+              onPressed: () => data.fetchGrades(),
+              child: const Text('重試'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (data.gradesData == null) {
+      return const Center(child: Text('尚無成績資料'));
+    }
+
+    return _buildGradesList(data.gradesData!, colorScheme);
+  }
+
+  Widget _buildGradesList(
+    Map<String, dynamic> gradesData,
+    ColorScheme colorScheme,
+  ) {
+    List grades = gradesData['grades'] ?? [];
+
+    if (_selectedSegment == 0 && grades.isNotEmpty) {
+      grades = [grades.last];
+    } else if (_selectedSegment == 0 && grades.isEmpty) {
+      return const Center(child: Text('尚無成績資料'));
+    }
+
+    if (_selectedSegment == 1) {
+      if (grades.length > 1) {
+        grades = grades.sublist(0, grades.length - 1).reversed.toList();
+      } else {
+        return const Center(child: Text('尚無歷年成績資料'));
+      }
+    }
+
+    return ListView.builder(
+      key: ValueKey(_selectedSegment),
+      padding: const EdgeInsets.all(16),
+      itemCount: grades.length,
+      itemBuilder: (context, index) {
+        final semester = grades[index];
+        final courses = semester['courses'] as List;
+
+        double totalWeightedScore = 0;
+        double totalGradedCredits = 0;
+        double totalCredits = 0;
+        double earnedCredits = 0;
+
+        for (var course in courses) {
+          final credit =
+              double.tryParse(course['credits']?.toString() ?? '0') ?? 0;
+          final scoreStr = course['score']?.toString() ?? '';
+          final score = double.tryParse(scoreStr);
+          totalCredits += credit;
+          bool isPass = false;
+          if (score != null) {
+            if (score >= 60) isPass = true;
+          } else {
+            if (scoreStr.contains('通過') ||
+                scoreStr.toLowerCase().contains('pass'))
+              isPass = true;
+          }
+          if (isPass) earnedCredits += credit;
+          if (score != null) {
+            totalWeightedScore += score * credit;
+            totalGradedCredits += credit;
+          }
         }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        final data = snapshot.data;
 
-        if (data == null || data['success'] != true) {
-          return Center(
-            child: Text('Failed to load grades: ${data?['message']}'),
-          );
-        }
+        final calculatedAverage = totalGradedCredits > 0
+            ? (totalWeightedScore / totalGradedCredits).toStringAsFixed(2)
+            : 'N/A';
 
-        List grades = data['grades'];
+        String formatCredit(double c) =>
+            c.truncateToDouble() == c ? c.toInt().toString() : c.toString();
+        final passRate =
+            '${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}';
 
-        // Filter for "Current Semester"
-        if (_selectedSegment == 0 && grades.isNotEmpty) {
-          grades = [grades.last];
-        } else if (_selectedSegment == 0 && grades.isEmpty) {
-          return Center(child: Text("尚無成績資料"));
-        }
+        final apiAverage = semester['summary']?['average_score']?.toString();
+        final displayAverage =
+            (apiAverage != null && apiAverage.isNotEmpty && apiAverage != 'N/A')
+            ? apiAverage
+            : calculatedAverage;
 
-        // Reverse to show latest first for "All Semesters"
-        if (_selectedSegment == 1) {
-          grades = grades.reversed.toList();
-        }
+        return Card(
+          elevation: 0,
+          color: colorScheme.surfaceContainerHighest,
+          margin: const EdgeInsets.only(bottom: 12),
+          clipBehavior: Clip.antiAlias,
+          child: ExpansionTile(
+            initiallyExpanded: false,
+            shape: const Border(),
+            collapsedShape: const Border(),
+            backgroundColor: Colors.transparent,
+            collapsedBackgroundColor: Colors.transparent,
+            textColor: colorScheme.onSurface,
+            iconColor: colorScheme.primary,
+            title: Text(
+              '${semester["academic_year"]}學年 第${semester["semester"]}學期',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              '平均: $displayAverage  |  排名: ${(semester["summary"]?["rank"]?.toString().isEmpty ?? true) ? "-" : semester["summary"]["rank"]}  |  學分: $passRate',
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            ),
+            children: courses.map<Widget>((course) {
+              final score =
+                  double.tryParse(course['score']?.toString() ?? '0') ?? 0;
+              final isPass = score >= 60;
+              final isPassString = course['score'].toString().contains('通過');
+              final effectivePass = isPass || isPassString;
 
-        return ListView.builder(
-          padding: EdgeInsets.all(16),
-          itemCount: grades.length,
-          itemBuilder: (context, index) {
-            final semester = grades[index];
-            final courses = semester['courses'] as List;
-
-            double totalWeightedScore = 0;
-            double totalGradedCredits = 0;
-            double totalCredits = 0;
-            double earnedCredits = 0;
-
-            for (var course in courses) {
-              final credit =
-                  double.tryParse(course['credits']?.toString() ?? '0') ?? 0;
-              final scoreStr = course['score']?.toString() ?? '';
-              final score = double.tryParse(scoreStr);
-
-              // 總學分 (Total Credits)
-              totalCredits += credit;
-
-              // 已獲得學分 (Earned Credits)
-              bool isPass = false;
-              if (score != null) {
-                if (score >= 60) isPass = true;
-              } else {
-                if (scoreStr.contains('通過') ||
-                    scoreStr.toLowerCase().contains('pass')) {
-                  isPass = true;
-                }
-              }
-
-              if (isPass) {
-                earnedCredits += credit;
-              }
-
-              // 平均計算 (Average Calculation) - Exclude Pass/Fail
-              // Only include numeric scores in the average
-              if (score != null) {
-                totalWeightedScore += score * credit;
-                totalGradedCredits += credit;
-              }
-            }
-
-            final calculatedAverage = totalGradedCredits > 0
-                ? (totalWeightedScore / totalGradedCredits).toStringAsFixed(2)
-                : "N/A";
-
-            // Format for display: 17/17 (Remove decimal if integer)
-            String formatCredit(double c) =>
-                c.truncateToDouble() == c ? c.toInt().toString() : c.toString();
-            final passRate =
-                "${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}";
-
-            // Use API average if available and not empty/N/A, otherwise use calculated
-            final apiAverage = semester["summary"]?["average_score"]
-                ?.toString();
-            final displayAverage =
-                (apiAverage != null &&
-                    apiAverage.isNotEmpty &&
-                    apiAverage != "N/A")
-                ? apiAverage
-                : calculatedAverage;
-
-            return Card(
-              elevation: 0,
-              color: colorScheme.surfaceContainerHighest,
-              margin: EdgeInsets.only(bottom: 12),
-              clipBehavior: Clip.antiAlias,
-              child: ExpansionTile(
-                initiallyExpanded: false,
-                shape: Border(), // Remove default borders
-                collapsedShape: Border(),
-                backgroundColor: Colors.transparent,
-                collapsedBackgroundColor: Colors.transparent,
-                textColor: colorScheme.onSurface,
-                iconColor: colorScheme.primary,
-                title: Text(
-                  '${semester["academic_year"]}學年 第${semester["semester"]}學期',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  '平均: $displayAverage  |  排名: ${(semester["summary"]?["rank"]?.toString().isEmpty ?? true) ? "-" : semester["summary"]["rank"]}  |  學分: $passRate',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-                children: courses.map<Widget>((course) {
-                  final score =
-                      double.tryParse(course["score"]?.toString() ?? "0") ?? 0;
-                  final isPass =
-                      score >= 60; // Simple pass/fail check, might vary
-
-                  // For "Pass" string scores
-                  final isPassString = course["score"].toString().contains(
-                    "通過",
-                  );
-                  final effectivePass = isPass || isPassString;
-
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: colorScheme.outlineVariant.withOpacity(0.5),
-                        ),
-                      ),
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              course['name'] ?? 'Unknown Course',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
                               children: [
-                                Text(
-                                  course['name'] ?? 'Unknown Course',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: colorScheme.onSurface,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.secondaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    course['type'] ?? '',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onSecondaryContainer,
+                                    ),
                                   ),
                                 ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: colorScheme.secondaryContainer,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        course["type"] ?? '',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color:
-                                              colorScheme.onSecondaryContainer,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '${course["credits"]} 學分',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${course["credits"]} 學分',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                          SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: effectivePass
-                                      ? colorScheme.primaryContainer
-                                      : colorScheme.errorContainer,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '${course["score"]}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: effectivePass
-                                        ? colorScheme.onPrimaryContainer
-                                        : colorScheme.onErrorContainer,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            );
-          },
+                      const SizedBox(width: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: effectivePass
+                              ? colorScheme.primaryContainer
+                              : colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${course["score"]}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: effectivePass
+                                ? colorScheme.onPrimaryContainer
+                                : colorScheme.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
         );
       },
     );

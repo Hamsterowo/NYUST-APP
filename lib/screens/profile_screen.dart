@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/custom_app_bar.dart';
 import 'login_form.dart'; // Import LoginForm
 
 class ProfileScreen extends StatelessWidget {
@@ -15,15 +16,15 @@ class ProfileScreen extends StatelessWidget {
 
     // If not logged in, show LoginForm
     if (!auth.isLoggedIn) {
-      return Scaffold(
-        appBar: AppBar(title: Text('個人中心')),
+      return const Scaffold(
+        appBar: CustomAppBar(title: '個人中心'),
         body: Center(child: LoginForm()),
       );
     }
 
     // If logged in, show Profile
     return Scaffold(
-      appBar: AppBar(title: Text('個人資料')),
+      appBar: const CustomAppBar(title: '個人資料'),
       body: SingleChildScrollView(
         child: Center(
           child: Padding(

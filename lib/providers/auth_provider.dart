@@ -11,6 +11,12 @@ class AuthProvider with ChangeNotifier {
   String? _captchaUrl;
   String? _verificationToken;
 
+  /// 登入成功後的回呼，由 DataProvider 設定
+  VoidCallback? onLoginSuccess;
+
+  /// 登出時的回呼，由 DataProvider 設定
+  VoidCallback? onLogoutCallback;
+
   AuthProvider() {
     init();
   }
@@ -23,6 +29,13 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> init() async {
     await _apiService.init();
+
+    // 當 API 偵測到 Session 過期 (401) 時，自動登出
+    _apiService.onSessionExpired = () {
+      _user = null;
+      notifyListeners();
+    };
+
     // Check if we have valid cookies/session?
     // For now, let's try to fetch user info to see if logged in
     try {
@@ -33,6 +46,7 @@ class AuthProvider with ChangeNotifier {
           'AuthProvider: Session restored! User: ${_user?["user"]?["name"]}',
         );
         notifyListeners();
+        onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
       } else {
         print('AuthProvider: No active session found.');
       }
@@ -91,6 +105,7 @@ class AuthProvider with ChangeNotifier {
         _user = info;
         _user?['username'] = username; // Store username if needed
         notifyListeners();
+        onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
         return true;
       } else {
         _error = result['message'] ?? 'Login failed';
@@ -111,6 +126,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     await _apiService.logout();
     _user = null;
+    onLogoutCallback?.call(); // 通知 DataProvider 清除快取
     notifyListeners();
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -11,12 +12,15 @@ class ApiService {
       'https://nyust-api.hamsterowo.workers.dev'; // Replace with your worker URL if different
   bool _initStarted = false;
 
+  /// 當 API 回傳 401 Session 過期時觸發，由 AuthProvider 設定
+  VoidCallback? onSessionExpired;
+
   ApiService() {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
         validateStatus: (status) {
           return status! < 500; // Accept all 2xx, 3xx, 4xx
         },
@@ -184,6 +188,13 @@ class ApiService {
 
       final response = await _dio.post(path, data: {'cookies': cookieList});
 
+      // 偵測到 401 代表 Session 過期
+      if (response.statusCode == 401) {
+        await _cookieJar!.deleteAll();
+        onSessionExpired?.call();
+        return {'status': 'session_expired', 'message': '登入已過期，請重新登入'};
+      }
+
       // Update cookies if returned
       if (response.data['cookies'] != null) {
         List<dynamic> newCookiesData = response.data['cookies'];
@@ -197,8 +208,18 @@ class ApiService {
       }
 
       return response.data;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
+      }
+      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
     } catch (e) {
-      throw Exception('API call to $path failed: $e');
+      return {'status': 'error', 'message': 'API call to $path failed: $e'};
     }
   }
 
@@ -212,6 +233,56 @@ class ApiService {
 
   Future<Map<String, dynamic>> getGraduation() async {
     return _authenticatedPost('/api/graduation');
+  }
+
+  Future<Map<String, dynamic>> getCalendar(int year) async {
+    await _ensureInit();
+    try {
+      final response = await _dio.get('/api/calendar/$year');
+      return response.data;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
+      }
+      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'API call to /api/calendar/$year failed: $e',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getHolidays(int year) async {
+    await _ensureInit();
+    try {
+      final response = await _dio.get('/api/holidays/$year');
+      return response.data;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
+      }
+      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'API call to /api/holidays/$year failed: $e',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getSchedule() async {
+    return _authenticatedPost('/api/schedule');
   }
 
   Future<void> logout() async {
