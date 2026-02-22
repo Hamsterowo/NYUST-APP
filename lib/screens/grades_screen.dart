@@ -24,6 +24,13 @@ class _GradesScreenState extends State<GradesScreen> {
     final data = context.watch<DataProvider>();
     final colorScheme = Theme.of(context).colorScheme;
 
+    if (!auth.isInitialized) {
+      return const Scaffold(
+        appBar: CustomAppBar(title: '成績查詢'),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     if (!auth.isLoggedIn) {
       return Scaffold(
         appBar: const CustomAppBar(title: '成績查詢'),

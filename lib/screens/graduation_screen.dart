@@ -368,6 +368,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final auth = context.watch<AuthProvider>();
     final colorScheme = Theme.of(context).colorScheme;
 
+    if (!auth.isInitialized) {
+      return const Scaffold(
+        appBar: CustomAppBar(title: '課表'),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     if (!auth.isLoggedIn) {
       return Scaffold(
         appBar: const CustomAppBar(title: '課表'),

@@ -14,6 +14,14 @@ class ProfileScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    // Wait for initialization (session restoration)
+    if (!auth.isInitialized) {
+      return const Scaffold(
+        appBar: CustomAppBar(title: '個人中心'),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     // If not logged in, show LoginForm
     if (!auth.isLoggedIn) {
       return const Scaffold(

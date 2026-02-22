@@ -10,6 +10,7 @@ class AuthProvider with ChangeNotifier {
   // Login Init Data
   String? _captchaUrl;
   String? _verificationToken;
+  bool _isInitialized = false;
 
   /// 登入成功後的回呼，由 DataProvider 設定
   VoidCallback? onLoginSuccess;
@@ -22,6 +23,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool get isLoading => _isLoading;
+  bool get isInitialized => _isInitialized;
   bool get isLoggedIn => _user != null;
   Map<String, dynamic>? get user => _user;
   String? get error => _error;
@@ -45,13 +47,15 @@ class AuthProvider with ChangeNotifier {
         print(
           'AuthProvider: Session restored! User: ${_user?["user"]?["name"]}',
         );
-        notifyListeners();
         onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
       } else {
         print('AuthProvider: No active session found.');
       }
     } catch (e) {
-      // Not logged in or error
+      print('AuthProvider: Session restoration failed: $e');
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
     }
   }
 
