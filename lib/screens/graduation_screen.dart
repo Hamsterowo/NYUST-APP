@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -352,16 +353,34 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     'C',
     'D',
     'Y',
-    'Z',
     'E',
     'F',
     'G',
     'H',
+    'Z',
     'I',
     'J',
     'K',
     'L',
   ];
+
+  final Map<String, String> _periodTimes = {
+    'X': '07:10 - 08:00',
+    'A': '08:10 - 09:00',
+    'B': '09:10 - 10:00',
+    'C': '10:10 - 11:00',
+    'D': '11:10 - 12:00',
+    'Y': '12:10 - 13:00',
+    'E': '13:10 - 14:00',
+    'F': '14:10 - 15:00',
+    'G': '15:10 - 16:00',
+    'H': '16:10 - 17:00',
+    'Z': '17:10 - 18:00',
+    'I': '18:25 - 19:15',
+    'J': '19:20 - 20:10',
+    'K': '20:15 - 21:05',
+    'L': '21:10 - 22:00',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -452,15 +471,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _buildScheduleGrid(List<ScheduleEvent> courses) {
     final weekDays = ['一', '二', '三', '四', '五', '六'];
-    const cellHeight = 48.0;
     const timeColumnWidth = 40.0;
     const headerHeight = 40.0;
     const minCellWidth = 50.0;
+    const minCellHeight = 40.0;
 
     final colorScheme = Theme.of(context).colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // 計算動態高度：(總高度 - 標題高度 - Padding) / 節次數量
+        final availableHeight = constraints.maxHeight - headerHeight - 24.0;
+        final cellHeight = max(
+          minCellHeight,
+          availableHeight / _periods.length,
+        );
+
         // 扣掉外層 Padding(12*2) 與節次欄，判斷每欄是否過窄
         final availableForDays = constraints.maxWidth - 24.0 - timeColumnWidth;
         final needsScroll = availableForDays / weekDays.length < minCellWidth;
@@ -597,25 +623,37 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           child: Column(
                             children: _periods
                                 .map(
-                                  (period) => Container(
-                                    height: cellHeight,
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: Theme.of(
-                                            context,
-                                          ).dividerColor.withValues(alpha: 0.5),
-                                        ),
-                                        right: BorderSide(
-                                          color: Theme.of(context).dividerColor,
+                                  (period) => InkWell(
+                                    onTap: () {
+                                      final time = _periodTimes[period] ?? '';
+                                      showTopSnackBar(
+                                        context,
+                                        '第 $period 節：$time',
+                                      );
+                                    },
+                                    child: Container(
+                                      height: cellHeight,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Theme.of(context)
+                                                .dividerColor
+                                                .withValues(alpha: 0.5),
+                                          ),
+                                          right: BorderSide(
+                                            color: Theme.of(
+                                              context,
+                                            ).dividerColor,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        period,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                      child: Center(
+                                        child: Text(
+                                          period,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),

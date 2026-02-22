@@ -357,8 +357,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final prevType = holidaysType[prevFormatted];
     final nextType = holidaysType[nextFormatted];
-    final bool isSamePrev = prevType == type && day.weekday != DateTime.monday;
-    final bool isSameNext = nextType == type && day.weekday != DateTime.sunday;
+    final bool isSamePrev =
+        prevType == type &&
+        day.weekday != DateTime.monday &&
+        prevDay.month == day.month;
+    final bool isSameNext =
+        nextType == type &&
+        day.weekday != DateTime.sunday &&
+        nextDay.month == day.month;
 
     // 單獨一天假期 → 圓形
     if (!isSamePrev && !isSameNext) {

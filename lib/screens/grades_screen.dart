@@ -279,7 +279,7 @@ class _GradesScreenState extends State<GradesScreen> {
                     vertical: 12.0,
                   ),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Column(

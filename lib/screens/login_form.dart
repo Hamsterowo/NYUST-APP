@@ -163,7 +163,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
               SizedBox(height: 24),
               if (auth.isLoading)
-                CircularProgressIndicator()
+                const CircularProgressIndicator()
               else
                 SizedBox(
                   width: double.infinity,

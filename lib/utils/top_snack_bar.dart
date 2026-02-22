@@ -151,40 +151,43 @@ class _TopSnackBarState extends State<_TopSnackBar>
           opacity: _fade,
           child: ScaleTransition(
             scale: _scale,
-            child: GestureDetector(
-              onTap: () {
-                if (mounted) _ctrl.reverse();
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bgColor.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(icon, color: fgColor, size: 22),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            widget.message,
-                            style: TextStyle(
-                              color: fgColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              height: 1.3,
+            child: Material(
+              type: MaterialType.transparency,
+              child: GestureDetector(
+                onTap: () {
+                  if (mounted) _ctrl.reverse();
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: bgColor.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(icon, color: fgColor, size: 22),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              widget.message,
+                              style: TextStyle(
+                                color: fgColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                height: 1.3,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

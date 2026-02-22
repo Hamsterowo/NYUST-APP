@@ -57,18 +57,21 @@ class ApiService {
         storage: FileStorage("$appDocPath/.cookies/"),
       );
       _dio.interceptors.add(CookieManager(_cookieJar!));
-      if (kDebugMode)
+      if (kDebugMode) {
         print('ApiService: CookieJar initialized at $appDocPath/.cookies/');
+      }
 
       // 若上次登入沒有勾選「保持登入」，重啟時自動清除 cookies
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool(_sessionOnlyKey) == true) {
-        if (kDebugMode)
+        if (kDebugMode) {
           print('ApiService: sessionOnlyLogin detected, clearing cookies...');
+        }
         await _clearSchoolCookies();
       } else {
-        if (kDebugMode)
+        if (kDebugMode) {
           print('ApiService: rememberMe was enabled, keeping cookies.');
+        }
       }
     } catch (e) {
       if (kDebugMode) print('ApiService: Init failed: $e');
