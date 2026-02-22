@@ -445,7 +445,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _buildScheduleGrid(List<ScheduleEvent> courses) {
     final weekDays = ['一', '二', '三', '四', '五', '六'];
-    const cellHeight = 44.0;
+    const cellHeight = 48.0;
     const timeColumnWidth = 40.0;
     const headerHeight = 40.0;
     const minCellWidth = 50.0;
