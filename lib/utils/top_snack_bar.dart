@@ -167,15 +167,6 @@ class _TopSnackBarState extends State<_TopSnackBar>
                     decoration: BoxDecoration(
                       color: bgColor.withValues(alpha: 0.92),
                       borderRadius: BorderRadius.circular(16),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.18),
-                          blurRadius: 20,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
