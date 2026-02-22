@@ -198,8 +198,9 @@ class _GradesScreenState extends State<GradesScreen> {
             if (score >= 60) isPass = true;
           } else {
             if (scoreStr.contains('通過') ||
-                scoreStr.toLowerCase().contains('pass'))
+                scoreStr.toLowerCase().contains('pass')) {
               isPass = true;
+            }
           }
           if (isPass) earnedCredits += credit;
           if (score != null) {
@@ -245,11 +246,17 @@ class _GradesScreenState extends State<GradesScreen> {
               style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             children: courses.map<Widget>((course) {
-              final score =
-                  double.tryParse(course['score']?.toString() ?? '0') ?? 0;
-              final isPass = score >= 60;
-              final isPassString = course['score'].toString().contains('通過');
-              final effectivePass = isPass || isPassString;
+              final scoreRaw = course['score']?.toString() ?? '';
+              final isEmpty = scoreRaw.isEmpty;
+              final score = isEmpty ? null : double.tryParse(scoreRaw);
+              final isPass =
+                  !isEmpty &&
+                  (score != null
+                      ? score >= 60
+                      : scoreRaw.contains('通過') ||
+                            scoreRaw.toLowerCase().contains('pass'));
+              final effectivePass = isPass;
+              final displayScore = isEmpty ? '無資料' : scoreRaw;
 
               return Container(
                 decoration: BoxDecoration(
@@ -319,17 +326,21 @@ class _GradesScreenState extends State<GradesScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: effectivePass
+                          color: isEmpty
+                              ? colorScheme.surfaceContainerHighest
+                              : effectivePass
                               ? colorScheme.primaryContainer
                               : colorScheme.errorContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '${course["score"]}',
+                          displayScore,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: effectivePass
+                            color: isEmpty
+                                ? colorScheme.onSurfaceVariant
+                                : effectivePass
                                 ? colorScheme.onPrimaryContainer
                                 : colorScheme.onErrorContainer,
                           ),

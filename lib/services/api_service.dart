@@ -65,7 +65,7 @@ class ApiService {
       }
     } catch (e) {
       _initStarted = false;
-      throw e;
+      rethrow;
     }
   }
 

@@ -66,6 +66,13 @@ class GraduationContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _buildCreditTable(context, breakdown),
+          const SizedBox(height: 6),
+          Text(
+            '* 合計欄位為通識 + 必修 + 選修',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           if (info['missing_courses_text'] != null &&
               info['missing_courses_text'].isNotEmpty) ...[
             const SizedBox(height: 24),
@@ -83,9 +90,9 @@ class GraduationContent extends StatelessWidget {
               color: colorScheme.errorContainer,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text(
+                child: _buildMissingCoursesList(
+                  context,
                   info['missing_courses_text'],
-                  style: TextStyle(color: colorScheme.onErrorContainer),
                 ),
               ),
             ),
@@ -183,7 +190,7 @@ class GraduationContent extends StatelessWidget {
       'general': '通識',
       'dept_required': '必修',
       'elective': '選修',
-      'total': '總計',
+      'total': '合計',
     };
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -279,6 +286,54 @@ class GraduationContent extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildMissingCoursesList(BuildContext context, String raw) {
+    final colorScheme = Theme.of(context).colorScheme;
+    // 格式：系所課號 + 課程名稱 + [年級]，例如 COE3007工程倫理與產業導論[2]
+    final regex = RegExp(r'^([A-Z]+\d+)(.+?)\[(\d+)\]$');
+
+    final items = raw.split('、').map((entry) {
+      final match = regex.firstMatch(entry.trim());
+      if (match != null) {
+        return {
+          'code': match.group(1)!,
+          'name': match.group(2)!,
+          'year': int.tryParse(match.group(3)!) ?? 0,
+        };
+      }
+      return {'code': '', 'name': entry.trim(), 'year': 0};
+    }).toList()..sort((a, b) => (a['year'] as int).compareTo(b['year'] as int));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: items.map((item) {
+        final year = item['year'] as int;
+        final label =
+            '${year > 0 ? '$year年級' : '??'} - ${item['code']} ${item['name']}';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '• ',
+                style: TextStyle(
+                  color: colorScheme.onErrorContainer,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(color: colorScheme.onErrorContainer),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
 }
 
 // ScheduleScreen 也改用 DataProvider
@@ -291,7 +346,6 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   final List<String> _periods = [
-    'W',
     'X',
     'A',
     'B',
@@ -390,155 +444,198 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Widget _buildScheduleGrid(List<ScheduleEvent> courses) {
-    final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
-    const cellWidth = 80.0;
-    const cellHeight = 100.0;
+    final weekDays = ['一', '二', '三', '四', '五', '六'];
+    const cellHeight = 44.0;
     const timeColumnWidth = 40.0;
     const headerHeight = 40.0;
+    const minCellWidth = 50.0;
 
-    return Column(
-      children: [
-        Container(
-          height: headerHeight,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            border: Border(
-              bottom: BorderSide(color: Theme.of(context).dividerColor),
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 扣掉外層 Padding(12*2) 與節次欄，判斷每欄是否過窄
+        final availableForDays = constraints.maxWidth - 24.0 - timeColumnWidth;
+        final needsScroll = availableForDays / weekDays.length < minCellWidth;
+
+        // 標題列日期欄
+        // 不捲動：Expanded 均分；捲動：固定 minCellWidth
+        Widget dayCell(String day) {
+          final label = Center(
+            child: Text(
+              '星期$day',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: timeColumnWidth,
-                child: const Center(
-                  child: Text(
-                    '節',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+          );
+          return needsScroll
+              ? SizedBox(width: minCellWidth, child: label)
+              : Expanded(child: label);
+        }
+
+        // 課表格子
+        Widget gridCell(int dayIndex, String period) {
+          final weekdayStr = (dayIndex + 1).toString();
+          final event = courses.firstWhere(
+            (c) => c.weekday == weekdayStr && c.times.contains(period),
+            orElse: () => ScheduleEvent(
+              semesterCourseNo: '',
+              deptCourseNo: '',
+              name: '',
+              courseClass: '',
+              classType: '',
+              requiredType: '',
+              credits: '',
+              timeRoomStr: '',
+              teacher: '',
+              remark: '',
+              times: [],
+            ),
+          );
+          final decoration = BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+              ),
+              right: BorderSide(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+              ),
+            ),
+          );
+          final child = event.name.isNotEmpty ? _buildCourseCard(event) : null;
+
+          return needsScroll
+              ? Container(
+                  width: minCellWidth,
+                  height: cellHeight,
+                  decoration: decoration,
+                  child: child,
+                )
+              : Expanded(
+                  child: Container(
+                    height: cellHeight,
+                    decoration: decoration,
+                    child: child,
+                  ),
+                );
+        }
+
+        Widget headerDays() =>
+            Row(children: weekDays.map((d) => dayCell(d)).toList());
+
+        Widget gridRows() => Column(
+          children: _periods
+              .map(
+                (period) => Row(
+                  children: List.generate(
+                    weekDays.length,
+                    (i) => gridCell(i, period),
                   ),
                 ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const ClampingScrollPhysics(),
-                  child: Row(
-                    children: weekDays
-                        .map(
-                          (day) => SizedBox(
-                            width: cellWidth,
-                            child: Center(
-                              child: Text(
-                                '星期$day',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              )
+              .toList(),
+        );
+
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Card(
+            clipBehavior: Clip.hardEdge,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
               children: [
-                SizedBox(
-                  width: timeColumnWidth,
-                  child: Column(
-                    children: _periods
-                        .map(
-                          (period) => Container(
-                            height: cellHeight,
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Theme.of(
-                                    context,
-                                  ).dividerColor.withValues(alpha: 0.5),
-                                ),
-                                right: BorderSide(
-                                  color: Theme.of(context).dividerColor,
-                                ),
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                period,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
+                // 標題列
+                Container(
+                  height: headerHeight,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    border: Border(
+                      bottom: BorderSide(color: Theme.of(context).dividerColor),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: timeColumnWidth,
+                        child: const Center(
+                          child: Text(
+                            '節',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        )
-                        .toList(),
+                        ),
+                      ),
+                      Expanded(
+                        child: needsScroll
+                            ? SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                physics: const ClampingScrollPhysics(),
+                                child: headerDays(),
+                              )
+                            : headerDays(),
+                      ),
+                    ],
                   ),
                 ),
+                // 格子區
                 Expanded(
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Column(
-                      children: _periods.map((period) {
-                        return Row(
-                          children: List.generate(7, (dayIndex) {
-                            final weekdayStr = (dayIndex + 1).toString();
-                            final event = courses.firstWhere(
-                              (c) =>
-                                  c.weekday == weekdayStr &&
-                                  c.times.contains(period),
-                              orElse: () => ScheduleEvent(
-                                semesterCourseNo: '',
-                                deptCourseNo: '',
-                                name: '',
-                                courseClass: '',
-                                classType: '',
-                                requiredType: '',
-                                credits: '',
-                                timeRoomStr: '',
-                                teacher: '',
-                                remark: '',
-                                times: [],
-                              ),
-                            );
-
-                            return Container(
-                              width: cellWidth,
-                              height: cellHeight,
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Theme.of(
-                                      context,
-                                    ).dividerColor.withValues(alpha: 0.5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 節次欄（固定，不水平捲動）
+                        SizedBox(
+                          width: timeColumnWidth,
+                          child: Column(
+                            children: _periods
+                                .map(
+                                  (period) => Container(
+                                    height: cellHeight,
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Theme.of(
+                                            context,
+                                          ).dividerColor.withValues(alpha: 0.5),
+                                        ),
+                                        right: BorderSide(
+                                          color: Theme.of(context).dividerColor,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        period,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  right: BorderSide(
-                                    color: Theme.of(
-                                      context,
-                                    ).dividerColor.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              ),
-                              child: event.name.isNotEmpty
-                                  ? _buildCourseCard(event)
-                                  : null,
-                            );
-                          }),
-                        );
-                      }).toList(),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                        // 課表格（依需求決定是否水平捲動）
+                        Expanded(
+                          child: needsScroll
+                              ? SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const ClampingScrollPhysics(),
+                                  child: gridRows(),
+                                )
+                              : gridRows(),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 

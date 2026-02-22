@@ -29,11 +29,11 @@ class TopSnackBarWidget extends StatefulWidget {
   final VoidCallback onDismissed;
 
   const TopSnackBarWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.isError = false,
     required this.onDismissed,
-  }) : super(key: key);
+  });
 
   @override
   _TopSnackBarWidgetState createState() => _TopSnackBarWidgetState();

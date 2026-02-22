@@ -20,18 +20,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  // 依據日期分組的事件：Map<String, List<CalendarEvent>> => String 為 'yyyy-MM-dd'
-  late Map<String, List<CalendarEvent>> _groupedEvents;
-
-  // 節假日清單：Map<String, String> => 'yyyy-MM-dd': 'type'
-  Map<String, String> _holidaysType = {};
+  // 多年快取：year → { 'yyyy-MM-dd': [events] }
+  final Map<int, Map<String, List<CalendarEvent>>> _cachedGroupedEvents = {};
+  // 多年節假日快取：year → { 'yyyy-MM-dd': type }
+  final Map<int, Map<String, String>> _cachedHolidaysType = {};
+  // 正在背景抓取的年份
+  final Set<int> _fetchingYears = {};
 
   // Calendar 狀態
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  // 當前瀏覽的年份，若使用者翻頁到新的一年，則呼叫 API
-  late int _loadedYear;
+  // 目前顯示的年份
+  int _currentYear = DateTime.now().year;
 
   // 記錄是否已經在此次掛載時檢查過，防止重複彈出
   bool _hasCheckedLegend = false;
@@ -40,10 +41,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-    _loadedYear = _focusedDay.year;
-    _groupedEvents = {};
-    _holidaysType = {};
-    _fetchCalendarData(_loadedYear);
+    _currentYear = _focusedDay.year;
+    _fetchYearIfNeeded(_currentYear);
   }
 
   Future<void> _checkAndShowLegend() async {
@@ -124,7 +123,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.15),
+                      color: Colors.red.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -148,7 +147,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.25),
+                      color: Colors.amber.withValues(alpha: 0.25),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -221,31 +220,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Future<void> _fetchCalendarData(int year) async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  Future<void> _fetchYearIfNeeded(int year, {bool foreground = true}) async {
+    if (_cachedGroupedEvents.containsKey(year)) {
+      if (foreground && _isLoading && year == _currentYear) {
+        setState(() => _isLoading = false);
+      }
+      return; // 已快取，直接返回，不再觸發預載避免無限遞迴
+    }
+    if (_fetchingYears.contains(year)) return;
+    _fetchingYears.add(year);
+
+    if (foreground) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       final data = await _apiService.getCalendar(year);
       if (data['success'] == true) {
         final List<dynamic> eventsJson = data['events'];
-
         final List<CalendarEvent> parsed = eventsJson
             .map((e) => CalendarEvent.fromJson(e))
             .toList();
 
-        // 分組
         Map<String, List<CalendarEvent>> newGrouped = {};
         for (var event in parsed) {
-          if (newGrouped[event.date] == null) {
-            newGrouped[event.date] = [];
-          }
-          newGrouped[event.date]!.add(event);
+          newGrouped.putIfAbsent(event.date, () => []).add(event);
         }
 
-        // Fetch holidays simultaneously or subsequently
         Map<String, String> newHolidaysType = {};
         try {
           final holidayData = await _apiService.getHolidays(year);
@@ -265,23 +269,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
               }
             }
           }
-        } catch (e) {
-          // Ignore holiday fetch failure, just don't show holidays
-        }
+        } catch (_) {}
 
-        setState(() {
-          _loadedYear = year;
-          _groupedEvents = newGrouped;
-          _holidaysType = newHolidaysType;
-          _isLoading = false;
-        });
+        _fetchingYears.remove(year);
+        _cachedGroupedEvents[year] = newGrouped;
+        _cachedHolidaysType[year] = newHolidaysType;
+
+        if (mounted) {
+          setState(() {
+            if (foreground && year == _currentYear) _isLoading = false;
+            _errorMessage = null;
+          });
+          _prefetchAdjacentYears(year);
+        }
       } else {
-        setState(() {
-          _errorMessage = data['message'] ?? '載入失敗';
-        });
+        _fetchingYears.remove(year);
+        if (foreground && mounted) {
+          setState(() {
+            _errorMessage = data['message'] ?? '載入失敗';
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
-      if (mounted) {
+      _fetchingYears.remove(year);
+      if (foreground && mounted) {
         setState(() {
           _errorMessage = e.toString();
           _isLoading = false;
@@ -290,11 +302,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
+  void _prefetchAdjacentYears(int year) {
+    _fetchYearIfNeeded(year - 1, foreground: false);
+    _fetchYearIfNeeded(year + 1, foreground: false);
+  }
+
   List<CalendarEvent> _getEventsForDay(DateTime day) {
-    // API 給的日期格式是 yyyy-MM-dd
     final formattedDate =
         "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-    return _groupedEvents[formattedDate] ?? [];
+    return _cachedGroupedEvents[_currentYear]?[formattedDate] ?? [];
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -308,37 +324,52 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _onPageChanged(DateTime focusedDay) {
     _focusedDay = focusedDay;
-    // 如果切換到不同的年份，重新拉取該年份資料
-    if (focusedDay.year != _loadedYear) {
-      _fetchCalendarData(focusedDay.year);
+    final newYear = focusedDay.year;
+    if (newYear != _currentYear) {
+      final hasCached = _cachedGroupedEvents.containsKey(newYear);
+      setState(() {
+        _currentYear = newYear;
+        _isLoading = !hasCached;
+        _errorMessage = null;
+      });
+      _fetchYearIfNeeded(newYear);
     }
   }
 
   Widget? _buildHolidayBackground(BuildContext context, DateTime day) {
+    final holidaysType = _cachedHolidaysType[_currentYear] ?? {};
     final formattedDate =
         "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-    if (!_holidaysType.containsKey(formattedDate)) return null;
+    if (!holidaysType.containsKey(formattedDate)) return null;
 
-    final type = _holidaysType[formattedDate]!;
+    final type = holidaysType[formattedDate]!;
     final isVacation = type == 'winter_vacation' || type == 'summer_vacation';
+    final color = isVacation
+        ? Colors.amber.withValues(alpha: 0.25)
+        : Colors.red.withValues(alpha: 0.15);
 
     final prevDay = day.subtract(const Duration(days: 1));
     final nextDay = day.add(const Duration(days: 1));
-
     final prevFormatted =
         "${prevDay.year}-${prevDay.month.toString().padLeft(2, '0')}-${prevDay.day.toString().padLeft(2, '0')}";
     final nextFormatted =
         "${nextDay.year}-${nextDay.month.toString().padLeft(2, '0')}-${nextDay.day.toString().padLeft(2, '0')}";
 
-    final prevType = _holidaysType[prevFormatted];
-    final nextType = _holidaysType[nextFormatted];
-
+    final prevType = holidaysType[prevFormatted];
+    final nextType = holidaysType[nextFormatted];
     final bool isSamePrev = prevType == type && day.weekday != DateTime.monday;
     final bool isSameNext = nextType == type && day.weekday != DateTime.sunday;
 
+    // 單獨一天假期 → 圓形
+    if (!isSamePrev && !isSameNext) {
+      return Container(
+        margin: const EdgeInsets.all(6.0),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+      );
+    }
+
     final double leftMargin = isSamePrev ? 0.0 : 6.0;
     final double rightMargin = isSameNext ? 0.0 : 6.0;
-
     final Radius leftRadius = isSamePrev
         ? Radius.zero
         : const Radius.circular(24.0);
@@ -354,9 +385,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         right: rightMargin,
       ),
       decoration: BoxDecoration(
-        color: isVacation
-            ? Colors.amber.withValues(alpha: 0.25)
-            : Colors.red.withValues(alpha: 0.15),
+        color: color,
         borderRadius: BorderRadius.horizontal(
           left: leftRadius,
           right: rightRadius,
@@ -384,7 +413,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: '行事曆',
-        onRefresh: () => _fetchCalendarData(_loadedYear),
+        onRefresh: () {
+          _cachedGroupedEvents.remove(_currentYear);
+          _fetchYearIfNeeded(_currentYear);
+        },
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -400,8 +432,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _focusedDay = now;
                 _selectedDay = now;
               });
-              if (_loadedYear != now.year) {
-                _fetchCalendarData(now.year);
+              if (_currentYear != now.year) {
+                final hasCached = _cachedGroupedEvents.containsKey(now.year);
+                setState(() {
+                  _currentYear = now.year;
+                  _isLoading = !hasCached;
+                });
+                _fetchYearIfNeeded(now.year);
               }
             },
           ),
@@ -426,7 +463,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   const SizedBox(height: 24),
                   FilledButton.tonal(
-                    onPressed: () => _fetchCalendarData(_loadedYear),
+                    onPressed: () => _fetchYearIfNeeded(_currentYear),
                     child: const Text('重試'),
                   ),
                 ],
@@ -446,12 +483,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   holidayPredicate: (day) {
                     final formattedDate =
                         "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-                    return _holidaysType.containsKey(formattedDate);
+                    return (_cachedHolidaysType[_currentYear] ?? {})
+                        .containsKey(formattedDate);
                   },
                   startingDayOfWeek: StartingDayOfWeek.monday,
-                  headerStyle: const HeaderStyle(
-                    formatButtonVisible: false, // 隱藏 Weekly/Monthly 切換按鈕
+                  rowHeight: 48,
+                  daysOfWeekHeight: 24,
+                  headerStyle: HeaderStyle(
+                    formatButtonVisible: false,
                     titleCentered: true,
+                    titleTextFormatter: (date, locale) =>
+                        '${date.year}年 ${date.month}月',
                   ),
                   calendarStyle: CalendarStyle(
                     cellMargin: const EdgeInsets.all(
@@ -471,10 +513,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   calendarBuilders: CalendarBuilders(
                     selectedBuilder: (context, day, focusedDay) {
-                      final bg = _buildHolidayBackground(context, day);
+                      final isOutside = day.month != focusedDay.month;
+                      final bg = isOutside
+                          ? null
+                          : _buildHolidayBackground(context, day);
                       return Stack(
                         children: [
-                          if (bg != null) bg,
+                          ?bg,
                           Container(
                             margin: const EdgeInsets.all(6.0),
                             decoration: BoxDecoration(
@@ -491,10 +536,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       );
                     },
                     todayBuilder: (context, day, focusedDay) {
-                      final bg = _buildHolidayBackground(context, day);
+                      final isOutside = day.month != focusedDay.month;
+                      final bg = isOutside
+                          ? null
+                          : _buildHolidayBackground(context, day);
                       return Stack(
                         children: [
-                          if (bg != null) bg,
+                          ?bg,
                           Container(
                             margin: const EdgeInsets.all(6.0),
                             decoration: BoxDecoration(
@@ -513,17 +561,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       );
                     },
                     holidayBuilder: (context, day, focusedDay) {
-                      final bg = _buildHolidayBackground(context, day);
+                      final isOutside = day.month != focusedDay.month;
                       final formattedDate =
                           "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-                      final type = _holidaysType[formattedDate] ?? 'national';
+                      final type =
+                          (_cachedHolidaysType[_currentYear] ??
+                              {})[formattedDate] ??
+                          'national';
                       final isVacation =
                           type == 'winter_vacation' ||
                           type == 'summer_vacation';
 
+                      // 跨月假期：只顯示紅字，無背景圖形
+                      if (isOutside) {
+                        return Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${day.day}',
+                            style: TextStyle(
+                              color: isVacation
+                                  ? Colors.amber.withValues(alpha: 0.55)
+                                  : Colors.red.withValues(alpha: 0.55),
+                            ),
+                          ),
+                        );
+                      }
+
+                      final bg = _buildHolidayBackground(context, day);
                       return Stack(
                         children: [
-                          if (bg != null) bg,
+                          ?bg,
                           Container(
                             margin: const EdgeInsets.all(6.0),
                             alignment: Alignment.center,
@@ -585,7 +652,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () =>
-                                    _fetchCalendarData(_loadedYear),
+                                    _fetchYearIfNeeded(_currentYear),
                                 child: const Text('重試'),
                               ),
                             ],
@@ -605,9 +672,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             // 依照重要性切換顏色
                             final bool isImportant = event.isImportant;
                             final Color cardColor = isImportant
-                                ? Colors.amber.withOpacity(0.2)
-                                : colorScheme.secondaryContainer.withOpacity(
-                                    0.5,
+                                ? Colors.amber.withValues(alpha: 0.2)
+                                : colorScheme.secondaryContainer.withValues(
+                                    alpha: 0.5,
                                   );
                             final Color barColor = isImportant
                                 ? Colors.amber
@@ -628,7 +695,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16.0,
-                                    vertical: 12.0,
+                                    vertical: 7.0,
                                   ),
                                   child: Row(
                                     children: [
