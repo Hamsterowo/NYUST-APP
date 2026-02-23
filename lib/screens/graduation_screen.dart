@@ -474,7 +474,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     const timeColumnWidth = 40.0;
     const headerHeight = 40.0;
     const minCellWidth = 50.0;
-    const minCellHeight = 40.0;
+    const minCellHeight = 32.0;
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -505,10 +505,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               : Expanded(child: label);
         }
 
-        // 課表格子
-        Widget gridCell(int dayIndex, String period) {
+        // 取得該節次該天的課程，若無則回傳空的 ScheduleEvent
+        ScheduleEvent getEventFor(int dayIndex, String period) {
           final weekdayStr = (dayIndex + 1).toString();
-          final event = courses.firstWhere(
+          return courses.firstWhere(
             (c) => c.weekday == weekdayStr && c.times.contains(period),
             orElse: () => ScheduleEvent(
               semesterCourseNo: '',
@@ -524,48 +524,71 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               times: [],
             ),
           );
-          final decoration = BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-              ),
-              right: BorderSide(
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-              ),
-            ),
-          );
-          final child = event.name.isNotEmpty ? _buildCourseCard(event) : null;
+        }
 
+        // 建立單日的所有節次欄位 (Column) 支援合併連續相同節次
+        Widget buildColumnForDay(int dayIndex) {
+          List<Widget> cells = [];
+
+          for (int i = 0; i < _periods.length; i++) {
+            final period = _periods[i];
+            final event = getEventFor(dayIndex, period);
+
+            int span = 1;
+            if (event.name.isNotEmpty) {
+              // 往後尋找連續的相同課程
+              while (i + span < _periods.length) {
+                final nextPeriod = _periods[i + span];
+                final nextEvent = getEventFor(dayIndex, nextPeriod);
+
+                // 比對課程是否相同 (以名稱和課程代碼作為依據)
+                if (nextEvent.name == event.name &&
+                    nextEvent.semesterCourseNo == event.semesterCourseNo) {
+                  span++;
+                } else {
+                  break;
+                }
+              }
+            }
+
+            final decoration = BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                ),
+                right: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                ),
+              ),
+            );
+
+            final child = event.name.isNotEmpty
+                ? _buildCourseCard(event)
+                : null;
+
+            final cellWidget = Container(
+              height: cellHeight * span, // 動態設定高度為 單節高度 x 節數
+              decoration: decoration,
+              width: needsScroll ? minCellWidth : double.infinity,
+              child: child,
+            );
+
+            cells.add(cellWidget);
+            i += span - 1; // 跳過已經合併的節次
+          }
+
+          final column = Column(children: cells);
           return needsScroll
-              ? Container(
-                  width: minCellWidth,
-                  height: cellHeight,
-                  decoration: decoration,
-                  child: child,
-                )
-              : Expanded(
-                  child: Container(
-                    height: cellHeight,
-                    decoration: decoration,
-                    child: child,
-                  ),
-                );
+              ? SizedBox(width: minCellWidth, child: column)
+              : Expanded(child: column);
         }
 
         Widget headerDays() =>
             Row(children: weekDays.map((d) => dayCell(d)).toList());
 
-        Widget gridRows() => Column(
-          children: _periods
-              .map(
-                (period) => Row(
-                  children: List.generate(
-                    weekDays.length,
-                    (i) => gridCell(i, period),
-                  ),
-                ),
-              )
-              .toList(),
+        Widget gridRows() => Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(weekDays.length, (i) => buildColumnForDay(i)),
         );
 
         return Padding(
@@ -601,10 +624,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       ),
                       Expanded(
                         child: needsScroll
-                            ? SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                physics: const ClampingScrollPhysics(),
-                                child: headerDays(),
+                            ? ScrollConfiguration(
+                                behavior: ScrollConfiguration.of(
+                                  context,
+                                ).copyWith(overscroll: false),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const ClampingScrollPhysics(),
+                                  child: headerDays(),
+                                ),
                               )
                             : headerDays(),
                       ),
@@ -613,66 +641,76 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 ),
                 // 格子區
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 節次欄（固定，不水平捲動）
-                        SizedBox(
-                          width: timeColumnWidth,
-                          child: Column(
-                            children: _periods
-                                .map(
-                                  (period) => InkWell(
-                                    onTap: () {
-                                      final time = _periodTimes[period] ?? '';
-                                      showTopSnackBar(
-                                        context,
-                                        '第 $period 節：$time',
-                                      );
-                                    },
-                                    child: Container(
-                                      height: cellHeight,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Theme.of(context)
-                                                .dividerColor
-                                                .withValues(alpha: 0.5),
-                                          ),
-                                          right: BorderSide(
-                                            color: Theme.of(
-                                              context,
-                                            ).dividerColor,
+                  child: ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(
+                      context,
+                    ).copyWith(overscroll: false),
+                    child: SingleChildScrollView(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 節次欄（固定，不水平捲動）
+                          SizedBox(
+                            width: timeColumnWidth,
+                            child: Column(
+                              children: _periods
+                                  .map(
+                                    (period) => InkWell(
+                                      onTap: () {
+                                        final time = _periodTimes[period] ?? '';
+                                        showTopSnackBar(
+                                          context,
+                                          '第 $period 節：$time',
+                                        );
+                                      },
+                                      child: Container(
+                                        height: cellHeight,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: Theme.of(context)
+                                                  .dividerColor
+                                                  .withValues(alpha: 0.5),
+                                            ),
+                                            right: BorderSide(
+                                              color: Theme.of(
+                                                context,
+                                              ).dividerColor,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          period,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
+                                        child: Center(
+                                          child: Text(
+                                            period,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
+                                  )
+                                  .toList(),
+                            ),
                           ),
-                        ),
-                        // 課表格（依需求決定是否水平捲動）
-                        Expanded(
-                          child: needsScroll
-                              ? SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const ClampingScrollPhysics(),
-                                  child: gridRows(),
-                                )
-                              : gridRows(),
-                        ),
-                      ],
+                          // 課表格（依需求決定是否水平捲動）
+                          Expanded(
+                            child: needsScroll
+                                ? ScrollConfiguration(
+                                    behavior: ScrollConfiguration.of(
+                                      context,
+                                    ).copyWith(overscroll: false),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: const ClampingScrollPhysics(),
+                                      child: gridRows(),
+                                    ),
+                                  )
+                                : gridRows(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

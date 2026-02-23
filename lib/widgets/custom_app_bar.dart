@@ -30,6 +30,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           centerTitle: true,
           elevation: 0, // 移除陰影讓視覺更延伸到上方橫線
+          scrolledUnderElevation: 0, // 關閉 M3 往下捲動時的背景變色
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor, // 強制使用背景色
+          surfaceTintColor: Colors.transparent, // 徹底關閉 Material3 表面染色
           actions: [
             if (actions != null) ...actions!,
             if (onRefresh != null)

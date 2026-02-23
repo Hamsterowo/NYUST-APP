@@ -39,7 +39,6 @@ class DataProvider with ChangeNotifier {
     await fetchGrades();
     await Future.delayed(const Duration(milliseconds: 200));
     await fetchGraduation();
-    await Future.delayed(const Duration(milliseconds: 200));
     await fetchSchedule();
   }
 
