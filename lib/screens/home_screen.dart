@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/navigation_provider.dart';
+import 'overview_screen.dart';
 import 'grades_screen.dart';
 import 'schedule_screen.dart';
 import 'calendar_screen.dart';
@@ -10,6 +11,7 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   final List<Widget> _screens = [
+    const OverviewScreen(),
     GradesScreen(),
     ScheduleScreen(),
     CalendarScreen(),
@@ -30,6 +32,11 @@ class HomeScreen extends StatelessWidget {
           context.read<NavigationProvider>().setIndex(index);
         },
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: '總覽',
+          ),
           NavigationDestination(
             icon: Icon(Icons.school_outlined),
             selectedIcon: Icon(Icons.school),

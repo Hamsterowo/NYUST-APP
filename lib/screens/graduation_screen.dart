@@ -412,7 +412,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               const SizedBox(height: 24),
               FilledButton.tonal(
                 onPressed: () {
-                  context.read<NavigationProvider>().setIndex(3);
+                  context.read<NavigationProvider>().setIndex(4);
                   showTopSnackBar(context, '請在此登入以查看課表');
                 },
                 child: const Text('前往登入'),
@@ -471,11 +471,58 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Widget _buildScheduleGrid(List<ScheduleEvent> courses) {
-    final weekDays = ['一', '二', '三', '四', '五', '六'];
-    const timeColumnWidth = 40.0;
-    const headerHeight = 40.0;
-    const minCellWidth = 50.0;
-    const minCellHeight = 32.0;
+    final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
+    const timeColumnWidth = 36.0; // 稍微縮減節次欄寬度
+    const headerHeight = 36.0; // 稍微縮減標題高度
+    const minCellWidth = 46.0; // 稍微縮減最小日欄寬度
+    const minCellHeight = 28.0; // 稍微縮小最小格子高度，讓整體更緊湊
+
+    int minDayIndex = 0;
+    int maxDayIndex = 4;
+    int minPeriodIndex = 1; // Default to 'A'
+    int maxPeriodIndex = 9; // Default to 'H'
+
+    if (courses.isNotEmpty) {
+      int minDay = 6;
+      int maxDay = 0;
+      int minP = _periods.length;
+      int maxP = 0;
+      bool hasClass = false;
+
+      for (var course in courses) {
+        if (course.name.isNotEmpty) {
+          hasClass = true;
+          int d = int.tryParse(course.weekday ?? '') ?? 1;
+          int dIndex = d - 1;
+          if (dIndex < minDay) minDay = dIndex;
+          if (dIndex > maxDay) maxDay = dIndex;
+
+          for (var t in course.times) {
+            int pIndex = _periods.indexOf(t);
+            if (pIndex != -1) {
+              if (pIndex < minP) minP = pIndex;
+              if (pIndex > maxP) maxP = pIndex;
+            }
+          }
+        }
+      }
+
+      if (hasClass) {
+        minDayIndex = min(minDay, 0).clamp(0, 6); // 星期一開始
+        maxDayIndex = max(maxDay, 4).clamp(minDayIndex, 6); // 最少顯示到星期五
+        minPeriodIndex = min(minP, 1).clamp(0, _periods.length - 1); // 提早到 'A'
+        maxPeriodIndex = max(
+          maxP,
+          8,
+        ).clamp(minPeriodIndex, _periods.length - 1); // 最晚到 'G'
+      }
+    }
+
+    final activeDayIndices = List.generate(
+      maxDayIndex - minDayIndex + 1,
+      (i) => minDayIndex + i,
+    );
+    final activePeriods = _periods.sublist(minPeriodIndex, maxPeriodIndex + 1);
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -483,14 +530,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       builder: (context, constraints) {
         // 計算動態高度：(總高度 - 標題高度 - Padding) / 節次數量
         final availableHeight = constraints.maxHeight - headerHeight - 24.0;
-        final cellHeight = max(
-          minCellHeight,
-          availableHeight / _periods.length,
-        );
+        final rawCellHeight = availableHeight / activePeriods.length;
+        final needsVerticalScroll = rawCellHeight < minCellHeight;
+        final cellHeight = needsVerticalScroll ? minCellHeight : rawCellHeight;
 
         // 扣掉外層 Padding(12*2) 與節次欄，判斷每欄是否過窄
         final availableForDays = constraints.maxWidth - 24.0 - timeColumnWidth;
-        final needsScroll = availableForDays / weekDays.length < minCellWidth;
+        final needsScroll =
+            availableForDays / activeDayIndices.length < minCellWidth;
 
         // 標題列日期欄
         // 不捲動：Expanded 均分；捲動：固定 minCellWidth
@@ -531,15 +578,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         Widget buildColumnForDay(int dayIndex) {
           List<Widget> cells = [];
 
-          for (int i = 0; i < _periods.length; i++) {
-            final period = _periods[i];
+          for (int i = 0; i < activePeriods.length; i++) {
+            final period = activePeriods[i];
             final event = getEventFor(dayIndex, period);
 
             int span = 1;
             if (event.name.isNotEmpty) {
               // 往後尋找連續的相同課程
-              while (i + span < _periods.length) {
-                final nextPeriod = _periods[i + span];
+              while (i + span < activePeriods.length) {
+                final nextPeriod = activePeriods[i + span];
                 final nextEvent = getEventFor(dayIndex, nextPeriod);
 
                 // 比對課程是否相同 (以名稱和課程代碼作為依據)
@@ -584,12 +631,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               : Expanded(child: column);
         }
 
-        Widget headerDays() =>
-            Row(children: weekDays.map((d) => dayCell(d)).toList());
+        Widget headerDays() => Row(
+          children: activeDayIndices
+              .map((i) => dayCell(allWeekDays[i]))
+              .toList(),
+        );
 
         Widget gridRows() => Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(weekDays.length, (i) => buildColumnForDay(i)),
+          children: activeDayIndices.map((i) => buildColumnForDay(i)).toList(),
         );
 
         return Padding(
@@ -647,6 +697,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       context,
                     ).copyWith(overscroll: false),
                     child: SingleChildScrollView(
+                      physics: needsVerticalScroll
+                          ? const ClampingScrollPhysics()
+                          : const NeverScrollableScrollPhysics(),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -654,7 +707,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           SizedBox(
                             width: timeColumnWidth,
                             child: Column(
-                              children: _periods
+                              children: activePeriods
                                   .map(
                                     (period) => InkWell(
                                       onTap: () {
@@ -766,10 +819,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               child: Text(
                 event.name,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 15, // 放大字體 (原本 12)
                   color: colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w500,
-                  height: 1.2,
+                  height: 1.15, // 稍微壓縮行距，避免字被切掉
                 ),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
@@ -779,7 +831,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               Text(
                 event.room!,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                 ),
                 maxLines: 1,

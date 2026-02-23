@@ -429,9 +429,9 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 監聽目前 Navigation 狀態，如果 currentIndex == 2 (行事曆) 則觸發檢查
+    // 監聽目前 Navigation 狀態，如果 currentIndex == 3 (行事曆) 則觸發檢查
     final navProvider = context.watch<NavigationProvider>();
-    if (navProvider.currentIndex == 2 && !_hasCheckedLegend) {
+    if (navProvider.currentIndex == 3 && !_hasCheckedLegend) {
       _hasCheckedLegend = true; // 標記為已檢查過
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkAndShowLegend();
@@ -478,7 +478,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         ],
       ),
       body: _isLoading
-          ? const CalendarSkeletonView()
+          ? CalendarSkeletonView(isExpanded: _isCalendarExpanded)
           : _errorMessage != null
           ? Center(
               child: Column(
@@ -875,7 +875,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 4.0, // 縮小上下邊距
+                                        vertical: 2.0, // 進一步縮小上下邊距，讓細項更緊密
                                       ),
                                       child: Card(
                                         elevation: 0,
@@ -916,7 +916,8 @@ class _CalendarScreenState extends State<CalendarScreen>
                                                 child: Text(
                                                   event.name,
                                                   style: TextStyle(
-                                                    fontWeight: FontWeight.w600,
+                                                    fontWeight: FontWeight
+                                                        .normal, // 拿掉粗體
                                                     fontSize: 15,
                                                     color: isImportant
                                                         ? Colors.amber.shade900

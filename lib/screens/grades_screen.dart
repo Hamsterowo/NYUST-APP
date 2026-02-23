@@ -49,7 +49,7 @@ class _GradesScreenState extends State<GradesScreen> {
               const SizedBox(height: 24),
               FilledButton.tonal(
                 onPressed: () {
-                  context.read<NavigationProvider>().setIndex(3);
+                  context.read<NavigationProvider>().setIndex(4);
                   showTopSnackBar(context, '請在此登入以查看成績');
                 },
                 child: const Text('前往登入'),
