@@ -115,86 +115,67 @@ class GradesSkeletonCard extends StatelessWidget {
   }
 }
 
-/// 課表格子的骨架框架
+/// 課表格子的骨架框架 (僅顯示外框與標題列，內部留白)
 class ScheduleSkeletonGrid extends StatelessWidget {
   const ScheduleSkeletonGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        // 假標題列
-        Container(
-          height: 40,
-          color: colorScheme.surfaceContainerHighest,
-          child: Row(
-            children: [
-              const SizedBox(width: 40),
-              ...List.generate(
-                7,
-                (i) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 10,
-                    ),
-                    child: SkeletonBox(height: 14),
-                  ),
+    final weekDays = ['一', '二', '三', '四', '五', '六'];
+
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Card(
+        clipBehavior: Clip.hardEdge,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            // 標題列
+            Container(
+              height: 40.0,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).dividerColor),
                 ),
               ),
-            ],
-          ),
-        ),
-        // 假格子列
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 節次欄
-              SizedBox(
-                width: 40,
-                child: Column(
-                  children: List.generate(
-                    8,
-                    (i) => Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: SkeletonBox(height: 12, borderRadius: 4),
+              child: Row(
+                children: [
+                  const SizedBox(width: 40.0),
+                  ...weekDays.map((d) => const Expanded(child: SizedBox())),
+                ],
+              ),
+            ),
+            // 空白的內部區域 (加上左方節次的邊線)
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                color: colorScheme.surface,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40.0,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(
+                            color: Theme.of(context).dividerColor,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const Expanded(child: SizedBox()), // 剩餘空白
+                  ],
                 ),
               ),
-              // 格子
-              Expanded(
-                child: Column(
-                  children: List.generate(
-                    8,
-                    (i) => Expanded(
-                      child: Row(
-                        children: List.generate(7, (j) {
-                          // 隨機讓部分格子有課程骨架
-                          final hasCourse =
-                              (i * 7 + j) % 5 == 0 || (i * 7 + j) % 7 == 1;
-                          return Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: hasCourse
-                                  ? SkeletonBox(borderRadius: 6)
-                                  : const SizedBox.shrink(),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

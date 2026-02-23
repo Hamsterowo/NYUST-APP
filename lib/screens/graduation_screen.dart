@@ -435,7 +435,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Widget _buildBody(DataProvider data) {
-    if (data.isLoadingSchedule && data.scheduleData.isEmpty) {
+    // 只要是在載入中（包含重新整理），就一律顯示簡化的骨架框架
+    if (data.isLoadingSchedule) {
       return const ScheduleSkeletonGrid();
     }
 
