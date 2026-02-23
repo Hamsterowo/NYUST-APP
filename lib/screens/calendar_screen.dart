@@ -4,9 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
+import '../providers/navigation_provider.dart';
+import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
-import '../providers/navigation_provider.dart';
+import '../widgets/timeline_painter.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -15,7 +17,8 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarScreenState extends State<CalendarScreen>
+    with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
@@ -37,12 +40,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // 記錄是否已經在此次掛載時檢查過，防止重複彈出
   bool _hasCheckedLegend = false;
 
+  bool _isCalendarExpanded = true;
+  PageController? _pageController;
+
+  late final AnimationController _expandController;
+  late final Animation<double> _expandAnimation;
+
   @override
   void initState() {
     super.initState();
+    _expandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+      value: _isCalendarExpanded ? 1.0 : 0.0,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _expandController,
+      curve: Curves.easeInOut,
+    );
+
     _selectedDay = _focusedDay;
     _currentYear = _focusedDay.year;
     _fetchYearIfNeeded(_currentYear);
+  }
+
+  @override
+  void dispose() {
+    _expandController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkAndShowLegend() async {
@@ -323,7 +348,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _onPageChanged(DateTime focusedDay) {
-    _focusedDay = focusedDay;
+    setState(() {
+      _focusedDay = focusedDay;
+    });
     final newYear = focusedDay.year;
     if (newYear != _currentYear) {
       final hasCached = _cachedGroupedEvents.containsKey(newYear);
@@ -477,167 +504,263 @@ class _CalendarScreenState extends State<CalendarScreen> {
             )
           : Column(
               children: [
-                // 月曆視圖
-                TableCalendar<CalendarEvent>(
-                  firstDay: DateTime.utc(2000, 1, 1),
-                  lastDay: DateTime.utc(2100, 12, 31),
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  onDaySelected: _onDaySelected,
-                  onPageChanged: _onPageChanged,
-                  eventLoader: _getEventsForDay,
-                  holidayPredicate: (day) {
-                    final formattedDate =
-                        "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-                    return (_cachedHolidaysType[_currentYear] ?? {})
-                        .containsKey(formattedDate);
-                  },
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  rowHeight: 48,
-                  daysOfWeekHeight: 24,
-                  headerStyle: HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                    titleTextFormatter: (date, locale) =>
-                        '${date.year}年 ${date.month}月',
+                // 月曆視圖 (包裝進圓角卡片)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
                   ),
-                  calendarStyle: CalendarStyle(
-                    cellMargin: const EdgeInsets.all(
-                      6.0,
-                    ), // 縮小圈圈範圍避免壓到下方 Marker
-                    todayDecoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: colorScheme.outlineVariant),
                     ),
-                    todayTextStyle: TextStyle(
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                    selectedDecoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  calendarBuilders: CalendarBuilders(
-                    selectedBuilder: (context, day, focusedDay) {
-                      final isOutside = day.month != focusedDay.month;
-                      final bg = isOutside
-                          ? null
-                          : _buildHolidayBackground(context, day);
-                      return Stack(
+                    color: colorScheme.surface,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ?bg,
-                          Container(
-                            margin: const EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${day.day}',
-                              style: const TextStyle(color: Colors.white),
-                            ),
+                          Row(
+                            children: [
+                              const SizedBox(width: 8),
+                              Text(
+                                '${_focusedDay.year} 年 ${_focusedDay.month} 月',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.chevron_left),
+                                onPressed: _isCalendarExpanded
+                                    ? () {
+                                        _pageController?.previousPage(
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeOut,
+                                        );
+                                      }
+                                    : null,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.chevron_right),
+                                onPressed: _isCalendarExpanded
+                                    ? () {
+                                        _pageController?.nextPage(
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeOut,
+                                        );
+                                      }
+                                    : null,
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  _isCalendarExpanded
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isCalendarExpanded = !_isCalendarExpanded;
+                                    if (_isCalendarExpanded) {
+                                      _expandController.forward();
+                                    } else {
+                                      _expandController.reverse();
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      );
-                    },
-                    todayBuilder: (context, day, focusedDay) {
-                      final isOutside = day.month != focusedDay.month;
-                      final bg = isOutside
-                          ? null
-                          : _buildHolidayBackground(context, day);
-                      return Stack(
-                        children: [
-                          ?bg,
-                          Container(
-                            margin: const EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${day.day}',
-                              style: TextStyle(
-                                color: colorScheme.onPrimaryContainer,
+                          SizeTransition(
+                            sizeFactor: _expandAnimation,
+                            axisAlignment: -1.0, // 向上收合
+                            child: TableCalendar<CalendarEvent>(
+                              onCalendarCreated: (controller) =>
+                                  _pageController = controller,
+                              firstDay: DateTime.utc(2000, 1, 1),
+                              lastDay: DateTime.utc(2100, 12, 31),
+                              focusedDay: _focusedDay,
+                              selectedDayPredicate: (day) =>
+                                  isSameDay(_selectedDay, day),
+                              onDaySelected: _onDaySelected,
+                              onPageChanged: _onPageChanged,
+                              eventLoader: _getEventsForDay,
+                              headerVisible: false,
+                              holidayPredicate: (day) {
+                                final formattedDate =
+                                    "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+                                return (_cachedHolidaysType[_currentYear] ?? {})
+                                    .containsKey(formattedDate);
+                              },
+                              startingDayOfWeek: StartingDayOfWeek.monday,
+                              rowHeight: 48,
+                              daysOfWeekHeight: 24,
+                              calendarStyle: CalendarStyle(
+                                cellMargin: const EdgeInsets.all(
+                                  6.0,
+                                ), // 縮小圈圈範圍避免壓到下方 Marker
+                                todayDecoration: BoxDecoration(
+                                  color: colorScheme.primaryContainer,
+                                  shape: BoxShape.circle,
+                                ),
+                                todayTextStyle: TextStyle(
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                                selectedDecoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              calendarBuilders: CalendarBuilders(
+                                selectedBuilder: (context, day, focusedDay) {
+                                  final isOutside =
+                                      day.month != focusedDay.month;
+                                  final bg = isOutside
+                                      ? null
+                                      : _buildHolidayBackground(context, day);
+                                  return Stack(
+                                    children: [
+                                      if (bg != null) bg,
+                                      Container(
+                                        margin: const EdgeInsets.all(6.0),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          '${day.day}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                todayBuilder: (context, day, focusedDay) {
+                                  final isOutside =
+                                      day.month != focusedDay.month;
+                                  final bg = isOutside
+                                      ? null
+                                      : _buildHolidayBackground(context, day);
+                                  return Stack(
+                                    children: [
+                                      if (bg != null) bg,
+                                      Container(
+                                        margin: const EdgeInsets.all(6.0),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primaryContainer,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          '${day.day}',
+                                          style: TextStyle(
+                                            color:
+                                                colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                holidayBuilder: (context, day, focusedDay) {
+                                  final isOutside =
+                                      day.month != focusedDay.month;
+                                  final formattedDate =
+                                      "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+                                  final type =
+                                      (_cachedHolidaysType[_currentYear] ??
+                                          {})[formattedDate] ??
+                                      'national';
+                                  final isVacation =
+                                      type == 'winter_vacation' ||
+                                      type == 'summer_vacation';
+
+                                  // 跨月假期：只顯示紅字，無背景圖形
+                                  if (isOutside) {
+                                    return Container(
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        '${day.day}',
+                                        style: TextStyle(
+                                          color: isVacation
+                                              ? Colors.amber.withValues(
+                                                  alpha: 0.55,
+                                                )
+                                              : Colors.red.withValues(
+                                                  alpha: 0.55,
+                                                ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  final bg = _buildHolidayBackground(
+                                    context,
+                                    day,
+                                  );
+                                  return Stack(
+                                    children: [
+                                      if (bg != null) bg,
+                                      Container(
+                                        margin: const EdgeInsets.all(6.0),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          '${day.day}',
+                                          style: TextStyle(
+                                            color: isVacation
+                                                ? Colors.amber.shade900
+                                                : Colors.red.shade900,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                markerBuilder: (context, day, events) {
+                                  if (events.isEmpty) return const SizedBox();
+                                  if (isSameDay(_selectedDay, day)) {
+                                    return const SizedBox();
+                                  }
+                                  final bool hasImportant = events
+                                      .cast<CalendarEvent>()
+                                      .any((e) => e.isImportant);
+
+                                  return Positioned(
+                                    bottom: 2,
+                                    child: Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: hasImportant
+                                            ? Colors.amber
+                                            : colorScheme.primary,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
                         ],
-                      );
-                    },
-                    holidayBuilder: (context, day, focusedDay) {
-                      final isOutside = day.month != focusedDay.month;
-                      final formattedDate =
-                          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-                      final type =
-                          (_cachedHolidaysType[_currentYear] ??
-                              {})[formattedDate] ??
-                          'national';
-                      final isVacation =
-                          type == 'winter_vacation' ||
-                          type == 'summer_vacation';
-
-                      // 跨月假期：只顯示紅字，無背景圖形
-                      if (isOutside) {
-                        return Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              color: isVacation
-                                  ? Colors.amber.withValues(alpha: 0.55)
-                                  : Colors.red.withValues(alpha: 0.55),
-                            ),
-                          ),
-                        );
-                      }
-
-                      final bg = _buildHolidayBackground(context, day);
-                      return Stack(
-                        children: [
-                          ?bg,
-                          Container(
-                            margin: const EdgeInsets.all(6.0),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${day.day}',
-                              style: TextStyle(
-                                color: isVacation
-                                    ? Colors.amber.shade900
-                                    : Colors.red.shade900,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                    markerBuilder: (context, day, events) {
-                      if (events.isEmpty) return const SizedBox();
-                      if (isSameDay(_selectedDay, day)) return const SizedBox();
-                      final bool hasImportant = events
-                          .cast<CalendarEvent>()
-                          .any((e) => e.isImportant);
-
-                      return Positioned(
-                        bottom: 2,
-                        child: Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: hasImportant
-                                ? Colors.amber
-                                : colorScheme.primary,
-                          ),
-                        ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
 
-                const Divider(),
+                const SizedBox(height: 8),
 
                 // 狀態或事件列表顯示區
                 Expanded(
@@ -664,88 +787,151 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ],
                           ),
                         )
-                      : selectedEvents.isEmpty
-                      ? const Center(child: Text('本日無行程'))
                       : ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                          padding: const EdgeInsets.only(
+                            left: 8,
+                            right: 16,
+                            bottom: 16,
                           ),
-                          itemCount: selectedEvents.length,
+                          itemCount: selectedEvents.isEmpty
+                              ? 2
+                              : selectedEvents.length + 1,
                           itemBuilder: (context, index) {
-                            final event = selectedEvents[index];
-                            // 使風格更貼近 Android 16 (Material Design 3):
-                            // 依照重要性切換顏色
-                            final bool isImportant = event.isImportant;
-                            final Color cardColor = isImportant
-                                ? Colors.amber.withValues(alpha: 0.2)
-                                : colorScheme.secondaryContainer.withValues(
-                                    alpha: 0.5,
-                                  );
-                            final Color barColor = isImportant
-                                ? Colors.amber
-                                : colorScheme.primary;
-
-                            return Card(
-                              elevation: 0,
-                              color: cardColor,
-                              margin: const EdgeInsets.only(bottom: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(16),
-                                onTap: () {
-                                  // 可擴充點擊事件
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 7.0,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 4,
-                                        height: 24, // 縮短高度
-                                        decoration: BoxDecoration(
-                                          color: barColor,
-                                          borderRadius: BorderRadius.circular(
-                                            4,
+                            if (index == 0) {
+                              return IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    SizedBox(
+                                      width: 40,
+                                      child: CustomPaint(
+                                        painter: TimelinePainter(
+                                          isFirst: true, // 頂部不接線
+                                          isLast: selectedEvents
+                                              .isEmpty, // 若無事件則下方不畫線
+                                          color: colorScheme.primary, // 標頭圓點顏色
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16.0,
+                                        ),
+                                        child: Text(
+                                          '${_selectedDay?.year} 年 ${_selectedDay?.month} 月 ${_selectedDay?.day} 日',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.onSurface,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            if (isImportant) ...[
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.amber.shade700,
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 8),
-                                            ],
-                                            Expanded(
-                                              child: Text(
-                                                event.name,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 15, // 字體可微調
-                                                  color: isImportant
-                                                      ? Colors.amber.shade900
-                                                      : colorScheme
-                                                            .onSecondaryContainer,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            if (selectedEvents.isEmpty) {
+                              // 如果原本無行程，index 1 顯示空訊息
+                              return const Padding(
+                                padding: EdgeInsets.only(left: 48.0, top: 16.0),
+                                child: Text(
+                                  '本日無行程',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              );
+                            }
+
+                            final eventIndex = index - 1;
+                            final event = selectedEvents[eventIndex];
+                            final bool isFirst = false; // 真實事件不可能是第一個
+                            final bool isLast =
+                                eventIndex == selectedEvents.length - 1;
+                            final bool isImportant = event.isImportant;
+
+                            final Color lineColor = isImportant
+                                ? Colors.amber
+                                : colorScheme.primary;
+
+                            return IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // 左側時間軸 (實線 + 圓點)
+                                  SizedBox(
+                                    width: 40,
+                                    child: CustomPaint(
+                                      painter: TimelinePainter(
+                                        isFirst: isFirst,
+                                        isLast: isLast,
+                                        color: lineColor,
+                                      ),
+                                    ),
+                                  ),
+                                  // 右側事件卡片
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4.0, // 縮小上下邊距
+                                      ),
+                                      child: Card(
+                                        elevation: 0,
+                                        color: isImportant
+                                            ? Colors.amber.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : colorScheme
+                                                  .surfaceContainerHighest,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          side: BorderSide(
+                                            color: isImportant
+                                                ? Colors.amber.withValues(
+                                                    alpha: 0.3,
+                                                  )
+                                                : Colors.transparent,
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0,
+                                            vertical: 8.0, // 縮小內部上下 padding
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              if (isImportant) ...[
+                                                Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber.shade700,
+                                                  size: 20,
+                                                ),
+                                                const SizedBox(width: 8),
+                                              ],
+                                              Expanded(
+                                                child: Text(
+                                                  event.name,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 15,
+                                                    color: isImportant
+                                                        ? Colors.amber.shade900
+                                                        : colorScheme
+                                                              .onSurfaceVariant,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             );
                           },
