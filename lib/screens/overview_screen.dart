@@ -1,153 +1,390 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import '../providers/data_provider.dart';
+import '../models/schedule_event.dart';
+import '../models/calendar_event.dart';
 import '../widgets/custom_app_bar.dart';
+import 'course_detail_screen.dart';
 
-class OverviewScreen extends StatelessWidget {
+class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
+
+  @override
+  State<OverviewScreen> createState() => _OverviewScreenState();
+}
+
+class _OverviewScreenState extends State<OverviewScreen> {
+  bool _isCalendarExpanded = false;
+  List<CalendarEvent>? _todayEvents;
+  bool _isLoadingCalendar = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTodayCalendar();
+  }
+
+  Future<void> _fetchTodayCalendar() async {
+    try {
+      final api = Provider.of<AuthProvider>(context, listen: false).api;
+      final now = DateTime.now();
+      final response = await api.getCalendar(now.year);
+      if (response['success'] == true && mounted) {
+        final List<dynamic> data = response['data'];
+        final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
+
+        // Filter for today
+        final todayStr =
+            "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+        setState(() {
+          _todayEvents = events.where((e) {
+            return e.date.startsWith(todayStr); // 比對日期開頭
+          }).toList();
+          _isLoadingCalendar = false;
+        });
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoadingCalendar = false;
+            _todayEvents = [];
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingCalendar = false;
+          _todayEvents = [];
+        });
+      }
+    }
+  }
+
+  String _getGreeting(String name) {
+    final now = DateTime.now();
+    final timeDouble = now.hour + now.minute / 60.0;
+
+    final displayName = name.isNotEmpty ? name : '';
+
+    if (timeDouble >= 5.0 && timeDouble < 11.5) {
+      return '早安，$displayName同學';
+    } else if (timeDouble >= 11.5 && timeDouble < 17.0) {
+      return '午安，$displayName同學';
+    } else if (timeDouble >= 17.0 && timeDouble < 23.0) {
+      return '晚安，$displayName同學';
+    } else {
+      return '別爆肝了...我也想休息...💤';
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year} 年 ${date.month} 月 ${date.day} 日';
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final now = DateTime.now();
 
     return Scaffold(
       appBar: const CustomAppBar(title: '總覽'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 歡迎與時間區域
-            Text(
-              '早安，同學',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '今天是 2026 年 2 月 24 日',
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 24),
+      body: Consumer2<AuthProvider, DataProvider>(
+        builder: (context, auth, data, child) {
+          final userName = auth.user?['user']?['name']?.toString() ?? '';
 
-            // 假數據大卡片群組
-            Row(
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    title: '本學期學分',
-                    value: '18',
-                    icon: Icons.auto_graph,
-                    color: colorScheme.primary,
+                // 歡迎與時間區域
+                Text(
+                  _getGreeting(userName),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    title: '待辦事項',
-                    value: '3',
-                    icon: Icons.checklist,
-                    color: colorScheme.tertiary,
-                  ),
+                const SizedBox(height: 8),
+                Text(
+                  '今天是 ${_formatDate(now)}',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
+                const SizedBox(height: 32),
+
+                // 今日課程
+                _buildTodayClassesSection(
+                  context,
+                  data.scheduleData,
+                  colorScheme,
+                ),
+
+                const SizedBox(height: 32),
+
+                // 今日行事曆
+                _buildCalendarSection(colorScheme),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // 即將到來的課程區塊
-            Text(
-              '今日課程',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _buildUpcomingClass(
-              context,
-              time: '08:10 - 09:00',
-              className: '軟體工程',
-              location: 'EC-401',
-              isCurrent: true,
-            ),
-            const SizedBox(height: 12),
-            _buildUpcomingClass(
-              context,
-              time: '09:10 - 10:00',
-              className: '資料庫系統設計',
-              location: 'EB-202',
-              isCurrent: false,
-            ),
-            const SizedBox(height: 24),
-
-            // 最新成績/公告區塊
-            Text(
-              '近期成績',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: colorScheme.outlineVariant),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: colorScheme.secondaryContainer,
-                  child: Icon(
-                    Icons.grade,
-                    color: colorScheme.onSecondaryContainer,
-                  ),
-                ),
-                title: const Text('人工智慧概論'),
-                subtitle: const Text('期中考成績已公布'),
-                trailing: const Icon(Icons.chevron_right),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      color: color.withValues(alpha: 0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: color.withValues(alpha: 0.2)),
+  Widget _buildCalendarSection(ColorScheme colorScheme) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        initiallyExpanded: _isCalendarExpanded,
+        onExpansionChanged: (val) {
+          setState(() {
+            _isCalendarExpanded = val;
+          });
+        },
+        title: Text(
+          '今日行事曆',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        collapsedBackgroundColor: colorScheme.surfaceContainerHighest,
+        backgroundColor: colorScheme.surfaceContainerHighest,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        collapsedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
+              ),
+              border: Border.all(color: colorScheme.surfaceContainerHighest),
+            ),
+            child: _isLoadingCalendar
+                ? const Center(child: CircularProgressIndicator())
+                : _todayEvents == null || _todayEvents!.isEmpty
+                ? const Text(
+                    '今日無任何校園行事曆事項安排。',
+                    style: TextStyle(color: Colors.grey),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _todayEvents!.map((e) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('📌 ', style: TextStyle(fontSize: 16)),
+                            Expanded(
+                              child: Text(
+                                e.name,
+                                style: const TextStyle(height: 1.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
+    );
+  }
+
+  Widget _buildTodayClassesSection(
+    BuildContext context,
+    List<ScheduleEvent> schedule,
+    ColorScheme colorScheme,
+  ) {
+    final now = DateTime.now();
+    final todayWeekday = now.weekday.toString();
+
+    // 過濾出今天的課
+    final todayClasses = schedule
+        .where((c) => c.weekday == todayWeekday)
+        .toList();
+
+    if (todayClasses.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '今日課程',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Center(
+                child: Text(
+                  '今日無課程，好好放鬆吧！',
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(title, style: TextStyle(color: colorScheme.onSurfaceVariant)),
-          ],
+          ),
+        ],
+      );
+    }
+
+    // 依照節次排序
+    final periods = [
+      'M',
+      'A',
+      '1',
+      '2',
+      '3',
+      '4',
+      'B',
+      '5',
+      '6',
+      '7',
+      '8',
+      'C',
+      'D',
+      'E',
+      'F',
+      'G',
+    ];
+    todayClasses.sort((a, b) {
+      final aFirst = a.times.isNotEmpty ? a.times.first : '';
+      final bFirst = b.times.isNotEmpty ? b.times.first : '';
+      final aIdx = periods.indexOf(aFirst);
+      final bIdx = periods.indexOf(bFirst);
+      return aIdx.compareTo(bIdx);
+    });
+
+    // 判斷當下或下一堂課
+    ScheduleEvent? highlightClass;
+
+    final periodEndTimes = {
+      'X': const TimeOfDay(hour: 8, minute: 0),
+      'A': const TimeOfDay(hour: 9, minute: 0),
+      'B': const TimeOfDay(hour: 10, minute: 0),
+      'C': const TimeOfDay(hour: 11, minute: 0),
+      'D': const TimeOfDay(hour: 12, minute: 0),
+      'Y': const TimeOfDay(hour: 13, minute: 0),
+      'E': const TimeOfDay(hour: 14, minute: 0),
+      'F': const TimeOfDay(hour: 15, minute: 0),
+      'G': const TimeOfDay(hour: 16, minute: 0),
+      'H': const TimeOfDay(hour: 17, minute: 0),
+      'Z': const TimeOfDay(hour: 18, minute: 0),
+      'I': const TimeOfDay(hour: 19, minute: 15),
+      'J': const TimeOfDay(hour: 20, minute: 10),
+      'K': const TimeOfDay(hour: 21, minute: 5),
+      'L': const TimeOfDay(hour: 22, minute: 0),
+    };
+
+    final periodTimeRanges = {
+      'X': '07:10 - 08:00',
+      'A': '08:10 - 09:00',
+      'B': '09:10 - 10:00',
+      'C': '10:10 - 11:00',
+      'D': '11:10 - 12:00',
+      'Y': '12:10 - 13:00',
+      'E': '13:10 - 14:00',
+      'F': '14:10 - 15:00',
+      'G': '15:10 - 16:00',
+      'H': '16:10 - 17:00',
+      'Z': '17:10 - 18:00',
+      'I': '18:25 - 19:15',
+      'J': '19:20 - 20:10',
+      'K': '20:15 - 21:05',
+      'L': '21:10 - 22:00',
+    };
+
+    final currentMinutes = now.hour * 60 + now.minute;
+
+    for (var c in todayClasses) {
+      if (c.times.isNotEmpty) {
+        // 取這堂課最後一節的結束時間
+        final lastPeriod = c.times.last;
+        final endTime = periodEndTimes[lastPeriod];
+        if (endTime != null) {
+          final endMinutes = endTime.hour * 60 + endTime.minute;
+          if (currentMinutes <= endMinutes) {
+            highlightClass = c;
+            break;
+          }
+        }
+      }
+    }
+
+    // 將課程顯示出來
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '今日課程',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
-      ),
+        const SizedBox(height: 16),
+        ...todayClasses.map((c) {
+          // 判斷狀態
+          String classState = 'future';
+          if (c == highlightClass) {
+            classState = 'current';
+          } else {
+            // 如果比 Highlight class 早，或者是時間已經全走完
+            if (c.times.isNotEmpty) {
+              final lastPeriod = c.times.last;
+              final endTime = periodEndTimes[lastPeriod];
+              if (endTime != null) {
+                final endMinutes = endTime.hour * 60 + endTime.minute;
+                if (currentMinutes > endMinutes) {
+                  classState = 'past';
+                }
+              }
+            }
+          }
+
+          String timeStr = '第 ${c.times.join(", ")} 節';
+
+          if (c.times.isNotEmpty) {
+            final firstPeriod = c.times.first;
+            final lastPeriod = c.times.last;
+            if (periodTimeRanges.containsKey(firstPeriod) &&
+                periodTimeRanges.containsKey(lastPeriod)) {
+              final startTime = periodTimeRanges[firstPeriod]!.split(' - ')[0];
+              final endTime = periodTimeRanges[lastPeriod]!.split(' - ')[1];
+              timeStr += ' ($startTime - $endTime)';
+            }
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: _buildUpcomingClass(
+              context,
+              time: timeStr,
+              className: c.name,
+              location: (c.room != null && c.room!.isNotEmpty)
+                  ? c.room!
+                  : '未指定',
+              state: classState,
+              year: c.year,
+              semester: c.semester,
+              courseNo: c.courseNo,
+            ),
+          );
+        }),
+      ],
     );
   }
 
@@ -156,78 +393,126 @@ class OverviewScreen extends StatelessWidget {
     required String time,
     required String className,
     required String location,
-    required bool isCurrent,
+    required String state, // 'past', 'current', 'future'
+    String? year,
+    String? semester,
+    String? courseNo,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    // 定義各狀態顏色
+    final isCurrent = state == 'current';
+    final isPast = state == 'past';
+
+    final cardColor = isCurrent
+        ? colorScheme.primaryContainer
+        : colorScheme.surface;
+    final borderColor = isCurrent
+        ? Colors.transparent
+        : colorScheme.outlineVariant;
+    final titleColor = isPast
+        ? Colors.grey
+        : (isCurrent ? colorScheme.onPrimaryContainer : colorScheme.onSurface);
+    final subtitleColor = isPast
+        ? Colors.grey
+        : (isCurrent
+              ? colorScheme.onPrimaryContainer
+              : colorScheme.onSurfaceVariant);
+    final iconBgColor = isPast
+        ? Colors.grey.withValues(alpha: 0.1)
+        : (isCurrent
+              ? colorScheme.primary.withValues(alpha: 0.1)
+              : colorScheme.surfaceContainerHighest);
+    final iconColor = isPast
+        ? Colors.grey
+        : (isCurrent ? colorScheme.primary : colorScheme.onSurfaceVariant);
+
     return Card(
       elevation: isCurrent ? 2 : 0,
-      color: isCurrent ? colorScheme.primaryContainer : colorScheme.surface,
+      color: cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isCurrent ? Colors.transparent : colorScheme.outlineVariant,
-        ),
+        side: BorderSide(color: borderColor),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isCurrent
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurfaceVariant,
-                  ),
+      clipBehavior: Clip.antiAlias, // 為 InkWell 保留波紋邊角
+      child: InkWell(
+        onTap: () {
+          if (year != null && semester != null && courseNo != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CourseDetailScreen(
+                  year: year,
+                  semester: semester,
+                  courseNo: courseNo,
+                  courseName: className,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  className,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isCurrent
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: isCurrent
-                    ? colorScheme.primary.withValues(alpha: 0.1)
-                    : colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
+            );
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('這門課沒有提供詳細課綱')));
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 16,
-                    color: isCurrent
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
                   Text(
-                    location,
+                    time,
                     style: TextStyle(
-                      color: isCurrent
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
+                      color: subtitleColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: Text(
+                      className,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: titleColor,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16,
+                      color: iconColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      location,
+                      style: TextStyle(
+                        color: iconColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import 'graduation_screen.dart';
+import 'course_detail_screen.dart';
 
 class GradesScreen extends StatefulWidget {
   const GradesScreen({super.key});
@@ -265,95 +266,121 @@ class _GradesScreenState extends State<GradesScreen> {
               final effectivePass = isPass;
               final displayScore = isEmpty ? '無資料' : scoreRaw;
 
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+              return InkWell(
+                onTap: () {
+                  final courseNo = course['courseNo']?.toString();
+                  if (courseNo != null &&
+                      courseNo.isNotEmpty &&
+                      semester['academic_year'] != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CourseDetailScreen(
+                          year: semester['academic_year'].toString(),
+                          semester: semester['semester'].toString(),
+                          courseNo: courseNo,
+                          courseName: course['name'] ?? 'Unknown Course',
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('這門課沒有提供詳細課綱')),
+                    );
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 12.0,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              course['name'] ?? 'Unknown Course',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: colorScheme.onSurface,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 12.0,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                course['name'] ?? 'Unknown Course',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: colorScheme.onSurface,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.secondaryContainer,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    course['type'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: colorScheme.onSecondaryContainer,
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.secondaryContainer,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      course['type'] ?? '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: colorScheme.onSecondaryContainer,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${course["credits"]} 學分',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: colorScheme.onSurfaceVariant,
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${course["credits"]} 學分',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isEmpty
-                              ? colorScheme.surfaceContainerHighest
-                              : effectivePass
-                              ? colorScheme.primaryContainer
-                              : colorScheme.errorContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          displayScore,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isEmpty
-                                ? colorScheme.onSurfaceVariant
-                                : effectivePass
-                                ? colorScheme.onPrimaryContainer
-                                : colorScheme.onErrorContainer,
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isEmpty
+                                ? colorScheme.surfaceContainerHighest
+                                : effectivePass
+                                ? Colors.green.withValues(alpha: 0.15)
+                                : Colors.red.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            displayScore,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: isEmpty
+                                  ? colorScheme.onSurfaceVariant
+                                  : effectivePass
+                                  ? Colors.green[700]
+                                  : Colors.red[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

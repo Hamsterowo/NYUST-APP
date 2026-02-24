@@ -8,6 +8,7 @@ import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
+import 'course_detail_screen.dart';
 
 class GraduationContent extends StatelessWidget {
   const GraduationContent({super.key});
@@ -780,30 +781,46 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(event.name),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('教室: ${event.room ?? "未定"}'),
-                  Text('教師: ${event.teacher}'),
-                  const Divider(),
-                  Text('時段: ${event.timeRoomStr}'),
-                ],
+        if (event.year != null &&
+            event.semester != null &&
+            event.courseNo != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetailScreen(
+                year: event.year!,
+                semester: event.semester!,
+                courseNo: event.courseNo!,
+                courseName: event.name,
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('關閉'),
+          );
+        } else {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(event.name),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('教室: ${event.room ?? "未定"}'),
+                    Text('教師: ${event.teacher}'),
+                    const Divider(),
+                    Text('時段: ${event.timeRoomStr}'),
+                  ],
+                ),
               ),
-            ],
-          ),
-        );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('關閉'),
+                ),
+              ],
+            ),
+          );
+        }
       },
       child: Container(
         margin: const EdgeInsets.all(2),

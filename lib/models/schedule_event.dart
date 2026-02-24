@@ -15,6 +15,12 @@ class ScheduleEvent {
   final List<String> times;
   final String? room;
 
+  // 課綱相關
+  final String? syllabusUrl;
+  final String? year;
+  final String? semester;
+  final String? courseNo;
+
   ScheduleEvent({
     required this.semesterCourseNo,
     required this.deptCourseNo,
@@ -29,6 +35,10 @@ class ScheduleEvent {
     this.weekday,
     required this.times,
     this.room,
+    this.syllabusUrl,
+    this.year,
+    this.semester,
+    this.courseNo,
   });
 
   factory ScheduleEvent.fromJson(Map<String, dynamic> json) {
@@ -46,6 +56,10 @@ class ScheduleEvent {
       weekday: json['weekday'],
       times: List<String>.from(json['times'] ?? []),
       room: json['room'],
+      syllabusUrl: json['syllabusUrl'],
+      year: json['year'],
+      semester: json['semester'],
+      courseNo: json['courseNo'],
     );
   }
 }

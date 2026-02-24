@@ -172,13 +172,21 @@ class ApiService {
 
   // ─── 通用認證請求（使用 SharedPreferences 中的 Cookies）──────────────────
 
-  Future<Map<String, dynamic>> _authenticatedPost(String path) async {
+  Future<Map<String, dynamic>> _authenticatedPost(
+    String path, {
+    Map<String, Object?>? data,
+  }) async {
     await _ensureInit();
     try {
       // 直接從 SharedPreferences 讀取，不受 domain 匹配限制
       final cookieList = await _loadSchoolCookies();
 
-      final response = await _dio.post(path, data: {'cookies': cookieList});
+      final requestData = <String, dynamic>{'cookies': cookieList};
+      if (data != null) {
+        requestData.addAll(data);
+      }
+
+      final response = await _dio.post(path, data: requestData);
 
       // 偵測到 401 代表 Session 過期
       if (response.statusCode == 401) {
@@ -270,6 +278,17 @@ class ApiService {
 
   Future<Map<String, dynamic>> getSchedule() async {
     return _authenticatedPost('/api/schedule');
+  }
+
+  Future<Map<String, dynamic>> getCourseDetail({
+    required String year,
+    required String semester,
+    required String courseNo,
+  }) async {
+    return _authenticatedPost(
+      '/api/schedule/detail',
+      data: {'year': year, 'semester': semester, 'courseNo': courseNo},
+    );
   }
 
   Future<void> logout() async {
