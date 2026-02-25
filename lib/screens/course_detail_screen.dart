@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/course_detail_model.dart';
 import '../services/api_service.dart';
 
@@ -70,7 +71,30 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.courseName), scrolledUnderElevation: 0),
+      appBar: AppBar(
+        title: Text(widget.courseName),
+        scrolledUnderElevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.open_in_browser),
+            tooltip: '在瀏覽器開啟',
+            onPressed: () async {
+              final url = Uri.parse(
+                'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
+              );
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('無法開啟網頁')));
+                }
+              }
+            },
+          ),
+        ],
+      ),
       body: _buildBody(),
     );
   }

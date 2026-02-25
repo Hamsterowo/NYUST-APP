@@ -112,14 +112,17 @@ class AuthProvider with ChangeNotifier {
         onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
         return true;
       } else {
-        _error = result['message'] ?? 'Login failed';
-        // Refresh captcha on failure?
+        final loginError = '帳號密碼或驗證碼錯誤';
         await fetchCaptcha();
+        _error = loginError; // Restore error after fetchCaptcha clears it
+        notifyListeners();
         return false;
       }
     } catch (e) {
-      _error = e.toString();
+      final loginError = '帳號密碼或驗證碼錯誤';
       await fetchCaptcha();
+      _error = loginError; // Restore error after fetchCaptcha clears it
+      notifyListeners();
       return false;
     } finally {
       _isLoading = false;

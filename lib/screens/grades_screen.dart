@@ -5,7 +5,7 @@ import '../providers/data_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/skeleton_loading.dart';
+import '../widgets/shimmer_box.dart';
 import 'graduation_screen.dart';
 import 'course_detail_screen.dart';
 
@@ -18,6 +18,8 @@ class GradesScreen extends StatefulWidget {
 
 class _GradesScreenState extends State<GradesScreen> {
   int _selectedSegment = 0;
+  // Maps 'academicYear-semester' -> expanded state, persisted across tab switches
+  final Map<String, bool> _expandedStates = {};
 
   @override
   Widget build(BuildContext context) {
@@ -120,18 +122,6 @@ class _GradesScreenState extends State<GradesScreen> {
   }
 
   Widget _buildGradesContent(DataProvider data, ColorScheme colorScheme) {
-    if (data.isLoadingGrades) {
-      // 骨架框架
-      return ListView(
-        padding: const EdgeInsets.all(16),
-        children: const [
-          GradesSkeletonCard(),
-          GradesSkeletonCard(),
-          GradesSkeletonCard(),
-        ],
-      );
-    }
-
     if (data.gradesFailed && data.gradesData == null) {
       return Center(
         child: Column(
@@ -153,6 +143,10 @@ class _GradesScreenState extends State<GradesScreen> {
           ],
         ),
       );
+    }
+
+    if (data.isLoadingGrades) {
+      return _buildGradesSkeleton(colorScheme);
     }
 
     if (data.gradesData == null) {
@@ -189,6 +183,14 @@ class _GradesScreenState extends State<GradesScreen> {
       itemBuilder: (context, index) {
         final semester = grades[index];
         final courses = semester['courses'] as List;
+        final semesterKey =
+            '${semester["academic_year"]}-${semester["semester"]}';
+
+        // Default: last semester of the "學期" tab is expanded
+        if (!_expandedStates.containsKey(semesterKey)) {
+          final isLastSemester = _selectedSegment == 0;
+          _expandedStates[semesterKey] = isLastSemester;
+        }
 
         double totalWeightedScore = 0;
         double totalGradedCredits = 0;
@@ -238,7 +240,11 @@ class _GradesScreenState extends State<GradesScreen> {
           margin: const EdgeInsets.only(bottom: 12),
           clipBehavior: Clip.antiAlias,
           child: ExpansionTile(
-            initiallyExpanded: false,
+            key: PageStorageKey(semesterKey),
+            initiallyExpanded: _expandedStates[semesterKey] ?? false,
+            onExpansionChanged: (expanded) {
+              setState(() => _expandedStates[semesterKey] = expanded);
+            },
             shape: const Border(),
             collapsedShape: const Border(),
             backgroundColor: Colors.transparent,
@@ -385,6 +391,77 @@ class _GradesScreenState extends State<GradesScreen> {
                 ),
               );
             }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGradesSkeleton(ColorScheme colorScheme) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 2,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    ShimmerBox(width: 120, height: 24),
+                    ShimmerBox(width: 60, height: 24),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              for (int i = 0; i < 3; i++) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16.0,
+                    horizontal: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            ShimmerBox(
+                              width: 150,
+                              height: 20,
+                              margin: EdgeInsets.only(bottom: 8),
+                            ),
+                            Row(
+                              children: [
+                                ShimmerBox(
+                                  width: 40,
+                                  height: 16,
+                                  margin: EdgeInsets.only(right: 8),
+                                ),
+                                ShimmerBox(width: 60, height: 16),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const ShimmerBox(width: 40, height: 32),
+                    ],
+                  ),
+                ),
+                if (i < 2) const Divider(height: 1),
+              ],
+            ],
           ),
         );
       },

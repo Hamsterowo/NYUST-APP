@@ -1,17 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:cookie_jar/cookie_jar.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:io';
+import 'cookie_manager/cookie_manager_api.dart';
 
 class ApiService {
   late Dio _dio;
-  PersistCookieJar? _cookieJar;
-  final String baseUrl = 'https://nyust-api.hamsterowo.workers.dev';
+  final String baseUrl = 'https://nyust-api.hamster.tw';
   bool _initStarted = false;
+  bool _isInit = false;
 
   // SharedPreferences 的 key，用來儲存學校 Cookies
   static const String _schoolCookiesKey = 'school_session_cookies';
@@ -25,24 +22,20 @@ class ApiService {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),
         validateStatus: (status) {
           return status! < 500;
         },
-        headers: {
-          'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       ),
     );
   }
 
   Future<void> init() async {
-    if (_cookieJar != null) return;
+    if (_isInit) return;
     if (_initStarted) {
-      while (_cookieJar == null) {
+      while (!_isInit) {
         await Future.delayed(Duration(milliseconds: 100));
       }
       return;
@@ -50,16 +43,7 @@ class ApiService {
     _initStarted = true;
 
     try {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      String appDocPath = appDocDir.path;
-
-      _cookieJar = PersistCookieJar(
-        storage: FileStorage("$appDocPath/.cookies/"),
-      );
-      _dio.interceptors.add(CookieManager(_cookieJar!));
-      if (kDebugMode) {
-        print('ApiService: CookieJar initialized at $appDocPath/.cookies/');
-      }
+      await setupCookieManager(_dio);
 
       // 若上次登入沒有勾選「保持登入」，重啟時自動清除 cookies
       final prefs = await SharedPreferences.getInstance();
@@ -73,6 +57,8 @@ class ApiService {
           print('ApiService: rememberMe was enabled, keeping cookies.');
         }
       }
+
+      _isInit = true;
     } catch (e) {
       if (kDebugMode) print('ApiService: Init failed: $e');
       _initStarted = false;
@@ -81,7 +67,7 @@ class ApiService {
   }
 
   Future<void> _ensureInit() async {
-    if (_cookieJar == null) {
+    if (!_isInit) {
       await init();
     }
   }
@@ -175,10 +161,11 @@ class ApiService {
   Future<Map<String, dynamic>> _authenticatedPost(
     String path, {
     Map<String, Object?>? data,
+    Duration? receiveTimeout,
+    Duration? connectTimeout,
   }) async {
     await _ensureInit();
     try {
-      // 直接從 SharedPreferences 讀取，不受 domain 匹配限制
       final cookieList = await _loadSchoolCookies();
 
       final requestData = <String, dynamic>{'cookies': cookieList};
@@ -186,7 +173,15 @@ class ApiService {
         requestData.addAll(data);
       }
 
-      final response = await _dio.post(path, data: requestData);
+      final options = (receiveTimeout != null || connectTimeout != null)
+          ? Options(receiveTimeout: receiveTimeout, sendTimeout: connectTimeout)
+          : null;
+
+      final response = await _dio.post(
+        path,
+        data: requestData,
+        options: options,
+      );
 
       // 偵測到 401 代表 Session 過期
       if (response.statusCode == 401) {
@@ -293,8 +288,7 @@ class ApiService {
 
   Future<void> logout() async {
     await _clearSchoolCookies();
-    if (_cookieJar != null) {
-      await _cookieJar!.deleteAll();
-    }
+    // CookieJar clearance is handled by the platform-specific implementation if needed
+    // However, since we rely on SharedPreferences for school cookies, clearing those is sufficient for logout.
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/top_snack_bar.dart';
 import 'dart:convert'; // for Base64
 
 class LoginForm extends StatefulWidget {
@@ -36,14 +37,31 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future<void> _submit(AuthProvider auth) async {
-    await auth.login(
-      _usernameController.text,
-      _passwordController.text,
-      _captchaController.text,
-      _rememberMe,
-    );
-    // 登入成功後觸發系統儲存密碼提示
-    if (auth.error == null) {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+    final captcha = _captchaController.text.trim();
+
+    if (username.isEmpty) {
+      showTopSnackBar(context, '請輸入學號', type: SnackBarType.warning);
+      return;
+    }
+    if (password.isEmpty) {
+      showTopSnackBar(context, '請輸入密碼', type: SnackBarType.warning);
+      return;
+    }
+    if (captcha.isEmpty) {
+      showTopSnackBar(context, '請輸入驗證碼', type: SnackBarType.warning);
+      return;
+    }
+
+    await auth.login(username, password, captcha, _rememberMe);
+
+    if (auth.error != null) {
+      if (mounted) {
+        showTopSnackBar(context, auth.error!, isError: true);
+      }
+    } else {
+      // 登入成功後觸發系統儲存密碼提示
       TextInput.finishAutofillContext();
     }
   }
@@ -67,19 +85,6 @@ class _LoginFormState extends State<LoginForm> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 32),
-              if (auth.error != null)
-                Container(
-                  padding: EdgeInsets.all(12),
-                  margin: EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    auth.error!,
-                    style: TextStyle(color: colorScheme.onErrorContainer),
-                  ),
-                ),
               TextField(
                 controller: _usernameController,
                 autofillHints: const [AutofillHints.username],

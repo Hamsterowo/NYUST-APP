@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,20 +19,21 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="A web for NYUST+ APP">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="nyust_app">
+  <meta name="apple-mobile-web-app-title" content="NYUST+">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>nyust_app</title>
+  <title>NYUST+</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <!--
     You can customize the "flutter_bootstrap.js" script.
@@ -41,6 +43,46 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    // Detects iOS / iPadOS Safari
+    window.isIos = function () {
+      const ua = navigator.userAgent || '';
+      const isIosDev = /iPhone|iPad|iPod/.test(ua);
+      // iPadOS 13+ reports as Macintosh, so also check for touch support
+      const isIpadOs = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+      return isIosDev || isIpadOs;
+    };
+    // Capture PWA install prompt for use by Flutter
+    let _pwaInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _pwaInstallPrompt = e;
+    });
+    // Returns true if the install prompt is available right now
+    window.isPwaPromptAvailable = function () {
+      return _pwaInstallPrompt !== null;
+    };
+    // Returns true if user has chosen "don't show again"
+    window.isPwaInstallDismissed = function () {
+      return localStorage.getItem('pwa_install_dismissed') === '1';
+    };
+    // Persist the "don't show again" preference
+    window.setPwaInstallDismissed = function () {
+      localStorage.setItem('pwa_install_dismissed', '1');
+    };
+    // Trigger the native install prompt; returns true if it was shown
+    window.showPwaInstallPrompt = function () {
+      if (_pwaInstallPrompt) {
+        _pwaInstallPrompt.prompt();
+        _pwaInstallPrompt.userChoice.then(() => {
+          _pwaInstallPrompt = null;
+        });
+        return true;
+      }
+      return false;
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

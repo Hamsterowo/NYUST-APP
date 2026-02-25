@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../models/schedule_event.dart';
 import '../models/calendar_event.dart';
+import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
 import 'course_detail_screen.dart';
 
@@ -15,7 +16,6 @@ class OverviewScreen extends StatefulWidget {
 }
 
 class _OverviewScreenState extends State<OverviewScreen> {
-  bool _isCalendarExpanded = false;
   List<CalendarEvent>? _todayEvents;
   bool _isLoadingCalendar = true;
 
@@ -31,17 +31,26 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final now = DateTime.now();
       final response = await api.getCalendar(now.year);
       if (response['success'] == true && mounted) {
-        final List<dynamic> data = response['data'];
+        final List<dynamic> data = response['events'] ?? [];
         final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
 
-        // Filter for today
+        // Filter for upcoming
         final todayStr =
             "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
         setState(() {
-          _todayEvents = events.where((e) {
-            return e.date.startsWith(todayStr); // 比對日期開頭
-          }).toList();
+          final upcomingEvents = events
+              .where((e) => e.date.compareTo(todayStr) >= 0)
+              .toList();
+          final todaysEvents = upcomingEvents
+              .where((e) => e.date == todayStr)
+              .toList();
+
+          if (todaysEvents.length >= 4) {
+            _todayEvents = todaysEvents;
+          } else {
+            _todayEvents = upcomingEvents.take(4).toList();
+          }
           _isLoadingCalendar = false;
         });
       } else {
@@ -114,15 +123,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 const SizedBox(height: 32),
 
                 // 今日課程
-                _buildTodayClassesSection(
-                  context,
-                  data.scheduleData,
-                  colorScheme,
-                ),
+                _buildTodayClassesSection(context, auth, data, colorScheme),
 
                 const SizedBox(height: 32),
 
-                // 今日行事曆
+                // 近期行事曆
                 _buildCalendarSection(colorScheme),
               ],
             ),
@@ -133,78 +138,154 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _buildCalendarSection(ColorScheme colorScheme) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        initiallyExpanded: _isCalendarExpanded,
-        onExpansionChanged: (val) {
-          setState(() {
-            _isCalendarExpanded = val;
-          });
-        },
-        title: Text(
-          '今日行事曆',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '近期校園行事曆',
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
-        collapsedBackgroundColor: colorScheme.surfaceContainerHighest,
-        backgroundColor: colorScheme.surfaceContainerHighest,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-              border: Border.all(color: colorScheme.surfaceContainerHighest),
-            ),
-            child: _isLoadingCalendar
-                ? const Center(child: CircularProgressIndicator())
-                : _todayEvents == null || _todayEvents!.isEmpty
-                ? const Text(
-                    '今日無任何校園行事曆事項安排。',
-                    style: TextStyle(color: Colors.grey),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _todayEvents!.map((e) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('📌 ', style: TextStyle(fontSize: 16)),
-                            Expanded(
-                              child: Text(
-                                e.name,
-                                style: const TextStyle(height: 1.5),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16.0),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: colorScheme.surfaceContainerHighest),
+          ),
+          child:
+              (_isLoadingCalendar &&
+                  (_todayEvents == null || _todayEvents!.isEmpty))
+              ? _buildCalendarSkeleton()
+              : (_todayEvents == null || _todayEvents!.isEmpty) &&
+                    !_isLoadingCalendar
+              ? const Text(
+                  '近期無任何校園行事曆事項安排。',
+                  style: TextStyle(color: Colors.grey),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _todayEvents!.map((e) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            e.isImportant ? '⭐ ' : '📌 ',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          Expanded(
+                            child: Text(
+                              '${e.date}  ${e.name}',
+                              style: TextStyle(
+                                height: 1.5,
+                                fontWeight: e.isImportant
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-          ),
-        ],
-      ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+        ),
+      ],
     );
   }
 
   Widget _buildTodayClassesSection(
     BuildContext context,
-    List<ScheduleEvent> schedule,
+    AuthProvider auth,
+    DataProvider data,
     ColorScheme colorScheme,
   ) {
+    if (!auth.isLoggedIn) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '今日課程',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Center(
+                child: Text(
+                  '您尚未登入，請先登入以使用完整功能',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     final now = DateTime.now();
     final todayWeekday = now.weekday.toString();
+    final isLoading = data.isLoadingSchedule && data.scheduleData.isEmpty;
+
+    // 如果正在載入且沒有本地快取資料，顯示骨架屏
+    if (isLoading) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '今日課程',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          for (int i = 0; i < 2; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ShimmerBox(
+                      width: 200,
+                      height: 18,
+                      margin: EdgeInsets.only(bottom: 8),
+                    ),
+                    ShimmerBox(
+                      width: 150,
+                      height: 14,
+                      margin: EdgeInsets.only(bottom: 4),
+                    ),
+                    ShimmerBox(width: 100, height: 14),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    final schedule = data.scheduleData;
 
     // 過濾出今天的課
     final todayClasses = schedule
@@ -515,6 +596,25 @@ class _OverviewScreenState extends State<OverviewScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCalendarSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        ShimmerBox(
+          width: double.infinity,
+          height: 18,
+          margin: EdgeInsets.only(bottom: 10),
+        ),
+        ShimmerBox(
+          width: double.infinity,
+          height: 18,
+          margin: EdgeInsets.only(bottom: 10),
+        ),
+        ShimmerBox(width: 200, height: 18),
+      ],
     );
   }
 }

@@ -7,7 +7,7 @@ import '../models/schedule_event.dart';
 import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/skeleton_loading.dart';
+import '../widgets/shimmer_box.dart';
 import 'course_detail_screen.dart';
 
 class GraduationContent extends StatelessWidget {
@@ -17,10 +17,6 @@ class GraduationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
     final colorScheme = Theme.of(context).colorScheme;
-
-    if (data.isLoadingGraduation) {
-      return const GraduationSkeletonView();
-    }
 
     if (data.graduationFailed && data.graduationData == null) {
       return Center(
@@ -45,12 +41,26 @@ class GraduationContent extends StatelessWidget {
       );
     }
 
-    if (data.graduationData == null) {
+    if (data.isLoadingGraduation) {
+      return _buildGraduationSkeleton(context, colorScheme);
+    }
+
+    final info = data.graduationData?['graduation_info'];
+    if (info == null) {
       return const Center(child: Text('尚無畢業學分資料'));
     }
 
-    final info = data.graduationData!['graduation_info'];
-    final breakdown = info['credits_breakdown'];
+    final breakdown =
+        info['credits_breakdown'] ??
+        {
+          "pe": "0",
+          "civilization": "0",
+          "literature": "0",
+          "general": "0",
+          "dept_required": "0",
+          "elective": "0",
+          "total": "0",
+        };
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -99,6 +109,67 @@ class GraduationContent extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGraduationSkeleton(
+    BuildContext context,
+    ColorScheme colorScheme,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            elevation: 2,
+            shadowColor: Colors.transparent,
+            color: colorScheme.surfaceContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  const ShimmerBox(width: 100, height: 20),
+                  const SizedBox(height: 8),
+                  const ShimmerBox(width: 80, height: 48),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: const [
+                      ShimmerBox(width: 80, height: 50),
+                      ShimmerBox(width: 80, height: 50),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const ShimmerBox(width: 120, height: 28),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: List.generate(
+                8,
+                (index) => const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
+                  ),
+                  child: ShimmerBox(width: double.infinity, height: 20),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -436,11 +507,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Widget _buildBody(DataProvider data) {
-    // 只要是在載入中（包含重新整理），就一律顯示簡化的骨架框架
-    if (data.isLoadingSchedule) {
-      return const ScheduleSkeletonGrid();
-    }
-
     if (data.scheduleFailed && data.scheduleData.isEmpty) {
       return Center(
         child: Column(
@@ -464,14 +530,69 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       );
     }
 
-    if (data.scheduleData.isEmpty) {
+    final hasData = data.scheduleData.isNotEmpty;
+    final displayData = hasData
+        ? data.scheduleData
+        : [
+            ScheduleEvent(
+              semesterCourseNo: '11210001',
+              deptCourseNo: 'ABC0001',
+              name: '這是一堂假的課這是一堂假的課',
+              courseClass: 'A班',
+              classType: '必修',
+              requiredType: '必',
+              credits: '3',
+              timeRoomStr: '1-C,D/教室',
+              teacher: '教授',
+              remark: '',
+              times: ['C', 'D'],
+              weekday: '1',
+            ),
+            ScheduleEvent(
+              semesterCourseNo: '11210002',
+              deptCourseNo: 'ABC0002',
+              name: '這是一堂假的課這是一堂假的課',
+              courseClass: 'B班',
+              classType: '選修',
+              requiredType: '選',
+              credits: '3',
+              timeRoomStr: '2-E,F/教室',
+              teacher: '教授',
+              remark: '',
+              times: ['E', 'F'],
+              weekday: '2',
+            ),
+            ScheduleEvent(
+              semesterCourseNo: '11210003',
+              deptCourseNo: 'ABC0003',
+              name: '假的課',
+              courseClass: 'C班',
+              classType: '必修',
+              requiredType: '必',
+              credits: '3',
+              timeRoomStr: '3-A,B/教室',
+              teacher: '教授',
+              remark: '',
+              times: ['A', 'B'],
+              weekday: '3',
+            ),
+          ];
+
+    if (!hasData && !data.isLoadingSchedule) {
       return const Center(child: Text('目前沒有任何課表資料'));
     }
 
-    return _buildScheduleGrid(data.scheduleData);
+    if (data.isLoadingSchedule) {
+      return _buildScheduleGrid(<ScheduleEvent>[], isLoading: true);
+    }
+
+    return _buildScheduleGrid(displayData);
   }
 
-  Widget _buildScheduleGrid(List<ScheduleEvent> courses) {
+  Widget _buildScheduleGrid(
+    List<ScheduleEvent> courses, {
+    bool isLoading = false,
+  }) {
     final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
     const timeColumnWidth = 36.0; // 稍微縮減節次欄寬度
     const headerHeight = 36.0; // 稍微縮減標題高度
@@ -543,12 +664,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         // 標題列日期欄
         // 不捲動：Expanded 均分；捲動：固定 minCellWidth
         Widget dayCell(String day) {
-          final label = Center(
-            child: Text(
-              '星期$day',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          );
+          final label = isLoading
+              ? const SizedBox.shrink()
+              : Center(
+                  child: Text(
+                    '星期$day',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                );
           return needsScroll
               ? SizedBox(width: minCellWidth, child: label)
               : Expanded(child: label);
@@ -611,12 +734,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               ),
             );
 
-            final child = event.name.isNotEmpty
-                ? _buildCourseCard(event)
-                : null;
+            final child = isLoading || !event.name.isNotEmpty
+                ? null
+                : _buildCourseCard(event);
 
             final cellWidget = Container(
-              height: cellHeight * span, // 動態設定高度為 單節高度 x 節數
+              height: cellHeight * span,
               decoration: decoration,
               width: needsScroll ? minCellWidth : double.infinity,
               child: child,
@@ -667,12 +790,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     children: [
                       SizedBox(
                         width: timeColumnWidth,
-                        child: const Center(
-                          child: Text(
-                            '節',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                        child: isLoading
+                            ? const SizedBox.shrink()
+                            : const Center(
+                                child: Text(
+                                  '節',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
                       ),
                       Expanded(
                         child: needsScroll
@@ -735,14 +860,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                             ),
                                           ),
                                         ),
-                                        child: Center(
-                                          child: Text(
-                                            period,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
+                                        child: isLoading
+                                            ? const SizedBox.shrink()
+                                            : Center(
+                                                child: Text(
+                                                  period,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
                                       ),
                                     ),
                                   )
