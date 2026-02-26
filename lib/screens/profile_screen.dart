@@ -9,8 +9,32 @@ import '../utils/pwa_interop.dart';
 import 'yuntech_privacy_screen.dart';
 import 'terms_of_service_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+import 'package:package_info_plus/package_info_plus.dart';
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String _versionStr = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      setState(() {
+        _versionStr = info.version;
+      });
+    } catch (_) {}
+  }
 
   void _showInstallPrompt(BuildContext context) {
     if (kIsWeb) {
@@ -245,6 +269,14 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          if (_versionStr.isNotEmpty)
+                            Text(
+                              'v$_versionStr',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.outline,
+                              ),
+                            ),
                         ],
                       ),
                     ),
