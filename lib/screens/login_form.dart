@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/top_snack_bar.dart';
 import 'dart:convert'; // for Base64
+import 'yuntech_privacy_screen.dart';
+import 'terms_of_service_screen.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -18,6 +20,21 @@ class _LoginFormState extends State<LoginForm> {
   final _captchaController = TextEditingController();
   final _passwordFocusNode = FocusNode();
   bool _rememberMe = false;
+
+  bool _hasReadPrivacy = false;
+  bool _hasReadTerms = false;
+  bool _isCheckedPrivacy = false;
+  bool _isCheckedTerms = false;
+
+  void _showMustReadSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('請先點選閱讀條款內容後，再進行勾選。'),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -70,6 +87,8 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final bool canLogin = _isCheckedPrivacy && _isCheckedTerms;
 
     return SingleChildScrollView(
       child: Padding(
@@ -167,13 +186,162 @@ class _LoginFormState extends State<LoginForm> {
                 contentPadding: EdgeInsets.zero,
               ),
               SizedBox(height: 24),
+
+              // Privacy Policy Row
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: _isCheckedPrivacy,
+                      onChanged: (val) {
+                        if (!_hasReadPrivacy) {
+                          _showMustReadSnackBar();
+                          return;
+                        }
+                        setState(() {
+                          _isCheckedPrivacy = val ?? false;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const YuntechPrivacyScreen(),
+                            ),
+                          ).then((_) {
+                            setState(() {
+                              _hasReadPrivacy = true;
+                            });
+                          });
+                        },
+                        child: Text(
+                          '我已閱讀並同意「YunTech 單一入口隱私權政策」',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: _hasReadPrivacy
+                                ? colorScheme.onSurface
+                                : colorScheme.primary,
+                            decoration: _hasReadPrivacy
+                                ? null
+                                : TextDecoration.underline,
+                            fontWeight: _hasReadPrivacy
+                                ? FontWeight.normal
+                                : FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const YuntechPrivacyScreen(),
+                          ),
+                        ).then((_) {
+                          setState(() {
+                            _hasReadPrivacy = true;
+                          });
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Terms of Service Row
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: _isCheckedTerms,
+                      onChanged: (val) {
+                        if (!_hasReadTerms) {
+                          _showMustReadSnackBar();
+                          return;
+                        }
+                        setState(() {
+                          _isCheckedTerms = val ?? false;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TermsOfServiceScreen(),
+                            ),
+                          ).then((_) {
+                            setState(() {
+                              _hasReadTerms = true;
+                            });
+                          });
+                        },
+                        child: Text(
+                          '我已閱讀並同意「NYUST+ 使用者條款」',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: _hasReadTerms
+                                ? colorScheme.onSurface
+                                : colorScheme.primary,
+                            decoration: _hasReadTerms
+                                ? null
+                                : TextDecoration.underline,
+                            fontWeight: _hasReadTerms
+                                ? FontWeight.normal
+                                : FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TermsOfServiceScreen(),
+                          ),
+                        ).then((_) {
+                          setState(() {
+                            _hasReadTerms = true;
+                          });
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               if (auth.isLoading)
                 const CircularProgressIndicator()
               else
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: () => _submit(auth),
+                    onPressed: canLogin ? () => _submit(auth) : null,
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),

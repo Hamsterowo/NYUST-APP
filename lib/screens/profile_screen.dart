@@ -6,6 +6,8 @@ import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
 import '../utils/pwa_interop.dart';
+import 'yuntech_privacy_screen.dart';
+import 'terms_of_service_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -90,6 +92,67 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // About / Legal card
+                        Card(
+                          elevation: 0,
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: Icon(
+                                  Icons.privacy_tip_outlined,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                title: const Text('YunTech 單一入口隱私權政策'),
+                                trailing: Icon(
+                                  Icons.chevron_right,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(12),
+                                    topRight: Radius.circular(12),
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const YuntechPrivacyScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const Divider(height: 1, indent: 56),
+                              ListTile(
+                                leading: Icon(
+                                  Icons.description_outlined,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                title: const Text('NYUST+ 使用者條款'),
+                                trailing: Icon(
+                                  Icons.chevron_right,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const TermsOfServiceScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ],

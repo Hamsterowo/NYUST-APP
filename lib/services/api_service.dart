@@ -271,6 +271,26 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> getPrivacyPolicy() async {
+    await _ensureInit();
+    try {
+      final response = await _dio.get('/api/policy/privacy');
+      return response.data;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
+      }
+      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
+    } catch (e) {
+      return {'status': 'error', 'message': 'API call failed: $e'};
+    }
+  }
+
   Future<Map<String, dynamic>> getSchedule() async {
     return _authenticatedPost('/api/schedule');
   }
