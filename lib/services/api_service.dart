@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'cookie_manager/cookie_manager_api.dart';
 
@@ -16,8 +15,8 @@ class ApiService {
   // 記住此次登入是否為「僅此次（不保持登入）」
   static const String _sessionOnlyKey = 'session_only_login';
 
-  // 安全密鑰保險箱
-  final _secureStorage = const FlutterSecureStorage();
+  // 安全密鑰保險箱（已停用，改回 SharedPreferences 解決冷啟動遺失問題）
+  // final _secureStorage = const FlutterSecureStorage();
 
   // 針對後端 API 驗證的通行密鑰 (API_SECRET)
   // 若為編譯版 (如 Web)，可透過 --dart-define=API_SECRET=您的密鑰 來注入
@@ -88,29 +87,37 @@ class ApiService {
 
   // ─── 學校 Cookie 的 SharedPreferences 儲存 ────────────────────────────────
 
-  /// 從 SecureStorage 讀取學校 Cookies（不依賴 CookieJar domain 匹配）
+  /// 從 SharedPreferences 讀取學校 Cookies（不依賴 CookieJar domain 匹配）
   Future<List<Map<String, dynamic>>> _loadSchoolCookies() async {
-    final raw = await _secureStorage.read(key: _schoolCookiesKey);
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_schoolCookiesKey);
     if (raw == null || raw.isEmpty) return [];
     try {
       final decoded = jsonDecode(raw) as List<dynamic>;
-      return decoded.cast<Map<String, dynamic>>();
-    } catch (_) {
+      return decoded.map((e) {
+        final map = e as Map;
+        final newMap = <String, dynamic>{};
+        map.forEach((key, value) {
+          newMap[key.toString()] = value;
+        });
+        return newMap;
+      }).toList();
+    } catch (e) {
+      if (kDebugMode) print('ApiService: Failed to parse cookies: $e');
       return [];
     }
   }
 
-  /// 將學校 Cookies 儲存到 SecureStorage
+  /// 將學校 Cookies 儲存到 SharedPreferences
   Future<void> _saveSchoolCookies(List<dynamic> cookies) async {
-    await _secureStorage.write(
-      key: _schoolCookiesKey,
-      value: jsonEncode(cookies),
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_schoolCookiesKey, jsonEncode(cookies));
   }
 
-  /// 清除學校 Cookies (從 SecureStorage)
+  /// 清除學校 Cookies (從 SharedPreferences)
   Future<void> _clearSchoolCookies() async {
-    await _secureStorage.delete(key: _schoolCookiesKey);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_schoolCookiesKey);
   }
 
   /// 檢查是否有儲存的學校 Cookies

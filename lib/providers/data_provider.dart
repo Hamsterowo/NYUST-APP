@@ -71,7 +71,12 @@ class DataProvider with ChangeNotifier {
       final cached = prefs.getString('cache_grades');
       if (cached != null) {
         try {
-          gradesData = jsonDecode(cached) as Map<String, dynamic>;
+          final map = jsonDecode(cached) as Map;
+          final newMap = <String, dynamic>{};
+          map.forEach((key, value) {
+            newMap[key.toString()] = value;
+          });
+          gradesData = newMap;
           gradesFailed = false;
           notifyListeners(); // 優先顯示快取畫面
         } catch (e) {
@@ -113,7 +118,12 @@ class DataProvider with ChangeNotifier {
       final cached = prefs.getString('cache_graduation');
       if (cached != null) {
         try {
-          graduationData = jsonDecode(cached) as Map<String, dynamic>;
+          final map = jsonDecode(cached) as Map;
+          final newMap = <String, dynamic>{};
+          map.forEach((key, value) {
+            newMap[key.toString()] = value;
+          });
+          graduationData = newMap;
           graduationFailed = false;
           notifyListeners(); // 優先顯示快取畫面
         } catch (e) {
@@ -156,9 +166,14 @@ class DataProvider with ChangeNotifier {
       if (cached != null) {
         try {
           final List<dynamic> raw = jsonDecode(cached);
-          scheduleData = raw
-              .map((e) => ScheduleEvent.fromJson(e as Map<String, dynamic>))
-              .toList();
+          scheduleData = raw.map((e) {
+            final map = e as Map;
+            final newMap = <String, dynamic>{};
+            map.forEach((key, value) {
+              newMap[key.toString()] = value;
+            });
+            return ScheduleEvent.fromJson(newMap);
+          }).toList();
           scheduleFailed = false;
           notifyListeners(); // 優先顯示快取畫面
         } catch (e) {
@@ -176,7 +191,10 @@ class DataProvider with ChangeNotifier {
       if (response['status'] == 'success' && response['data'] != null) {
         final List<dynamic> raw = response['data']['schedule'] ?? [];
         scheduleData = raw
-            .map((e) => ScheduleEvent.fromJson(e as Map<String, dynamic>))
+            .map(
+              (e) =>
+                  ScheduleEvent.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
             .toList();
         scheduleFailed = false;
         // 2. 儲存最新快取
