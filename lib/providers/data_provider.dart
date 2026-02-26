@@ -70,9 +70,13 @@ class DataProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString('cache_grades');
       if (cached != null) {
-        gradesData = jsonDecode(cached);
-        gradesFailed = false;
-        notifyListeners(); // 優先顯示快取畫面
+        try {
+          gradesData = jsonDecode(cached) as Map<String, dynamic>;
+          gradesFailed = false;
+          notifyListeners(); // 優先顯示快取畫面
+        } catch (e) {
+          print('Parse grades cache error: $e');
+        }
       }
     }
 
@@ -108,9 +112,13 @@ class DataProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString('cache_graduation');
       if (cached != null) {
-        graduationData = jsonDecode(cached);
-        graduationFailed = false;
-        notifyListeners(); // 優先顯示快取畫面
+        try {
+          graduationData = jsonDecode(cached) as Map<String, dynamic>;
+          graduationFailed = false;
+          notifyListeners(); // 優先顯示快取畫面
+        } catch (e) {
+          print('Parse graduation cache error: $e');
+        }
       }
     }
 
@@ -146,10 +154,16 @@ class DataProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString('cache_schedule');
       if (cached != null) {
-        final List<dynamic> raw = jsonDecode(cached);
-        scheduleData = raw.map((e) => ScheduleEvent.fromJson(e)).toList();
-        scheduleFailed = false;
-        notifyListeners(); // 優先顯示快取畫面
+        try {
+          final List<dynamic> raw = jsonDecode(cached);
+          scheduleData = raw
+              .map((e) => ScheduleEvent.fromJson(e as Map<String, dynamic>))
+              .toList();
+          scheduleFailed = false;
+          notifyListeners(); // 優先顯示快取畫面
+        } catch (e) {
+          print('Parse schedule cache error: $e');
+        }
       }
     }
 
@@ -161,7 +175,9 @@ class DataProvider with ChangeNotifier {
       final response = await _api.getSchedule();
       if (response['status'] == 'success' && response['data'] != null) {
         final List<dynamic> raw = response['data']['schedule'] ?? [];
-        scheduleData = raw.map((e) => ScheduleEvent.fromJson(e)).toList();
+        scheduleData = raw
+            .map((e) => ScheduleEvent.fromJson(e as Map<String, dynamic>))
+            .toList();
         scheduleFailed = false;
         // 2. 儲存最新快取
         final prefs = await SharedPreferences.getInstance();
