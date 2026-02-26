@@ -20,7 +20,11 @@ class ApiService {
   final _secureStorage = const FlutterSecureStorage();
 
   // 針對後端 API 驗證的通行密鑰 (API_SECRET)
-  static const String _apiSecretKey = 'lrR2Uf-E6No13m45iCa7';
+  // 若為編譯版 (如 Web)，可透過 --dart-define=API_SECRET=您的密鑰 來注入
+  static const String _apiSecretKey = String.fromEnvironment(
+    'API_SECRET',
+    defaultValue: 'lrR2Uf-E6No13m45iCa7', // 本機開發或未設定時的預設回退值
+  );
 
   /// 當 API 回傳 401 Session 過期時觸發，由 AuthProvider 設定
   VoidCallback? onSessionExpired;
