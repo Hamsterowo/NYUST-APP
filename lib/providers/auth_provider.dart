@@ -60,27 +60,32 @@ class AuthProvider with ChangeNotifier {
         await _clearUserCache();
       } else {
         // Validation failed, but it might just be a network error.
-        final hasCookies = await _apiService.hasSavedCookies();
-        if (hasCookies) {
-          final prefs = await SharedPreferences.getInstance();
-          final cachedStr = prefs.getString('cached_user_info');
-          if (cachedStr != null) {
-            _user = jsonDecode(cachedStr);
-          } else {
-            _user = {
-              'offline': true,
-              'user': {'name': '離線模式'},
-            };
-          }
+        final prefs = await SharedPreferences.getInstance();
+        final cachedStr = prefs.getString('cached_user_info');
+
+        if (cachedStr != null) {
+          _user = jsonDecode(cachedStr);
           print('AuthProvider: Offline mode active. Using cached user info.');
           onLoginSuccess?.call();
         } else {
-          print('AuthProvider: No active session found nor cookies.');
+          print('AuthProvider: No active session found nor cached user info.');
           await _clearUserCache();
         }
       }
     } catch (e) {
       print('AuthProvider: Session restoration failed: $e');
+      // 網路異常時，嘗試從本地快取恢復，避免直接跳到登入畫面
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final cachedStr = prefs.getString('cached_user_info');
+        if (cachedStr != null) {
+          _user = jsonDecode(cachedStr);
+          print(
+            'AuthProvider: Exception fallback – using cached user info (offline mode).',
+          );
+          onLoginSuccess?.call();
+        }
+      } catch (_) {}
     } finally {
       _isInitialized = true;
       notifyListeners();

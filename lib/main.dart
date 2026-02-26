@@ -64,7 +64,11 @@ class MyApp extends StatelessWidget {
         fontFamily: 'JFOpenHuninn',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: auth.isLoggedIn ? const HomeScreen() : const LoginScreen(),
+      home: !auth.isInitialized
+          ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+          : auth.isLoggedIn
+          ? const HomeScreen()
+          : const LoginScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
         '/grades': (context) => GradesScreen(),
