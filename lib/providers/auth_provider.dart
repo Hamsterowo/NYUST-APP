@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -33,8 +35,9 @@ class AuthProvider with ChangeNotifier {
     await _apiService.init();
 
     // 當 API 偵測到 Session 過期 (401) 時，自動登出
-    _apiService.onSessionExpired = () {
+    _apiService.onSessionExpired = () async {
       _user = null;
+      await _clearUserCache();
       notifyListeners();
     };
 
@@ -47,9 +50,34 @@ class AuthProvider with ChangeNotifier {
         print(
           'AuthProvider: Session restored! User: ${_user?["user"]?["name"]}',
         );
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('cached_user_info', jsonEncode(info));
+
         onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
+      } else if (info['status'] == 'session_expired') {
+        print('AuthProvider: Session legitimately expired.');
+        await _clearUserCache();
       } else {
-        print('AuthProvider: No active session found.');
+        // Validation failed, but it might just be a network error.
+        final hasCookies = await _apiService.hasSavedCookies();
+        if (hasCookies) {
+          final prefs = await SharedPreferences.getInstance();
+          final cachedStr = prefs.getString('cached_user_info');
+          if (cachedStr != null) {
+            _user = jsonDecode(cachedStr);
+          } else {
+            _user = {
+              'offline': true,
+              'user': {'name': '離線模式'},
+            };
+          }
+          print('AuthProvider: Offline mode active. Using cached user info.');
+          onLoginSuccess?.call();
+        } else {
+          print('AuthProvider: No active session found nor cookies.');
+          await _clearUserCache();
+        }
       }
     } catch (e) {
       print('AuthProvider: Session restoration failed: $e');
@@ -108,6 +136,10 @@ class AuthProvider with ChangeNotifier {
         final info = await _apiService.getUserInfo();
         _user = info;
         _user?['username'] = username; // Store username if needed
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('cached_user_info', jsonEncode(_user));
+
         notifyListeners();
         onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
         return true;
@@ -132,9 +164,15 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     await _apiService.logout();
+    await _clearUserCache();
     _user = null;
     onLogoutCallback?.call(); // 通知 DataProvider 清除快取
     notifyListeners();
+  }
+
+  Future<void> _clearUserCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('cached_user_info');
   }
 
   ApiService get api => _apiService;
