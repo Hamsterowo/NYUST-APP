@@ -6,6 +6,7 @@ import '../utils/top_snack_bar.dart';
 import 'dart:convert'; // for Base64
 import 'yuntech_privacy_screen.dart';
 import 'terms_of_service_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -25,6 +26,7 @@ class _LoginFormState extends State<LoginForm> {
   bool _hasReadTerms = false;
   bool _isCheckedPrivacy = false;
   bool _isCheckedTerms = false;
+  String _versionStr = '';
 
   void _showMustReadSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -41,7 +43,17 @@ class _LoginFormState extends State<LoginForm> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().fetchCaptcha();
+      _loadVersion();
     });
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      setState(() {
+        _versionStr = info.version;
+      });
+    } catch (_) {}
   }
 
   @override
@@ -346,6 +358,14 @@ class _LoginFormState extends State<LoginForm> {
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: Text('登入', style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              if (_versionStr.isNotEmpty)
+                Text(
+                  'v$_versionStr',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.outline,
                   ),
                 ),
             ],
