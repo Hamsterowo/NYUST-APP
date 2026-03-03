@@ -252,10 +252,11 @@ class ApiService {
     return _authenticatedPost('/api/graduation');
   }
 
-  Future<Map<String, dynamic>> getCalendar(int year) async {
+  /// 合併端點：一次取得行事曆事件 + 假日資料
+  Future<Map<String, dynamic>> getCalendarAll(int year) async {
     await _ensureInit();
     try {
-      final response = await _dio.get('/api/calendar/$year');
+      final response = await _dio.get('/api/calendar-all/$year');
       return response.data;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -270,30 +271,7 @@ class ApiService {
     } catch (e) {
       return {
         'status': 'error',
-        'message': 'API call to /api/calendar/$year failed: $e',
-      };
-    }
-  }
-
-  Future<Map<String, dynamic>> getHolidays(int year) async {
-    await _ensureInit();
-    try {
-      final response = await _dio.get('/api/holidays/$year');
-      return response.data;
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
-      }
-      if (e.type == DioExceptionType.connectionError) {
-        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
-      }
-      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
-    } catch (e) {
-      return {
-        'status': 'error',
-        'message': 'API call to /api/holidays/$year failed: $e',
+        'message': 'API call to /api/calendar-all/$year failed: $e',
       };
     }
   }

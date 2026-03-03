@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
+import '../services/calendar_cache_service.dart';
 import '../providers/navigation_provider.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
@@ -244,12 +245,42 @@ class _CalendarScreenState extends State<CalendarScreen>
     );
   }
 
+  /// 從合併端點的回應資料解析並填入記憶體快取
+  void _parseAndCacheData(int year, Map<String, dynamic> data) {
+    final List<dynamic> eventsJson = data['events'] ?? [];
+    final List<CalendarEvent> parsed = eventsJson
+        .map((e) => CalendarEvent.fromJson(e))
+        .toList();
+
+    final Map<String, List<CalendarEvent>> newGrouped = {};
+    for (var event in parsed) {
+      newGrouped.putIfAbsent(event.date, () => []).add(event);
+    }
+
+    final Map<String, String> newHolidaysType = {};
+    if (data['holidayDetails'] != null) {
+      final Map<String, dynamic> details = data['holidayDetails'];
+      details.forEach((date, type) {
+        newHolidaysType[date] = type?.toString() ?? 'national';
+      });
+    } else if (data['holidays'] != null) {
+      final List<dynamic> hList = data['holidays'];
+      for (var date in hList) {
+        newHolidaysType[date.toString()] = 'national';
+      }
+    }
+
+    _cachedGroupedEvents[year] = newGrouped;
+    _cachedHolidaysType[year] = newHolidaysType;
+  }
+
   Future<void> _fetchYearIfNeeded(int year, {bool foreground = true}) async {
+    // 1. 內存快取命中 → 直接返回
     if (_cachedGroupedEvents.containsKey(year)) {
       if (foreground && _isLoading && year == _currentYear) {
         setState(() => _isLoading = false);
       }
-      return; // 已快取，直接返回，不再觸發預載避免無限遞迴
+      return;
     }
     if (_fetchingYears.contains(year)) return;
     _fetchingYears.add(year);
@@ -262,42 +293,29 @@ class _CalendarScreenState extends State<CalendarScreen>
     }
 
     try {
-      final data = await _apiService.getCalendar(year);
-      if (data['success'] == true) {
-        final List<dynamic> eventsJson = data['events'];
-        final List<CalendarEvent> parsed = eventsJson
-            .map((e) => CalendarEvent.fromJson(e))
-            .toList();
-
-        Map<String, List<CalendarEvent>> newGrouped = {};
-        for (var event in parsed) {
-          newGrouped.putIfAbsent(event.date, () => []).add(event);
+      // 2. 本地持久化快取命中 → 不打 API
+      final cached = await CalendarCacheService.getCalendarData(year);
+      if (cached != null) {
+        _fetchingYears.remove(year);
+        _parseAndCacheData(year, cached);
+        if (mounted) {
+          setState(() {
+            if (foreground && year == _currentYear) _isLoading = false;
+            _errorMessage = null;
+          });
+          _prefetchAdjacentYears(year);
         }
+        return;
+      }
 
-        Map<String, String> newHolidaysType = {};
-        try {
-          final holidayData = await _apiService.getHolidays(year);
-          if (holidayData['success'] == true &&
-              holidayData['holidays'] != null) {
-            final List<dynamic> hList = holidayData['holidays'];
-            if (holidayData['holidayDetails'] != null) {
-              final Map<String, dynamic> details =
-                  holidayData['holidayDetails'];
-              for (var date in hList) {
-                newHolidaysType[date.toString()] =
-                    details[date.toString()]?.toString() ?? 'national';
-              }
-            } else {
-              for (var date in hList) {
-                newHolidaysType[date.toString()] = 'national';
-              }
-            }
-          }
-        } catch (_) {}
+      // 3. 快取不存在或過期 → 呼叫合併 API 端點
+      final data = await _apiService.getCalendarAll(year);
+      if (data['success'] == true) {
+        // 寫入持久化快取
+        await CalendarCacheService.saveCalendarData(year, data);
 
         _fetchingYears.remove(year);
-        _cachedGroupedEvents[year] = newGrouped;
-        _cachedHolidaysType[year] = newHolidaysType;
+        _parseAndCacheData(year, data);
 
         if (mounted) {
           setState(() {
@@ -445,8 +463,14 @@ class _CalendarScreenState extends State<CalendarScreen>
     return Scaffold(
       appBar: CustomAppBar(
         title: '行事曆',
-        onRefresh: () {
-          _cachedGroupedEvents.remove(_currentYear);
+        onRefresh: () async {
+          // 清除所有持久化快取
+          await CalendarCacheService.clearAllCache();
+          // 清除內存快取
+          _cachedGroupedEvents.clear();
+          _cachedHolidaysType.clear();
+          _fetchingYears.clear();
+          // 重新從 API 獲取當前年份
           _fetchYearIfNeeded(_currentYear);
         },
         actions: [

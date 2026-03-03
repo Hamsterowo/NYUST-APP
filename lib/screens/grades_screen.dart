@@ -68,7 +68,7 @@ class _GradesScreenState extends State<GradesScreen> {
         title: _selectedSegment == 2 ? '畢業學分' : '成績查詢',
         onRefresh: data.isLoadingGrades
             ? null
-            : () {
+            : () async {
                 if (_selectedSegment == 2) {
                   data.fetchGraduation();
                 } else {
