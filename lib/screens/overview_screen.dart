@@ -6,6 +6,7 @@ import '../models/schedule_event.dart';
 import '../models/calendar_event.dart';
 import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
+import '../utils/top_snack_bar.dart';
 import 'course_detail_screen.dart';
 
 class OverviewScreen extends StatefulWidget {
@@ -81,7 +82,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       return '早安，$displayName同學';
     } else if (timeDouble >= 11.5 && timeDouble < 17.0) {
       return '午安，$displayName同學';
-    } else if (timeDouble >= 17.0 && timeDouble < 23.0) {
+    } else if (timeDouble >= 17.0 && timeDouble < 24.0) {
       return '晚安，$displayName同學';
     } else {
       return '別爆肝了...我也想休息...💤';
@@ -531,9 +532,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               ),
             );
           } else {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('這門課沒有提供詳細課綱')));
+            showTopSnackBar(context, '這門課沒有提供詳細課綱', type: SnackBarType.warning);
           }
         },
         child: Padding(

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../providers/navigation_provider.dart';
-import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
@@ -628,7 +627,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       : _buildHolidayBackground(context, day);
                                   return Stack(
                                     children: [
-                                      if (bg != null) bg,
+                                      ?bg,
                                       Container(
                                         margin: const EdgeInsets.all(6.0),
                                         decoration: BoxDecoration(
@@ -654,7 +653,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       : _buildHolidayBackground(context, day);
                                   return Stack(
                                     children: [
-                                      if (bg != null) bg,
+                                      ?bg,
                                       Container(
                                         margin: const EdgeInsets.all(6.0),
                                         decoration: BoxDecoration(
@@ -711,7 +710,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   );
                                   return Stack(
                                     children: [
-                                      if (bg != null) bg,
+                                      ?bg,
                                       Container(
                                         margin: const EdgeInsets.all(6.0),
                                         alignment: Alignment.center,

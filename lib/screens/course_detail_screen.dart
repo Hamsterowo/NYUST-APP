@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/course_detail_model.dart';
 import '../services/api_service.dart';
+import '../utils/top_snack_bar.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String year;
@@ -86,9 +87,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               } else {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('無法開啟網頁')));
+                  showTopSnackBar(context, '無法開啟網頁', isError: true);
                 }
               }
             },

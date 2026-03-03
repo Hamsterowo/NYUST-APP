@@ -29,13 +29,7 @@ class _LoginFormState extends State<LoginForm> {
   String _versionStr = '';
 
   void _showMustReadSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('請先點選閱讀條款內容後，再進行勾選。'),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showTopSnackBar(context, '請先點選閱讀條款內容後，再進行勾選。', type: SnackBarType.warning);
   }
 
   @override

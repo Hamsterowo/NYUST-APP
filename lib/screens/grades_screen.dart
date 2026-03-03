@@ -290,8 +290,10 @@ class _GradesScreenState extends State<GradesScreen> {
                       ),
                     );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('這門課沒有提供詳細課綱')),
+                    showTopSnackBar(
+                      context,
+                      '這門課沒有提供詳細課綱',
+                      type: SnackBarType.warning,
                     );
                   }
                 },
