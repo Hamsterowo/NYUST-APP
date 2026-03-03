@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showReportDialog(BuildContext context) {
-    showTopSnackBar(context, '此功能尚未完成');
+    showTopSnackBar(context, '此功能尚未完成', type: SnackBarType.info);
   }
 
   @override
@@ -91,33 +91,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Column(
                       children: [
-                        // User info card
-                        Card(
-                          elevation: 0,
-                          color: colorScheme.surfaceContainerHighest,
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  user?["user"]?["name"] ?? "Student",
-                                  style: textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurfaceVariant,
+                        // User info card (Expanded width, custom layout)
+                        SizedBox(
+                          width: double.infinity,
+                          child: Card(
+                            elevation: 0,
+                            color: colorScheme.surfaceContainerHighest,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0,
+                                vertical: 28.0,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Left Side: Name and Student ID
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          user?["user"]?["name"] ??
+                                              user?["user"]?["姓名"] ??
+                                              "Student",
+                                          style: textTheme.headlineLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          user?["user"]?["學號"] ?? "ID Unknown",
+                                          style: textTheme.titleMedium
+                                              ?.copyWith(
+                                                color: colorScheme
+                                                    .onSurfaceVariant
+                                                    .withOpacity(0.8),
+                                              ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  user?["user"]?["department"] ?? "Unknown",
-                                  style: textTheme.titleMedium?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
+                                  // Right Side: Department and Class
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        user?["user"]?["系(所)別"] ??
+                                            user?["user"]?["department"] ??
+                                            "Unknown",
+                                        style: textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        user?["user"]?["班級"] ?? "",
+                                        style: textTheme.bodyLarge?.copyWith(
+                                          color: colorScheme.onSurfaceVariant
+                                              .withOpacity(0.8),
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 6),
+                        Text(
+                          '※ 此頁面僅供參考，無法作為在學證明等正式用途',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withOpacity(
+                              0.7,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         // About / Legal card
                         Card(
                           elevation: 0,
