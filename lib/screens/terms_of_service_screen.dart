@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
 
 class TermsOfServiceScreen extends StatefulWidget {
   const TermsOfServiceScreen({super.key});
@@ -15,7 +15,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   @override
   void initState() {
     super.initState();
-    _termsFuture = context.read<ApiService>().getTermsOfService();
+    _termsFuture = context.read<AuthProvider>().api.getTermsOfService();
   }
 
   @override
@@ -57,7 +57,8 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     onPressed: () {
                       setState(() {
                         _termsFuture = context
-                            .read<ApiService>()
+                            .read<AuthProvider>()
+                            .api
                             .getTermsOfService();
                       });
                     },
