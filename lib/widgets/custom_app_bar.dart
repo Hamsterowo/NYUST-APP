@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final VoidCallback? onRefresh;
+  final Future<void> Function()? onRefresh;
   final List<Widget>? actions;
 
   const CustomAppBar({

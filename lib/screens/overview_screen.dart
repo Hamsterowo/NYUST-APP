@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../models/schedule_event.dart';
 import '../models/calendar_event.dart';
+import '../services/calendar_cache_service.dart';
 import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
@@ -28,9 +29,23 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Future<void> _fetchTodayCalendar() async {
     try {
-      final api = Provider.of<AuthProvider>(context, listen: false).api;
       final now = DateTime.now();
-      final response = await api.getCalendar(now.year);
+
+      // 先嘗試讀取本地快取（與行事曆頁面共享同一份快取）
+      Map<String, dynamic>? response =
+          await CalendarCacheService.getCalendarData(now.year);
+
+      if (response == null) {
+        // 快取不存在或過期，從合併 API 端點取得
+        final api = Provider.of<AuthProvider>(context, listen: false).api;
+        response = await api.getCalendarAll(now.year);
+
+        // 若成功則寫入快取
+        if (response['success'] == true) {
+          await CalendarCacheService.saveCalendarData(now.year, response);
+        }
+      }
+
       if (response['success'] == true && mounted) {
         final List<dynamic> data = response['events'] ?? [];
         final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
