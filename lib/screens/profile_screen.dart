@@ -40,11 +40,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (kIsWeb) {
       final result = showPwaInstallPrompt();
       if (result != true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('目前無法安裝：您可能已安裝，或瀏覽器不支援此功能'),
-            behavior: SnackBarBehavior.floating,
-          ),
+        showTopSnackBar(
+          context,
+          '目前無法安裝：您可能已安裝，或瀏覽器不支援此功能',
+          type: SnackBarType.warning,
         );
       }
     }

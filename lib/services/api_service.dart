@@ -6,7 +6,7 @@ import 'cookie_manager/cookie_manager_api.dart';
 
 class ApiService {
   late Dio _dio;
-  final String baseUrl = 'https://nyust-api.hamster.tw';
+  final String baseUrl = 'https://cf-api.nyust-plus.com';
   bool _initStarted = false;
   bool _isInit = false;
 
