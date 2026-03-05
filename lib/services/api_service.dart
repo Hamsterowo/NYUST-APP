@@ -252,11 +252,29 @@ class ApiService {
     return _authenticatedPost('/api/graduation');
   }
 
+  /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
   Future<Map<String, dynamic>> getCalendar(int year) async {
     await _ensureInit();
     try {
-      final response = await _dio.get('/api/calendar/$year');
-      return response.data;
+      // 同時發送兩個請求
+      final results = await Future.wait([
+        _dio.get('/api/calendar/$year'),
+        _dio.get('/api/holidays/$year'),
+      ]);
+
+      final calendarData = results[0].data as Map<String, dynamic>;
+      final holidaysData = results[1].data as Map<String, dynamic>;
+
+      // 合併為統一格式（與舊 calendar-all 端點相容）
+      return {
+        'success': calendarData['success'] == true,
+        'year': year.toString(),
+        'events': calendarData['events'] ?? [],
+        'eventCount': calendarData['count'] ?? 0,
+        'holidays': holidaysData['holidays'] ?? [],
+        'holidayCount': holidaysData['count'] ?? 0,
+        'holidayDetails': holidaysData['holidayDetails'] ?? {},
+      };
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
