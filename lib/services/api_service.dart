@@ -252,11 +252,10 @@ class ApiService {
     return _authenticatedPost('/api/graduation');
   }
 
-  /// 合併端點：一次取得行事曆事件 + 假日資料
-  Future<Map<String, dynamic>> getCalendarAll(int year) async {
+  Future<Map<String, dynamic>> getCalendar(int year) async {
     await _ensureInit();
     try {
-      final response = await _dio.get('/api/calendar-all/$year');
+      final response = await _dio.get('/api/calendar/$year');
       return response.data;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -271,7 +270,7 @@ class ApiService {
     } catch (e) {
       return {
         'status': 'error',
-        'message': 'API call to /api/calendar-all/$year failed: $e',
+        'message': 'API call to /api/calendar/$year failed: $e',
       };
     }
   }
