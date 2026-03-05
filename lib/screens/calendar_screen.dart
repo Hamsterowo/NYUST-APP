@@ -293,30 +293,16 @@ class _CalendarScreenState extends State<CalendarScreen>
     }
 
     try {
-      // 2. 本地持久化快取命中 → 不打 API
-      final cached = await CalendarCacheService.getCalendarData(year);
-      if (cached != null) {
-        _fetchingYears.remove(year);
-        _parseAndCacheData(year, cached);
-        if (mounted) {
-          setState(() {
-            if (foreground && year == _currentYear) _isLoading = false;
-            _errorMessage = null;
-          });
-          _prefetchAdjacentYears(year);
-        }
-        return;
-      }
+      // 2 + 3. 使用 getOrFetch：自動讀本地快取 → miss 則呼叫 API → 寫快取（並行去重）
+      final data = await CalendarCacheService.getOrFetch(
+        year,
+        (y) => _apiService.getCalendarAll(y),
+      );
 
-      // 3. 快取不存在或過期 → 呼叫合併 API 端點
-      final data = await _apiService.getCalendarAll(year);
-      if (data['success'] == true) {
-        // 寫入持久化快取
-        await CalendarCacheService.saveCalendarData(year, data);
+      _fetchingYears.remove(year);
 
-        _fetchingYears.remove(year);
+      if (data != null) {
         _parseAndCacheData(year, data);
-
         if (mounted) {
           setState(() {
             if (foreground && year == _currentYear) _isLoading = false;
@@ -325,10 +311,9 @@ class _CalendarScreenState extends State<CalendarScreen>
           _prefetchAdjacentYears(year);
         }
       } else {
-        _fetchingYears.remove(year);
         if (foreground && mounted) {
           setState(() {
-            _errorMessage = data['message'] ?? '載入失敗';
+            _errorMessage = '載入失敗';
             _isLoading = false;
           });
         }
