@@ -46,8 +46,9 @@ class CalendarCacheService {
     }
   }
 
-  /// 清除所有年份的快取
+  /// 清除所有年份的快取（同時清除 in-flight 追蹤）
   static Future<void> clearAllCache() async {
+    _inFlight.clear();
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys();
     for (final key in keys) {
@@ -55,5 +56,41 @@ class CalendarCacheService {
         await prefs.remove(key);
       }
     }
+  }
+
+  // ─── In-flight 請求去重 ──────────────────────────────────────────────────
+
+  /// 正在進行中的請求（年份 → Future），用於防止並行重複 API 呼叫
+  static final Map<int, Future<Map<String, dynamic>?>> _inFlight = {};
+
+  /// 讀快取 → miss 則呼叫 [apiFetcher] → 寫快取，並行呼叫自動去重。
+  /// 同一年份若已有進行中的請求，會共享同一個 Future。
+  static Future<Map<String, dynamic>?> getOrFetch(
+    int year,
+    Future<Map<String, dynamic>> Function(int year) apiFetcher,
+  ) {
+    if (_inFlight.containsKey(year)) return _inFlight[year]!;
+
+    final future = _doGetOrFetch(year, apiFetcher);
+    _inFlight[year] = future;
+    future.whenComplete(() => _inFlight.remove(year));
+    return future;
+  }
+
+  static Future<Map<String, dynamic>?> _doGetOrFetch(
+    int year,
+    Future<Map<String, dynamic>> Function(int year) apiFetcher,
+  ) async {
+    // 1. 讀本地快取
+    final cached = await getCalendarData(year);
+    if (cached != null) return cached;
+
+    // 2. 快取 miss → 呼叫 API
+    final data = await apiFetcher(year);
+    if (data['success'] == true) {
+      await saveCalendarData(year, data);
+      return data;
+    }
+    return null;
   }
 }

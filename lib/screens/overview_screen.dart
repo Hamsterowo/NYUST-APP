@@ -30,23 +30,15 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Future<void> _fetchTodayCalendar() async {
     try {
       final now = DateTime.now();
+      final api = Provider.of<AuthProvider>(context, listen: false).api;
 
-      // 先嘗試讀取本地快取（與行事曆頁面共享同一份快取）
-      Map<String, dynamic>? response =
-          await CalendarCacheService.getCalendarData(now.year);
+      // 使用 getOrFetch：自動讀快取 → miss 則呼叫 API → 寫快取，並行去重
+      final response = await CalendarCacheService.getOrFetch(
+        now.year,
+        (year) => api.getCalendarAll(year),
+      );
 
-      if (response == null) {
-        // 快取不存在或過期，從合併 API 端點取得
-        final api = Provider.of<AuthProvider>(context, listen: false).api;
-        response = await api.getCalendarAll(now.year);
-
-        // 若成功則寫入快取
-        if (response['success'] == true) {
-          await CalendarCacheService.saveCalendarData(now.year, response);
-        }
-      }
-
-      if (response['success'] == true && mounted) {
+      if (response != null && response['success'] == true && mounted) {
         final List<dynamic> data = response['events'] ?? [];
         final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
 

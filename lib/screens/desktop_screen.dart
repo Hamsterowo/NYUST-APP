@@ -1,14 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import 'home_screen.dart';
+import 'login_screen.dart';
 
 class DesktopScreen extends StatelessWidget {
   const DesktopScreen({super.key});
 
-  Future<void> _launchUrl() async {
-    final Uri url = Uri.parse('https://webapp.yuntech.edu.tw/yuntechsso/');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $url');
+  void _continueToApp(BuildContext context) {
+    final auth = context.read<AuthProvider>();
+
+    // 若還沒初始化完成，等初始化後再導航
+    if (!auth.isInitialized) {
+      // 監聽初始化完成後導航
+      void listener() {
+        if (auth.isInitialized) {
+          auth.removeListener(listener);
+          _navigateByAuthState(context, auth);
+        }
+      }
+
+      auth.addListener(listener);
+      // 顯示 loading 提示
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+    } else {
+      _navigateByAuthState(context, auth);
     }
+  }
+
+  void _navigateByAuthState(BuildContext context, AuthProvider auth) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) =>
+            auth.isLoggedIn ? const HomeScreen() : const LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -39,8 +69,8 @@ class DesktopScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text(
                   '您目前正在使用電腦版網頁\n\n'
-                  '建議您直接前往「國立雲林科技大學單一入口服務網」\n'
-                  '可以獲得更好的使用體驗',
+                  '建議您使用行動裝置以獲得更好的使用體驗\n'
+                  '或點擊下方按鈕繼續使用',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     height: 1.6,
                     color: Colors.grey.shade800,
@@ -49,9 +79,9 @@ class DesktopScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48),
                 FilledButton.icon(
-                  onPressed: _launchUrl,
-                  icon: const Icon(Icons.open_in_new),
-                  label: const Text('前往單一入口服務網'),
+                  onPressed: () => _continueToApp(context),
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('繼續前往'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
@@ -64,13 +94,6 @@ class DesktopScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                TextButton(
-                  onPressed: _launchUrl,
-                  child: const Text(
-                    'https://webapp.yuntech.edu.tw/yuntechsso/',
                   ),
                 ),
               ],
