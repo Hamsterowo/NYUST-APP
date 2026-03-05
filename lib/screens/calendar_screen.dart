@@ -296,7 +296,7 @@ class _CalendarScreenState extends State<CalendarScreen>
       // 2 + 3. 使用 getOrFetch：自動讀本地快取 → miss 則呼叫 API → 寫快取（並行去重）
       final data = await CalendarCacheService.getOrFetch(
         year,
-        (y) => _apiService.getCalendarAll(y),
+        (y) => _apiService.getCalendar(y),
       );
 
       _fetchingYears.remove(year);

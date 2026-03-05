@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/course_detail_model.dart';
 import '../services/api_service.dart';
+import '../services/course_detail_cache.dart';
 import '../utils/top_snack_bar.dart';
 
 class CourseDetailScreen extends StatefulWidget {
@@ -36,22 +37,28 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   Future<void> _fetchDetail() async {
     try {
-      final response = await _api.getCourseDetail(
-        year: widget.year,
-        semester: widget.semester,
-        courseNo: widget.courseNo,
+      // 使用快取服務：先讀 SP 快取 → miss 才打 API → 成功寫入快取
+      final response = await CourseDetailCache.getOrFetch(
+        widget.year,
+        widget.semester,
+        widget.courseNo,
+        () => _api.getCourseDetail(
+          year: widget.year,
+          semester: widget.semester,
+          courseNo: widget.courseNo,
+        ),
       );
 
       if (!mounted) return;
 
-      if (response['status'] == 'success') {
+      if (response != null && response['status'] == 'success') {
         setState(() {
           _courseDetail = CourseDetail.fromJson(response['data']);
           _isLoading = false;
         });
       } else {
         setState(() {
-          _errorMessage = response['message'] ?? '載入失敗';
+          _errorMessage = response?['message'] ?? '載入失敗';
           _isLoading = false;
         });
       }

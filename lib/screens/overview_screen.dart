@@ -35,7 +35,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       // 使用 getOrFetch：自動讀快取 → miss 則呼叫 API → 寫快取，並行去重
       final response = await CalendarCacheService.getOrFetch(
         now.year,
-        (year) => api.getCalendarAll(year),
+        (year) => api.getCalendar(year),
       );
 
       if (response != null && response['success'] == true && mounted) {

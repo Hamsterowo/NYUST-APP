@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
+import '../services/course_detail_cache.dart';
+import '../services/calendar_cache_service.dart';
 import '../models/schedule_event.dart';
 import 'auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +54,9 @@ class DataProvider with ChangeNotifier {
     gradesFailed = false;
     graduationFailed = false;
     scheduleFailed = false;
+    // 清除課程詳細與行事曆的本地快取
+    await CourseDetailCache.clearAll();
+    await CalendarCacheService.clearAllCache();
     notifyListeners();
 
     // 清空本地存儲
