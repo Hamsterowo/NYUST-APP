@@ -308,7 +308,10 @@ class _CalendarScreenState extends State<CalendarScreen>
             if (foreground && year == _currentYear) _isLoading = false;
             _errorMessage = null;
           });
-          _prefetchAdjacentYears(year);
+          // 只有主要(前景)載入時才預抓相鄰年份，避免連鎖反應造成無窮迴圈
+          if (foreground) {
+            _prefetchAdjacentYears(year);
+          }
         }
       } else {
         if (foreground && mounted) {
