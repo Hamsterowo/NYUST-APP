@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -41,48 +42,62 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     };
 
-    // Check if we have valid cookies/session?
-    // For now, let's try to fetch user info to see if logged in
+    // 檢查是否有儲存的學校 Cookies
+    final hasCookies = await _apiService.hasSavedCookies();
+
+    if (!hasCookies) {
+      await _clearUserCache();
+      _isInitialized = true;
+      notifyListeners();
+      return;
+    }
+
+    // 有 Cookies 才有機會恢復 Session
     try {
       final info = await _apiService.getUserInfo();
-      if (info['success'] == true) {
+
+      // 嚴格檢查：必須有 user 物件，且名稱（或 ID）不能為空
+      final bool hasValidUser = info['user'] != null &&
+          info['user']['name'] != null &&
+          info['user']['name'].toString().trim().isNotEmpty;
+
+      if (info['success'] == true && hasValidUser) {
         _user = info;
-        print(
-          'AuthProvider: Session restored! User: ${_user?["user"]?["name"]}',
-        );
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('cached_user_info', jsonEncode(info));
 
         onLoginSuccess?.call(); // 通知 DataProvider 開始預先載入
-      } else if (info['status'] == 'session_expired') {
-        print('AuthProvider: Session legitimately expired.');
+      } else if (info['status'] == 'session_expired' ||
+          info['success'] == false ||
+          (info['success'] == true && !hasValidUser)) {
+        // 如果 API 明確回傳失敗或過期，或者雖然 success 但沒抓到名字（幽靈 Session），強制登出
+        _user = null;
         await _clearUserCache();
-      } else {
-        // Validation failed, but it might just be a network error.
+        await _apiService.logout(); // 強制清除 Cookies
+      } else if (info['status'] == 'error') {
+        // 只有在「網路錯誤」時才嘗試恢復離線快取
         final prefs = await SharedPreferences.getInstance();
         final cachedStr = prefs.getString('cached_user_info');
 
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
-          print('AuthProvider: Offline mode active. Using cached user info.');
           onLoginSuccess?.call();
         } else {
-          print('AuthProvider: No active session found nor cached user info.');
           await _clearUserCache();
         }
+      } else {
+        // 其他未知狀況，安全起見直接登出
+        await _clearUserCache();
+        await _apiService.logout();
       }
     } catch (e) {
-      print('AuthProvider: Session restoration failed: $e');
-      // 網路異常時，嘗試從本地快取恢復，避免直接跳到登入畫面
+      // 網路異常且有 Cookies 時，嘗試從本地快取恢復
       try {
         final prefs = await SharedPreferences.getInstance();
         final cachedStr = prefs.getString('cached_user_info');
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
-          print(
-            'AuthProvider: Exception fallback – using cached user info (offline mode).',
-          );
           onLoginSuccess?.call();
         }
       } catch (_) {}

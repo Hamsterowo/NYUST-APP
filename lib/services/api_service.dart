@@ -58,16 +58,18 @@ class ApiService {
     try {
       await setupCookieManager(_dio);
 
-      // 若上次登入沒有勾選「保持登入」，重啟時自動清除 cookies
+      // 若上次登入沒有勾選「保持登入」（或者是全新安裝），重啟時自動清除 cookies
       final prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool(_sessionOnlyKey) == true) {
+      final rememberMe = prefs.getBool(_sessionOnlyKey) == false; // false 代表 rememberMe 為 true
+
+      if (!rememberMe) {
         if (kDebugMode) {
-          print('ApiService: sessionOnlyLogin detected, clearing cookies...');
+          print('ApiService: sessionOnlyLogin or unknown state, clearing cookies for safety...');
         }
         await _clearSchoolCookies();
       } else {
         if (kDebugMode) {
-          print('ApiService: rememberMe was enabled, keeping cookies.');
+          print('ApiService: rememberMe was explicitly enabled, keeping cookies.');
         }
       }
 

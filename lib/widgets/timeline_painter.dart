@@ -15,7 +15,7 @@ class TimelinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final linePaint = Paint()
       ..color = Colors.grey
-          .withOpacity(0.3) // 淺灰色實線
+          .withValues(alpha: 0.3) // 淺灰色實線
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 

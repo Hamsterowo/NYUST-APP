@@ -85,7 +85,7 @@ class DataProvider with ChangeNotifier {
           gradesFailed = false;
           notifyListeners(); // 優先顯示快取畫面
         } catch (e) {
-          print('Parse grades cache error: $e');
+          if (kDebugMode) print('Parse grades cache error: $e');
         }
       }
     }
@@ -132,7 +132,7 @@ class DataProvider with ChangeNotifier {
           graduationFailed = false;
           notifyListeners(); // 優先顯示快取畫面
         } catch (e) {
-          print('Parse graduation cache error: $e');
+          if (kDebugMode) print('Parse graduation cache error: $e');
         }
       }
     }
@@ -182,7 +182,7 @@ class DataProvider with ChangeNotifier {
           scheduleFailed = false;
           notifyListeners(); // 優先顯示快取畫面
         } catch (e) {
-          print('Parse schedule cache error: $e');
+          if (kDebugMode) print('Parse schedule cache error: $e');
         }
       }
     }
