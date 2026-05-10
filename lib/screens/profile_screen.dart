@@ -158,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         user?["user"]?["班級"] ?? "",
                                         style: textTheme.bodyLarge?.copyWith(
                                           color: colorScheme.onSurfaceVariant
-                                              .withOpacity(0.8),
+                                              .withValues(alpha: 0.8),
                                         ),
                                         textAlign: TextAlign.right,
                                       ),
