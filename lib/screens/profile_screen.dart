@@ -130,9 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           user?["user"]?["學號"] ?? "ID Unknown",
                                           style: textTheme.titleMedium
                                               ?.copyWith(
-                                                color: colorScheme
-                                                    .onSurfaceVariant
-                                                    .withOpacity(0.8),
+                                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                                               ),
                                         ),
                                       ],
@@ -173,8 +171,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Text(
                           '※ 此頁面僅供參考，無法作為在學證明等正式用途',
                           style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withOpacity(
-                              0.7,
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.7,
                             ),
                           ),
                         ),

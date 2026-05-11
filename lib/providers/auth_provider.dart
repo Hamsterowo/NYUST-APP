@@ -114,12 +114,15 @@ class AuthProvider with ChangeNotifier {
     try {
       // Clear cookies to ensure a fresh session for login handshake
       await _apiService.logout();
+      await _apiService.init(); // Ensure cookie manager is ready
 
       final data = await _apiService.loginInit();
-      _captchaUrl =
-          data['captchaImage']; // Worker returns base64 data uri in 'captchaImage'
-      _verificationToken =
-          data['verificationToken']; // Worker returns 'verificationToken', check if it matches
+      if (data['success'] == true) {
+        _captchaUrl = data['captchaImage'];
+        _verificationToken = data['verificationToken'];
+      } else {
+        throw Exception(data['message'] ?? 'Failed to init login');
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -188,6 +191,16 @@ class AuthProvider with ChangeNotifier {
     _user = null;
     onLogoutCallback?.call(); // 通知 DataProvider 清除快取
     notifyListeners();
+  }
+
+  /// 更新使用者資料 (用於重新整理功能)
+  void updateUserInfo(Map<String, dynamic> info) {
+    _user = info;
+    notifyListeners();
+    // 同步更新本地快取
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('cached_user_info', jsonEncode(info));
+    });
   }
 
   Future<void> _clearUserCache() async {

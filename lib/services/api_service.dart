@@ -1,11 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'cookie_manager/cookie_manager_api.dart';
+import 'scrapers/sso_scraper.dart';
+import 'scrapers/info_scraper.dart';
+import 'scrapers/schedule_scraper.dart';
+import 'scrapers/grades_scraper.dart';
+import 'scrapers/graduation_scraper.dart';
+import 'scrapers/calendar_scraper.dart';
 
 class ApiService {
   late Dio _dio;
+  late SsoScraper _ssoScraper;
+  late InfoScraper _infoScraper;
+  late ScheduleScraper _scheduleScraper;
+  late GradesScraper _gradesScraper;
+  late GraduationScraper _graduationScraper;
+  late CalendarScraper _calendarScraper;
   final String baseUrl = 'https://cf-api.nyust-plus.com';
   bool _initStarted = false;
   bool _isInit = false;
@@ -43,6 +56,12 @@ class ApiService {
         },
       ),
     );
+    _ssoScraper = SsoScraper(_dio);
+    _infoScraper = InfoScraper(_dio);
+    _scheduleScraper = ScheduleScraper(_dio);
+    _gradesScraper = GradesScraper(_dio);
+    _graduationScraper = GraduationScraper(_dio);
+    _calendarScraper = CalendarScraper(_dio);
   }
 
   Future<void> init() async {
@@ -133,14 +152,8 @@ class ApiService {
   Future<Map<String, dynamic>> loginInit() async {
     await _ensureInit();
     try {
-      final response = await _dio.get('/api/login/init');
-
-      // 儲存初始 Cookies 到 SharedPreferences
-      if (response.data['cookies'] != null) {
-        await _saveSchoolCookies(response.data['cookies']);
-      }
-
-      return response.data;
+      // 改為使用本地 Scraper
+      return await _ssoScraper.loginInit();
     } catch (e) {
       throw Exception('Failed to init login: $e');
     }
@@ -155,144 +168,111 @@ class ApiService {
   ) async {
     await _ensureInit();
     try {
-      // 讀取 loginInit 儲存的 Cookies
-      final cookieList = await _loadSchoolCookies();
-
-      final response = await _dio.post(
-        '/api/login',
-        data: {
-          'username': username,
-          'password': password,
-          'captcha': captcha,
-          'verificationToken': requestVerificationToken,
-          'cookies': cookieList,
-          'rememberMe': rememberMe,
-        },
+      // 改為使用本地 Scraper
+      final result = await _ssoScraper.login(
+        username: username,
+        password: password,
+        captcha: captcha,
+        verificationToken: requestVerificationToken,
+        rememberMe: rememberMe,
       );
 
-      if (response.data['success'] == true) {
-        // 儲存登入後取得的最新學校 Cookies
-        if (response.data['cookies'] != null) {
-          await _saveSchoolCookies(response.data['cookies']);
-        }
+      if (result['success'] == true) {
+        // 登入成功後，同步本地 Cookie 到 SharedPreferences 以相容舊有的 API 呼叫
+        await _syncCookiesFromJar();
+        
         // 記錄是否為僅此次登入（重啟後清除）
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_sessionOnlyKey, !rememberMe);
       }
-      return response.data;
+      return result;
     } catch (e) {
       throw Exception('Login failed: $e');
     }
   }
 
-  // ─── 通用認證請求（使用 SharedPreferences 中的 Cookies）──────────────────
-
-  Future<Map<String, dynamic>> _authenticatedPost(
-    String path, {
-    Map<String, Object?>? data,
-    Duration? receiveTimeout,
-    Duration? connectTimeout,
-  }) async {
-    await _ensureInit();
+  /// 從 CookieJar 中同步學校 Cookies 到 SharedPreferences (供舊版 API 使用)
+  Future<void> _syncCookiesFromJar() async {
     try {
-      final cookieList = await _loadSchoolCookies();
+      final cookieJar = _dio.interceptors
+          .whereType<CookieManager>()
+          .firstOrNull
+          ?.cookieJar;
+      
+      if (cookieJar == null) return;
 
-      final requestData = <String, dynamic>{'cookies': cookieList};
-      if (data != null) {
-        requestData.addAll(data);
+      // 取得雲科大相關網域的 Cookies
+      final domains = [
+        'https://webapp.yuntech.edu.tw',
+        'https://yunportal.yuntech.edu.tw'
+      ];
+      
+      final List<Map<String, dynamic>> allCookies = [];
+      for (var domain in domains) {
+        final cookies = await cookieJar.loadForRequest(Uri.parse(domain));
+        for (var c in cookies) {
+          allCookies.add({
+            'name': c.name,
+            'value': c.value,
+            'domain': c.domain,
+            'path': c.path,
+            'expires': c.expires?.toIso8601String(),
+            'httpOnly': c.httpOnly,
+            'secure': c.secure,
+          });
+        }
       }
 
-      final options = (receiveTimeout != null || connectTimeout != null)
-          ? Options(receiveTimeout: receiveTimeout, sendTimeout: connectTimeout)
-          : null;
-
-      final response = await _dio.post(
-        path,
-        data: requestData,
-        options: options,
-      );
-
-      // 偵測到 401 代表 Session 過期
-      if (response.statusCode == 401) {
-        await _clearSchoolCookies();
-        onSessionExpired?.call();
-        return {'status': 'session_expired', 'message': '登入已過期，請重新登入'};
+      if (allCookies.isNotEmpty) {
+        await _saveSchoolCookies(allCookies);
+        if (kDebugMode) print('ApiService: Cookies synced to SharedPreferences');
       }
-
-      // API 回傳更新後的 Cookies → 存回 SharedPreferences
-      final updatedCookies =
-          response.data['finalCookies'] ?? response.data['cookies'];
-      if (updatedCookies != null) {
-        await _saveSchoolCookies(updatedCookies);
-      }
-
-      return response.data;
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
-      }
-      if (e.type == DioExceptionType.connectionError) {
-        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
-      }
-      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
     } catch (e) {
-      return {'status': 'error', 'message': 'API call to $path failed: $e'};
+      if (kDebugMode) print('ApiService: Failed to sync cookies: $e');
     }
   }
 
   Future<Map<String, dynamic>> getUserInfo() async {
-    return _authenticatedPost('/api/user-info');
+    await _ensureInit();
+    return _infoScraper.getUserInfo();
+  }
+
+  Future<Map<String, dynamic>> getCalendarEvents(String year) async {
+    await _ensureInit();
+    return _calendarScraper.getCalendarEvents(year);
+  }
+
+  Future<Map<String, dynamic>> getHolidays(int year) async {
+    await _ensureInit();
+    return _calendarScraper.getHolidays(year);
+  }
+
+  /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
+  Future<Map<String, dynamic>> getCalendarCombined(String year) async {
+    final events = await getCalendarEvents(year);
+    final holidays = await getHolidays(int.parse(year));
+
+    return {
+      'success': events['success'] == true && holidays['success'] == true,
+      'events': events['events'] ?? [],
+      'holidays': holidays['holidays'] ?? [],
+      'holidayDetails': holidays['holidayDetails'] ?? {},
+    };
   }
 
   Future<Map<String, dynamic>> getGrades() async {
-    return _authenticatedPost('/api/grades');
+    await _ensureInit();
+    return _gradesScraper.getGrades();
   }
 
   Future<Map<String, dynamic>> getGraduation() async {
-    return _authenticatedPost('/api/graduation');
+    await _ensureInit();
+    return _graduationScraper.getGraduation();
   }
 
   /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
   Future<Map<String, dynamic>> getCalendar(int year) async {
-    await _ensureInit();
-    try {
-      // 同時發送兩個請求
-      final results = await Future.wait([
-        _dio.get('/api/calendar/$year'),
-        _dio.get('/api/holidays/$year'),
-      ]);
-
-      final calendarData = results[0].data as Map<String, dynamic>;
-      final holidaysData = results[1].data as Map<String, dynamic>;
-
-      // 合併為統一格式（與舊 calendar-all 端點相容）
-      return {
-        'success': calendarData['success'] == true,
-        'year': year.toString(),
-        'events': calendarData['events'] ?? [],
-        'eventCount': calendarData['count'] ?? 0,
-        'holidays': holidaysData['holidays'] ?? [],
-        'holidayCount': holidaysData['count'] ?? 0,
-        'holidayDetails': holidaysData['holidayDetails'] ?? {},
-      };
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
-      }
-      if (e.type == DioExceptionType.connectionError) {
-        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
-      }
-      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
-    } catch (e) {
-      return {
-        'status': 'error',
-        'message': 'API call to /api/calendar/$year failed: $e',
-      };
-    }
+    return getCalendarCombined(year.toString());
   }
 
   Future<Map<String, dynamic>> getPrivacyPolicy() async {
@@ -335,8 +315,10 @@ class ApiService {
     }
   }
 
+
   Future<Map<String, dynamic>> getSchedule() async {
-    return _authenticatedPost('/api/schedule');
+    await _ensureInit();
+    return _scheduleScraper.getSchedule();
   }
 
   Future<Map<String, dynamic>> getCourseDetail({
@@ -344,15 +326,19 @@ class ApiService {
     required String semester,
     required String courseNo,
   }) async {
-    return _authenticatedPost(
-      '/api/schedule/detail',
-      data: {'year': year, 'semester': semester, 'courseNo': courseNo},
+    await _ensureInit();
+    return _scheduleScraper.getCourseDetail(
+      year: year,
+      semester: semester,
+      courseNo: courseNo,
     );
   }
 
   Future<void> logout() async {
     await _clearSchoolCookies();
-    // CookieJar clearance is handled by the platform-specific implementation if needed
-    // However, since we rely on SharedPreferences for school cookies, clearing those is sufficient for logout.
+    await clearCookies(); // 徹底清除 CookieJar 中的實體檔案
   }
+
+  SsoScraper get ssoScraper => _ssoScraper;
+  InfoScraper get infoScraper => _infoScraper;
 }

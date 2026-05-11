@@ -19,10 +19,10 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
           create: (ctx) => DataProvider(
-            ctx.read<AuthProvider>().api,
-            ctx.read<AuthProvider>(),
+            Provider.of<AuthProvider>(ctx, listen: false).api,
+            Provider.of<AuthProvider>(ctx, listen: false),
           ),
-          update: (ctx, auth, prev) => prev ?? DataProvider(auth.api, auth),
+          update: (ctx, auth, prev) => prev!,
         ),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ],

@@ -5,3 +5,9 @@ Future<void> setupCookieManager(Dio dio) async {
     'Cannot create a cookie manager without dart:html or dart:io',
   );
 }
+
+Future<void> clearCookies() async {
+  throw UnsupportedError(
+    'Cannot create a cookie manager without dart:html or dart:io',
+  );
+}
