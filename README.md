@@ -42,6 +42,19 @@
    flutter run
    ```
 
+## 📦 打包發布
+
+為了保護程式碼邏輯，發布正式版本時建議使用以下混淆指令進行打包：
+
+### Android (APK)
+```bash
+flutter build apk --obfuscate --split-debug-info=build/app/outputs/symbols
+```
+
+### 參數說明：
+- `--obfuscate`: 啟動程式碼混淆，隱藏變數名稱與邏輯。
+- `--split-debug-info`: 指定偵錯資訊存儲路徑（用於還原混淆後的錯誤紀錄）。
+
 ## 📜 免責聲明 (Disclaimer)
 
 本專案為開發者獨立開發的第三方應用程式，並非由 **國立雲林科技大學 (NYUST)** 官方開發或維護。本 App 透過模擬登錄方式獲取資料，所有使用者帳號密碼僅用於與校方伺服器驗證，開發者不會收集、儲存或洩漏使用者的個人隱私資訊。
