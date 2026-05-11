@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -22,7 +24,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x' # 使用最新的 3.x 版本
+          flutter-version: '3.x'
           channel: 'stable'
 
       - name: Get dependencies
@@ -36,8 +38,8 @@ jobs:
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           name: Release ${{ github.ref_name }}
-          draft: true # 改為草稿模式，方便手動編輯敘述
+          draft: true
           prerelease: false
-          generate_release_notes: true # 自動產生更新日誌
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
