@@ -11,16 +11,21 @@ import 'dart:convert';
 /// 在使用者登入後自動預先載入所有資料。
 class DataProvider with ChangeNotifier {
   final ApiService _api;
+  final AuthProvider _auth;
 
-  DataProvider(this._api, AuthProvider authProvider) {
+  DataProvider(this._api, this._auth) {
+    _init();
+  }
+
+  void _init() {
     // App 啟動時若已有登入的 Session，立即預先載入
-    if (authProvider.isLoggedIn) {
+    if (_auth.isLoggedIn) {
       prefetchAll();
     }
     // 新登入時自動預先載入
-    authProvider.onLoginSuccess = () => prefetchAll();
+    _auth.onLoginSuccess = () => prefetchAll();
     // 登出時清除所有快取
-    authProvider.onLogoutCallback = () => clearAll();
+    _auth.onLogoutCallback = () => clearAll();
   }
 
   // ─── 成績 ───────────────────────────────────────────────────────
@@ -40,10 +45,40 @@ class DataProvider with ChangeNotifier {
 
   /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）
   Future<void> prefetchAll() async {
+    await fetchUserInfo();
+    await Future.delayed(const Duration(milliseconds: 200));
     await fetchGrades();
     await Future.delayed(const Duration(milliseconds: 200));
     await fetchGraduation();
     await fetchSchedule();
+  }
+
+  /// 強制重新抓取（不使用快取）
+  Future<void> forceFetchAll() async {
+    // 清除記憶體快取
+    gradesData = null;
+    graduationData = null;
+    scheduleData = [];
+    
+    // 清除本地存儲快取
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('cache_grades');
+    await prefs.remove('cache_graduation');
+    await prefs.remove('cache_schedule');
+    
+    await prefetchAll();
+  }
+
+  // ─── 個人資料 ─────────────────────────────────────────────────────
+  Future<void> fetchUserInfo() async {
+    try {
+      final response = await _api.getUserInfo();
+      if (response['success'] == true) {
+        _auth.updateUserInfo(response);
+      }
+    } catch (e) {
+      if (kDebugMode) print('DataProvider: fetchUserInfo error: $e');
+    }
   }
 
   /// 清除所有快取（登出時呼叫）
