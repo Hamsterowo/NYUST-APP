@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/weather_model.dart';
 
 class WeatherService {
@@ -10,9 +9,10 @@ class WeatherService {
 
   // 取得雲林縣 (包含斗六市) 鄉鎮天氣預報
   Future<WeatherData?> fetchWeatherForDouliu() async {
-    final apiKey = dotenv.env['CWA_API_KEY'];
+    // TODO: 填入您的中央氣象署 API Key
+    const apiKey = 'YOUR_API_KEY_HERE';
     
-    if (apiKey == null || apiKey.isEmpty) {
+    if (apiKey == 'YOUR_API_KEY_HERE' || apiKey.isEmpty) {
       throw Exception('API Key is missing');
     }
 
