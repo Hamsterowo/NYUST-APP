@@ -75,3 +75,9 @@ app.*.map.json
 .env
 .env.*
 !.env.example
+
+# Documentation
+doc/
+
+# Test
+test/

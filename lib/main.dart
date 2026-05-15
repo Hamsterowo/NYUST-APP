@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/auth_provider.dart';
 import 'providers/data_provider.dart';
 import 'providers/navigation_provider.dart';
+import 'providers/weather_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/grades_screen.dart';
 import 'screens/graduation_screen.dart';
@@ -12,11 +14,19 @@ import 'screens/login_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await dotenv.load(fileName: ".env");
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, WeatherProvider>(
+          create: (ctx) => WeatherProvider(
+            Provider.of<AuthProvider>(ctx, listen: false).api,
+          ),
+          update: (ctx, auth, prev) => prev!,
+        ),
         ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
           create: (ctx) => DataProvider(
             Provider.of<AuthProvider>(ctx, listen: false).api,
