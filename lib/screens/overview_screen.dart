@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../models/schedule_event.dart';
@@ -11,6 +13,7 @@ import '../widgets/weather_card.dart';
 import '../utils/top_snack_bar.dart';
 import '../providers/weather_provider.dart';
 import 'course_detail_screen.dart';
+import 'terms_of_service_screen.dart';
 
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
@@ -29,7 +32,34 @@ class _OverviewScreenState extends State<OverviewScreen> {
     _fetchTodayCalendar();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<WeatherProvider>().fetchWeather();
+      _checkTermsAgreement();
     });
+  }
+
+  Future<void> _checkTermsAgreement() async {
+    final prefs = await SharedPreferences.getInstance();
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version;
+    
+    // 檢查是否已同意過此版本的條款
+    final String lastAcceptedVersion = prefs.getString('accepted_terms_version') ?? '';
+    
+    if (lastAcceptedVersion != currentVersion) {
+      if (mounted) {
+        final bool? agreed = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const TermsOfServiceScreen(
+              showAgreementButtons: true,
+            ),
+          ),
+        );
+        
+        if (agreed == true) {
+          await prefs.setString('accepted_terms_version', currentVersion);
+        }
+      }
+    }
   }
 
   Future<void> _handleRefresh() async {

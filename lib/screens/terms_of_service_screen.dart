@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
 class TermsOfServiceScreen extends StatefulWidget {
-  const TermsOfServiceScreen({super.key});
+  final bool showAgreementButtons;
+
+  const TermsOfServiceScreen({
+    super.key,
+    this.showAgreementButtons = false,
+  });
 
   @override
   State<TermsOfServiceScreen> createState() => _TermsOfServiceScreenState();
@@ -30,7 +36,46 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         scrolledUnderElevation: 0,
+        // 如果是強制顯示模式，隱藏返回按鈕以防使用者略過
+        automaticallyImplyLeading: !widget.showAgreementButtons,
       ),
+      bottomNavigationBar: widget.showAgreementButtons
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // 拒絕並退出程式
+                          SystemNavigator.pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colorScheme.error,
+                          side: BorderSide(color: colorScheme.error),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('拒絕並退出程式'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('同意'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: FutureBuilder<Map<String, dynamic>>(
         future: _termsFuture,
         builder: (context, snapshot) {
@@ -76,7 +121,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: 24.0,
-              vertical: 32.0,
+              vertical: 16.0,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,6 +144,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     ),
                   ),
                 ],
+                const SizedBox(height: 32),
               ],
             ),
           );
