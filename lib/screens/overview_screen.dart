@@ -7,7 +7,9 @@ import '../models/calendar_event.dart';
 import '../services/calendar_cache_service.dart';
 import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/weather_card.dart';
 import '../utils/top_snack_bar.dart';
+import '../providers/weather_provider.dart';
 import 'course_detail_screen.dart';
 
 class OverviewScreen extends StatefulWidget {
@@ -25,6 +27,17 @@ class _OverviewScreenState extends State<OverviewScreen> {
   void initState() {
     super.initState();
     _fetchTodayCalendar();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WeatherProvider>().fetchWeather();
+    });
+  }
+
+  Future<void> _handleRefresh() async {
+    // 觸發重新取得日曆資料與天氣資料
+    await Future.wait([
+      _fetchTodayCalendar(),
+      context.read<WeatherProvider>().fetchWeather(),
+    ]);
   }
 
   Future<void> _fetchTodayCalendar() async {
@@ -107,40 +120,49 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     return Scaffold(
       appBar: const CustomAppBar(title: '總覽'),
-      body: Consumer2<AuthProvider, DataProvider>(
-        builder: (context, auth, data, child) {
-          final userName = auth.user?['user']?['name']?.toString() ?? '';
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: Consumer2<AuthProvider, DataProvider>(
+          builder: (context, auth, data, child) {
+            final userName = auth.user?['user']?['name']?.toString() ?? '';
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 歡迎與時間區域
-                Text(
-                  _getGreeting(userName),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(), // 確保可下拉
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 歡迎與時間區域
+                  Text(
+                    _getGreeting(userName),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '今天是 ${_formatDate(now)}',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 8),
+                  Text(
+                    '今天是 ${_formatDate(now)}',
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 16),
 
-                // 今日課程
-                _buildTodayClassesSection(context, auth, data, colorScheme),
+                  // 天氣概覽區塊
+                  const WeatherCard(),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                // 近期行事曆
-                _buildCalendarSection(colorScheme),
-              ],
-            ),
-          );
-        },
+                  // 今日課程
+                  _buildTodayClassesSection(context, auth, data, colorScheme),
+
+                  const SizedBox(height: 32),
+
+                  // 近期行事曆
+                  _buildCalendarSection(colorScheme),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
