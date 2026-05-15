@@ -23,6 +23,8 @@ class ApiService {
   bool _initStarted = false;
   bool _isInit = false;
 
+  Dio get dio => _dio;
+
   // SharedPreferences 的 key，用來儲存學校 Cookies
   static const String _schoolCookiesKey = 'school_session_cookies';
   // 記住此次登入是否為「僅此次（不保持登入）」

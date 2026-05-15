@@ -21,12 +21,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProxyProvider<AuthProvider, WeatherProvider>(
-          create: (ctx) => WeatherProvider(
-            Provider.of<AuthProvider>(ctx, listen: false).api,
-          ),
-          update: (ctx, auth, prev) => prev!,
-        ),
+        ChangeNotifierProvider(create: (_) => WeatherProvider()),
         ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
           create: (ctx) => DataProvider(
             Provider.of<AuthProvider>(ctx, listen: false).api,
