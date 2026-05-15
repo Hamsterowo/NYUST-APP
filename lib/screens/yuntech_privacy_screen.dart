@@ -3,7 +3,12 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
 class YuntechPrivacyScreen extends StatefulWidget {
-  const YuntechPrivacyScreen({super.key});
+  final bool showAgreementButtons;
+
+  const YuntechPrivacyScreen({
+    super.key,
+    this.showAgreementButtons = false,
+  });
 
   @override
   State<YuntechPrivacyScreen> createState() => _YuntechPrivacyScreenState();
@@ -59,7 +64,42 @@ class _YuntechPrivacyScreenState extends State<YuntechPrivacyScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         scrolledUnderElevation: 0,
+        automaticallyImplyLeading: !widget.showAgreementButtons,
       ),
+      bottomNavigationBar: widget.showAgreementButtons
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('返回'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('同意'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -97,9 +137,12 @@ class _YuntechPrivacyScreenState extends State<YuntechPrivacyScreen> {
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(24),
-              itemCount: (_data?['blocks'] as List?)?.length ?? 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              itemCount: ((_data?['blocks'] as List?)?.length ?? 0) + 1,
               itemBuilder: (context, index) {
+                if (index == (_data?['blocks'] as List?)?.length) {
+                  return const SizedBox(height: 32);
+                }
                 final block = _data!['blocks'][index];
                 final String type = block['type'];
                 final String text = block['text'];

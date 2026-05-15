@@ -23,9 +23,7 @@ class _LoginFormState extends State<LoginForm> {
   bool _rememberMe = false;
 
   bool _hasReadPrivacy = false;
-  bool _hasReadTerms = false;
   bool _isCheckedPrivacy = false;
-  bool _isCheckedTerms = false;
   String _versionStr = '';
 
   void _showMustReadSnackBar() {
@@ -94,7 +92,8 @@ class _LoginFormState extends State<LoginForm> {
     final auth = context.watch<AuthProvider>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final bool canLogin = _isCheckedPrivacy && _isCheckedTerms;
+    // 登入按鈕現在只受單一入口隱私權政策勾選框控制
+    final bool canLogin = _isCheckedPrivacy;
 
     return SingleChildScrollView(
       child: Padding(
@@ -193,7 +192,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
               SizedBox(height: 24),
 
-              // Privacy Policy Row
+              // Privacy Policy Row (單一入口網)
               Container(
                 decoration: BoxDecoration(
                   color: colorScheme.surfaceContainerHighest,
@@ -219,12 +218,17 @@ class _LoginFormState extends State<LoginForm> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const YuntechPrivacyScreen(),
+                              builder: (_) => const YuntechPrivacyScreen(
+                                showAgreementButtons: true,
+                              ),
                             ),
-                          ).then((_) {
-                            setState(() {
-                              _hasReadPrivacy = true;
-                            });
+                          ).then((agreed) {
+                            if (agreed == true) {
+                              setState(() {
+                                _hasReadPrivacy = true;
+                                _isCheckedPrivacy = true;
+                              });
+                            }
                           });
                         },
                         child: Text(
@@ -253,93 +257,24 @@ class _LoginFormState extends State<LoginForm> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const YuntechPrivacyScreen(),
-                          ),
-                        ).then((_) {
-                          setState(() {
-                            _hasReadPrivacy = true;
-                          });
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Terms of Service Row
-              Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: _isCheckedTerms,
-                      onChanged: (val) {
-                        if (!_hasReadTerms) {
-                          _showMustReadSnackBar();
-                          return;
-                        }
-                        setState(() {
-                          _isCheckedTerms = val ?? false;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const TermsOfServiceScreen(),
+                            builder: (_) => const YuntechPrivacyScreen(
+                              showAgreementButtons: true,
                             ),
-                          ).then((_) {
+                          ),
+                        ).then((agreed) {
+                          if (agreed == true) {
                             setState(() {
-                              _hasReadTerms = true;
+                              _hasReadPrivacy = true;
+                              _isCheckedPrivacy = true;
                             });
-                          });
-                        },
-                        child: Text(
-                          '我已閱讀並同意「NYUST+ 使用者條款」',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: _hasReadTerms
-                                ? colorScheme.onSurface
-                                : colorScheme.primary,
-                            decoration: _hasReadTerms
-                                ? null
-                                : TextDecoration.underline,
-                            fontWeight: _hasReadTerms
-                                ? FontWeight.normal
-                                : FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_forward_ios,
-                        color: colorScheme.onSurfaceVariant,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const TermsOfServiceScreen(),
-                          ),
-                        ).then((_) {
-                          setState(() {
-                            _hasReadTerms = true;
-                          });
+                          }
                         });
                       },
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               if (auth.isLoading)
                 const CircularProgressIndicator()
