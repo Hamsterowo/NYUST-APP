@@ -150,11 +150,18 @@ class WeatherCard extends StatelessWidget {
               child: Row(
                 children: [
 
-                  Icon(
-                    _getWeatherIcon(data.wx),
-                    size: 48,
-                    color: _getWeatherColor(data.wx),
-                  ),
+                  // 修正某些圖示方向（例如雨傘顛倒）
+                  Builder(builder: (ctx) {
+                    final iconData = _getWeatherIcon(data.wx);
+                    final iconColor = _getWeatherColor(data.wx);
+                    if (iconData == Icons.umbrella) {
+                      return Transform.rotate(
+                        angle: 3.141592653589793, // 180°
+                        child: Icon(iconData, size: 48, color: iconColor),
+                      );
+                    }
+                    return Icon(iconData, size: 48, color: iconColor);
+                  }),
                   const SizedBox(width: 16),
 
                   Expanded(
