@@ -1,0 +1,198 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import '../providers/auth_provider.dart';
+import '../screens/home_screen.dart';
+import '../screens/login_screen.dart';
+import '../screens/terms_of_service_screen.dart';
+
+class SplashWrapper extends StatefulWidget {
+  const SplashWrapper({super.key});
+
+  @override
+  State<SplashWrapper> createState() => _SplashWrapperState();
+}
+
+class _SplashWrapperState extends State<SplashWrapper>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  bool _splashDone = false;
+  bool _animationTriggered = false;
+  bool? _goingToLogin;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() => _splashDone = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onAuthReady(AuthProvider auth) async {
+    if (_animationTriggered) return;
+    _animationTriggered = true;
+
+    await _checkTermsAgreement();
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
+    setState(() {
+      _goingToLogin = !auth.isLoggedIn;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    if (!mounted) return;
+
+    _controller.forward();
+  }
+
+  Future<void> _checkTermsAgreement() async {
+    final prefs = await SharedPreferences.getInstance();
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version;
+    final lastAccepted = prefs.getString('accepted_terms_version') ?? '';
+
+    if (lastAccepted != currentVersion && mounted) {
+      final agreed = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const TermsOfServiceScreen(showAgreementButtons: true),
+        ),
+      );
+      if (agreed == true) {
+        await prefs.setString('accepted_terms_version', currentVersion);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (auth.isInitialized && !_animationTriggered) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _onAuthReady(auth);
+      });
+    }
+
+    if (_splashDone) {
+      return auth.isLoggedIn ? const HomeScreen() : const LoginScreen();
+    }
+
+    if (_goingToLogin == null) {
+      return Scaffold(
+        backgroundColor: colorScheme.surface,
+        body: Center(
+          child: Icon(Icons.school, size: 120, color: colorScheme.primary),
+        ),
+      );
+    }
+
+    final destination =
+        _goingToLogin! ? const LoginScreen() : const HomeScreen();
+
+    return Stack(
+      children: [
+        destination,
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) => _buildOverlay(context, colorScheme),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOverlay(BuildContext context, ColorScheme colorScheme) {
+    final screenSize = MediaQuery.of(context).size;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final t = Curves.easeInOutCubic.transform(_controller.value);
+
+    final bgOpacity = (1.0 - t).clamp(0.0, 1.0);
+
+    if (_goingToLogin!) {
+      const startSize = 120.0;
+      const endSize = 64.0;
+
+      final startCenterY = screenSize.height / 2;
+      final endCenterY = statusBarHeight + kToolbarHeight + 24 + 32;
+
+      final currentSize = lerpDouble(startSize, endSize, t)!;
+      final currentCenterY = lerpDouble(startCenterY, endCenterY, t)!;
+      final currentLeft = screenSize.width / 2 - currentSize / 2;
+      final currentTop = currentCenterY - currentSize / 2;
+
+      final iconOpacity = t > 0.9
+          ? lerpDouble(1.0, 0.0, (t - 0.9) / 0.1)!.clamp(0.0, 1.0)
+          : 1.0;
+
+      return IgnorePointer(
+        ignoring: t > 0.5,
+        child: Stack(
+          children: [
+            if (bgOpacity > 0.01)
+              Positioned.fill(
+                child: Container(
+                  color: colorScheme.surface.withValues(alpha: bgOpacity),
+                ),
+              ),
+            Positioned(
+              left: currentLeft,
+              top: currentTop,
+              child: Icon(
+                Icons.school,
+                size: currentSize,
+                color: colorScheme.primary.withValues(alpha: iconOpacity),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      final iconOpacity = (1.0 - t).clamp(0.0, 1.0);
+
+      return IgnorePointer(
+        ignoring: t > 0.5,
+        child: Stack(
+          children: [
+            if (bgOpacity > 0.01)
+              Positioned.fill(
+                child: Container(
+                  color: colorScheme.surface.withValues(alpha: bgOpacity),
+                ),
+              ),
+            if (iconOpacity > 0.01)
+              Positioned(
+                left: screenSize.width / 2 - 60,
+                top: screenSize.height / 2 - 60,
+                child: Icon(
+                  Icons.school,
+                  size: 120,
+                  color: colorScheme.primary.withValues(alpha: iconOpacity),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+  }
+}

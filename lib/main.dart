@@ -9,7 +9,7 @@ import 'screens/home_screen.dart';
 import 'screens/grades_screen.dart';
 import 'screens/graduation_screen.dart';
 import 'screens/desktop_screen.dart';
-import 'screens/login_screen.dart';
+import 'widgets/splash_wrapper.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,8 +37,6 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-
     final isDesktopWeb =
         kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||
@@ -66,11 +64,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'JFOpenHuninn',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: !auth.isInitialized
-          ? const Scaffold(body: Center(child: CircularProgressIndicator()))
-          : auth.isLoggedIn
-          ? const HomeScreen()
-          : const LoginScreen(),
+      home: const SplashWrapper(),
       routes: {
         '/home': (context) => const HomeScreen(),
         '/grades': (context) => GradesScreen(),
