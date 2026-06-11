@@ -18,8 +18,7 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen>
-    with SingleTickerProviderStateMixin {
+class _CalendarScreenState extends State<CalendarScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
@@ -37,25 +36,11 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   bool _hasCheckedLegend = false;
 
-  bool _isCalendarExpanded = true;
   PageController? _pageController;
-
-  late final AnimationController _expandController;
-  late final Animation<double> _expandAnimation;
 
   @override
   void initState() {
     super.initState();
-    _expandController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-      value: _isCalendarExpanded ? 1.0 : 0.0,
-    );
-    _expandAnimation = CurvedAnimation(
-      parent: _expandController,
-      curve: Curves.easeInOut,
-    );
-
     _selectedDay = _focusedDay;
     _currentYear = _focusedDay.year;
     _fetchYearIfNeeded(_currentYear);
@@ -63,7 +48,6 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   @override
   void dispose() {
-    _expandController.dispose();
     super.dispose();
   }
 
@@ -445,7 +429,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         : [];
 
     final bodyContent = _isLoading
-          ? CalendarSkeletonView(isExpanded: _isCalendarExpanded)
+          ? const CalendarSkeletonView()
           : _errorMessage != null
           ? Center(
               child: Column(
@@ -471,42 +455,6 @@ class _CalendarScreenState extends State<CalendarScreen>
             )
           : Column(
               children: [
-                if (widget.embed) ...[
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.info_outline, size: 20),
-                          tooltip: '圖示說明',
-                          onPressed: _showLegendDialog,
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.today, size: 20),
-                          tooltip: '回到今日',
-                          onPressed: () {
-                            final now = DateTime.now();
-                            setState(() {
-                              _focusedDay = now;
-                              _selectedDay = now;
-                            });
-                            if (_currentYear != now.year) {
-                              final hasCached = _cachedGroupedEvents.containsKey(now.year);
-                              setState(() {
-                                _currentYear = now.year;
-                                _isLoading = !hasCached;
-                              });
-                              _fetchYearIfNeeded(now.year);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -536,57 +484,59 @@ class _CalendarScreenState extends State<CalendarScreen>
                                 ),
                               ),
                               const Spacer(),
+                              if (widget.embed) ...[
+                                IconButton(
+                                  icon: const Icon(Icons.info_outline, size: 20),
+                                  tooltip: '圖示說明',
+                                  onPressed: _showLegendDialog,
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.today, size: 20),
+                                  tooltip: '回到今日',
+                                  onPressed: () {
+                                    final now = DateTime.now();
+                                    setState(() {
+                                      _focusedDay = now;
+                                      _selectedDay = now;
+                                    });
+                                    if (_currentYear != now.year) {
+                                      final hasCached = _cachedGroupedEvents.containsKey(now.year);
+                                      setState(() {
+                                        _currentYear = now.year;
+                                        _isLoading = !hasCached;
+                                      });
+                                      _fetchYearIfNeeded(now.year);
+                                    }
+                                  },
+                                ),
+                              ],
                               IconButton(
                                 icon: const Icon(Icons.chevron_left),
-                                onPressed: _isCalendarExpanded
-                                    ? () {
-                                        _pageController?.previousPage(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          curve: Curves.easeOut,
-                                        );
-                                      }
-                                    : null,
+                                onPressed: () {
+                                  _pageController?.previousPage(
+                                    duration: const Duration(
+                                      milliseconds: 300,
+                                    ),
+                                    curve: Curves.easeOut,
+                                  );
+                                },
                               ),
                               IconButton(
                                 icon: const Icon(Icons.chevron_right),
-                                onPressed: _isCalendarExpanded
-                                    ? () {
-                                        _pageController?.nextPage(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          curve: Curves.easeOut,
-                                        );
-                                      }
-                                    : null,
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  _isCalendarExpanded
-                                      ? Icons.expand_less
-                                      : Icons.expand_more,
-                                ),
                                 onPressed: () {
-                                  setState(() {
-                                    _isCalendarExpanded = !_isCalendarExpanded;
-                                    if (_isCalendarExpanded) {
-                                      _expandController.forward();
-                                    } else {
-                                      _expandController.reverse();
-                                    }
-                                  });
+                                  _pageController?.nextPage(
+                                    duration: const Duration(
+                                      milliseconds: 300,
+                                    ),
+                                    curve: Curves.easeOut,
+                                  );
                                 },
                               ),
                             ],
                           ),
-                          SizeTransition(
-                            sizeFactor: _expandAnimation,
-                            axisAlignment: -1.0,
-                            child: TableCalendar<CalendarEvent>(
-                              onCalendarCreated: (controller) =>
-                                  _pageController = controller,
+                          TableCalendar<CalendarEvent>(
+                            onCalendarCreated: (controller) =>
+                                _pageController = controller,
                               firstDay: DateTime.utc(2000, 1, 1),
                               lastDay: DateTime.utc(2100, 12, 31),
                               focusedDay: _focusedDay,
@@ -754,12 +704,11 @@ class _CalendarScreenState extends State<CalendarScreen>
                                 },
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
 
                 const SizedBox(height: 8),
 

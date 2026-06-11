@@ -41,16 +41,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final info = await PackageInfo.fromPlatform();
     final currentVersion = info.version;
 
-    final String lastAcceptedVersion = prefs.getString('accepted_terms_version') ?? '';
+    final String lastAcceptedVersion =
+        prefs.getString('accepted_terms_version') ?? '';
 
     if (lastAcceptedVersion != currentVersion) {
       if (mounted) {
         final bool? agreed = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
-            builder: (context) => const TermsOfServiceScreen(
-              showAgreementButtons: true,
-            ),
+            builder: (context) =>
+                const TermsOfServiceScreen(showAgreementButtons: true),
           ),
         );
 
@@ -62,7 +62,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Future<void> _handleRefresh() async {
-
     await Future.wait([
       _fetchTodayCalendar(),
       context.read<WeatherProvider>().fetchWeather(),
@@ -129,10 +128,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
       return '早安，$displayName同學';
     } else if (timeDouble >= 11.5 && timeDouble < 17.0) {
       return '午安，$displayName同學';
-    } else if (timeDouble >= 17.0 && timeDouble < 24.0) {
-      return '晚安，$displayName同學';
     } else {
-      return '別爆肝了...我也想休息...💤';
+      return '晚安，$displayName同學';
     }
   }
 
@@ -159,7 +156,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   Text(
                     _getGreeting(userName),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -443,7 +439,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     for (var c in todayClasses) {
       if (c.times.isNotEmpty) {
-
         final lastPeriod = c.times.last;
         final endTime = periodEndTimes[lastPeriod];
         if (endTime != null) {
@@ -467,12 +462,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
         ),
         const SizedBox(height: 16),
         ...todayClasses.map((c) {
-
           String classState = 'future';
           if (c == highlightClass) {
             classState = 'current';
           } else {
-
             if (c.times.isNotEmpty) {
               final lastPeriod = c.times.last;
               final endTime = periodEndTimes[lastPeriod];
