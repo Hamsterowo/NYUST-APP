@@ -90,9 +90,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               final url = Uri.parse(
                 'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
               );
-              if (await canLaunchUrl(url)) {
+              try {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
-              } else {
+              } catch (_) {
                 if (context.mounted) {
                   showTopSnackBar(context, '無法開啟網頁', isError: true);
                 }
