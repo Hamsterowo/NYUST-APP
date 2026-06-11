@@ -332,28 +332,28 @@ class CalendarSkeletonView extends StatelessWidget {
       ),
     );
 
-    return Column(
-      children: [
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: calendarCard,
-        ),
-        if (isExpanded) const SizedBox(height: 8),
-
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: List.generate(
-              3,
-              (_) => const Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: SkeletonBox(height: 52, borderRadius: 12),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: calendarCard,
+          ),
+          if (isExpanded) const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: List.generate(
+                3,
+                (_) => const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: SkeletonBox(height: 52, borderRadius: 12),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
