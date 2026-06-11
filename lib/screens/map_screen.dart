@@ -23,7 +23,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool _isLoading = true;
 
   final TextEditingController _searchController = TextEditingController();
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
   List<MapBuilding> _searchResults = [];
 
   late AnimationController _animationController;
@@ -71,10 +72,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     if (_selectedBuildingId == buildingId) return;
 
     if (buildingId == null) {
-
       _previouslySelectedBuildingId = _selectedBuildingId;
     } else {
-
       _previouslySelectedBuildingId = null;
     }
 
@@ -91,12 +90,13 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   Future<void> _loadMapData() async {
     try {
-
       final paths = await MapParserService.parseMapSvg('assets/map.svg');
 
       final jsonString = await rootBundle.loadString('assets/map_data.json');
       final List<dynamic> jsonList = json.decode(jsonString);
-      final buildings = jsonList.map((item) => MapBuilding.fromJson(item)).toList();
+      final buildings = jsonList
+          .map((item) => MapBuilding.fromJson(item))
+          .toList();
 
       Rect totalBounds = Rect.zero;
       for (var p in paths) {
@@ -127,18 +127,20 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   void _animateToMatrix(Matrix4 targetMatrix) {
-    _mapAnimation = Matrix4Tween(
-      begin: _transformationController.value,
-      end: targetMatrix,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOutCubic,
-    ));
+    _mapAnimation =
+        Matrix4Tween(
+          begin: _transformationController.value,
+          end: targetMatrix,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOutCubic,
+          ),
+        );
     _animationController.forward(from: 0.0);
   }
 
   void _zoomToBuilding(String buildingId, Size viewportSize) {
-
     Rect buildingBounds = Rect.zero;
     for (var pathData in _paths) {
       if (pathData.id == buildingId) {
@@ -158,11 +160,19 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     double fitScale = scaleX < scaleY ? scaleX : scaleY;
     fitScale *= 0.95;
 
-    double fitOffsetX = (viewportSize.width - _totalBounds.width * fitScale) / 2 - _totalBounds.left * fitScale;
-    double fitOffsetY = (viewportSize.height - _totalBounds.height * fitScale) / 2 - _totalBounds.top * fitScale;
+    double fitOffsetX =
+        (viewportSize.width - _totalBounds.width * fitScale) / 2 -
+        _totalBounds.left * fitScale;
+    double fitOffsetY =
+        (viewportSize.height - _totalBounds.height * fitScale) / 2 -
+        _totalBounds.top * fitScale;
 
-    double bCenterX = (buildingBounds.left + buildingBounds.width / 2) * fitScale + fitOffsetX;
-    double bCenterY = (buildingBounds.top + buildingBounds.height / 2) * fitScale + fitOffsetY;
+    double bCenterX =
+        (buildingBounds.left + buildingBounds.width / 2) * fitScale +
+        fitOffsetX;
+    double bCenterY =
+        (buildingBounds.top + buildingBounds.height / 2) * fitScale +
+        fitOffsetY;
 
     double targetZoom = 2.5;
 
@@ -183,8 +193,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     double fitScale = scaleX < scaleY ? scaleX : scaleY;
     fitScale *= 0.95;
 
-    double fitOffsetX = (viewportSize.width - _totalBounds.width * fitScale) / 2 - _totalBounds.left * fitScale;
-    double fitOffsetY = (viewportSize.height - _totalBounds.height * fitScale) / 2 - _totalBounds.top * fitScale;
+    double fitOffsetX =
+        (viewportSize.width - _totalBounds.width * fitScale) / 2 -
+        _totalBounds.left * fitScale;
+    double fitOffsetY =
+        (viewportSize.height - _totalBounds.height * fitScale) / 2 -
+        _totalBounds.top * fitScale;
 
     final double svgX = (localPosition.dx - fitOffsetX) / fitScale;
     final double svgY = (localPosition.dy - fitOffsetY) / fitScale;
@@ -202,7 +216,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
       _zoomToBuilding(tappedId, viewportSize);
     } else {
-
       _updateSelection(null);
     }
   }
@@ -228,7 +241,9 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       color: colorScheme.surface.withValues(alpha: 0.95),
       shadowColor: Colors.black.withValues(alpha: 0.15),
@@ -238,7 +253,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Row(
               children: [
                 Expanded(
@@ -256,7 +270,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
@@ -288,9 +305,14 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 runSpacing: 4,
                 children: building.keyLocations.map((loc) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      color: colorScheme.secondaryContainer.withValues(alpha: 0.6),
+                      color: colorScheme.secondaryContainer.withValues(
+                        alpha: 0.6,
+                      ),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -333,9 +355,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () {
-
-                    },
+                    onPressed: () {},
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -420,9 +440,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       if (widget.embed) {
         return loadingBody;
       }
-      return Scaffold(
-        body: loadingBody,
-      );
+      return Scaffold(body: loadingBody);
     }
 
     final bodyContent = LayoutBuilder(
@@ -437,7 +455,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               maxScale: 6.0,
               boundaryMargin: const EdgeInsets.all(200),
               child: GestureDetector(
-                onTapUp: (details) => _handleMapTap(details.localPosition, viewportSize),
+                onTapUp: (details) =>
+                    _handleMapTap(details.localPosition, viewportSize),
                 child: SizedBox(
                   width: viewportSize.width,
                   height: viewportSize.height,
@@ -448,8 +467,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                       previouslySelectedId: _previouslySelectedBuildingId,
                       totalBounds: _totalBounds,
                       themePrimaryColor: colorScheme.primary,
-                      themePrimaryContainerColor: colorScheme.primaryContainer.withValues(alpha: 0.7),
-                      baseBackgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      themePrimaryContainerColor: colorScheme.primaryContainer
+                          .withValues(alpha: 0.7),
+                      baseBackgroundColor: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.4),
                       transformationController: _transformationController,
                       labelOpacityAnimation: _labelOpacityAnimation,
                       buildings: _buildings,
@@ -476,7 +497,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 _searchController.clear();
                                 _onSearchChanged('');
                               },
-                            )
+                            ),
                           ]
                         : null,
                     onChanged: _onSearchChanged,
@@ -493,7 +514,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ],
                       ),
                       child: ClipRRect(
@@ -508,18 +529,19 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                               title: Text(building.name),
                               subtitle: Text(
                                 building.keyLocations.isNotEmpty
-                                    ? '主要單位: ${building.keyLocations.join(", ")}'
+                                    ? '${building.keyLocations.join(", ")}'
                                     : building.description,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              onTap: () => _selectSearchResult(building, viewportSize),
+                              onTap: () =>
+                                  _selectSearchResult(building, viewportSize),
                             );
                           },
                         ),
                       ),
                     ),
-                  ]
+                  ],
                 ],
               ),
             ),
@@ -560,9 +582,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
-      body: SafeArea(
-        child: bodyContent,
-      ),
+      body: SafeArea(child: bodyContent),
     );
   }
 }
@@ -584,10 +604,7 @@ class FloorRoom {
 class MockFloorScreen extends StatefulWidget {
   final String buildingName;
 
-  const MockFloorScreen({
-    super.key,
-    required this.buildingName,
-  });
+  const MockFloorScreen({super.key, required this.buildingName});
 
   @override
   State<MockFloorScreen> createState() => _MockFloorScreenState();
@@ -618,37 +635,62 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
 
   String _getRoomName(String code) {
     switch (code) {
+      case 'EL101':
+        return '資工系多媒體教室';
+      case 'EL102':
+        return '電子系微處理器實驗室';
+      case 'EL105':
+        return '資訊工程學系系辦公室';
+      case 'EL108':
+        return '研討會議室';
+      case 'EL110':
+        return '電力實驗室';
 
-      case 'EL101': return '資工系多媒體教室';
-      case 'EL102': return '電子系微處理器實驗室';
-      case 'EL105': return '資訊工程學系系辦公室';
-      case 'EL108': return '研討會議室';
-      case 'EL110': return '電力實驗室';
+      case 'EL201':
+        return '電機系辦公室';
+      case 'EL202':
+        return '自動控制實驗室';
+      case 'EL205':
+        return '嵌入式系統晶片實驗室';
+      case 'EL208':
+        return '電力電子研究室';
+      case 'EL210':
+        return '感測器研究室';
 
-      case 'EL201': return '電機系辦公室';
-      case 'EL202': return '自動控制實驗室';
-      case 'EL205': return '嵌入式系統晶片實驗室';
-      case 'EL208': return '電力電子研究室';
-      case 'EL210': return '感測器研究室';
+      case 'EL301':
+        return '第二PC電腦教室';
+      case 'EL302':
+        return '微處理機實驗室';
+      case 'EL305':
+        return '機器人導引與控制實驗室';
+      case 'EL308':
+        return '智慧機器人與自動化實驗室';
+      case 'EL310':
+        return '自動化檢測實驗室';
 
-      case 'EL301': return '第二PC電腦教室';
-      case 'EL302': return '微處理機實驗室';
-      case 'EL305': return '機器人導引與控制實驗室';
-      case 'EL308': return '智慧機器人與自動化實驗室';
-      case 'EL310': return '自動化檢測實驗室';
+      case 'EL401':
+        return '通信系統實驗室';
+      case 'EL402':
+        return '無人載具系統整合實驗室';
+      case 'EL405':
+        return '通訊組會議室';
+      case 'EL408':
+        return '射頻電路實驗室';
+      case 'EL410':
+        return '視訊與影像處理實驗室';
 
-      case 'EL401': return '通信系統實驗室';
-      case 'EL402': return '無人載具系統整合實驗室';
-      case 'EL405': return '通訊組會議室';
-      case 'EL408': return '射頻電路實驗室';
-      case 'EL410': return '視訊與影像處理實驗室';
-
-      case 'EL501': return '研究生工作室一';
-      case 'EL502': return '研究生工作室二';
-      case 'EL505': return '電力與能源研發中心';
-      case 'EL508': return '電磁干擾實驗室';
-      case 'EL510': return '高壓發電機房';
-      default: return '學術研究室';
+      case 'EL501':
+        return '研究生工作室一';
+      case 'EL502':
+        return '研究生工作室二';
+      case 'EL505':
+        return '電力與能源研發中心';
+      case 'EL508':
+        return '電磁干擾實驗室';
+      case 'EL510':
+        return '高壓發電機房';
+      default:
+        return '學術研究室';
     }
   }
 
@@ -735,12 +777,15 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Text(
                   '${widget.buildingName} - $_currentFloor 空間配置',
-                  style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const Divider(height: 1),
@@ -800,7 +845,9 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
         decoration: BoxDecoration(
           color: colorScheme.surface.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -811,7 +858,6 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
         ),
         child: Stack(
           children: [
-
             AnimatedPositioned(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOutCubic,
@@ -849,7 +895,9 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
                     child: AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
                       style: TextStyle(
-                        color: isCurrent ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+                        color: isCurrent
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -926,7 +974,6 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-
             Positioned.fill(
               child: Container(
                 color: colorScheme.surfaceContainerLowest,
@@ -963,9 +1010,7 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
               left: _isFloorLeverExpanded ? 16 : -60,
               top: 0,
               bottom: 0,
-              child: Center(
-                child: _buildFloorLever(colorScheme),
-              ),
+              child: Center(child: _buildFloorLever(colorScheme)),
             ),
 
             AnimatedPositioned(
@@ -974,9 +1019,7 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
               left: _isFloorLeverExpanded ? -60 : 16,
               top: 0,
               bottom: 0,
-              child: Center(
-                child: _buildFloorLeverTrigger(colorScheme),
-              ),
+              child: Center(child: _buildFloorLeverTrigger(colorScheme)),
             ),
 
             Positioned(
@@ -1012,7 +1055,6 @@ class FloorPlanPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-
     final paintBg = Paint()
       ..color = colorScheme.surfaceContainerLow
       ..style = PaintingStyle.fill;
@@ -1064,8 +1106,10 @@ class FloorPlanPainter extends CustomPainter {
     textPainterCorridor.paint(
       canvas,
       Offset(
-        corridorRect.left + (corridorRect.width - textPainterCorridor.width) / 2,
-        corridorRect.top + (corridorRect.height - textPainterCorridor.height) / 2,
+        corridorRect.left +
+            (corridorRect.width - textPainterCorridor.width) / 2,
+        corridorRect.top +
+            (corridorRect.height - textPainterCorridor.height) / 2,
       ),
     );
 
@@ -1112,7 +1156,9 @@ class FloorPlanPainter extends CustomPainter {
           TextSpan(
             text: room.name,
             style: TextStyle(
-              color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+              color: isSelected
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onSurfaceVariant,
               fontSize: 10,
               height: 1.3,
             ),
