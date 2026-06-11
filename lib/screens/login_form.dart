@@ -19,7 +19,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   final _captchaController = TextEditingController();
   final _passwordFocusNode = FocusNode();
-  bool _rememberMe = false;
+  final bool _rememberMe = true;
 
   bool _hasReadPrivacy = false;
   bool _isCheckedPrivacy = false;
@@ -185,15 +185,7 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
-              CheckboxListTile(
-                title: Text("保持登入"),
-                value: _rememberMe,
-                onChanged: (val) => setState(() => _rememberMe = val!),
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-              ),
-              SizedBox(height: 24),
+              SizedBox(height: 16),
 
               Container(
                 decoration: BoxDecoration(
