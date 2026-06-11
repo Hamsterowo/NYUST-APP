@@ -161,7 +161,7 @@ class _GradesScreenState extends State<GradesScreen> {
       );
     }
 
-    if (data.isLoadingGrades) {
+    if (data.isLoadingGrades && data.gradesData == null) {
       return _buildGradesSkeleton(colorScheme);
     }
 
