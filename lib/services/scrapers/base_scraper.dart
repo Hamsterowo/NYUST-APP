@@ -22,7 +22,7 @@ abstract class BaseScraper {
     const int maxRedirects = 10;
 
     while (redirectCount < maxRedirects) {
-      // 禁用 Dio 自動導向，改為手動處理，以精確捕捉每一跳的 Cookies
+
       final response = await dio.get(
         currentUrl,
         options: (options ?? Options(headers: commonHeaders)).copyWith(
@@ -31,7 +31,6 @@ abstract class BaseScraper {
         ),
       );
 
-      // 1. 處理標準 HTTP 302 導向
       if (response.statusCode == 301 || response.statusCode == 302) {
         final nextUrl = response.headers.value('location');
         if (nextUrl != null) {
@@ -47,7 +46,6 @@ abstract class BaseScraper {
         }
       }
 
-      // 2. 處理雲科大特有的 JavaScript 導向
       if (response.data is String && response.data.toString().contains('var redirectUrl')) {
         final text = response.data.toString();
         final match = RegExp(r"var\s+redirectUrl\s*=\s*'([^']+)'").firstMatch(text);

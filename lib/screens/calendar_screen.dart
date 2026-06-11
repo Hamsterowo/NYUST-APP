@@ -11,7 +11,8 @@ import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  final bool embed;
+  const CalendarScreen({super.key, this.embed = false});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -23,21 +24,17 @@ class _CalendarScreenState extends State<CalendarScreen>
   bool _isLoading = true;
   String? _errorMessage;
 
-  // 多年快取：year → { 'yyyy-MM-dd': [events] }
   final Map<int, Map<String, List<CalendarEvent>>> _cachedGroupedEvents = {};
-  // 多年節假日快取：year → { 'yyyy-MM-dd': type }
+
   final Map<int, Map<String, String>> _cachedHolidaysType = {};
-  // 正在背景抓取的年份
+
   final Set<int> _fetchingYears = {};
 
-  // Calendar 狀態
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  // 目前顯示的年份
   int _currentYear = DateTime.now().year;
 
-  // 記錄是否已經在此次掛載時檢查過，防止重複彈出
   bool _hasCheckedLegend = false;
 
   bool _isCalendarExpanded = true;
@@ -275,7 +272,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   }
 
   Future<void> _fetchYearIfNeeded(int year, {bool foreground = true}) async {
-    // 1. 內存快取命中 → 直接返回
+
     if (_cachedGroupedEvents.containsKey(year)) {
       if (foreground && _isLoading && year == _currentYear) {
         setState(() => _isLoading = false);
@@ -293,7 +290,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     }
 
     try {
-      // 2 + 3. 使用 getOrFetch：自動讀本地快取 → miss 則呼叫 API → 寫快取（並行去重）
+
       final data = await CalendarCacheService.getOrFetch(
         year,
         (y) => _apiService.getCalendar(y),
@@ -308,7 +305,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             if (foreground && year == _currentYear) _isLoading = false;
             _errorMessage = null;
           });
-          // 只有主要(前景)載入時才預抓相鄰年份，避免連鎖反應造成無窮迴圈
+
           if (foreground) {
             _prefetchAdjacentYears(year);
           }
@@ -398,7 +395,6 @@ class _CalendarScreenState extends State<CalendarScreen>
         day.weekday != DateTime.sunday &&
         nextDay.month == day.month;
 
-    // 單獨一天假期 → 圓形
     if (!isSamePrev && !isSameNext) {
       return Container(
         margin: const EdgeInsets.all(6.0),
@@ -434,10 +430,10 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 監聽目前 Navigation 狀態，如果 currentIndex == 3 (行事曆) 則觸發檢查
+
     final navProvider = context.watch<NavigationProvider>();
-    if (navProvider.currentIndex == 3 && !_hasCheckedLegend) {
-      _hasCheckedLegend = true; // 標記為已檢查過
+    if ((navProvider.currentIndex == 3 || navProvider.currentIndex == 1) && !_hasCheckedLegend) {
+      _hasCheckedLegend = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkAndShowLegend();
       });
@@ -448,47 +444,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         ? _getEventsForDay(_selectedDay!)
         : [];
 
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: '行事曆',
-        onRefresh: () async {
-          // 清除所有持久化快取
-          await CalendarCacheService.clearAllCache();
-          // 清除內存快取
-          _cachedGroupedEvents.clear();
-          _cachedHolidaysType.clear();
-          _fetchingYears.clear();
-          // 重新從 API 獲取當前年份
-          _fetchYearIfNeeded(_currentYear);
-        },
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: '圖示說明',
-            onPressed: _showLegendDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.today),
-            tooltip: '回到今日',
-            onPressed: () {
-              final now = DateTime.now();
-              setState(() {
-                _focusedDay = now;
-                _selectedDay = now;
-              });
-              if (_currentYear != now.year) {
-                final hasCached = _cachedGroupedEvents.containsKey(now.year);
-                setState(() {
-                  _currentYear = now.year;
-                  _isLoading = !hasCached;
-                });
-                _fetchYearIfNeeded(now.year);
-              }
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
+    final bodyContent = _isLoading
           ? CalendarSkeletonView(isExpanded: _isCalendarExpanded)
           : _errorMessage != null
           ? Center(
@@ -515,7 +471,42 @@ class _CalendarScreenState extends State<CalendarScreen>
             )
           : Column(
               children: [
-                // 月曆視圖 (包裝進圓角卡片)
+                if (widget.embed) ...[
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.info_outline, size: 20),
+                          tooltip: '圖示說明',
+                          onPressed: _showLegendDialog,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.today, size: 20),
+                          tooltip: '回到今日',
+                          onPressed: () {
+                            final now = DateTime.now();
+                            setState(() {
+                              _focusedDay = now;
+                              _selectedDay = now;
+                            });
+                            if (_currentYear != now.year) {
+                              final hasCached = _cachedGroupedEvents.containsKey(now.year);
+                              setState(() {
+                                _currentYear = now.year;
+                                _isLoading = !hasCached;
+                              });
+                              _fetchYearIfNeeded(now.year);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -592,7 +583,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                           ),
                           SizeTransition(
                             sizeFactor: _expandAnimation,
-                            axisAlignment: -1.0, // 向上收合
+                            axisAlignment: -1.0,
                             child: TableCalendar<CalendarEvent>(
                               onCalendarCreated: (controller) =>
                                   _pageController = controller,
@@ -617,7 +608,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                               calendarStyle: CalendarStyle(
                                 cellMargin: const EdgeInsets.all(
                                   6.0,
-                                ), // 縮小圈圈範圍避免壓到下方 Marker
+                                ),
                                 todayDecoration: BoxDecoration(
                                   color: colorScheme.primaryContainer,
                                   shape: BoxShape.circle,
@@ -697,7 +688,6 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       type == 'winter_vacation' ||
                                       type == 'summer_vacation';
 
-                                  // 跨月假期：只顯示紅字，無背景圖形
                                   if (isOutside) {
                                     return Container(
                                       alignment: Alignment.center,
@@ -773,7 +763,6 @@ class _CalendarScreenState extends State<CalendarScreen>
 
                 const SizedBox(height: 8),
 
-                // 狀態或事件列表顯示區
                 Expanded(
                   child: _isLoading
                       ? const Center(child: CircularProgressIndicator())
@@ -818,10 +807,10 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       width: 40,
                                       child: CustomPaint(
                                         painter: TimelinePainter(
-                                          isFirst: true, // 頂部不接線
+                                          isFirst: true,
                                           isLast: selectedEvents
-                                              .isEmpty, // 若無事件則下方不畫線
-                                          color: colorScheme.primary, // 標頭圓點顏色
+                                              .isEmpty,
+                                          color: colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -846,7 +835,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                             }
 
                             if (selectedEvents.isEmpty) {
-                              // 如果原本無行程，index 1 顯示空訊息
+
                               return const Padding(
                                 padding: EdgeInsets.only(left: 48.0, top: 16.0),
                                 child: Text(
@@ -858,7 +847,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
                             final eventIndex = index - 1;
                             final event = selectedEvents[eventIndex];
-                            final bool isFirst = false; // 真實事件不可能是第一個
+                            final bool isFirst = false;
                             final bool isLast =
                                 eventIndex == selectedEvents.length - 1;
                             final bool isImportant = event.isImportant;
@@ -871,7 +860,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  // 左側時間軸 (實線 + 圓點)
+
                                   SizedBox(
                                     width: 40,
                                     child: CustomPaint(
@@ -882,11 +871,11 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       ),
                                     ),
                                   ),
-                                  // 右側事件卡片
+
                                   Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 2.0, // 進一步縮小上下邊距，讓細項更緊密
+                                        vertical: 2.0,
                                       ),
                                       child: Card(
                                         elevation: 0,
@@ -911,7 +900,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 16.0,
-                                            vertical: 8.0, // 縮小內部上下 padding
+                                            vertical: 8.0,
                                           ),
                                           child: Row(
                                             children: [
@@ -928,7 +917,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                                   event.name,
                                                   style: TextStyle(
                                                     fontWeight: FontWeight
-                                                        .normal, // 拿掉粗體
+                                                        .normal,
                                                     fontSize: 15,
                                                     color: isImportant
                                                         ? Colors.amber.shade900
@@ -950,7 +939,50 @@ class _CalendarScreenState extends State<CalendarScreen>
                         ),
                 ),
               ],
-            ),
+            );
+
+    if (widget.embed) {
+      return bodyContent;
+    }
+
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: '行事曆',
+        onRefresh: () async {
+          await CalendarCacheService.clearAllCache();
+          _cachedGroupedEvents.clear();
+          _cachedHolidaysType.clear();
+          _fetchingYears.clear();
+          _fetchYearIfNeeded(_currentYear);
+        },
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: '圖示說明',
+            onPressed: _showLegendDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.today),
+            tooltip: '回到今日',
+            onPressed: () {
+              final now = DateTime.now();
+              setState(() {
+                _focusedDay = now;
+                _selectedDay = now;
+              });
+              if (_currentYear != now.year) {
+                final hasCached = _cachedGroupedEvents.containsKey(now.year);
+                setState(() {
+                  _currentYear = now.year;
+                  _isLoading = !hasCached;
+                });
+                _fetchYearIfNeeded(now.year);
+              }
+            },
+          ),
+        ],
+      ),
+      body: bodyContent,
     );
   }
 }

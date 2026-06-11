@@ -40,10 +40,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final prefs = await SharedPreferences.getInstance();
     final info = await PackageInfo.fromPlatform();
     final currentVersion = info.version;
-    
-    // 檢查是否已同意過此版本的條款
+
     final String lastAcceptedVersion = prefs.getString('accepted_terms_version') ?? '';
-    
+
     if (lastAcceptedVersion != currentVersion) {
       if (mounted) {
         final bool? agreed = await Navigator.push<bool>(
@@ -54,7 +53,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
             ),
           ),
         );
-        
+
         if (agreed == true) {
           await prefs.setString('accepted_terms_version', currentVersion);
         }
@@ -63,7 +62,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Future<void> _handleRefresh() async {
-    // 觸發重新取得日曆資料與天氣資料
+
     await Future.wait([
       _fetchTodayCalendar(),
       context.read<WeatherProvider>().fetchWeather(),
@@ -75,7 +74,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final now = DateTime.now();
       final api = Provider.of<AuthProvider>(context, listen: false).api;
 
-      // 使用 getOrFetch：自動讀快取 → miss 則呼叫 API → 寫快取，並行去重
       final response = await CalendarCacheService.getOrFetch(
         now.year,
         (year) => api.getCalendar(year),
@@ -85,7 +83,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
         final List<dynamic> data = response['events'] ?? [];
         final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
 
-        // Filter for upcoming
         final todayStr =
             "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
@@ -157,12 +154,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
             final userName = auth.user?['user']?['name']?.toString() ?? '';
 
             return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(), // 確保可下拉
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 歡迎與時間區域
+
                   Text(
                     _getGreeting(userName),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -176,17 +173,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 天氣概覽區塊
                   const WeatherCard(),
 
                   const SizedBox(height: 32),
 
-                  // 今日課程
                   _buildTodayClassesSection(context, auth, data, colorScheme),
 
                   const SizedBox(height: 32),
 
-                  // 近期行事曆
                   _buildCalendarSection(colorScheme),
                 ],
               ),
@@ -300,7 +294,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final todayWeekday = now.weekday.toString();
     final isLoading = data.isLoadingSchedule && data.scheduleData.isEmpty;
 
-    // 如果正在載入且沒有本地快取資料，顯示骨架屏
     if (isLoading) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +340,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     final schedule = data.scheduleData;
 
-    // 過濾出今天的課
     final todayClasses = schedule
         .where((c) => c.weekday == todayWeekday)
         .toList();
@@ -383,7 +375,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
       );
     }
 
-    // 依照節次排序
     final periods = [
       'M',
       'A',
@@ -410,7 +401,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
       return aIdx.compareTo(bIdx);
     });
 
-    // 判斷當下或下一堂課
     ScheduleEvent? highlightClass;
 
     final periodEndTimes = {
@@ -453,7 +443,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     for (var c in todayClasses) {
       if (c.times.isNotEmpty) {
-        // 取這堂課最後一節的結束時間
+
         final lastPeriod = c.times.last;
         final endTime = periodEndTimes[lastPeriod];
         if (endTime != null) {
@@ -466,7 +456,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
       }
     }
 
-    // 將課程顯示出來
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -478,12 +467,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
         ),
         const SizedBox(height: 16),
         ...todayClasses.map((c) {
-          // 判斷狀態
+
           String classState = 'future';
           if (c == highlightClass) {
             classState = 'current';
           } else {
-            // 如果比 Highlight class 早，或者是時間已經全走完
+
             if (c.times.isNotEmpty) {
               final lastPeriod = c.times.last;
               final endTime = periodEndTimes[lastPeriod];
@@ -534,14 +523,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
     required String time,
     required String className,
     required String location,
-    required String state, // 'past', 'current', 'future'
+    required String state,
     String? year,
     String? semester,
     String? courseNo,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // 定義各狀態顏色
     final isCurrent = state == 'current';
     final isPast = state == 'past';
 
@@ -575,7 +563,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: borderColor),
       ),
-      clipBehavior: Clip.antiAlias, // 為 InkWell 保留波紋邊角
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           if (year != null && semester != null && courseNo != null) {

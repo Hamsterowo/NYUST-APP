@@ -36,7 +36,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         scrolledUnderElevation: 0,
-        // 如果是強制顯示模式，隱藏返回按鈕以防使用者略過
+
         automaticallyImplyLeading: !widget.showAgreementButtons,
       ),
       bottomNavigationBar: widget.showAgreementButtons
@@ -48,7 +48,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          // 拒絕並退出程式
+
                           SystemNavigator.pop();
                         },
                         style: OutlinedButton.styleFrom(

@@ -4,52 +4,54 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Future<void> Function()? onRefresh;
   final List<Widget>? actions;
+  final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.onRefresh,
     this.actions,
+    this.bottom,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 頂部的一橫線 (視覺裝飾)
-        Container(
-          height: 4.0, // 橫線粗細
-          width: double.infinity,
-          color: Theme.of(context).primaryColor, // 根據主題色顯示橫線
-        ),
-        AppBar(
-          title: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).primaryColor,
+            width: 4.0,
           ),
-          centerTitle: true,
-          elevation: 0, // 移除陰影讓視覺更延伸到上方橫線
-          scrolledUnderElevation: 0, // 關閉 M3 往下捲動時的背景變色
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor, // 強制使用背景色
-          surfaceTintColor: Colors.transparent, // 徹底關閉 Material3 表面染色
-          actions: [
-            if (actions != null) ...actions!,
-            if (onRefresh != null)
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: onRefresh,
-                tooltip: '重新整理',
-              ),
-          ],
         ),
-      ],
+      ),
+      child: AppBar(
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        actions: [
+          if (actions != null) ...actions!,
+          if (onRefresh != null)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: onRefresh,
+              tooltip: '重新整理',
+            ),
+        ],
+        bottom: bottom,
+      ),
     );
   }
 
   @override
   Size get preferredSize {
-    // Scaffold 預期的 AppBar 高度 + 上方橫線高度
-    return const Size.fromHeight(kToolbarHeight + 4.0);
+    final double bottomHeight = bottom?.preferredSize.height ?? 0.0;
+    return Size.fromHeight(kToolbarHeight + 4.0 + bottomHeight);
   }
 }

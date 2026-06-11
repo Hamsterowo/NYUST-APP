@@ -94,7 +94,7 @@ class WeatherCard extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, 
+                    Icon(Icons.error_outline,
                       color: Theme.of(context).colorScheme.error,
                       size: 32,
                     ),
@@ -130,7 +130,7 @@ class WeatherCard extends StatelessWidget {
 
         final data = weatherProvider.weatherData;
         if (data == null) {
-          return const SizedBox.shrink(); // 初始狀態
+          return const SizedBox.shrink();
         }
 
         return Card(
@@ -140,7 +140,7 @@ class WeatherCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             onTap: () {
               showTopSnackBar(
-                context, 
+                context,
                 '資料來源：中央氣象署',
                 type: SnackBarType.info,
               );
@@ -149,15 +149,14 @@ class WeatherCard extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  // 天氣圖示
+
                   Icon(
                     _getWeatherIcon(data.wx),
                     size: 48,
                     color: _getWeatherColor(data.wx),
                   ),
                   const SizedBox(width: 16),
-                  
-                  // 天氣與溫度資訊
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,17 +183,16 @@ class WeatherCard extends StatelessWidget {
                     ),
                   ),
 
-                  // 最高 / 最低溫
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'H: ${data.maxTemp}°C', 
+                        'H: ${data.maxTemp}°C',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'L: ${data.minTemp}°C', 
+                        'L: ${data.minTemp}°C',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],

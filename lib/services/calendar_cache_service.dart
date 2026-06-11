@@ -30,7 +30,7 @@ class CalendarCacheService {
 
     final cachedTime = DateTime.fromMillisecondsSinceEpoch(ts);
     if (DateTime.now().difference(cachedTime) > _cacheDuration) {
-      // 快取過期，清除
+
       await prefs.remove('$_dataPrefix$year');
       await prefs.remove('$_tsPrefix$year');
       return null;
@@ -58,8 +58,6 @@ class CalendarCacheService {
     }
   }
 
-  // ─── In-flight 請求去重 ──────────────────────────────────────────────────
-
   /// 正在進行中的請求（年份 → Future），用於防止並行重複 API 呼叫
   static final Map<int, Future<Map<String, dynamic>?>> _inFlight = {};
 
@@ -81,11 +79,10 @@ class CalendarCacheService {
     int year,
     Future<Map<String, dynamic>> Function(int year) apiFetcher,
   ) async {
-    // 1. 讀本地快取
+
     final cached = await getCalendarData(year);
     if (cached != null) return cached;
 
-    // 2. 快取 miss → 呼叫 API
     final data = await apiFetcher(year);
     if (data['success'] == true) {
       await saveCalendarData(year, data);

@@ -10,7 +10,8 @@ import 'graduation_screen.dart';
 import 'course_detail_screen.dart';
 
 class GradesScreen extends StatefulWidget {
-  const GradesScreen({super.key});
+  final bool embed;
+  const GradesScreen({super.key, this.embed = false});
 
   @override
   State<GradesScreen> createState() => _GradesScreenState();
@@ -18,7 +19,7 @@ class GradesScreen extends StatefulWidget {
 
 class _GradesScreenState extends State<GradesScreen> {
   int _selectedSegment = 0;
-  // Maps 'academicYear-semester' -> expanded state, persisted across tab switches
+
   final Map<String, bool> _expandedStates = {};
 
   @override
@@ -28,6 +29,9 @@ class _GradesScreenState extends State<GradesScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (!auth.isInitialized) {
+      if (widget.embed) {
+        return const Center(child: CircularProgressIndicator());
+      }
       return const Scaffold(
         appBar: CustomAppBar(title: '成績查詢'),
         body: Center(child: CircularProgressIndicator()),
@@ -35,32 +39,85 @@ class _GradesScreenState extends State<GradesScreen> {
     }
 
     if (!auth.isLoggedIn) {
-      return Scaffold(
-        appBar: const CustomAppBar(title: '成績查詢'),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.lock_outline, size: 64, color: colorScheme.outline),
-              const SizedBox(height: 16),
-              Text(
-                '登入使用所有功能',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+      final notLoggedInBody = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_outline, size: 64, color: colorScheme.outline),
+            const SizedBox(height: 16),
+            Text(
+              '登入使用所有功能',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 24),
-              FilledButton.tonal(
-                onPressed: () {
-                  context.read<NavigationProvider>().setIndex(4);
-                  showTopSnackBar(context, '請在此登入以查看成績');
-                },
-                child: const Text('前往登入'),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.tonal(
+              onPressed: () {
+                context.read<NavigationProvider>().setIndex(2);
+                showTopSnackBar(context, '請在此登入以查看成績');
+              },
+              child: const Text('前往登入'),
+            ),
+          ],
         ),
       );
+
+      if (widget.embed) {
+        return notLoggedInBody;
+      }
+
+      return Scaffold(
+        appBar: const CustomAppBar(title: '成績查詢'),
+        body: notLoggedInBody,
+      );
+    }
+
+    final bodyContent = Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('學期'),
+                  icon: Icon(Icons.calendar_view_day),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('歷年'),
+                  icon: Icon(Icons.history),
+                ),
+                ButtonSegment<int>(
+                  value: 2,
+                  label: Text('畢業'),
+                  icon: Icon(Icons.school),
+                ),
+              ],
+              selected: <int>{_selectedSegment},
+              onSelectionChanged: (Set<int> newSelection) {
+                setState(() => _selectedSegment = newSelection.first);
+              },
+              showSelectedIcon: false,
+              style: const ButtonStyle(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: _selectedSegment == 2
+              ? const GraduationContent()
+              : _buildGradesContent(data, colorScheme),
+        ),
+      ],
+    );
+
+    if (widget.embed) {
+      return bodyContent;
     }
 
     return Scaffold(
@@ -76,48 +133,7 @@ class _GradesScreenState extends State<GradesScreen> {
                 }
               },
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<int>(
-                segments: const <ButtonSegment<int>>[
-                  ButtonSegment<int>(
-                    value: 0,
-                    label: Text('學期'),
-                    icon: Icon(Icons.calendar_view_day),
-                  ),
-                  ButtonSegment<int>(
-                    value: 1,
-                    label: Text('歷年'),
-                    icon: Icon(Icons.history),
-                  ),
-                  ButtonSegment<int>(
-                    value: 2,
-                    label: Text('畢業'),
-                    icon: Icon(Icons.school),
-                  ),
-                ],
-                selected: <int>{_selectedSegment},
-                onSelectionChanged: (Set<int> newSelection) {
-                  setState(() => _selectedSegment = newSelection.first);
-                },
-                showSelectedIcon: false,
-                style: const ButtonStyle(
-                  visualDensity: VisualDensity.comfortable,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: _selectedSegment == 2
-                ? const GraduationContent()
-                : _buildGradesContent(data, colorScheme),
-          ),
-        ],
-      ),
+      body: bodyContent,
     );
   }
 
@@ -186,7 +202,6 @@ class _GradesScreenState extends State<GradesScreen> {
         final semesterKey =
             '${semester["academic_year"]}-${semester["semester"]}';
 
-        // Default: last semester of the "學期" tab is expanded
         if (!_expandedStates.containsKey(semesterKey)) {
           final isLastSemester = _selectedSegment == 0;
           _expandedStates[semesterKey] = isLastSemester;

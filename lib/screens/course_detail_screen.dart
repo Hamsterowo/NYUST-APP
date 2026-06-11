@@ -37,7 +37,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   Future<void> _fetchDetail() async {
     try {
-      // 使用快取服務：先讀 SP 快取 → miss 才打 API → 成功寫入快取
+
       final response = await CourseDetailCache.getOrFetch(
         widget.year,
         widget.semester,

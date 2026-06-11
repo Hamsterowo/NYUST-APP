@@ -59,7 +59,6 @@ class _TopSnackBarState extends State<_TopSnackBar>
       reverseDuration: const Duration(milliseconds: 320),
     );
 
-    // 進場：從底部彈跳滑入
     _slide = Tween<Offset>(begin: const Offset(0, 1.4), end: Offset.zero)
         .animate(
           CurvedAnimation(
@@ -69,7 +68,6 @@ class _TopSnackBarState extends State<_TopSnackBar>
           ),
         );
 
-    // 進場：淡入；退場：淡出
     _fade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
@@ -78,7 +76,6 @@ class _TopSnackBarState extends State<_TopSnackBar>
       ),
     );
 
-    // 輕微縮放，讓彈跳感更立體
     _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
@@ -132,14 +129,14 @@ class _TopSnackBarState extends State<_TopSnackBar>
     final cs = Theme.of(context).colorScheme;
     final (icon, bgColor, fgColor) = _typeStyle(cs);
     final mq = MediaQuery.of(context);
-    // 鍵盤高度（開啟時 > 0）
+
     final keyboardHeight = mq.viewInsets.bottom;
-    // NavigationBar 高度：Material 3 預設 80，加上底部 safe area
+
     const navBarHeight = 80.0;
     final bottomOffset = keyboardHeight > 0
         ? keyboardHeight +
-              12 // 鍵盤上方
-        : mq.padding.bottom + navBarHeight + 12; // 導覽列上方
+              12
+        : mq.padding.bottom + navBarHeight + 12;
 
     return Positioned(
       bottom: bottomOffset,

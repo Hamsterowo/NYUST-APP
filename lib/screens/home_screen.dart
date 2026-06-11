@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/navigation_provider.dart';
 import 'overview_screen.dart';
-import 'grades_screen.dart';
-import 'schedule_screen.dart';
-import 'calendar_screen.dart';
+import 'info_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
 
@@ -19,16 +17,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const OverviewScreen(),
-    GradesScreen(),
-    ScheduleScreen(),
-    CalendarScreen(),
+    const InfoScreen(),
     const ProfileScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
-    // Show PWA install dialog after the first frame renders
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowInstallDialog();
     });
@@ -41,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (isDismissed) return;
       final isIosDevice = isIos();
       final isAvailable = isPwaPromptAvailable();
-      // Show on iOS always (manual install), or on other platforms when prompt is available
+
       if (!isIosDevice && !isAvailable) return;
       _showInstallDialog(isIos: isIosDevice);
     } catch (_) {}
@@ -103,7 +99,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final navigation = context.watch<NavigationProvider>();
-    final currentIndex = navigation.currentIndex;
+    int currentIndex = navigation.currentIndex;
+
+    if (currentIndex >= _screens.length) {
+      currentIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<NavigationProvider>().setIndex(0);
+      });
+    }
 
     return Scaffold(
       body: IndexedStack(index: currentIndex, children: _screens),
@@ -119,19 +122,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: '總覽',
           ),
           NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
-            label: '成績',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.table_chart_outlined),
-            selectedIcon: Icon(Icons.table_chart),
-            label: '課表',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: '行事曆',
+            icon: Icon(Icons.info_outline),
+            selectedIcon: Icon(Icons.info),
+            label: '資訊',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings),
