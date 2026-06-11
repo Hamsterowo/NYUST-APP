@@ -91,16 +91,15 @@ class CourseDetailCache {
     String courseNo,
     Future<Map<String, dynamic>> Function() fetcher,
   ) async {
-    // 1. 讀本地快取
+
     final cached = await get(year, semester, courseNo);
     if (cached != null) return cached;
 
-    // 2. 快取 miss → 呼叫 API
     final data = await fetcher();
     if (data['status'] == 'success') {
       await save(year, semester, courseNo, data);
       return data;
     }
-    return data; // 仍回傳失敗結果供 UI 處理
+    return data;
   }
 }

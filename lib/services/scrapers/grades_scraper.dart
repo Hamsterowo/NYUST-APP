@@ -14,7 +14,6 @@ class GradesScraper extends BaseScraper {
     try {
       if (kDebugMode) print('GradesScraper: Fetching grades from $gradesUrl');
 
-      // 修正 Access Deny: 先「路過」一下選課頁面以建立 WebNewCAS Session
       await getWithRedirects(
         'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Course/',
         options: Options(headers: commonHeaders),
@@ -32,8 +31,7 @@ class GradesScraper extends BaseScraper {
 
       final document = parseHtml(response.data);
       if (kDebugMode) print('GradesScraper: Page Title: ${document.querySelector('title')?.text.trim()}');
-      
-      // 檢查是否被導向回登入頁面
+
       if (response.data.toString().contains('Login.aspx')) {
         return {
           'success': false,
@@ -44,16 +42,14 @@ class GradesScraper extends BaseScraper {
 
       final List<Map<String, dynamic>> gradesData = [];
 
-      // 參考 academic.js: $('.col-lg-6.col-md-12')
       final semesterBlocks = document.querySelectorAll('.col-lg-6.col-md-12');
 
       for (var block in semesterBlocks) {
         final titleElement = block.querySelector('.GridView_Header span');
         if (titleElement == null) continue;
 
-        final semesterTitle = titleElement.text.trim(); // e.g., "第 114 學年第1 學期"
+        final semesterTitle = titleElement.text.trim();
 
-        // 解析學年與學期 (參考 academic.js Regex)
         final regExp = RegExp(r'第\s*(\d+)\s*學年第\s*(\d+)\s*學期');
         final match = regExp.firstMatch(semesterTitle);
         int academicYear = 0;
@@ -64,13 +60,13 @@ class GradesScraper extends BaseScraper {
         }
 
         final List<Map<String, dynamic>> courses = [];
-        // 參考 academic.js: $(block).find('tr.DataGrid_Item, tr.DataGrid_AlternatingItem')
+
         final rows = block.querySelectorAll('tr.DataGrid_Item, tr.DataGrid_AlternatingItem');
 
         for (var row in rows) {
           final code = row.querySelector('span[id*="_Dept_Cour_No"]')?.text.trim() ?? '';
           final courseAnchor = row.querySelector('a[id*="_cour_cname"]');
-          
+
           if (code.isNotEmpty && courseAnchor != null) {
             final nameZh = courseAnchor.text.trim();
             final nameEn = row.querySelector('span[id*="_cour_ename"]')?.text.trim() ?? '';
@@ -82,7 +78,7 @@ class GradesScraper extends BaseScraper {
             String courseNo = '';
             final relativeHref = courseAnchor.attributes['href'];
             if (relativeHref != null && relativeHref.isNotEmpty) {
-              syllabusUrl = relativeHref.replaceFirst(RegExp(r'^(\.\.\/)+'), 
+              syllabusUrl = relativeHref.replaceFirst(RegExp(r'^(\.\.\/)+'),
                   'https://webapp.yuntech.edu.tw/WebNewCAS/');
               final parts = relativeHref.split('&');
               if (parts.length >= 4) {

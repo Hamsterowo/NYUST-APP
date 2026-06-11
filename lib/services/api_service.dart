@@ -25,23 +25,16 @@ class ApiService {
 
   Dio get dio => _dio;
 
-  // SharedPreferences 的 key，用來儲存學校 Cookies
   static const String _schoolCookiesKey = 'school_session_cookies';
-  // 記住此次登入是否為「僅此次（不保持登入）」
   static const String _sessionOnlyKey = 'session_only_login';
 
-  // 安全密鑰保險箱（已停用，改回 SharedPreferences 解決冷啟動遺失問題）
-  // final _secureStorage = const FlutterSecureStorage();
-
-  // 針對後端 API 驗證的通行密鑰 (API_SECRET)
-  // 若為編譯版 (如 Web)，可透過 --dart-define=API_SECRET=您的密鑰 來注入
   static const String _apiSecretKey = String.fromEnvironment(
     'API_SECRET',
-    defaultValue: 'lrR2Uf-E6No13m45iCa7', // 本機開發或未設定時的預設回退值
+    defaultValue: '',
   );
 
-  /// 當 API 回傳 401 Session 過期時觸發，由 AuthProvider 設定
   VoidCallback? onSessionExpired;
+  bool isMockMode = false;
 
   ApiService() {
     _dio = Dio(
@@ -79,9 +72,8 @@ class ApiService {
     try {
       await setupCookieManager(_dio);
 
-      // 若上次登入沒有勾選「保持登入」（或者是全新安裝），重啟時自動清除 cookies
       final prefs = await SharedPreferences.getInstance();
-      final rememberMe = prefs.getBool(_sessionOnlyKey) == false; // false 代表 rememberMe 為 true
+      final rememberMe = prefs.getBool(_sessionOnlyKey) == false;
 
       if (!rememberMe) {
         if (kDebugMode) {
@@ -107,8 +99,6 @@ class ApiService {
       await init();
     }
   }
-
-  // ─── 學校 Cookie 的 SharedPreferences 儲存 ────────────────────────────────
 
   /// 從 SharedPreferences 讀取學校 Cookies（不依賴 CookieJar domain 匹配）
   Future<List<Map<String, dynamic>>> _loadSchoolCookies() async {
@@ -149,12 +139,9 @@ class ApiService {
     return cookies.isNotEmpty;
   }
 
-  // ─── 登入流程 ──────────────────────────────────────────────────────────────
-
   Future<Map<String, dynamic>> loginInit() async {
     await _ensureInit();
     try {
-      // 改為使用本地 Scraper
       return await _ssoScraper.loginInit();
     } catch (e) {
       throw Exception('Failed to init login: $e');
@@ -170,7 +157,6 @@ class ApiService {
   ) async {
     await _ensureInit();
     try {
-      // 改為使用本地 Scraper
       final result = await _ssoScraper.login(
         username: username,
         password: password,
@@ -180,10 +166,9 @@ class ApiService {
       );
 
       if (result['success'] == true) {
-        // 登入成功後，同步本地 Cookie 到 SharedPreferences 以相容舊有的 API 呼叫
+
         await _syncCookiesFromJar();
-        
-        // 記錄是否為僅此次登入（重啟後清除）
+
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_sessionOnlyKey, !rememberMe);
       }
@@ -200,15 +185,14 @@ class ApiService {
           .whereType<CookieManager>()
           .firstOrNull
           ?.cookieJar;
-      
+
       if (cookieJar == null) return;
 
-      // 取得雲科大相關網域的 Cookies
       final domains = [
         'https://webapp.yuntech.edu.tw',
         'https://yunportal.yuntech.edu.tw'
       ];
-      
+
       final List<Map<String, dynamic>> allCookies = [];
       for (var domain in domains) {
         final cookies = await cookieJar.loadForRequest(Uri.parse(domain));
@@ -235,6 +219,17 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getUserInfo() async {
+    if (isMockMode) {
+      return {
+        'success': true,
+        'user': {
+          'name': '開發除錯員',
+          'id': 'D11012345',
+          'dept': '資訊工程學系',
+          'class': '資工三甲',
+        }
+      };
+    }
     await _ensureInit();
     return _infoScraper.getUserInfo();
   }
@@ -263,11 +258,120 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getGrades() async {
+    if (isMockMode) {
+      return {
+        'success': true,
+        'grades': [
+          {
+            'academic_year': '112',
+            'semester': '1',
+            'summary': {
+              'average_score': '89.50',
+              'rank': '3 / 48',
+            },
+            'courses': [
+              {
+                'name': '行動裝置程式設計',
+                'credits': '3.0',
+                'score': '95',
+                'type': '選修',
+                'courseNo': '1001',
+              },
+              {
+                'name': '軟體工程',
+                'credits': '3.0',
+                'score': '88',
+                'type': '必修',
+                'courseNo': '1002',
+              },
+              {
+                'name': '電腦網路',
+                'credits': '3.0',
+                'score': '85',
+                'type': '必修',
+                'courseNo': '1003',
+              }
+            ]
+          },
+          {
+            'academic_year': '112',
+            'semester': '2',
+            'summary': {
+              'average_score': '92.30',
+              'rank': '1 / 48',
+            },
+            'courses': [
+              {
+                'name': '人機互動技術',
+                'credits': '3.0',
+                'score': '96',
+                'type': '選修',
+                'courseNo': '2001',
+              },
+              {
+                'name': '編譯器設計',
+                'credits': '3.0',
+                'score': '87',
+                'type': '必修',
+                'courseNo': '2002',
+              },
+              {
+                'name': '專題實作(二)',
+                'credits': '2.0',
+                'score': '94',
+                'type': '必修',
+                'courseNo': '2003',
+              }
+            ]
+          }
+        ]
+      };
+    }
     await _ensureInit();
     return _gradesScraper.getGrades();
   }
 
   Future<Map<String, dynamic>> getGraduation() async {
+    if (isMockMode) {
+      return {
+        'success': true,
+        'graduation_info': {
+          'total_credits': '84',
+          'english_threshold': '已通過',
+          'internship_threshold': '已修過',
+          'credits_breakdown': {
+            'required_goal': {
+              'pe': '4',
+              'civilization': '2',
+              'literature': '2',
+              'general': '8',
+              'dept_required': '60',
+              'elective': '52',
+              'total': '128',
+            },
+            'earned': {
+              'pe': '4',
+              'civilization': '2',
+              'literature': '2',
+              'general': '8',
+              'dept_required': '50',
+              'elective': '18',
+              'total': '84',
+            },
+            'missing': {
+              'pe': '0',
+              'civilization': '0',
+              'literature': '0',
+              'general': '0',
+              'dept_required': '10',
+              'elective': '34',
+              'total': '44',
+            }
+          },
+          'missing_courses_text': 'COE3007工程倫理與產業導論[3]、COE3008系統分析與設計[3]'
+        }
+      };
+    }
     await _ensureInit();
     return _graduationScraper.getGraduation();
   }
@@ -317,8 +421,72 @@ class ApiService {
     }
   }
 
-
   Future<Map<String, dynamic>> getSchedule() async {
+    if (isMockMode) {
+      return {
+        'status': 'success',
+        'data': {
+          'schedule': [
+            {
+              'semesterCourseNo': '11210001',
+              'deptCourseNo': 'COE3001',
+              'name': '行動裝置程式設計',
+              'courseClass': '資工三甲',
+              'classType': '選修',
+              'requiredType': '選',
+              'credits': '3',
+              'timeRoomStr': '1-C,D/EL101',
+              'teacher': '張教授',
+              'remark': '',
+              'times': ['C', 'D'],
+              'weekday': '1'
+            },
+            {
+              'semesterCourseNo': '11210002',
+              'deptCourseNo': 'COE3002',
+              'name': '人機互動技術',
+              'courseClass': '資工三甲',
+              'classType': '選修',
+              'requiredType': '選',
+              'credits': '3',
+              'timeRoomStr': '2-E,F/EL102',
+              'teacher': '李教授',
+              'remark': '',
+              'times': ['E', 'F'],
+              'weekday': '2'
+            },
+            {
+              'semesterCourseNo': '11210003',
+              'deptCourseNo': 'COE3003',
+              'name': '軟體工程',
+              'courseClass': '資工三甲',
+              'classType': '必修',
+              'requiredType': '必',
+              'credits': '3',
+              'timeRoomStr': '3-A,B/EL105',
+              'teacher': '王教授',
+              'remark': '',
+              'times': ['A', 'B'],
+              'weekday': '3'
+            },
+            {
+              'semesterCourseNo': '11210004',
+              'deptCourseNo': 'COE3004',
+              'name': '系統分析與設計',
+              'courseClass': '資工三甲',
+              'classType': '必修',
+              'requiredType': '必',
+              'credits': '3',
+              'timeRoomStr': '4-G,H/EL108',
+              'teacher': '陳教授',
+              'remark': '',
+              'times': ['G', 'H'],
+              'weekday': '4'
+            }
+          ]
+        }
+      };
+    }
     await _ensureInit();
     return _scheduleScraper.getSchedule();
   }
@@ -338,7 +506,7 @@ class ApiService {
 
   Future<void> logout() async {
     await _clearSchoolCookies();
-    await clearCookies(); // 徹底清除 CookieJar 中的實體檔案
+    await clearCookies();
   }
 
   SsoScraper get ssoScraper => _ssoScraper;

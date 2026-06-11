@@ -135,7 +135,7 @@ class ScheduleSkeletonGrid extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // 標題列
+
             Container(
               height: 40.0,
               decoration: BoxDecoration(
@@ -151,7 +151,7 @@ class ScheduleSkeletonGrid extends StatelessWidget {
                 ],
               ),
             ),
-            // 空白的內部區域 (加上左方節次的邊線)
+
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -168,7 +168,7 @@ class ScheduleSkeletonGrid extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Expanded(child: SizedBox()), // 剩餘空白
+                    const Expanded(child: SizedBox()),
                   ],
                 ),
               ),
@@ -192,7 +192,7 @@ class GraduationSkeletonView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 摘要卡片骨架
+
           Card(
             elevation: 2,
             shadowColor: Colors.transparent,
@@ -233,7 +233,7 @@ class GraduationSkeletonView extends StatelessWidget {
           const SizedBox(height: 24),
           const SkeletonBox(height: 22, width: 100),
           const SizedBox(height: 16),
-          // 表格骨架
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -284,7 +284,7 @@ class CalendarSkeletonView extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            // 月份標題列 (< 月份 >)
+
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -294,7 +294,7 @@ class CalendarSkeletonView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            // 週標題列
+
             if (isExpanded)
               Row(
                 children: List.generate(
@@ -308,7 +308,7 @@ class CalendarSkeletonView extends StatelessWidget {
                 ),
               ),
             if (isExpanded) const SizedBox(height: 8),
-            // 日期格子（5 週）
+
             if (isExpanded)
               ...List.generate(
                 5,
@@ -334,13 +334,13 @@ class CalendarSkeletonView extends StatelessWidget {
 
     return Column(
       children: [
-        // 月曆區域骨架
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: calendarCard,
         ),
         if (isExpanded) const SizedBox(height: 8),
-        // 事件列表骨架
+
         Padding(
           padding: const EdgeInsets.all(12),
           child: Column(

@@ -1,4 +1,4 @@
-// Web implementation using javascript interop
+
 import 'dart:js_interop';
 
 @JS('isPwaInstallDismissed')

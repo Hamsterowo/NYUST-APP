@@ -10,9 +10,8 @@ class DesktopScreen extends StatelessWidget {
   void _continueToApp(BuildContext context) {
     final auth = context.read<AuthProvider>();
 
-    // 若還沒初始化完成，等初始化後再導航
     if (!auth.isInitialized) {
-      // 監聽初始化完成後導航
+
       void listener() {
         if (auth.isInitialized) {
           auth.removeListener(listener);
@@ -21,7 +20,7 @@ class DesktopScreen extends StatelessWidget {
       }
 
       auth.addListener(listener);
-      // 顯示 loading 提示
+
       showDialog(
         context: context,
         barrierDismissible: false,

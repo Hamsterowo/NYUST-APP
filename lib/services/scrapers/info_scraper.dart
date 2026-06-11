@@ -15,13 +15,12 @@ class InfoScraper extends BaseScraper {
     try {
       if (kDebugMode) print('InfoScraper: Fetching user info from $infoPageUrl');
 
-      // 仿照舊 API，直接請求 Default.aspx
       final response = await getWithRedirects(
         infoPageUrl,
         options: Options(
           headers: {
             ...commonHeaders,
-            // 舊 API 似乎沒有傳 Referer，或者是由 fetch 自動處理
+
           },
         ),
       );
@@ -32,10 +31,8 @@ class InfoScraper extends BaseScraper {
 
       var document = parseHtml(response.data);
       if (kDebugMode) print('InfoScraper: Page Title: ${document.querySelector('title')?.text.trim()}');
-      
-      // 檢查是否拿到了真正的內容頁 (Default.aspx 其實是 Frameset，但 getWithRedirects 會跳轉到內容)
-      // 如果內容不對，嘗試抓取 StudInfo.aspx
-      if (response.data.toString().contains('ctl00_showName') == false && 
+
+      if (response.data.toString().contains('ctl00_showName') == false &&
           response.data.toString().contains('姓名') == false) {
         if (kDebugMode) print('InfoScraper: Content seems missing, trying fallback to StudInfo.aspx...');
         final studInfoRes = await getWithRedirects(
@@ -89,11 +86,11 @@ class InfoScraper extends BaseScraper {
       }
 
       userInfo['姓名'] = userInfo['姓名'] ?? '';
-      
+
       if (userInfo['姓名']!.isEmpty) {
-        userInfo['姓名'] = document.querySelector('#ctl00_showName')?.text.trim() ?? 
-                         document.querySelector('#ctl00_showUser')?.text.trim() ?? 
-                         document.querySelector('span[id*="showName"]')?.text.trim() ?? 
+        userInfo['姓名'] = document.querySelector('#ctl00_showName')?.text.trim() ??
+                         document.querySelector('#ctl00_showUser')?.text.trim() ??
+                         document.querySelector('span[id*="showName"]')?.text.trim() ??
                          '';
       }
 

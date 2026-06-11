@@ -35,7 +35,6 @@ class GraduationScraper extends BaseScraper {
         };
       }
 
-      // 輔助方法：參考 academic.js: getText('id')
       String getTextSafely(String id) {
         return document.querySelector('#ctl00_MainContent_oStudGradInfo_$id')?.text.trim() ?? '';
       }

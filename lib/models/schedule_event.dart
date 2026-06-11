@@ -10,12 +10,10 @@ class ScheduleEvent {
   final String teacher;
   final String remark;
 
-  // 切割好的欄位
   final String? weekday;
   final List<String> times;
   final String? room;
 
-  // 課綱相關
   final String? syllabusUrl;
   final String? year;
   final String? semester;

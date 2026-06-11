@@ -91,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Column(
                       children: [
-                        // User info card (Expanded width, custom layout)
+
                         SizedBox(
                           width: double.infinity,
                           child: Card(
@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  // Left Side: Name and Student ID
+
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -136,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ],
                                     ),
                                   ),
-                                  // Right Side: Department and Class
+
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     mainAxisSize: MainAxisSize.min,
@@ -177,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        // About / Legal card
+
                         Card(
                           elevation: 0,
                           color: colorScheme.surfaceContainerHighest,
@@ -240,12 +240,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
 
-                    // Action buttons + Logout at bottom
                     Padding(
                       padding: const EdgeInsets.only(top: 32.0),
                       child: Column(
                         children: [
-                          // Install App button (web only)
+
                           if (kIsWeb) ...[
                             SizedBox(
                               width: double.infinity,
@@ -276,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 12),
                           ],
-                          // Report button
+
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton(
@@ -302,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          // Logout button
+
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton(

@@ -15,7 +15,7 @@ class SsoScraper extends BaseScraper {
   /// 初始化登入：獲取 VerificationToken 與驗證碼圖片
   Future<Map<String, dynamic>> loginInit() async {
     try {
-      // 1. 請求登入頁面
+
       if (kDebugMode) print('SsoScraper: Fetching login page from $loginPageUrl');
       final response = await dio.get(
         loginPageUrl,
@@ -31,14 +31,13 @@ class SsoScraper extends BaseScraper {
 
       if (kDebugMode) {
         print('SsoScraper: Response Status: ${response.statusCode}');
-        // 印出前 1000 個字元以便偵錯
+
         final body = response.data.toString();
         print('SsoScraper: Response Body Preview: ${body.length > 1000 ? body.substring(0, 1000) : body}');
       }
 
       final document = parseHtml(response.data);
 
-      // 2. 提取 __RequestVerificationToken
       final tokenElement =
           document.querySelector('input[name="__RequestVerificationToken"]');
       final token = getAttribute(tokenElement, 'value');
@@ -47,14 +46,13 @@ class SsoScraper extends BaseScraper {
         throw Exception('無法獲取登入驗證碼 (Token not found)');
       }
 
-      // 3. 請求驗證碼圖片
       if (kDebugMode) print('SsoScraper: Fetching captcha image...');
       final captchaRes = await dio.get(
         captchaUrl,
         options: Options(
           headers: {
             ...commonHeaders,
-            'Referer': loginPageUrl, // 加入 Referer 避開簡單防護
+            'Referer': loginPageUrl,
           },
           responseType: ResponseType.bytes,
         ),
@@ -64,10 +62,10 @@ class SsoScraper extends BaseScraper {
       String base64Image = '';
 
       if (contentType.contains('image/')) {
-        // 二進位圖片轉換為 Base64
+
         base64Image = base64Encode(captchaRes.data);
       } else {
-        // 如果伺服器直接回傳 Base64 字串 (API 原始邏輯中見過)
+
         base64Image = utf8.decode(captchaRes.data);
       }
 
@@ -94,7 +92,7 @@ class SsoScraper extends BaseScraper {
     bool rememberMe = true,
   }) async {
     try {
-      // 準備 Form Data
+
       final formData = {
         '__RequestVerificationToken': verificationToken,
         'pLoginName': username,
@@ -105,8 +103,6 @@ class SsoScraper extends BaseScraper {
         'ReturnUrl': '/YunTechSSO/',
       };
 
-      // 模擬原 API 的 POST 請求
-      // 注意：此處需要關閉 followRedirects 以捕捉 302
       final response = await dio.post(
         loginPageUrl,
         data: FormData.fromMap(formData),
@@ -121,19 +117,17 @@ class SsoScraper extends BaseScraper {
         ),
       );
 
-      // 檢查是否跳轉 (代表登入成功)
       if (response.statusCode == 302 || response.statusCode == 301) {
         final location = response.headers.value('location');
         if (kDebugMode) print('SsoScraper: Login successful, redirecting to $location');
-        
-        // 重要：必須實際請求導向位址，才能讓伺服器寫入完整的 Session Cookies
+
         if (location != null) {
-          final redirectUrl = location.startsWith('http') 
-              ? location 
+          final redirectUrl = location.startsWith('http')
+              ? location
               : 'https://webapp.yuntech.edu.tw$location';
-          
+
           await dio.get(
-            redirectUrl, 
+            redirectUrl,
             options: Options(
               headers: commonHeaders,
               followRedirects: true,
@@ -147,7 +141,6 @@ class SsoScraper extends BaseScraper {
         };
       }
 
-      // 登入失敗：解析錯誤訊息
       final document = parseHtml(response.data);
       String errorMsg = '登入失敗，請檢查帳號密碼與驗證碼';
 

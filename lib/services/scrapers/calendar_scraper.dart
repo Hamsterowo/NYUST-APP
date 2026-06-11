@@ -22,13 +22,12 @@ class CalendarScraper extends BaseScraper {
       final document = parseHtml(response.data);
       final List<Map<String, dynamic>> events = [];
 
-      // 參考 calendar.js: $('a') 尋找包含 eventdatetime_id 的連結
       final links = document.querySelectorAll('a');
       for (var element in links) {
         final href = element.attributes['href'];
         if (href != null && href.contains('eventdatetime_id=')) {
           final name = element.text.trim();
-          
+
           try {
             final uri = Uri.parse('https://events.yuntech.edu.tw/$href');
             final eventYear = uri.queryParameters['y'];
@@ -36,13 +35,12 @@ class CalendarScraper extends BaseScraper {
             final eventDay = uri.queryParameters['d'];
             final eventId = uri.queryParameters['eventdatetime_id'];
 
-            // 檢查是否為重要事件 (紅字 FF0000)
             final htmlStr = element.innerHtml.toLowerCase();
             final styleStr = (element.attributes['style'] ?? '').toLowerCase();
             final isImportant = htmlStr.contains('ff0000') || styleStr.contains('ff0000');
 
             if (eventYear != null && eventMonth != null && eventDay != null && name.isNotEmpty) {
-              // 雲科大行事曆中，同一天的多個事件會以全形分號「；」分隔
+
               final eventNames = name.split('；').map((n) => n.trim()).where((n) => n.isNotEmpty);
 
               int index = 0;
@@ -57,7 +55,7 @@ class CalendarScraper extends BaseScraper {
               }
             }
           } catch (e) {
-            // 忽略格式錯誤的連結
+
           }
         }
       }
@@ -80,10 +78,9 @@ class CalendarScraper extends BaseScraper {
   Future<Map<String, dynamic>> getHolidays(int year) async {
     try {
       if (kDebugMode) print('CalendarScraper: Fetching holidays for $year');
-      
+
       final List<String> nationalHolidays = [];
-      
-      // 1. 抓取台灣行政院國定假日資料 (jsDelivr)
+
       try {
         final holidayRes = await dio.get(
           'https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/$year.json',
@@ -91,7 +88,7 @@ class CalendarScraper extends BaseScraper {
         if (holidayRes.statusCode == 200 && holidayRes.data is List) {
           for (var item in holidayRes.data) {
             if (item['isHoliday'] == true) {
-              final String dateStr = item['date'].toString(); // YYYYMMDD
+              final String dateStr = item['date'].toString();
               if (dateStr.length == 8) {
                 nationalHolidays.add('${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}');
               }
@@ -102,17 +99,16 @@ class CalendarScraper extends BaseScraper {
         if (kDebugMode) print('CalendarScraper: Failed to fetch national holidays: $e');
       }
 
-      // 2. 抓取學校寒暑假 (解析行事曆網頁)
       final winterHolidays = <String>[];
       final summerHolidays = <String>[];
-      
+
       try {
         final calendarUrl = 'https://events.yuntech.edu.tw/index.php?&y=$year&view=YunTech&';
         final response = await dio.get(calendarUrl);
         final document = parseHtml(response.data);
-        
+
         String? winterStart, winterEnd, summerStart, summerEnd;
-        
+
         final links = document.querySelectorAll('a');
         for (var element in links) {
           final href = element.attributes['href'];
@@ -122,7 +118,7 @@ class CalendarScraper extends BaseScraper {
             final evYear = uri.queryParameters['y'];
             final evMonth = uri.queryParameters['m'];
             final evDay = uri.queryParameters['d'];
-            
+
             if (evYear != null && evMonth != null && evDay != null) {
               final dateStr = '$evYear-${evMonth.padLeft(2, '0')}-${evDay.padLeft(2, '0')}';
               final eventNames = name.split('；');
@@ -135,7 +131,7 @@ class CalendarScraper extends BaseScraper {
             }
           }
         }
-        
+
         if (winterStart != null && winterEnd != null) {
           winterHolidays.addAll(_getDatesInRange(winterStart, winterEnd));
         }
@@ -146,7 +142,6 @@ class CalendarScraper extends BaseScraper {
         if (kDebugMode) print('CalendarScraper: Failed to fetch school vacations: $e');
       }
 
-      // 3. 合併與去重
       final allHolidaysSet = <String>{...nationalHolidays, ...winterHolidays, ...summerHolidays};
       final finalHolidays = allHolidaysSet.toList()..sort();
 
@@ -181,7 +176,7 @@ class CalendarScraper extends BaseScraper {
     final dates = <String>[];
     DateTime current = DateTime.parse(startStr);
     final DateTime end = DateTime.parse(endStr);
-    
+
     while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
       final y = current.year;
       final m = current.month.toString().padLeft(2, '0');
