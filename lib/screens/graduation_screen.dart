@@ -41,7 +41,7 @@ class GraduationContent extends StatelessWidget {
       );
     }
 
-    if (data.isLoadingGraduation) {
+    if (data.isLoadingGraduation && data.graduationData == null) {
       return _buildGraduationSkeleton(context, colorScheme);
     }
 
@@ -596,7 +596,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       return const Center(child: Text('目前沒有任何課表資料'));
     }
 
-    if (data.isLoadingSchedule) {
+    if (data.isLoadingSchedule && !hasData) {
       return _buildScheduleGrid(<ScheduleEvent>[], isLoading: true);
     }
 
