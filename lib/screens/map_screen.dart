@@ -529,7 +529,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                               title: Text(building.name),
                               subtitle: Text(
                                 building.keyLocations.isNotEmpty
-                                    ? '${building.keyLocations.join(", ")}'
+                                    ? building.keyLocations.join(", ")
                                     : building.description,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -980,6 +980,7 @@ class _MockFloorScreenState extends State<MockFloorScreen> {
                 child: InteractiveViewer(
                   maxScale: 4.0,
                   minScale: 0.5,
+                  boundaryMargin: const EdgeInsets.all(300),
                   child: Center(
                     child: SizedBox(
                       width: 600,
