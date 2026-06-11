@@ -12,16 +12,48 @@ import '../widgets/timeline_painter.dart';
 
 class CalendarScreen extends StatefulWidget {
   final bool embed;
-  const CalendarScreen({super.key, this.embed = false});
+  final ValueChanged<bool>? onLoadingChanged;
+  const CalendarScreen({super.key, this.embed = false, this.onLoadingChanged});
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  State<CalendarScreen> createState() => CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class CalendarScreenState extends State<CalendarScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
+
+  bool get isLoading => _isLoading;
+
+  void _setLoading(bool loading) {
+    if (_isLoading != loading) {
+      if (mounted) {
+        setState(() {
+          _isLoading = loading;
+        });
+      } else {
+        _isLoading = loading;
+      }
+      widget.onLoadingChanged?.call(loading);
+    }
+  }
+
+  Future<void> refreshData() async {
+    await CalendarCacheService.clearAllCache();
+    if (mounted) {
+      setState(() {
+        _cachedGroupedEvents.clear();
+        _cachedHolidaysType.clear();
+        _fetchingYears.clear();
+      });
+    } else {
+      _cachedGroupedEvents.clear();
+      _cachedHolidaysType.clear();
+      _fetchingYears.clear();
+    }
+    await _fetchYearIfNeeded(_currentYear);
+  }
 
   final Map<int, Map<String, List<CalendarEvent>>> _cachedGroupedEvents = {};
 
@@ -259,7 +291,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     if (_cachedGroupedEvents.containsKey(year)) {
       if (foreground && _isLoading && year == _currentYear) {
-        setState(() => _isLoading = false);
+        _setLoading(false);
       }
       return;
     }
@@ -268,9 +300,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     if (foreground) {
       setState(() {
-        _isLoading = true;
         _errorMessage = null;
       });
+      _setLoading(true);
     }
 
     try {
@@ -286,9 +318,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _parseAndCacheData(year, data);
         if (mounted) {
           setState(() {
-            if (foreground && year == _currentYear) _isLoading = false;
             _errorMessage = null;
           });
+          if (foreground && year == _currentYear) {
+            _setLoading(false);
+          }
 
           if (foreground) {
             _prefetchAdjacentYears(year);
@@ -298,8 +332,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
         if (foreground && mounted) {
           setState(() {
             _errorMessage = '載入失敗';
-            _isLoading = false;
           });
+          _setLoading(false);
         }
       }
     } catch (e) {
@@ -307,8 +341,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (foreground && mounted) {
         setState(() {
           _errorMessage = e.toString();
-          _isLoading = false;
         });
+        _setLoading(false);
       }
     }
   }
@@ -342,9 +376,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       final hasCached = _cachedGroupedEvents.containsKey(newYear);
       setState(() {
         _currentYear = newYear;
-        _isLoading = !hasCached;
         _errorMessage = null;
       });
+      _setLoading(!hasCached);
       _fetchYearIfNeeded(newYear);
     }
   }
