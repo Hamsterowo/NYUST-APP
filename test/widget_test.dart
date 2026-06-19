@@ -11,7 +11,6 @@ import 'package:nyust_plus/main.dart';
 import 'package:nyust_plus/providers/auth_provider.dart';
 import 'package:nyust_plus/providers/data_provider.dart';
 import 'package:nyust_plus/providers/navigation_provider.dart';
-import 'package:nyust_plus/providers/weather_provider.dart';
 
 void main() {
   testWidgets('App boot smoke test', (WidgetTester tester) async {
@@ -20,7 +19,6 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => WeatherProvider()),
           ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
             create: (ctx) => DataProvider(
               Provider.of<AuthProvider>(ctx, listen: false).api,

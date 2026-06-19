@@ -3,23 +3,76 @@ import 'package:flutter/material.dart';
 
 enum SnackBarType { success, error, info, warning }
 
+class _SnackBarItem {
+  final String message;
+  final SnackBarType type;
+  final BuildContext context;
+
+  _SnackBarItem({
+    required this.message,
+    required this.type,
+    required this.context,
+  });
+}
+
+final List<_SnackBarItem> _snackBarQueue = [];
+bool _isSnackBarShowing = false;
+VoidCallback? _currentDismissAction;
+
 void showTopSnackBar(
   BuildContext context,
   String message, {
   bool isError = false,
   SnackBarType type = SnackBarType.success,
 }) {
-  final overlay = Overlay.of(context);
-  late OverlayEntry entry;
-
   final resolvedType = isError ? SnackBarType.error : type;
+
+  _snackBarQueue.add(
+    _SnackBarItem(
+      message: message,
+      type: resolvedType,
+      context: context,
+    ),
+  );
+
+  // 避免佇列無限增長，若大於 2 個等待項目則丟棄最舊的
+  if (_snackBarQueue.length > 2) {
+    _snackBarQueue.removeRange(0, _snackBarQueue.length - 1);
+  }
+
+  if (_isSnackBarShowing && _currentDismissAction != null) {
+    _currentDismissAction!();
+  } else {
+    _showNextSnackBar();
+  }
+}
+
+void _showNextSnackBar() {
+  if (_isSnackBarShowing || _snackBarQueue.isEmpty) return;
+
+  _isSnackBarShowing = true;
+  final item = _snackBarQueue.removeAt(0);
+
+  if (!item.context.mounted) {
+    _isSnackBarShowing = false;
+    _showNextSnackBar();
+    return;
+  }
+
+  final overlay = Overlay.of(item.context);
+  late OverlayEntry entry;
 
   entry = OverlayEntry(
     builder: (_) => _TopSnackBar(
-      message: message,
-      type: resolvedType,
+      message: item.message,
+      type: item.type,
       onDismissed: () {
         if (entry.mounted) entry.remove();
+        _isSnackBarShowing = false;
+        _currentDismissAction = null;
+        Future.delayed(const Duration(milliseconds: 80), () {
+          _showNextSnackBar();
+        });
       },
     ),
   );
@@ -53,10 +106,14 @@ class _TopSnackBarState extends State<_TopSnackBar>
   void initState() {
     super.initState();
 
+    _currentDismissAction = () {
+      if (mounted) _ctrl.reverse();
+    };
+
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 480),
-      reverseDuration: const Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 380),
+      reverseDuration: const Duration(milliseconds: 250),
     );
 
     _slide = Tween<Offset>(begin: const Offset(0, 1.4), end: Offset.zero)
@@ -64,7 +121,7 @@ class _TopSnackBarState extends State<_TopSnackBar>
           CurvedAnimation(
             parent: _ctrl,
             curve: Curves.easeOutBack,
-            reverseCurve: Curves.easeInCubic,
+            reverseCurve: Curves.fastOutSlowIn,
           ),
         );
 
@@ -76,7 +133,7 @@ class _TopSnackBarState extends State<_TopSnackBar>
       ),
     );
 
-    _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.9, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
@@ -97,6 +154,7 @@ class _TopSnackBarState extends State<_TopSnackBar>
 
   @override
   void dispose() {
+    _currentDismissAction = null;
     _ctrl.dispose();
     super.dispose();
   }
@@ -104,23 +162,23 @@ class _TopSnackBarState extends State<_TopSnackBar>
   (IconData, Color, Color) _typeStyle(ColorScheme cs) => switch (widget.type) {
     SnackBarType.error => (
       Icons.error_rounded,
-      cs.errorContainer,
-      cs.onErrorContainer,
+      cs.error,
+      cs.onError,
     ),
     SnackBarType.warning => (
       Icons.warning_amber_rounded,
-      const Color(0xFFFFF3CD),
-      const Color(0xFF856404),
+      Colors.orange.shade800,
+      Colors.white,
     ),
     SnackBarType.info => (
       Icons.info_rounded,
-      cs.secondaryContainer,
-      cs.onSecondaryContainer,
+      cs.secondary,
+      cs.onSecondary,
     ),
     SnackBarType.success => (
       Icons.check_circle_rounded,
-      cs.primaryContainer,
-      cs.onPrimaryContainer,
+      cs.primary,
+      cs.onPrimary,
     ),
   };
 
@@ -132,11 +190,16 @@ class _TopSnackBarState extends State<_TopSnackBar>
 
     final keyboardHeight = mq.viewInsets.bottom;
 
-    const navBarHeight = 80.0;
+    // 透過 Navigator 判定當前是否在沒有 AppBar 返回按鈕的底層/首頁
+    bool hasNavBar = false;
+    try {
+      hasNavBar = !Navigator.of(context).canPop();
+    } catch (_) {}
+
+    final navBarHeight = hasNavBar ? 80.0 : 0.0;
     final bottomOffset = keyboardHeight > 0
-        ? keyboardHeight +
-              12
-        : mq.padding.bottom + navBarHeight + 12;
+        ? keyboardHeight + 16
+        : mq.padding.bottom + navBarHeight + 16;
 
     return Positioned(
       bottom: bottomOffset,
@@ -154,38 +217,43 @@ class _TopSnackBarState extends State<_TopSnackBar>
                 onTap: () {
                   if (mounted) _ctrl.reverse();
                 },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bgColor.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon, color: fgColor, size: 22),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              widget.message,
-                              style: TextStyle(
-                                color: fgColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: fgColor.withValues(alpha: 0.15),
+                      width: 1.2,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.18),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, color: fgColor, size: 24),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          widget.message,
+                          style: TextStyle(
+                            color: fgColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

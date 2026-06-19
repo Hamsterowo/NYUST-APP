@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:url_launcher/url_launcher.dart';
 import '../models/course_detail_model.dart';
+import '../models/map_building_model.dart';
 import '../services/api_service.dart';
 import '../services/course_detail_cache.dart';
 import '../utils/top_snack_bar.dart';
+import 'map_screen.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String year;
@@ -74,6 +78,130 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   String _formatContent(String text) {
     if (text.isEmpty) return '無資料';
     return text.split('\n').map((line) => line.trimLeft()).join('\n').trim();
+  }
+
+  List<String> _extractRoomCodes(String timeRoomStr) {
+    if (timeRoomStr.isEmpty) return [];
+    final parts = timeRoomStr.split(RegExp(r'[\s,，、；;]+'));
+    final List<String> rooms = [];
+    for (var part in parts) {
+      final subParts = part.split('/');
+      if (subParts.length >= 2) {
+        final room = subParts.last.trim();
+        if (room.isNotEmpty && !rooms.contains(room)) {
+          rooms.add(room);
+        }
+      } else {
+        final trimmed = part.trim();
+        if (trimmed.isNotEmpty &&
+            RegExp(r'^[A-Za-z]+').hasMatch(trimmed) &&
+            !trimmed.contains('-')) {
+          if (!rooms.contains(trimmed)) {
+            rooms.add(trimmed);
+          }
+        }
+      }
+    }
+    return rooms;
+  }
+
+  Future<void> _handleNavigateToMap(String roomCode) async {
+    try {
+      final jsonString = await rootBundle.loadString('assets/map_data.json');
+      final List<dynamic> jsonList = json.decode(jsonString);
+      final buildings =
+          jsonList.map((item) => MapBuilding.fromJson(item)).toList();
+
+      if (!mounted) return;
+
+      final regExp = RegExp(r'^([A-Za-z]+)(\d*)');
+      final match = regExp.firstMatch(roomCode.trim());
+      if (match == null) {
+        showTopSnackBar(
+          context,
+          '教室代號格式無效，無法定位',
+          type: SnackBarType.warning,
+        );
+        return;
+      }
+
+      final String codePrefix = match.group(1)!.toUpperCase();
+      bool hasBuilding = false;
+      for (var b in buildings) {
+        final bIdUpper = b.id.toUpperCase();
+        if (bIdUpper.endsWith('-$codePrefix') ||
+            b.aliases.any((alias) => alias.toUpperCase() == codePrefix)) {
+          hasBuilding = true;
+          break;
+        }
+      }
+
+      if (hasBuilding) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MapScreen(
+              embed: false,
+              targetRoomCode: roomCode,
+            ),
+          ),
+        );
+      } else {
+        showTopSnackBar(
+          context,
+          '查無大樓 [$codePrefix] 的定位資訊',
+          type: SnackBarType.warning,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showTopSnackBar(context, '讀取地圖資料失敗: $e', isError: true);
+      }
+    }
+  }
+
+  void _showRoomSelectionSheet(List<String> roomCodes) {
+    final colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  '選擇上課教室定位',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              ...roomCodes.map((room) {
+                return ListTile(
+                  leading: Icon(
+                    Icons.map_outlined,
+                    color: colorScheme.primary,
+                  ),
+                  title: Text('前往 $room 定位'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _handleNavigateToMap(room);
+                  },
+                );
+              }),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -280,7 +408,26 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             const Divider(height: 8),
             _buildInfoRow('學分數', detail.credits),
             const Divider(height: 8),
-            _buildInfoRow('上課時間教室', detail.timeRoom),
+            _buildInfoRow(
+              '上課時間教室',
+              detail.timeRoom,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              trailing: () {
+                final rooms = _extractRoomCodes(detail.timeRoom);
+                if (rooms.isEmpty) return null;
+                return IconButton(
+                  icon: const Icon(Icons.map_outlined),
+                  tooltip: '查看地圖定位',
+                  onPressed: () {
+                    if (rooms.length == 1) {
+                      _handleNavigateToMap(rooms.first);
+                    } else {
+                      _showRoomSelectionSheet(rooms);
+                    }
+                  },
+                );
+              }(),
+            ),
             if (detail.courseClass != null &&
                 detail.courseClass!.isNotEmpty) ...[
               const Divider(height: 8),
@@ -303,11 +450,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    Widget? trailing,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: crossAxisAlignment,
         children: [
           SizedBox(
             width: 100,
@@ -325,6 +477,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
+          if (trailing != null) trailing,
         ],
       ),
     );

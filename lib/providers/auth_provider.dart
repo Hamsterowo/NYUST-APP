@@ -63,6 +63,21 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
+    // Load cached user info immediately if available, so that isLoggedIn is true from startup
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedStr = prefs.getString('cached_user_info');
+      if (cachedStr != null) {
+        final cachedUser = jsonDecode(cachedStr);
+        _user = cachedUser;
+        if (cachedUser['user']?['id'] == 'D11012345') {
+          _apiService.isMockMode = true;
+        }
+        notifyListeners();
+        onLoginSuccess?.call();
+      }
+    } catch (_) {}
+
     try {
       final info = await _apiService.getUserInfo();
 

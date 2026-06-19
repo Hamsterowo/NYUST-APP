@@ -288,7 +288,6 @@ class CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _fetchYearIfNeeded(int year, {bool foreground = true}) async {
-
     if (_cachedGroupedEvents.containsKey(year)) {
       if (foreground && _isLoading && year == _currentYear) {
         _setLoading(false);
@@ -306,7 +305,6 @@ class CalendarScreenState extends State<CalendarScreen> {
     }
 
     try {
-
       final data = await CalendarCacheService.getOrFetch(
         year,
         (y) => _apiService.getCalendar(y),
@@ -424,10 +422,10 @@ class CalendarScreenState extends State<CalendarScreen> {
     final double rightMargin = isSameNext ? 0.0 : 6.0;
     final Radius leftRadius = isSamePrev
         ? Radius.zero
-        : const Radius.circular(24.0);
+        : const Radius.circular(12.0);
     final Radius rightRadius = isSameNext
         ? Radius.zero
-        : const Radius.circular(24.0);
+        : const Radius.circular(12.0);
 
     return Container(
       margin: EdgeInsets.only(
@@ -448,9 +446,8 @@ class CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final navProvider = context.watch<NavigationProvider>();
-    if ((navProvider.currentIndex == 3 || navProvider.currentIndex == 1) && !_hasCheckedLegend) {
+    if (navProvider.currentIndex == 3 && !_hasCheckedLegend) {
       _hasCheckedLegend = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkAndShowLegend();
@@ -463,454 +460,332 @@ class CalendarScreenState extends State<CalendarScreen> {
         : [];
 
     final bodyContent = _isLoading
-          ? const CalendarSkeletonView()
-          : _errorMessage != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.cloud_off_rounded,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton.tonal(
-                    onPressed: () => _fetchYearIfNeeded(_currentYear),
-                    child: const Text('重試'),
-                  ),
-                ],
-              ),
-            )
-          : Column(
+        ? const CalendarSkeletonView()
+        : _errorMessage != null
+        ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
+                const Icon(
+                  Icons.cloud_off_rounded,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 24),
+                FilledButton.tonal(
+                  onPressed: () => _fetchYearIfNeeded(_currentYear),
+                  child: const Text('重試'),
+                ),
+              ],
+            ),
+          )
+        : Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: colorScheme.outlineVariant),
                   ),
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: colorScheme.outlineVariant),
-                    ),
-                    color: colorScheme.surface,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const SizedBox(width: 8),
-                              Text(
-                                '${_focusedDay.year} 年 ${_focusedDay.month} 月',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                  color: colorScheme.surface,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const SizedBox(width: 8),
+                            Text(
+                              '${_focusedDay.year} 年 ${_focusedDay.month} 月',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const Spacer(),
-                              if (widget.embed) ...[
-                                IconButton(
-                                  icon: const Icon(Icons.info_outline, size: 20),
-                                  tooltip: '圖示說明',
-                                  onPressed: _showLegendDialog,
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.today, size: 20),
-                                  tooltip: '回到今日',
-                                  onPressed: () {
-                                    final now = DateTime.now();
+                            ),
+                            const Spacer(),
+                            if (widget.embed) ...[
+                              IconButton(
+                                icon: const Icon(Icons.info_outline, size: 20),
+                                tooltip: '圖示說明',
+                                onPressed: _showLegendDialog,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.today, size: 20),
+                                tooltip: '回到今日',
+                                onPressed: () {
+                                  final now = DateTime.now();
+                                  setState(() {
+                                    _focusedDay = now;
+                                    _selectedDay = now;
+                                  });
+                                  if (_currentYear != now.year) {
+                                    final hasCached = _cachedGroupedEvents
+                                        .containsKey(now.year);
                                     setState(() {
-                                      _focusedDay = now;
-                                      _selectedDay = now;
+                                      _currentYear = now.year;
+                                      _isLoading = !hasCached;
                                     });
-                                    if (_currentYear != now.year) {
-                                      final hasCached = _cachedGroupedEvents.containsKey(now.year);
-                                      setState(() {
-                                        _currentYear = now.year;
-                                        _isLoading = !hasCached;
-                                      });
-                                      _fetchYearIfNeeded(now.year);
-                                    }
-                                  },
-                                ),
-                              ],
-                              IconButton(
-                                icon: const Icon(Icons.chevron_left),
-                                onPressed: () {
-                                  _pageController?.previousPage(
-                                    duration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    curve: Curves.easeOut,
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.chevron_right),
-                                onPressed: () {
-                                  _pageController?.nextPage(
-                                    duration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    curve: Curves.easeOut,
-                                  );
+                                    _fetchYearIfNeeded(now.year);
+                                  }
                                 },
                               ),
                             ],
-                          ),
-                          TableCalendar<CalendarEvent>(
-                            onCalendarCreated: (controller) =>
-                                _pageController = controller,
-                              firstDay: DateTime.utc(2000, 1, 1),
-                              lastDay: DateTime.utc(2100, 12, 31),
-                              focusedDay: _focusedDay,
-                              selectedDayPredicate: (day) =>
-                                  isSameDay(_selectedDay, day),
-                              onDaySelected: _onDaySelected,
-                              onPageChanged: _onPageChanged,
-                              eventLoader: _getEventsForDay,
-                              headerVisible: false,
-                              holidayPredicate: (day) {
-                                final formattedDate =
-                                    "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-                                return (_cachedHolidaysType[_currentYear] ?? {})
-                                    .containsKey(formattedDate);
+                            IconButton(
+                              icon: const Icon(Icons.chevron_left),
+                              onPressed: () {
+                                _pageController?.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
                               },
-                              startingDayOfWeek: StartingDayOfWeek.monday,
-                              rowHeight: 48,
-                              daysOfWeekHeight: 24,
-                              calendarStyle: CalendarStyle(
-                                cellMargin: const EdgeInsets.all(
-                                  6.0,
-                                ),
-                                todayDecoration: BoxDecoration(
-                                  color: colorScheme.primaryContainer,
-                                  shape: BoxShape.circle,
-                                ),
-                                todayTextStyle: TextStyle(
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                                selectedDecoration: BoxDecoration(
-                                  color: colorScheme.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              calendarBuilders: CalendarBuilders(
-                                selectedBuilder: (context, day, focusedDay) {
-                                  final isOutside =
-                                      day.month != focusedDay.month;
-                                  final bg = isOutside
-                                      ? null
-                                      : _buildHolidayBackground(context, day);
-                                  return Stack(
-                                    children: [
-                                      ?bg,
-                                      Container(
-                                        margin: const EdgeInsets.all(6.0),
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          '${day.day}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                                todayBuilder: (context, day, focusedDay) {
-                                  final isOutside =
-                                      day.month != focusedDay.month;
-                                  final bg = isOutside
-                                      ? null
-                                      : _buildHolidayBackground(context, day);
-                                  return Stack(
-                                    children: [
-                                      ?bg,
-                                      Container(
-                                        margin: const EdgeInsets.all(6.0),
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.primaryContainer,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          '${day.day}',
-                                          style: TextStyle(
-                                            color:
-                                                colorScheme.onPrimaryContainer,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                                holidayBuilder: (context, day, focusedDay) {
-                                  final isOutside =
-                                      day.month != focusedDay.month;
-                                  final formattedDate =
-                                      "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-                                  final type =
-                                      (_cachedHolidaysType[_currentYear] ??
-                                          {})[formattedDate] ??
-                                      'national';
-                                  final isVacation =
-                                      type == 'winter_vacation' ||
-                                      type == 'summer_vacation';
-
-                                  if (isOutside) {
-                                    return Container(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        '${day.day}',
-                                        style: TextStyle(
-                                          color: isVacation
-                                              ? Colors.amber.withValues(
-                                                  alpha: 0.55,
-                                                )
-                                              : Colors.red.withValues(
-                                                  alpha: 0.55,
-                                                ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  final bg = _buildHolidayBackground(
-                                    context,
-                                    day,
-                                  );
-                                  return Stack(
-                                    children: [
-                                      ?bg,
-                                      Container(
-                                        margin: const EdgeInsets.all(6.0),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          '${day.day}',
-                                          style: TextStyle(
-                                            color: isVacation
-                                                ? Colors.amber.shade900
-                                                : Colors.red.shade900,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                                markerBuilder: (context, day, events) {
-                                  if (events.isEmpty) return const SizedBox();
-                                  if (isSameDay(_selectedDay, day)) {
-                                    return const SizedBox();
-                                  }
-                                  final bool hasImportant = events
-                                      .cast<CalendarEvent>()
-                                      .any((e) => e.isImportant);
-
-                                  return Positioned(
-                                    bottom: 2,
-                                    child: Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: hasImportant
-                                            ? Colors.amber
-                                            : colorScheme.primary,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right),
+                              onPressed: () {
+                                _pageController?.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
+                              },
                             ),
                           ],
                         ),
-                      ),
+                        TableCalendar<CalendarEvent>(
+                          onCalendarCreated: (controller) =>
+                              _pageController = controller,
+                          firstDay: DateTime.utc(2000, 1, 1),
+                          lastDay: DateTime.utc(2100, 12, 31),
+                          focusedDay: _focusedDay,
+                          selectedDayPredicate: (day) =>
+                              isSameDay(_selectedDay, day),
+                          onDaySelected: _onDaySelected,
+                          onPageChanged: _onPageChanged,
+                          eventLoader: _getEventsForDay,
+                          headerVisible: false,
+                          holidayPredicate: (day) {
+                            final formattedDate =
+                                "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+                            return (_cachedHolidaysType[_currentYear] ?? {})
+                                .containsKey(formattedDate);
+                          },
+                          startingDayOfWeek: StartingDayOfWeek.monday,
+                          rowHeight: 48,
+                          daysOfWeekHeight: 24,
+                          calendarStyle: CalendarStyle(
+                            cellMargin: const EdgeInsets.all(6.0),
+                            todayDecoration: BoxDecoration(
+                              color: colorScheme.primaryContainer,
+                              shape: BoxShape.circle,
+                            ),
+                            todayTextStyle: TextStyle(
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                            selectedDecoration: BoxDecoration(
+                              color: colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          calendarBuilders: CalendarBuilders(
+                            selectedBuilder: (context, day, focusedDay) {
+                              final isOutside = day.month != focusedDay.month;
+                              final bg = isOutside
+                                  ? null
+                                  : _buildHolidayBackground(context, day);
+                              return Stack(
+                                children: [
+                                  ?bg,
+                                  Container(
+                                    margin: const EdgeInsets.all(6.0),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${day.day}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            todayBuilder: (context, day, focusedDay) {
+                              final isOutside = day.month != focusedDay.month;
+                              final bg = isOutside
+                                  ? null
+                                  : _buildHolidayBackground(context, day);
+                              return Stack(
+                                children: [
+                                  ?bg,
+                                  Container(
+                                    margin: const EdgeInsets.all(6.0),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${day.day}',
+                                      style: TextStyle(
+                                        color: colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            holidayBuilder: (context, day, focusedDay) {
+                              final isOutside = day.month != focusedDay.month;
+                              final formattedDate =
+                                  "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+                              final type =
+                                  (_cachedHolidaysType[_currentYear] ??
+                                      {})[formattedDate] ??
+                                  'national';
+                              final isVacation =
+                                  type == 'winter_vacation' ||
+                                  type == 'summer_vacation';
+
+                              if (isOutside) {
+                                return Container(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '${day.day}',
+                                    style: TextStyle(
+                                      color: isVacation
+                                          ? Colors.amber.withValues(alpha: 0.55)
+                                          : Colors.red.withValues(alpha: 0.55),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              final bg = _buildHolidayBackground(context, day);
+                              return Stack(
+                                children: [
+                                  ?bg,
+                                  Container(
+                                    margin: const EdgeInsets.all(6.0),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${day.day}',
+                                      style: TextStyle(
+                                        color: isVacation
+                                            ? Colors.amber.shade900
+                                            : Colors.red.shade900,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            markerBuilder: (context, day, events) {
+                              if (events.isEmpty) return const SizedBox();
+                              if (isSameDay(_selectedDay, day)) {
+                                return const SizedBox();
+                              }
+                              final bool hasImportant = events
+                                  .cast<CalendarEvent>()
+                                  .any((e) => e.isImportant);
+
+                              return Positioned(
+                                bottom: 2,
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: hasImportant
+                                        ? Colors.amber
+                                        : colorScheme.primary,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
+              ),
 
-                const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-                Expanded(
-                  child: _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _errorMessage != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(height: 16),
-                              Text('發生錯誤：$_errorMessage'),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () =>
-                                    _fetchYearIfNeeded(_currentYear),
-                                child: const Text('重試'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(
-                            left: 8,
-                            right: 16,
-                            bottom: 16,
-                          ),
-                          itemCount: selectedEvents.isEmpty
-                              ? 2
-                              : selectedEvents.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    SizedBox(
-                                      width: 40,
-                                      child: CustomPaint(
-                                        painter: TimelinePainter(
-                                          isFirst: true,
-                                          isLast: selectedEvents
-                                              .isEmpty,
-                                          color: colorScheme.primary,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16.0,
-                                        ),
-                                        child: Text(
-                                          '${_selectedDay?.year} 年 ${_selectedDay?.month} 月 ${_selectedDay?.day} 日',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: colorScheme.onSurface,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            if (selectedEvents.isEmpty) {
-
-                              return const Padding(
-                                padding: EdgeInsets.only(left: 48.0, top: 16.0),
-                                child: Text(
-                                  '本日無行程',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              );
-                            }
-
-                            final eventIndex = index - 1;
-                            final event = selectedEvents[eventIndex];
-                            final bool isFirst = false;
-                            final bool isLast =
-                                eventIndex == selectedEvents.length - 1;
-                            final bool isImportant = event.isImportant;
-
-                            final Color lineColor = isImportant
-                                ? Colors.amber
-                                : colorScheme.primary;
-
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            Text('發生錯誤：$_errorMessage'),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => _fetchYearIfNeeded(_currentYear),
+                              child: const Text('重試'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(
+                          left: 8,
+                          right: 16,
+                          bottom: 16,
+                        ),
+                        itemCount: selectedEvents.isEmpty
+                            ? 2
+                            : selectedEvents.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
                             return IntrinsicHeight(
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-
                                   SizedBox(
                                     width: 40,
                                     child: CustomPaint(
                                       painter: TimelinePainter(
-                                        isFirst: isFirst,
-                                        isLast: isLast,
-                                        color: lineColor,
+                                        isFirst: true,
+                                        isLast: selectedEvents.isEmpty,
+                                        color: colorScheme.primary,
                                       ),
                                     ),
                                   ),
-
                                   Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 2.0,
+                                        vertical: 16.0,
                                       ),
-                                      child: Card(
-                                        elevation: 0,
-                                        color: isImportant
-                                            ? Colors.amber.withValues(
-                                                alpha: 0.15,
-                                              )
-                                            : colorScheme
-                                                  .surfaceContainerHighest,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          side: BorderSide(
-                                            color: isImportant
-                                                ? Colors.amber.withValues(
-                                                    alpha: 0.3,
-                                                  )
-                                                : Colors.transparent,
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0,
-                                            vertical: 8.0,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              if (isImportant) ...[
-                                                Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber.shade700,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 8),
-                                              ],
-                                              Expanded(
-                                                child: Text(
-                                                  event.name,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight
-                                                        .normal,
-                                                    fontSize: 15,
-                                                    color: isImportant
-                                                        ? Colors.amber.shade900
-                                                        : colorScheme
-                                                              .onSurfaceVariant,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                      child: Text(
+                                        '${_selectedDay?.year} 年 ${_selectedDay?.month} 月 ${_selectedDay?.day} 日',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                     ),
@@ -918,11 +793,106 @@ class CalendarScreenState extends State<CalendarScreen> {
                                 ],
                               ),
                             );
-                          },
-                        ),
-                ),
-              ],
-            );
+                          }
+
+                          if (selectedEvents.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(left: 48.0, top: 16.0),
+                              child: Text(
+                                '本日無行程',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            );
+                          }
+
+                          final eventIndex = index - 1;
+                          final event = selectedEvents[eventIndex];
+                          final bool isFirst = false;
+                          final bool isLast =
+                              eventIndex == selectedEvents.length - 1;
+                          final bool isImportant = event.isImportant;
+
+                          final Color lineColor = isImportant
+                              ? Colors.amber
+                              : colorScheme.primary;
+
+                          return IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                SizedBox(
+                                  width: 40,
+                                  child: CustomPaint(
+                                    painter: TimelinePainter(
+                                      isFirst: isFirst,
+                                      isLast: isLast,
+                                      color: lineColor,
+                                    ),
+                                  ),
+                                ),
+
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 2.0,
+                                    ),
+                                    child: Card(
+                                      elevation: 0,
+                                      color: isImportant
+                                          ? Colors.amber.withValues(alpha: 0.15)
+                                          : colorScheme.surfaceContainerHighest,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: BorderSide(
+                                          color: isImportant
+                                              ? Colors.amber.withValues(
+                                                  alpha: 0.3,
+                                                )
+                                              : Colors.transparent,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0,
+                                          vertical: 8.0,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            if (isImportant) ...[
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.amber.shade700,
+                                                size: 20,
+                                              ),
+                                              const SizedBox(width: 8),
+                                            ],
+                                            Expanded(
+                                              child: Text(
+                                                event.name,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  fontSize: 15,
+                                                  color: isImportant
+                                                      ? Colors.amber.shade900
+                                                      : colorScheme
+                                                            .onSurfaceVariant,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
 
     if (widget.embed) {
       return bodyContent;

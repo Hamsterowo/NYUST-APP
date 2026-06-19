@@ -9,6 +9,7 @@ import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
 import 'course_detail_screen.dart';
+import 'map_screen.dart';
 
 class GraduationContent extends StatelessWidget {
   const GraduationContent({super.key});
@@ -418,6 +419,7 @@ class ScheduleScreen extends StatefulWidget {
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
+  bool _isMapMode = false;
   final List<String> _periods = [
     'X',
     'A',
@@ -485,7 +487,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () {
-                context.read<NavigationProvider>().setIndex(2);
+                context.read<NavigationProvider>().setIndex(4);
                 showTopSnackBar(context, '請在此登入以查看課表');
               },
               child: const Text('前往登入'),
@@ -515,6 +517,24 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       appBar: CustomAppBar(
         title: '課表',
         onRefresh: data.isLoadingSchedule ? null : () => data.fetchSchedule(),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isMapMode ? Icons.map : Icons.map_outlined,
+              color: _isMapMode ? colorScheme.primary : null,
+            ),
+            onPressed: () {
+              setState(() {
+                _isMapMode = !_isMapMode;
+              });
+              showTopSnackBar(
+                context,
+                _isMapMode ? '已開啟地圖定位模式，點擊課程直接前往地圖' : '已關閉地圖定位模式',
+              );
+            },
+            tooltip: '地圖定位模式',
+          ),
+        ],
       ),
       body: bodyContent,
     );
@@ -781,7 +801,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             elevation: 0,
             shape: RoundedRectangleBorder(
               side: BorderSide(color: colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
               children: [
@@ -914,8 +934,32 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _buildCourseCard(ScheduleEvent event) {
     final colorScheme = Theme.of(context).colorScheme;
+    final hasRoom = event.room != null && event.room!.isNotEmpty;
+    final isLocatable = _isMapMode && hasRoom;
+
     return GestureDetector(
       onTap: () {
+        if (_isMapMode) {
+          if (hasRoom) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MapScreen(
+                  embed: false,
+                  targetRoomCode: event.room,
+                ),
+              ),
+            );
+          } else {
+            showTopSnackBar(
+              context,
+              '此課程無指定教室，無法定位',
+              type: SnackBarType.warning,
+            );
+          }
+          return;
+        }
+
         if (event.year != null &&
             event.semester != null &&
             event.courseNo != null) {
@@ -961,8 +1005,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         margin: const EdgeInsets.all(2),
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.8),
+          color: isLocatable
+              ? colorScheme.secondaryContainer.withValues(alpha: 0.95)
+              : colorScheme.primaryContainer.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(6),
+          border: isLocatable
+              ? Border.all(color: colorScheme.secondary, width: 1.5)
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -972,22 +1021,44 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 event.name,
                 style: TextStyle(
                   fontSize: 15,
-                  color: colorScheme.onPrimaryContainer,
+                  color: isLocatable
+                      ? colorScheme.onSecondaryContainer
+                      : colorScheme.onPrimaryContainer,
                   height: 1.15,
+                  fontWeight: isLocatable ? FontWeight.bold : FontWeight.normal,
                 ),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (event.room != null && event.room!.isNotEmpty)
-              Text(
-                event.room!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            if (hasRoom)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      event.room!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isLocatable
+                            ? colorScheme.onSecondaryContainer.withValues(
+                                alpha: 0.8,
+                              )
+                            : colorScheme.onPrimaryContainer.withValues(
+                                alpha: 0.7,
+                              ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isLocatable)
+                    Icon(
+                      Icons.near_me_rounded,
+                      size: 12,
+                      color: colorScheme.secondary,
+                    ),
+                ],
               ),
           ],
         ),
@@ -995,3 +1066,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 }
+
+class GraduationScreen extends StatelessWidget {
+  const GraduationScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = context.watch<DataProvider>();
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: '畢業學分',
+        onRefresh: data.isLoadingGraduation
+            ? null
+            : () => data.fetchGraduation(),
+      ),
+      body: const GraduationContent(),
+    );
+  }
+}
+
