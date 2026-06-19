@@ -8,13 +8,15 @@ import '../widgets/campus_map_painter.dart';
 
 class MapScreen extends StatefulWidget {
   final bool embed;
-  const MapScreen({super.key, this.embed = false});
+  final String? targetRoomCode;
+  const MapScreen({super.key, this.embed = false, this.targetRoomCode});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
+  final GlobalKey _mapKey = GlobalKey();
   List<SvgPathData> _paths = [];
   List<MapBuilding> _buildings = [];
   String? _selectedBuildingId;
@@ -32,6 +34,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   late AnimationController _labelOpacityController;
   late Animation<double> _labelOpacityAnimation;
+  String? _pendingZoomBuildingId;
+  String? _queryRoomCode;
 
   @override
   void initState() {
@@ -73,8 +77,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
     if (buildingId == null) {
       _previouslySelectedBuildingId = _selectedBuildingId;
+      _pendingZoomBuildingId = null;
+      _queryRoomCode = null;
     } else {
       _previouslySelectedBuildingId = null;
+      _queryRoomCode = null;
     }
 
     setState(() {
@@ -115,6 +122,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           _totalBounds = totalBounds;
           _isLoading = false;
         });
+
+        if (widget.targetRoomCode != null && widget.targetRoomCode!.isNotEmpty) {
+          _handleAutoTargetRoom(widget.targetRoomCode!, buildings);
+        }
       }
     } catch (e) {
       debugPrint("Error loading map data: $e");
@@ -123,6 +134,42 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  void _handleAutoTargetRoom(String roomCode, List<MapBuilding> buildings) {
+    final regExp = RegExp(r'^([A-Za-z]+)(\d*)');
+    final match = regExp.firstMatch(roomCode.trim());
+    if (match == null) return;
+
+    final String codePrefix = match.group(1)!.toUpperCase();
+
+    MapBuilding? targetBuilding;
+    for (var b in buildings) {
+      final bIdUpper = b.id.toUpperCase();
+      if (bIdUpper.endsWith('-$codePrefix') ||
+          b.aliases.any((alias) => alias.toUpperCase() == codePrefix)) {
+        targetBuilding = b;
+        break;
+      }
+    }
+
+    if (targetBuilding != null) {
+      final bId = targetBuilding.id;
+      _updateSelection(bId);
+
+      setState(() {
+        _queryRoomCode = roomCode;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final renderBox = _mapKey.currentContext?.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            _zoomToBuilding(bId, renderBox.size);
+          }
+        }
+      });
     }
   }
 
@@ -155,8 +202,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
     if (buildingBounds == Rect.zero || _totalBounds.isEmpty) return;
 
-    double scaleX = viewportSize.width / _totalBounds.width;
-    double scaleY = viewportSize.height / _totalBounds.height;
+    final double scaleX = viewportSize.width / _totalBounds.width;
+    final double scaleY = viewportSize.height / _totalBounds.height;
     double fitScale = scaleX < scaleY ? scaleX : scaleY;
     fitScale *= 0.95;
 
@@ -186,6 +233,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   void _handleMapTap(Offset localPosition, Size viewportSize) {
+    FocusScope.of(context).unfocus();
     if (_totalBounds.isEmpty || _paths.isEmpty) return;
 
     double scaleX = viewportSize.width / _totalBounds.width;
@@ -299,6 +347,31 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
+            if (_queryRoomCode != null) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colorScheme.secondary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.search_rounded, size: 14, color: colorScheme.secondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '查詢教室：$_queryRoomCode',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (building.keyLocations.isNotEmpty) ...[
               const SizedBox(height: 6),
               Wrap(
@@ -363,7 +436,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 Expanded(
                   child: FilledButton.icon(
                     icon: const Icon(Icons.layers_outlined, size: 16),
-                    label: const Text('平面圖建置中', style: TextStyle(fontSize: 13)),
+                    label: Text(
+                      _queryRoomCode != null
+                          ? '$_queryRoomCode 平面圖不可用'
+                          : '平面圖建置中',
+                      style: const TextStyle(fontSize: 13),
+                    ),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       backgroundColor: Colors.grey,
@@ -402,14 +480,14 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
     setState(() {
       _searchResults = [];
+      _pendingZoomBuildingId = building.id;
     });
     _updateSelection(building.id);
-
-    _zoomToBuilding(building.id, viewportSize);
   }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (_isLoading) {
@@ -434,7 +512,23 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       builder: (context, constraints) {
         final viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
 
+        if (_pendingZoomBuildingId != null) {
+          final viewInsetsBottom = mediaQuery.viewInsets.bottom;
+          if (viewInsetsBottom == 0) {
+            final buildingId = _pendingZoomBuildingId!;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && _pendingZoomBuildingId == buildingId) {
+                setState(() {
+                  _pendingZoomBuildingId = null;
+                });
+                _zoomToBuilding(buildingId, viewportSize);
+              }
+            });
+          }
+        }
+
         return Stack(
+          key: _mapKey,
           children: [
             InteractiveViewer(
               transformationController: _transformationController,
@@ -470,65 +564,94 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               top: 16,
               left: 16,
               right: 16,
-              child: Column(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SearchBar(
-                    controller: _searchController,
-                    hintText: '搜尋校園大樓 (例: 工五, 5, 活動中心)...',
-                    leading: const Icon(Icons.search),
-                    trailing: _searchController.text.isNotEmpty
-                        ? [
-                            IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                                _onSearchChanged('');
-                              },
-                            ),
-                          ]
-                        : null,
-                    onChanged: _onSearchChanged,
-                  ),
-                  if (_searchResults.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 250),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: _searchResults.length,
-                          itemBuilder: (context, index) {
-                            final building = _searchResults[index];
-                            return ListTile(
-                              leading: const Icon(Icons.location_city_outlined),
-                              title: Text(building.name),
-                              subtitle: Text(
-                                building.keyLocations.isNotEmpty
-                                    ? building.keyLocations.join(", ")
-                                    : building.description,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              onTap: () =>
-                                  _selectSearchResult(building, viewportSize),
-                            );
-                          },
+                  if (!widget.embed) ...[
+                    IconButton.filled(
+                      onPressed: () => Navigator.maybePop(context),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      style: IconButton.styleFrom(
+                        backgroundColor: colorScheme.surface,
+                        foregroundColor: colorScheme.onSurface,
+                        minimumSize: const Size(56, 56),
+                        maximumSize: const Size(56, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
                         ),
+                        elevation: 1,
+                        shadowColor: Colors.black.withValues(alpha: 0.1),
                       ),
                     ),
+                    const SizedBox(width: 12),
                   ],
+                  Expanded(
+                    child: Column(
+                      children: [
+                        SearchBar(
+                          controller: _searchController,
+                          hintText: '搜尋系館名稱或代號',
+                          leading: const Icon(Icons.search),
+                          trailing: _searchController.text.isNotEmpty
+                              ? [
+                                  IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      _onSearchChanged('');
+                                    },
+                                  ),
+                                ]
+                              : null,
+                          onChanged: _onSearchChanged,
+                        ),
+                        if (_searchResults.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            constraints: const BoxConstraints(maxHeight: 250),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: _searchResults.length,
+                                itemBuilder: (context, index) {
+                                  final building = _searchResults[index];
+                                  return ListTile(
+                                    leading: const Icon(
+                                      Icons.location_city_outlined,
+                                    ),
+                                    title: Text(building.name),
+                                    subtitle: Text(
+                                      building.keyLocations.isNotEmpty
+                                          ? building.keyLocations.join(", ")
+                                          : building.description,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    onTap: () => _selectSearchResult(
+                                      building,
+                                      viewportSize,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

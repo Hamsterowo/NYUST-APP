@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/navigation_provider.dart';
 import 'overview_screen.dart';
+import 'schedule_screen.dart';
 import 'info_screen.dart';
+import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
 
@@ -17,7 +19,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const OverviewScreen(),
+    const ScheduleScreen(),
     const InfoScreen(),
+    const CalendarScreen(),
     const ProfileScreen(),
   ];
 
@@ -96,6 +100,63 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildNavItem({
+    required BuildContext context,
+    required int index,
+    required IconData activeIcon,
+    required IconData inactiveIcon,
+    required String label,
+    required int currentIndex,
+    required ColorScheme colorScheme,
+  }) {
+    final isSelected = index == currentIndex;
+    final activeColor = colorScheme.primary;
+    final inactiveColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          context.read<NavigationProvider>().setIndex(index);
+        },
+        borderRadius: BorderRadius.circular(24),
+        splashColor: colorScheme.primary.withValues(alpha: 0.1),
+        highlightColor: Colors.transparent,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: AnimatedScale(
+                  scale: isSelected ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  child: Icon(
+                    isSelected ? activeIcon : inactiveIcon,
+                    color: isSelected ? activeColor : inactiveColor,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontFamily: 'JFOpenHuninn',
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? activeColor : inactiveColor,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final navigation = context.watch<NavigationProvider>();
@@ -108,30 +169,82 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: IndexedStack(index: currentIndex, children: _screens),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
-          context.read<NavigationProvider>().setIndex(index);
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: '總覽',
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          height: 66,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+              width: 1.0,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.info_outline),
-            selectedIcon: Icon(Icons.info),
-            label: '資訊',
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildNavItem(
+                context: context,
+                index: 0,
+                activeIcon: Icons.dashboard,
+                inactiveIcon: Icons.dashboard_outlined,
+                label: '總覽',
+                currentIndex: currentIndex,
+                colorScheme: colorScheme,
+              ),
+              _buildNavItem(
+                context: context,
+                index: 1,
+                activeIcon: Icons.table_chart,
+                inactiveIcon: Icons.table_chart_outlined,
+                label: '課表',
+                currentIndex: currentIndex,
+                colorScheme: colorScheme,
+              ),
+              _buildNavItem(
+                context: context,
+                index: 2,
+                activeIcon: Icons.info,
+                inactiveIcon: Icons.info_outline,
+                label: '資訊',
+                currentIndex: currentIndex,
+                colorScheme: colorScheme,
+              ),
+              _buildNavItem(
+                context: context,
+                index: 3,
+                activeIcon: Icons.calendar_month,
+                inactiveIcon: Icons.calendar_month_outlined,
+                label: '行事曆',
+                currentIndex: currentIndex,
+                colorScheme: colorScheme,
+              ),
+              _buildNavItem(
+                context: context,
+                index: 4,
+                activeIcon: Icons.settings,
+                inactiveIcon: Icons.settings_outlined,
+                label: '設定',
+                currentIndex: currentIndex,
+                colorScheme: colorScheme,
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            selectedIcon: Icon(Icons.settings),
-            label: '設定',
-          ),
-        ],
+        ),
       ),
     );
   }

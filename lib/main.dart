@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/data_provider.dart';
 import 'providers/navigation_provider.dart';
-import 'providers/weather_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/grades_screen.dart';
 import 'screens/graduation_screen.dart';
@@ -18,7 +17,6 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => WeatherProvider()),
         ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
           create: (ctx) => DataProvider(
             Provider.of<AuthProvider>(ctx, listen: false).api,

@@ -13,7 +13,10 @@ class DataProvider with ChangeNotifier {
   final ApiService _api;
   final AuthProvider _auth;
 
+  Future<void>? _cacheLoadingFuture;
+
   DataProvider(this._api, this._auth) {
+    _cacheLoadingFuture = _loadCache();
     _init();
   }
 
@@ -26,6 +29,52 @@ class DataProvider with ChangeNotifier {
     _auth.onLoginSuccess = () => prefetchAll();
 
     _auth.onLogoutCallback = () => clearAll();
+  }
+
+  Future<void> _loadCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Load grades cache
+      final cachedGrades = prefs.getString('cache_grades');
+      if (cachedGrades != null && gradesData == null) {
+        final map = jsonDecode(cachedGrades) as Map;
+        final newMap = <String, dynamic>{};
+        map.forEach((key, value) {
+          newMap[key.toString()] = value;
+        });
+        gradesData = newMap;
+      }
+
+      // Load graduation cache
+      final cachedGraduation = prefs.getString('cache_graduation');
+      if (cachedGraduation != null && graduationData == null) {
+        final map = jsonDecode(cachedGraduation) as Map;
+        final newMap = <String, dynamic>{};
+        map.forEach((key, value) {
+          newMap[key.toString()] = value;
+        });
+        graduationData = newMap;
+      }
+
+      // Load schedule cache
+      final cachedSchedule = prefs.getString('cache_schedule');
+      if (cachedSchedule != null && scheduleData.isEmpty) {
+        final List<dynamic> raw = jsonDecode(cachedSchedule);
+        scheduleData = raw.map((e) {
+          final map = e as Map;
+          final newMap = <String, dynamic>{};
+          map.forEach((key, value) {
+            newMap[key.toString()] = value;
+          });
+          return ScheduleEvent.fromJson(newMap);
+        }).toList();
+      }
+
+      notifyListeners();
+    } catch (e) {
+      if (kDebugMode) print('DataProvider: _loadCache error: $e');
+    }
   }
 
   Map<String, dynamic>? gradesData;
@@ -98,6 +147,8 @@ class DataProvider with ChangeNotifier {
   Future<void> fetchGrades() async {
     if (isLoadingGrades) return;
 
+    if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
+
     if (gradesData == null) {
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString('cache_grades');
@@ -143,6 +194,8 @@ class DataProvider with ChangeNotifier {
   Future<void> fetchGraduation() async {
     if (isLoadingGraduation) return;
 
+    if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
+
     if (graduationData == null) {
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString('cache_graduation');
@@ -187,6 +240,8 @@ class DataProvider with ChangeNotifier {
 
   Future<void> fetchSchedule() async {
     if (isLoadingSchedule) return;
+
+    if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
 
     if (scheduleData.isEmpty) {
       final prefs = await SharedPreferences.getInstance();

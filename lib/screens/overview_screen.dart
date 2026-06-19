@@ -9,9 +9,7 @@ import '../models/calendar_event.dart';
 import '../services/calendar_cache_service.dart';
 import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/weather_card.dart';
 import '../utils/top_snack_bar.dart';
-import '../providers/weather_provider.dart';
 import 'course_detail_screen.dart';
 import 'terms_of_service_screen.dart';
 
@@ -24,6 +22,7 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen> {
   List<CalendarEvent>? _todayEvents;
+  List<CalendarEvent>? _allEvents;
   bool _isLoadingCalendar = true;
 
   @override
@@ -31,7 +30,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
     super.initState();
     _fetchTodayCalendar();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WeatherProvider>().fetchWeather();
       _checkTermsAgreement();
     });
   }
@@ -62,10 +60,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Future<void> _handleRefresh() async {
-    await Future.wait([
-      _fetchTodayCalendar(),
-      context.read<WeatherProvider>().fetchWeather(),
-    ]);
+    await _fetchTodayCalendar();
   }
 
   Future<void> _fetchTodayCalendar() async {
@@ -86,6 +81,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
             "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
         setState(() {
+          _allEvents = events;
           final upcomingEvents = events
               .where((e) => e.date.compareTo(todayStr) >= 0)
               .toList();
@@ -103,6 +99,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       } else {
         if (mounted) {
           setState(() {
+            _allEvents = [];
             _isLoadingCalendar = false;
             _todayEvents = [];
           });
@@ -111,6 +108,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
+          _allEvents = [];
           _isLoadingCalendar = false;
           _todayEvents = [];
         });
@@ -118,23 +116,331 @@ class _OverviewScreenState extends State<OverviewScreen> {
     }
   }
 
-  String _getGreeting(String name) {
-    final now = DateTime.now();
-    final timeDouble = now.hour + now.minute / 60.0;
+  Map<String, dynamic> _getCountdownData(
+    List<CalendarEvent> events,
+    DateTime now,
+  ) {
+    final year = now.year;
 
-    final displayName = name.isNotEmpty ? name : '';
+    DateTime? winterStart;
+    DateTime? sem2Start;
+    DateTime? summerStart;
+    DateTime? sem1Start;
 
-    if (timeDouble >= 5.0 && timeDouble < 11.5) {
-      return '早安，$displayName同學';
-    } else if (timeDouble >= 11.5 && timeDouble < 17.0) {
-      return '午安，$displayName同學';
-    } else {
-      return '晚安，$displayName同學';
+    for (var event in events) {
+      final date = event.getDateTime();
+      if (date.year != year) continue;
+
+      final name = event.name;
+
+      if ((name.contains('寒假') &&
+              (name.contains('開始') ||
+                  name.contains('起') ||
+                  name.contains('放'))) &&
+          (date.month == 12 || date.month == 1)) {
+        winterStart = date;
+      }
+      if ((name.contains('開始上課') ||
+              name.contains('上課開始') ||
+              name.contains('開學') ||
+              name.contains('正式上課')) &&
+          (date.month == 2 || date.month == 3)) {
+        if (sem2Start == null || date.isBefore(sem2Start)) {
+          sem2Start = date;
+        }
+      }
+      if ((name.contains('暑假') &&
+              (name.contains('開始') ||
+                  name.contains('起') ||
+                  name.contains('放'))) &&
+          (date.month == 5 || date.month == 6 || date.month == 7)) {
+        summerStart = date;
+      }
+      if ((name.contains('開始上課') ||
+              name.contains('上課開始') ||
+              name.contains('開學') ||
+              name.contains('正式上課')) &&
+          (date.month == 8 || date.month == 9)) {
+        if (sem1Start == null || date.isBefore(sem1Start)) {
+          sem1Start = date;
+        }
+      }
     }
+
+    if (winterStart == null ||
+        sem2Start == null ||
+        summerStart == null ||
+        sem1Start == null) {
+      return {'error': true, 'message': '無法顯示寒暑假時間'};
+    }
+
+    DateTime start;
+    DateTime end;
+    String label;
+    bool isVacation;
+
+    final nowZero = DateTime(now.year, now.month, now.day);
+    final winterStartZero = DateTime(
+      winterStart.year,
+      winterStart.month,
+      winterStart.day,
+    );
+    final sem2StartZero = DateTime(
+      sem2Start.year,
+      sem2Start.month,
+      sem2Start.day,
+    );
+    final summerStartZero = DateTime(
+      summerStart.year,
+      summerStart.month,
+      summerStart.day,
+    );
+    final sem1StartZero = DateTime(
+      sem1Start.year,
+      sem1Start.month,
+      sem1Start.day,
+    );
+
+    if (nowZero.isAfter(winterStartZero) && nowZero.isBefore(sem2StartZero)) {
+      start = winterStartZero;
+      end = sem2StartZero;
+      label = '開學';
+      isVacation = true;
+    } else if (nowZero.isAfter(sem2StartZero) &&
+        nowZero.isBefore(summerStartZero)) {
+      start = sem2StartZero;
+      end = summerStartZero;
+      label = '暑假';
+      isVacation = false;
+    } else if (nowZero.isAfter(summerStartZero) &&
+        nowZero.isBefore(sem1StartZero)) {
+      start = summerStartZero;
+      end = sem1StartZero;
+      label = '開學';
+      isVacation = true;
+    } else if (nowZero.isAfter(sem1StartZero)) {
+      start = sem1StartZero;
+      end = DateTime(year + 1, winterStartZero.month, winterStartZero.day);
+      label = '寒假';
+      isVacation = false;
+    } else {
+      start = DateTime(year - 1, sem1StartZero.month, sem1StartZero.day);
+      end = winterStartZero;
+      label = '寒假';
+      isVacation = false;
+    }
+
+    final totalDays = end.difference(start).inDays;
+    final remainingDays = end.difference(nowZero).inDays;
+
+    if (totalDays <= 0 || remainingDays < 0) {
+      return {'error': true, 'message': '無法顯示寒暑假時間'};
+    }
+
+    final elapsedDays = totalDays - remainingDays;
+    double progress = elapsedDays / totalDays;
+    if (progress < 0.0) progress = 0.0;
+    if (progress > 1.0) progress = 1.0;
+
+    return {
+      'error': false,
+      'label': label,
+      'remainingDays': remainingDays,
+      'progress': progress,
+      'isVacation': isVacation,
+      'startStr':
+          '${start.month.toString().padLeft(2, '0')}/${start.day.toString().padLeft(2, '0')}',
+      'endStr':
+          '${end.month.toString().padLeft(2, '0')}/${end.day.toString().padLeft(2, '0')}',
+    };
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year} 年 ${date.month} 月 ${date.day} 日';
+  Widget _buildCountdownCard(
+    BuildContext context,
+    ColorScheme colorScheme,
+    DateTime now,
+  ) {
+    if (_isLoadingCalendar || _allEvents == null) {
+      return Container(
+        height: 120,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            ShimmerBox(
+              width: 120,
+              height: 18,
+              margin: EdgeInsets.only(bottom: 12),
+            ),
+            ShimmerBox(
+              width: double.infinity,
+              height: 8,
+              margin: EdgeInsets.only(bottom: 12),
+            ),
+            ShimmerBox(width: 80, height: 14),
+          ],
+        ),
+      );
+    }
+
+    final data = _getCountdownData(_allEvents!, now);
+
+    if (data['error'] == true) {
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF64748B), Color(0xFF475569)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF475569).withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.white70, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                data['message'] ?? '無法顯示寒暑假時間',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final bool isVacation = data['isVacation'] ?? false;
+    final List<Color> gradientColors = isVacation
+        ? const [Color(0xFFEA580C), Color(0xFFF59E0B)]
+        : const [Color(0xFF0284C7), Color(0xFF10B981)];
+
+    final double progress = data['progress'] ?? 0.0;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: gradientColors.last.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '${data['label']}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    const Text(
+                      '還有',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${data['remainingDays']}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      '天',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                minHeight: 8,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '已度過 ${(progress * 100).toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  '${data['startStr']} - ${data['endStr']}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -156,22 +462,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _getGreeting(userName),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '今天是 ${_formatDate(now)}',
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 16),
-
-                  const WeatherCard(),
-
-                  const SizedBox(height: 32),
+                  _buildCountdownCard(context, colorScheme, now),
+                  const SizedBox(height: 24),
 
                   _buildTodayClassesSection(context, auth, data, colorScheme),
 
@@ -203,7 +495,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: colorScheme.surfaceContainerHighest),
           ),
           child:
@@ -270,7 +562,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
             elevation: 0,
             shape: RoundedRectangleBorder(
               side: BorderSide(color: colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: const Padding(
               padding: EdgeInsets.all(24.0),
@@ -306,7 +598,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               padding: const EdgeInsets.only(bottom: 12.0),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.outlineVariant,
                   ),
@@ -355,15 +647,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
             elevation: 0,
             shape: RoundedRectangleBorder(
               side: BorderSide(color: colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: const Padding(
               padding: EdgeInsets.all(24.0),
               child: Center(
-                child: Text(
-                  '今日無課程，好好放鬆吧！',
-                  style: TextStyle(color: Colors.grey),
-                ),
+                child: Text('今日無課程！', style: TextStyle(color: Colors.grey)),
               ),
             ),
           ),
@@ -553,7 +842,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       elevation: isCurrent ? 2 : 0,
       color: cardColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
         side: BorderSide(color: borderColor),
       ),
       clipBehavior: Clip.antiAlias,
@@ -611,7 +900,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: iconBgColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
