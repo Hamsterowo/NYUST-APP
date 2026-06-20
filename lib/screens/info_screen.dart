@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'grades_screen.dart';
 import 'graduation_screen.dart';
 import 'map_screen.dart';
@@ -83,7 +84,7 @@ class InfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: '資訊'),
+      appBar: CustomAppBar(title: AppLocalizations.of(context).infoTitle),
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -92,68 +93,56 @@ class InfoScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Card 1: Grades
-              SizedBox(
-                height: 100,
-                width: double.infinity,
-                child: _buildDashboardCard(
-                  context,
-                  title: '成績查詢',
-                  description: '查詢學期與歷年成績及班級排名',
-                  icon: Icons.school_rounded,
-                  themeColor: const Color(0xFF0D9488),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const GradesScreen(embed: false),
-                      ),
-                    );
-                  },
-                ),
+              _buildDashboardCard(
+                context,
+                title: AppLocalizations.of(context).infoGradesTitle,
+                description: AppLocalizations.of(context).infoGradesDesc,
+                icon: Icons.school_rounded,
+                themeColor: const Color(0xFF0D9488),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const GradesScreen(embed: false),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
 
               // Card 2: Graduation Credits
-              SizedBox(
-                height: 100,
-                width: double.infinity,
-                child: _buildDashboardCard(
-                  context,
-                  title: '畢業學分',
-                  description: '檢視畢業門檻與修課學分進度',
-                  icon: Icons.workspace_premium_rounded,
-                  themeColor: const Color(0xFFD97706),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const GraduationScreen(),
-                      ),
-                    );
-                  },
-                ),
+              _buildDashboardCard(
+                context,
+                title: AppLocalizations.of(context).infoGradTitle,
+                description: AppLocalizations.of(context).infoGradDesc,
+                icon: Icons.workspace_premium_rounded,
+                themeColor: const Color(0xFFD97706),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const GraduationScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
 
               // Card 3: Campus Map
-              SizedBox(
-                height: 100,
-                width: double.infinity,
-                child: _buildDashboardCard(
-                  context,
-                  title: '校園地圖',
-                  description: '查看校園地圖，提供搜尋功能快速查看系館位置',
-                  icon: Icons.map_rounded,
-                  themeColor: const Color(0xFF4F46E5),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const MapScreen(embed: false),
-                      ),
-                    );
-                  },
-                ),
+              _buildDashboardCard(
+                context,
+                title: AppLocalizations.of(context).infoMapTitle,
+                description: AppLocalizations.of(context).infoMapDesc,
+                icon: Icons.map_rounded,
+                themeColor: const Color(0xFF4F46E5),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MapScreen(embed: false),
+                    ),
+                  );
+                },
               ),
             ],
           ),

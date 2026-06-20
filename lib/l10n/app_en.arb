@@ -1,0 +1,303 @@
+{
+  "@@locale": "en",
+  "appName": "NYUST+",
+  "settingsTitle": "Settings",
+  "navOverview": "Overview",
+  "navSchedule": "Schedule",
+  "navInfo": "Info",
+  "navCalendar": "Calendar",
+  "navSettings": "Settings",
+  "languageSetting": "Language Settings",
+  "languageSettingSub": "Change App language in system settings",
+  "privacyPolicy": "YunTech Portal Privacy Policy",
+  "termsOfService": "NYUST+ Terms of Service",
+  "logout": "Logout",
+  "reportIssue": "Report an Issue",
+  "installApp": "Install APP",
+  "notPromoted": "Don't show again",
+  "ok": "OK",
+  "confirm": "Confirm",
+  "install": "Install",
+  "profileDisclaimer": "※ This page is for reference only and cannot be used as an official proof of enrollment.",
+  "installError": "Currently unable to install: You might have installed it already, or your browser does not support this feature.",
+  "featureNotFinished": "This feature is not finished yet.",
+  "installTitle": "Install NYUST+ APP",
+  "installDescIos": "Install NYUST+ shortcut to your device:\n\n1️⃣ Tap the \"Share\" icon at the bottom ⧧\n2️⃣ Scroll down and select \"Add to Home Screen\"\n3️⃣ Tap \"Add\"",
+  "installDescAndroid": "Install NYUST+ to your device to run directly without opening a browser.",
+
+  "vacationLabelStart": "Semester Starts",
+  "vacationLabelWinter": "Winter Vacation",
+  "vacationLabelSummer": "Summer Vacation",
+  "vacationError": "Cannot display holiday information",
+  "vacationCountdownPrefix": "Still",
+  "vacationCountdownSuffix": "Days",
+  "vacationElapsed": "{percentage}% elapsed",
+  "@vacationElapsed": {
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "todayClassesTitle": "Today's Classes",
+  "notLoggedInMessage": "You are not logged in. Please log in first.",
+  "noClassesToday": "No classes today!",
+  "upcomingEventsTitle": "Upcoming Campus Events",
+  "noUpcomingEvents": "No upcoming campus events scheduled.",
+  "noCourseDetail": "Detailed syllabus is not available for this course.",
+  "notSpecified": "Not Specified",
+  "classPeriods": "Period {periods}",
+  "@classPeriods": {
+    "placeholders": {
+      "periods": {
+        "type": "String"
+      }
+    }
+  },
+
+  "loginToUseAllFeatures": "Log in to use all features",
+  "goToLogin": "Go to Login",
+  "pleaseLoginToViewSchedule": "Please log in here to view your schedule.",
+  "mapModeEnabled": "Map positioning mode enabled. Tap a course to view on map.",
+  "mapModeDisabled": "Map positioning mode disabled",
+  "mapModeTooltip": "Map Mode",
+  "loadScheduleFailed": "Failed to load schedule",
+  "checkNetworkRetry": "Please check your network and try again.",
+  "retry": "Retry",
+  "noScheduleData": "No schedule data available",
+  "weekdayHeader": "{day}",
+  "@weekdayHeader": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+  "weekdaySun": "Sun",
+  "periodHeader": "Pd.",
+  "periodDetails": "Period {period}: {time}",
+  "@periodDetails": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noClassroomForLocation": "This course has no designated classroom and cannot be located.",
+  "classroomLabel": "Classroom: {room}",
+  "@classroomLabel": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherLabel": "Teacher: {teacher}",
+  "@teacherLabel": {
+    "placeholders": {
+      "teacher": {
+        "type": "String"
+      }
+    }
+  },
+  "timeLabel": "Time: {time}",
+  "@timeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "close": "Close",
+  "notDecided": "TBD",
+
+  "infoTitle": "Information",
+  "infoGradesTitle": "Grades Inquiry",
+  "infoGradesDesc": "Check semester grades, history, and class rankings.",
+  "infoGradTitle": "Graduation Credits",
+  "infoGradDesc": "Review graduation requirements and credit progress.",
+  "infoMapTitle": "Campus Map",
+  "infoMapDesc": "View the campus map with search functionality to quickly find buildings.",
+
+  "calendarTitle": "Calendar",
+  "legendTitle": "Calendar Icon Legend",
+  "legendBgColor": "Date Background Colors:",
+  "legendToday": "Today's Date",
+  "legendSelected": "Selected Date",
+  "legendHoliday": "National Holiday",
+  "legendVacation": "Winter / Summer Vacation",
+  "legendDots": "Event Markers:",
+  "legendEvent": "Standard Event",
+  "legendImportant": "Important Event",
+  "noEventsToday": "No events today",
+  "legendTooltip": "Icon Legend",
+  "backToTodayTooltip": "Back to Today",
+  "loadCalendarFailed": "Failed to load",
+  "loadErrorPrefix": "An error occurred: {error}",
+  "@loadErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesTitle": "Grades",
+  "gradesSegmentSemester": "Semester",
+  "gradesSegmentHistory": "History",
+  "gradesNoData": "No grades data available",
+  "gradesNoHistoryData": "No history grades data available",
+  "gradesNoCurrentData": "No grades data for the current semester",
+  "gradesNotEnrolled": "(Graduated or not enrolled this semester)",
+  "loadGradesFailed": "Failed to load grades",
+  "pleaseLoginToViewGrades": "Please log in here to view grades.",
+  "gradesAverage": "Average Score",
+  "gradesRank": "Class Rank",
+  "gradesEarnedCredits": "Earned Credits",
+  "gradesDetailHeader": "Course Grade Details for This Semester",
+  "gradesAllDetailHeader": "Course Grade Details",
+  "gradesAverageShort": "Avg: {avg}",
+  "@gradesAverageShort": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesRankShort": "Rank: {rank}",
+  "@gradesRankShort": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesCreditsShort": "Credits: {credits}",
+  "@gradesCreditsShort": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "courseCreditsFormat": "{credits} Credits",
+  "@courseCreditsFormat": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesSemesterTitle": "Semester {semester}, Academic Year {year}",
+  "@gradesSemesterTitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "semester": {
+        "type": "String"
+      }
+    }
+  },
+  "courseInstructor": "Instructor",
+  "courseContactInfo": "Contact Info",
+  "courseCurriculumNo": "Curriculum No.",
+  "courseCredits": "Credits",
+  "courseScheduleClassroom": "Schedule/Classroom",
+  "courseClass": "Class",
+  "courseRequiredElective": "Required/Elective",
+  "courseType": "Course Type",
+  "courseRemark": "Remark",
+  "courseGoal": "Teaching Objectives",
+  "courseOutline": "Course Outline",
+  "courseGrading": "Evaluation Methods",
+  "courseSyllabus": "Teaching Plan & Progress",
+  "courseNoData": "No Data",
+  "courseNone": "None",
+  "courseOpenInBrowser": "Open in Browser",
+  "courseOpenWebpageFailed": "Failed to open webpage",
+  "courseSelectRoomLocation": "Select Classroom Map Location",
+  "courseGoToRoomLocation": "Go to {room} Location",
+  "@courseGoToRoomLocation": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "courseInvalidRoomCode": "Invalid classroom code format, cannot locate",
+  "courseBuildingNotFound": "No location info found for building [{prefix}]",
+  "@courseBuildingNotFound": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "courseLoadMapDataFailed": "Failed to load map data: {error}",
+  "@courseLoadMapDataFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gradLoadFailed": "Failed to load graduation credits",
+  "gradNoData": "No graduation credits data available",
+  "gradDetailTitle": "Credit Statistics Details",
+  "gradTotalNotice": "* The total column is the sum of General Education, Required, and Elective credits",
+  "gradMissingRequiredCourses": "Uncompleted Required Courses",
+  "gradTotalEarnedCredits": "Total Earned Credits",
+  "gradEnglishThreshold": "English Requirement",
+  "gradInternshipThreshold": "Internship Requirement",
+  "gradCategory": "Category",
+  "gradRequired": "Required",
+  "gradEarned": "Earned",
+  "gradMissing": "Missing",
+  "gradYearFormat": "Grade {year}",
+  "@gradYearFormat": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "gradLabelPE": "P.E.",
+  "gradLabelCivilization": "Civilization",
+  "gradLabelLiterature": "Literature",
+  "gradLabelGeneral": "General Ed.",
+  "gradLabelDeptRequired": "Required",
+  "gradLabelElective": "Electives",
+  "gradLabelTotal": "Total",
+
+  "mapLoadingText": "Drawing vector campus map...",
+  "mapSearchHint": "Search building name or code",
+  "mapQueryRoom": "Query classroom: {room}",
+  "@mapQueryRoom": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "mapNoDescription": "No detailed description available for this building.",
+  "mapExternalNav": "External Navigation",
+  "mapFloorPlanUnderConstruction": "Floor Plan Under Construction",
+  "mapFloorPlanUnavailable": "{room} Floor Plan Unavailable",
+  "@mapFloorPlanUnavailable": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  }
+}
+

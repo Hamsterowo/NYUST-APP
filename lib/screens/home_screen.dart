@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/navigation_provider.dart';
+import '../providers/data_provider.dart';
 import 'overview_screen.dart';
 import 'schedule_screen.dart';
 import 'info_screen.dart';
@@ -52,14 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('安裝 NYUST+ APP'),
+        title: Text(AppLocalizations.of(context).installTitle),
         content: Text(
           isIos
-              ? '將 NYUST+ 捷徑安裝到您的裝置：\n\n'
-                    '1️⃣  點擊底部「分享」圖示 ⧧\n'
-                    '2️⃣  往下滞動，選擇「加入主畫面」\n'
-                    '3️⃣  點擊「加入」'
-              : '將 NYUST+ 安裝到您的裝置，不用開啟瀏覽器即可直接操作。',
+              ? AppLocalizations.of(context).installDescIos
+              : AppLocalizations.of(context).installDescAndroid,
         ),
         actions: [
           TextButton(
@@ -71,17 +70,17 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               Navigator.of(ctx).pop();
             },
-            child: const Text('不再提示'),
+            child: Text(AppLocalizations.of(context).notPromoted),
           ),
           if (isIos)
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('好的'),
+              child: Text(AppLocalizations.of(context).ok),
             )
           else ...[
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('確定'),
+              child: Text(AppLocalizations.of(context).confirm),
             ),
             FilledButton(
               onPressed: () {
@@ -92,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   } catch (_) {}
                 }
               },
-              child: const Text('安裝'),
+              child: Text(AppLocalizations.of(context).install),
             ),
           ],
         ],
@@ -157,8 +156,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String? _lastLocale;
+
   @override
   Widget build(BuildContext context) {
+    final newLocale = Localizations.localeOf(context).toString();
+    if (_lastLocale != null && _lastLocale != newLocale) {
+      if (kDebugMode) {
+        print('HomeScreen: Locale changed from $_lastLocale to $newLocale. Refreshing all data...');
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<DataProvider>().forceFetchAll();
+      });
+    }
+    _lastLocale = newLocale;
+
     final navigation = context.watch<NavigationProvider>();
     int currentIndex = navigation.currentIndex;
 
@@ -202,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 index: 0,
                 activeIcon: Icons.dashboard,
                 inactiveIcon: Icons.dashboard_outlined,
-                label: '總覽',
+                label: AppLocalizations.of(context).navOverview,
                 currentIndex: currentIndex,
                 colorScheme: colorScheme,
               ),
@@ -211,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 index: 1,
                 activeIcon: Icons.table_chart,
                 inactiveIcon: Icons.table_chart_outlined,
-                label: '課表',
+                label: AppLocalizations.of(context).navSchedule,
                 currentIndex: currentIndex,
                 colorScheme: colorScheme,
               ),
@@ -220,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 index: 2,
                 activeIcon: Icons.info,
                 inactiveIcon: Icons.info_outline,
-                label: '資訊',
+                label: AppLocalizations.of(context).navInfo,
                 currentIndex: currentIndex,
                 colorScheme: colorScheme,
               ),
@@ -229,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 index: 3,
                 activeIcon: Icons.calendar_month,
                 inactiveIcon: Icons.calendar_month_outlined,
-                label: '行事曆',
+                label: AppLocalizations.of(context).navCalendar,
                 currentIndex: currentIndex,
                 colorScheme: colorScheme,
               ),
@@ -238,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 index: 4,
                 activeIcon: Icons.settings,
                 inactiveIcon: Icons.settings_outlined,
-                label: '設定',
+                label: AppLocalizations.of(context).navSettings,
                 currentIndex: currentIndex,
                 colorScheme: colorScheme,
               ),

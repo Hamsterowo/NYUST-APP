@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import '../l10n/app_localizations.dart';
 import '../models/map_building_model.dart';
 import '../services/map_parser_service.dart';
 import '../widgets/campus_map_painter.dart';
@@ -278,12 +279,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         name: _selectedBuildingId!.replaceAll('building-', '').toUpperCase(),
         aliases: [],
         keyLocations: [],
-        description: '暫無此建築物之詳細介紹。',
+        description: AppLocalizations.of(context).mapNoDescription,
       ),
     );
 
-    // 已移除測試平面圖資料：預設不顯示平面圖功能以避免誤導
-    final bool hasFloorPlan = false;
 
     return Card(
       elevation: 6,
@@ -361,7 +360,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     Icon(Icons.search_rounded, size: 14, color: colorScheme.secondary),
                     const SizedBox(width: 4),
                     Text(
-                      '查詢教室：$_queryRoomCode',
+                      AppLocalizations.of(context).mapQueryRoom(_queryRoomCode ?? ''),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -422,7 +421,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.navigation_outlined, size: 16),
-                    label: const Text('外部地圖導航', style: TextStyle(fontSize: 13)),
+                    label: Text(
+                      AppLocalizations.of(context).mapExternalNav,
+                      style: const TextStyle(fontSize: 13),
+                    ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
@@ -438,8 +440,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     icon: const Icon(Icons.layers_outlined, size: 16),
                     label: Text(
                       _queryRoomCode != null
-                          ? '$_queryRoomCode 平面圖不可用'
-                          : '平面圖建置中',
+                          ? AppLocalizations.of(context)
+                              .mapFloorPlanUnavailable(_queryRoomCode!)
+                          : AppLocalizations.of(context)
+                              .mapFloorPlanUnderConstruction,
                       style: const TextStyle(fontSize: 13),
                     ),
                     style: FilledButton.styleFrom(
@@ -494,10 +498,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       final loadingBody = Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('正在繪製向量校園地圖...'),
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(AppLocalizations.of(context).mapLoadingText),
           ],
         ),
       );
@@ -590,7 +594,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                       children: [
                         SearchBar(
                           controller: _searchController,
-                          hintText: '搜尋系館名稱或代號',
+                          hintText: AppLocalizations.of(context).mapSearchHint,
                           leading: const Icon(Icons.search),
                           trailing: _searchController.text.isNotEmpty
                               ? [

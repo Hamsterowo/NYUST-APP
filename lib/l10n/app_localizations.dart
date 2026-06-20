@@ -1,0 +1,1064 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_zh.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('zh'),
+  ];
+
+  /// No description provided for @appName.
+  ///
+  /// In zh, this message translates to:
+  /// **'NYUST+'**
+  String get appName;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'設定'**
+  String get settingsTitle;
+
+  /// No description provided for @navOverview.
+  ///
+  /// In zh, this message translates to:
+  /// **'總覽'**
+  String get navOverview;
+
+  /// No description provided for @navSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'課表'**
+  String get navSchedule;
+
+  /// No description provided for @navInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'資訊'**
+  String get navInfo;
+
+  /// No description provided for @navCalendar.
+  ///
+  /// In zh, this message translates to:
+  /// **'行事曆'**
+  String get navCalendar;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'設定'**
+  String get navSettings;
+
+  /// No description provided for @languageSetting.
+  ///
+  /// In zh, this message translates to:
+  /// **'語言設定'**
+  String get languageSetting;
+
+  /// No description provided for @languageSettingSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'至系統設定修改 App 語言'**
+  String get languageSettingSub;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In zh, this message translates to:
+  /// **'YunTech 單一入口隱私權政策'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In zh, this message translates to:
+  /// **'NYUST+ 使用者條款'**
+  String get termsOfService;
+
+  /// No description provided for @logout.
+  ///
+  /// In zh, this message translates to:
+  /// **'登出'**
+  String get logout;
+
+  /// No description provided for @reportIssue.
+  ///
+  /// In zh, this message translates to:
+  /// **'回報問題'**
+  String get reportIssue;
+
+  /// No description provided for @installApp.
+  ///
+  /// In zh, this message translates to:
+  /// **'安裝 APP'**
+  String get installApp;
+
+  /// No description provided for @notPromoted.
+  ///
+  /// In zh, this message translates to:
+  /// **'不再提示'**
+  String get notPromoted;
+
+  /// No description provided for @ok.
+  ///
+  /// In zh, this message translates to:
+  /// **'好的'**
+  String get ok;
+
+  /// No description provided for @confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'確定'**
+  String get confirm;
+
+  /// No description provided for @install.
+  ///
+  /// In zh, this message translates to:
+  /// **'安裝'**
+  String get install;
+
+  /// No description provided for @profileDisclaimer.
+  ///
+  /// In zh, this message translates to:
+  /// **'※ 此頁面僅供參考，無法作為在學證明等正式用途'**
+  String get profileDisclaimer;
+
+  /// No description provided for @installError.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前無法安裝：您可能已安裝，或瀏覽器不支援此功能'**
+  String get installError;
+
+  /// No description provided for @featureNotFinished.
+  ///
+  /// In zh, this message translates to:
+  /// **'此功能尚未完成'**
+  String get featureNotFinished;
+
+  /// No description provided for @installTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'安裝 NYUST+ APP'**
+  String get installTitle;
+
+  /// No description provided for @installDescIos.
+  ///
+  /// In zh, this message translates to:
+  /// **'將 NYUST+ 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」'**
+  String get installDescIos;
+
+  /// No description provided for @installDescAndroid.
+  ///
+  /// In zh, this message translates to:
+  /// **'將 NYUST+ 安裝到您的裝置，不用開啟瀏覽器即可直接操作。'**
+  String get installDescAndroid;
+
+  /// No description provided for @vacationLabelStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'開學'**
+  String get vacationLabelStart;
+
+  /// No description provided for @vacationLabelWinter.
+  ///
+  /// In zh, this message translates to:
+  /// **'寒假'**
+  String get vacationLabelWinter;
+
+  /// No description provided for @vacationLabelSummer.
+  ///
+  /// In zh, this message translates to:
+  /// **'暑假'**
+  String get vacationLabelSummer;
+
+  /// No description provided for @vacationError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法顯示寒暑假時間'**
+  String get vacationError;
+
+  /// No description provided for @vacationCountdownPrefix.
+  ///
+  /// In zh, this message translates to:
+  /// **'還有'**
+  String get vacationCountdownPrefix;
+
+  /// No description provided for @vacationCountdownSuffix.
+  ///
+  /// In zh, this message translates to:
+  /// **'天'**
+  String get vacationCountdownSuffix;
+
+  /// No description provided for @vacationElapsed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已度過 {percentage}%'**
+  String vacationElapsed(String percentage);
+
+  /// No description provided for @todayClassesTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日課程'**
+  String get todayClassesTitle;
+
+  /// No description provided for @notLoggedInMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'您尚未登入，請先登入以使用完整功能'**
+  String get notLoggedInMessage;
+
+  /// No description provided for @noClassesToday.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日無課程！'**
+  String get noClassesToday;
+
+  /// No description provided for @upcomingEventsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'近期校園行事曆'**
+  String get upcomingEventsTitle;
+
+  /// No description provided for @noUpcomingEvents.
+  ///
+  /// In zh, this message translates to:
+  /// **'近期無任何校園行事曆事項安排。'**
+  String get noUpcomingEvents;
+
+  /// No description provided for @noCourseDetail.
+  ///
+  /// In zh, this message translates to:
+  /// **'這門課沒有提供詳細課綱'**
+  String get noCourseDetail;
+
+  /// No description provided for @notSpecified.
+  ///
+  /// In zh, this message translates to:
+  /// **'未指定'**
+  String get notSpecified;
+
+  /// No description provided for @classPeriods.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {periods} 節'**
+  String classPeriods(String periods);
+
+  /// No description provided for @loginToUseAllFeatures.
+  ///
+  /// In zh, this message translates to:
+  /// **'登入使用所有功能'**
+  String get loginToUseAllFeatures;
+
+  /// No description provided for @goToLogin.
+  ///
+  /// In zh, this message translates to:
+  /// **'前往登入'**
+  String get goToLogin;
+
+  /// No description provided for @pleaseLoginToViewSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'請在此登入以查看課表'**
+  String get pleaseLoginToViewSchedule;
+
+  /// No description provided for @mapModeEnabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已開啟地圖定位模式，點擊課程直接前往地圖'**
+  String get mapModeEnabled;
+
+  /// No description provided for @mapModeDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已關閉地圖定位模式'**
+  String get mapModeDisabled;
+
+  /// No description provided for @mapModeTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'地圖定位模式'**
+  String get mapModeTooltip;
+
+  /// No description provided for @loadScheduleFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法載入課表'**
+  String get loadScheduleFailed;
+
+  /// No description provided for @checkNetworkRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'請確認網路連線後重試'**
+  String get checkNetworkRetry;
+
+  /// No description provided for @retry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重試'**
+  String get retry;
+
+  /// No description provided for @noScheduleData.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前沒有任何課表資料'**
+  String get noScheduleData;
+
+  /// No description provided for @weekdayHeader.
+  ///
+  /// In zh, this message translates to:
+  /// **'星期{day}'**
+  String weekdayHeader(String day);
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In zh, this message translates to:
+  /// **'一'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayTue.
+  ///
+  /// In zh, this message translates to:
+  /// **'二'**
+  String get weekdayTue;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In zh, this message translates to:
+  /// **'三'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayThu.
+  ///
+  /// In zh, this message translates to:
+  /// **'四'**
+  String get weekdayThu;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In zh, this message translates to:
+  /// **'五'**
+  String get weekdayFri;
+
+  /// No description provided for @weekdaySat.
+  ///
+  /// In zh, this message translates to:
+  /// **'六'**
+  String get weekdaySat;
+
+  /// No description provided for @weekdaySun.
+  ///
+  /// In zh, this message translates to:
+  /// **'日'**
+  String get weekdaySun;
+
+  /// No description provided for @periodHeader.
+  ///
+  /// In zh, this message translates to:
+  /// **'節'**
+  String get periodHeader;
+
+  /// No description provided for @periodDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {period} 節：{time}'**
+  String periodDetails(String period, String time);
+
+  /// No description provided for @noClassroomForLocation.
+  ///
+  /// In zh, this message translates to:
+  /// **'此課程無指定教室，無法定位'**
+  String get noClassroomForLocation;
+
+  /// No description provided for @classroomLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'教室: {room}'**
+  String classroomLabel(String room);
+
+  /// No description provided for @teacherLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'教師: {teacher}'**
+  String teacherLabel(String teacher);
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'時段: {time}'**
+  String timeLabel(String time);
+
+  /// No description provided for @close.
+  ///
+  /// In zh, this message translates to:
+  /// **'關閉'**
+  String get close;
+
+  /// No description provided for @notDecided.
+  ///
+  /// In zh, this message translates to:
+  /// **'未定'**
+  String get notDecided;
+
+  /// No description provided for @infoTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'資訊'**
+  String get infoTitle;
+
+  /// No description provided for @infoGradesTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績查詢'**
+  String get infoGradesTitle;
+
+  /// No description provided for @infoGradesDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'查詢學期與歷年成績及班級排名'**
+  String get infoGradesDesc;
+
+  /// No description provided for @infoGradTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'畢業學分'**
+  String get infoGradTitle;
+
+  /// No description provided for @infoGradDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'檢視畢業門檻與修課學分進度'**
+  String get infoGradDesc;
+
+  /// No description provided for @infoMapTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'校園地圖'**
+  String get infoMapTitle;
+
+  /// No description provided for @infoMapDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看校園地圖，提供搜尋功能快速查看系館位置'**
+  String get infoMapDesc;
+
+  /// No description provided for @calendarTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'行事曆'**
+  String get calendarTitle;
+
+  /// No description provided for @legendTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'行事曆圖示說明'**
+  String get legendTitle;
+
+  /// No description provided for @legendBgColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'日期背景顏色：'**
+  String get legendBgColor;
+
+  /// No description provided for @legendToday.
+  ///
+  /// In zh, this message translates to:
+  /// **'今天日期'**
+  String get legendToday;
+
+  /// No description provided for @legendSelected.
+  ///
+  /// In zh, this message translates to:
+  /// **'當前選取日期'**
+  String get legendSelected;
+
+  /// No description provided for @legendHoliday.
+  ///
+  /// In zh, this message translates to:
+  /// **'國定假日'**
+  String get legendHoliday;
+
+  /// No description provided for @legendVacation.
+  ///
+  /// In zh, this message translates to:
+  /// **'寒假 / 暑假'**
+  String get legendVacation;
+
+  /// No description provided for @legendDots.
+  ///
+  /// In zh, this message translates to:
+  /// **'事件小點點：'**
+  String get legendDots;
+
+  /// No description provided for @legendEvent.
+  ///
+  /// In zh, this message translates to:
+  /// **'一般事件'**
+  String get legendEvent;
+
+  /// No description provided for @legendImportant.
+  ///
+  /// In zh, this message translates to:
+  /// **'重要事件'**
+  String get legendImportant;
+
+  /// No description provided for @noEventsToday.
+  ///
+  /// In zh, this message translates to:
+  /// **'本日無行程'**
+  String get noEventsToday;
+
+  /// No description provided for @legendTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'圖示說明'**
+  String get legendTooltip;
+
+  /// No description provided for @backToTodayTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'回到今日'**
+  String get backToTodayTooltip;
+
+  /// No description provided for @loadCalendarFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'載入失敗'**
+  String get loadCalendarFailed;
+
+  /// No description provided for @loadErrorPrefix.
+  ///
+  /// In zh, this message translates to:
+  /// **'發生錯誤：{error}'**
+  String loadErrorPrefix(String error);
+
+  /// No description provided for @gradesTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績查詢'**
+  String get gradesTitle;
+
+  /// No description provided for @gradesSegmentSemester.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期'**
+  String get gradesSegmentSemester;
+
+  /// No description provided for @gradesSegmentHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'歷年'**
+  String get gradesSegmentHistory;
+
+  /// No description provided for @gradesNoData.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚無成績資料'**
+  String get gradesNoData;
+
+  /// No description provided for @gradesNoHistoryData.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚無歷年成績資料'**
+  String get gradesNoHistoryData;
+
+  /// No description provided for @gradesNoCurrentData.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚無當前學期的成績資料'**
+  String get gradesNoCurrentData;
+
+  /// No description provided for @gradesNotEnrolled.
+  ///
+  /// In zh, this message translates to:
+  /// **'（已畢業或本學期未在學）'**
+  String get gradesNotEnrolled;
+
+  /// No description provided for @loadGradesFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法載入成績'**
+  String get loadGradesFailed;
+
+  /// No description provided for @pleaseLoginToViewGrades.
+  ///
+  /// In zh, this message translates to:
+  /// **'請在此登入以查看成績'**
+  String get pleaseLoginToViewGrades;
+
+  /// No description provided for @gradesAverage.
+  ///
+  /// In zh, this message translates to:
+  /// **'平均成績'**
+  String get gradesAverage;
+
+  /// No description provided for @gradesRank.
+  ///
+  /// In zh, this message translates to:
+  /// **'班級排名'**
+  String get gradesRank;
+
+  /// No description provided for @gradesEarnedCredits.
+  ///
+  /// In zh, this message translates to:
+  /// **'實得學分'**
+  String get gradesEarnedCredits;
+
+  /// No description provided for @gradesDetailHeader.
+  ///
+  /// In zh, this message translates to:
+  /// **'本學期修課成績明細'**
+  String get gradesDetailHeader;
+
+  /// No description provided for @gradesAllDetailHeader.
+  ///
+  /// In zh, this message translates to:
+  /// **'修課成績明細'**
+  String get gradesAllDetailHeader;
+
+  /// No description provided for @gradesAverageShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'平均: {avg}'**
+  String gradesAverageShort(String avg);
+
+  /// No description provided for @gradesRankShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'排名: {rank}'**
+  String gradesRankShort(String rank);
+
+  /// No description provided for @gradesCreditsShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'學分: {credits}'**
+  String gradesCreditsShort(String credits);
+
+  /// No description provided for @courseCreditsFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'{credits} 學分'**
+  String courseCreditsFormat(String credits);
+
+  /// No description provided for @gradesSemesterTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'{year}學年 第{semester}學期'**
+  String gradesSemesterTitle(String year, String semester);
+
+  /// No description provided for @courseInstructor.
+  ///
+  /// In zh, this message translates to:
+  /// **'授課教師'**
+  String get courseInstructor;
+
+  /// No description provided for @courseContactInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'聯絡資訊'**
+  String get courseContactInfo;
+
+  /// No description provided for @courseCurriculumNo.
+  ///
+  /// In zh, this message translates to:
+  /// **'系所課號'**
+  String get courseCurriculumNo;
+
+  /// No description provided for @courseCredits.
+  ///
+  /// In zh, this message translates to:
+  /// **'學分數'**
+  String get courseCredits;
+
+  /// No description provided for @courseScheduleClassroom.
+  ///
+  /// In zh, this message translates to:
+  /// **'上課時間教室'**
+  String get courseScheduleClassroom;
+
+  /// No description provided for @courseClass.
+  ///
+  /// In zh, this message translates to:
+  /// **'開課班級'**
+  String get courseClass;
+
+  /// No description provided for @courseRequiredElective.
+  ///
+  /// In zh, this message translates to:
+  /// **'修別'**
+  String get courseRequiredElective;
+
+  /// No description provided for @courseType.
+  ///
+  /// In zh, this message translates to:
+  /// **'授課方式'**
+  String get courseType;
+
+  /// No description provided for @courseRemark.
+  ///
+  /// In zh, this message translates to:
+  /// **'備註'**
+  String get courseRemark;
+
+  /// No description provided for @courseGoal.
+  ///
+  /// In zh, this message translates to:
+  /// **'教學目標'**
+  String get courseGoal;
+
+  /// No description provided for @courseOutline.
+  ///
+  /// In zh, this message translates to:
+  /// **'課程大綱'**
+  String get courseOutline;
+
+  /// No description provided for @courseGrading.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績評量方式'**
+  String get courseGrading;
+
+  /// No description provided for @courseSyllabus.
+  ///
+  /// In zh, this message translates to:
+  /// **'教學計畫與進度'**
+  String get courseSyllabus;
+
+  /// No description provided for @courseNoData.
+  ///
+  /// In zh, this message translates to:
+  /// **'無資料'**
+  String get courseNoData;
+
+  /// No description provided for @courseNone.
+  ///
+  /// In zh, this message translates to:
+  /// **'無'**
+  String get courseNone;
+
+  /// No description provided for @courseOpenInBrowser.
+  ///
+  /// In zh, this message translates to:
+  /// **'在瀏覽器開啟'**
+  String get courseOpenInBrowser;
+
+  /// No description provided for @courseOpenWebpageFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法開啟網頁'**
+  String get courseOpenWebpageFailed;
+
+  /// No description provided for @courseSelectRoomLocation.
+  ///
+  /// In zh, this message translates to:
+  /// **'選擇上課教室定位'**
+  String get courseSelectRoomLocation;
+
+  /// No description provided for @courseGoToRoomLocation.
+  ///
+  /// In zh, this message translates to:
+  /// **'前往 {room} 定位'**
+  String courseGoToRoomLocation(String room);
+
+  /// No description provided for @courseInvalidRoomCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'教室代號格式無效，無法定位'**
+  String get courseInvalidRoomCode;
+
+  /// No description provided for @courseBuildingNotFound.
+  ///
+  /// In zh, this message translates to:
+  /// **'查無大樓 [{prefix}] 的定位資訊'**
+  String courseBuildingNotFound(String prefix);
+
+  /// No description provided for @courseLoadMapDataFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'讀取地圖資料失敗: {error}'**
+  String courseLoadMapDataFailed(String error);
+
+  /// No description provided for @gradLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法載入畢業學分'**
+  String get gradLoadFailed;
+
+  /// No description provided for @gradNoData.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚無畢業學分資料'**
+  String get gradNoData;
+
+  /// No description provided for @gradDetailTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'學分統計詳細'**
+  String get gradDetailTitle;
+
+  /// No description provided for @gradTotalNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'* 合計欄位為通識 + 必修 + 選修'**
+  String get gradTotalNotice;
+
+  /// No description provided for @gradMissingRequiredCourses.
+  ///
+  /// In zh, this message translates to:
+  /// **'未修通過必修課'**
+  String get gradMissingRequiredCourses;
+
+  /// No description provided for @gradTotalEarnedCredits.
+  ///
+  /// In zh, this message translates to:
+  /// **'總實得學分'**
+  String get gradTotalEarnedCredits;
+
+  /// No description provided for @gradEnglishThreshold.
+  ///
+  /// In zh, this message translates to:
+  /// **'英文門檻'**
+  String get gradEnglishThreshold;
+
+  /// No description provided for @gradInternshipThreshold.
+  ///
+  /// In zh, this message translates to:
+  /// **'實習門檻'**
+  String get gradInternshipThreshold;
+
+  /// No description provided for @gradCategory.
+  ///
+  /// In zh, this message translates to:
+  /// **'類別'**
+  String get gradCategory;
+
+  /// No description provided for @gradRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'應修'**
+  String get gradRequired;
+
+  /// No description provided for @gradEarned.
+  ///
+  /// In zh, this message translates to:
+  /// **'實得'**
+  String get gradEarned;
+
+  /// No description provided for @gradMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚缺'**
+  String get gradMissing;
+
+  /// No description provided for @gradYearFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'{year}年級'**
+  String gradYearFormat(String year);
+
+  /// No description provided for @gradLabelPE.
+  ///
+  /// In zh, this message translates to:
+  /// **'體育'**
+  String get gradLabelPE;
+
+  /// No description provided for @gradLabelCivilization.
+  ///
+  /// In zh, this message translates to:
+  /// **'文明'**
+  String get gradLabelCivilization;
+
+  /// No description provided for @gradLabelLiterature.
+  ///
+  /// In zh, this message translates to:
+  /// **'文學'**
+  String get gradLabelLiterature;
+
+  /// No description provided for @gradLabelGeneral.
+  ///
+  /// In zh, this message translates to:
+  /// **'通識'**
+  String get gradLabelGeneral;
+
+  /// No description provided for @gradLabelDeptRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'必修'**
+  String get gradLabelDeptRequired;
+
+  /// No description provided for @gradLabelElective.
+  ///
+  /// In zh, this message translates to:
+  /// **'選修'**
+  String get gradLabelElective;
+
+  /// No description provided for @gradLabelTotal.
+  ///
+  /// In zh, this message translates to:
+  /// **'合計'**
+  String get gradLabelTotal;
+
+  /// No description provided for @mapLoadingText.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在繪製向量校園地圖...'**
+  String get mapLoadingText;
+
+  /// No description provided for @mapSearchHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'搜尋系館名稱或代號'**
+  String get mapSearchHint;
+
+  /// No description provided for @mapQueryRoom.
+  ///
+  /// In zh, this message translates to:
+  /// **'查詢教室：{room}'**
+  String mapQueryRoom(String room);
+
+  /// No description provided for @mapNoDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'暫無此建築物之詳細介紹。'**
+  String get mapNoDescription;
+
+  /// No description provided for @mapExternalNav.
+  ///
+  /// In zh, this message translates to:
+  /// **'外部地圖導航'**
+  String get mapExternalNav;
+
+  /// No description provided for @mapFloorPlanUnderConstruction.
+  ///
+  /// In zh, this message translates to:
+  /// **'平面圖建置中'**
+  String get mapFloorPlanUnderConstruction;
+
+  /// No description provided for @mapFloorPlanUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'{room} 平面圖不可用'**
+  String mapFloorPlanUnavailable(String room);
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'zh':
+      return AppLocalizationsZh();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
@@ -23,8 +25,15 @@ class CalendarScreenState extends State<CalendarScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
+  String? _currentLanguageCode;
 
   bool get isLoading => _isLoading;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _currentLanguageCode = Localizations.localeOf(context).languageCode;
+  }
 
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
@@ -75,7 +84,11 @@ class CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     _selectedDay = _focusedDay;
     _currentYear = _focusedDay.year;
-    _fetchYearIfNeeded(_currentYear);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _fetchYearIfNeeded(_currentYear);
+      }
+    });
   }
 
   @override
@@ -97,14 +110,14 @@ class CalendarScreenState extends State<CalendarScreen> {
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
         return AlertDialog(
-          title: const Text('行事曆圖示說明'),
+          title: Text(AppLocalizations.of(context).legendTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '日期背景顏色：',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context).legendBgColor,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Row(
@@ -127,7 +140,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('今天日期'),
+                  Text(AppLocalizations.of(context).legendToday),
                 ],
               ),
               const SizedBox(height: 8),
@@ -151,7 +164,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('當前選取日期'),
+                  Text(AppLocalizations.of(context).legendSelected),
                 ],
               ),
               const SizedBox(height: 8),
@@ -175,7 +188,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('國定假日'),
+                  Text(AppLocalizations.of(context).legendHoliday),
                 ],
               ),
               const SizedBox(height: 8),
@@ -199,13 +212,13 @@ class CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('寒假 / 暑假'),
+                  Text(AppLocalizations.of(context).legendVacation),
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
-                '事件小點點：',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context).legendDots,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Row(
@@ -219,7 +232,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('一般事件'),
+                  Text(AppLocalizations.of(context).legendEvent),
                 ],
               ),
               const SizedBox(height: 8),
@@ -234,7 +247,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('重要事件'),
+                  Text(AppLocalizations.of(context).legendImportant),
                 ],
               ),
             ],
@@ -246,11 +259,11 @@ class CalendarScreenState extends State<CalendarScreen> {
                 await prefs.setBool('hide_calendar_legend', true);
                 if (context.mounted) Navigator.of(context).pop();
               },
-              child: const Text('不再顯示'),
+              child: Text(AppLocalizations.of(context).notPromoted),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('確定'),
+              child: Text(AppLocalizations.of(context).confirm),
             ),
           ],
         );
@@ -305,9 +318,11 @@ class CalendarScreenState extends State<CalendarScreen> {
     }
 
     try {
+      final lang = _currentLanguageCode ?? 'zh';
       final data = await CalendarCacheService.getOrFetch(
         year,
-        (y) => _apiService.getCalendar(y),
+        lang,
+        (y, {lang}) => _apiService.getCalendar(y, lang: lang),
       );
 
       _fetchingYears.remove(year);
@@ -329,7 +344,7 @@ class CalendarScreenState extends State<CalendarScreen> {
       } else {
         if (foreground && mounted) {
           setState(() {
-            _errorMessage = '載入失敗';
+            _errorMessage = AppLocalizations.of(context).loadCalendarFailed;
           });
           _setLoading(false);
         }
@@ -444,8 +459,22 @@ class CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  String? _lastLocale;
+
   @override
   Widget build(BuildContext context) {
+    final newLocale = Localizations.localeOf(context).toString();
+    if (_lastLocale != null && _lastLocale != newLocale) {
+      _cachedGroupedEvents.clear();
+      _cachedHolidaysType.clear();
+      _fetchingYears.clear();
+      _isLoading = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchYearIfNeeded(_currentYear);
+      });
+    }
+    _lastLocale = newLocale;
+
     final navProvider = context.watch<NavigationProvider>();
     if (navProvider.currentIndex == 3 && !_hasCheckedLegend) {
       _hasCheckedLegend = true;
@@ -479,7 +508,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                 const SizedBox(height: 24),
                 FilledButton.tonal(
                   onPressed: () => _fetchYearIfNeeded(_currentYear),
-                  child: const Text('重試'),
+                  child: Text(AppLocalizations.of(context).retry),
                 ),
               ],
             ),
@@ -508,7 +537,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                           children: [
                             const SizedBox(width: 8),
                             Text(
-                              '${_focusedDay.year} 年 ${_focusedDay.month} 月',
+                              DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(_focusedDay),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -518,12 +547,12 @@ class CalendarScreenState extends State<CalendarScreen> {
                             if (widget.embed) ...[
                               IconButton(
                                 icon: const Icon(Icons.info_outline, size: 20),
-                                tooltip: '圖示說明',
+                                tooltip: AppLocalizations.of(context).legendTooltip,
                                 onPressed: _showLegendDialog,
                               ),
                               IconButton(
                                 icon: const Icon(Icons.today, size: 20),
-                                tooltip: '回到今日',
+                                tooltip: AppLocalizations.of(context).backToTodayTooltip,
                                 onPressed: () {
                                   final now = DateTime.now();
                                   setState(() {
@@ -741,11 +770,11 @@ class CalendarScreenState extends State<CalendarScreen> {
                               color: Colors.red,
                             ),
                             const SizedBox(height: 16),
-                            Text('發生錯誤：$_errorMessage'),
+                            Text(AppLocalizations.of(context).loadErrorPrefix(_errorMessage!)),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () => _fetchYearIfNeeded(_currentYear),
-                              child: const Text('重試'),
+                              child: Text(AppLocalizations.of(context).retry),
                             ),
                           ],
                         ),
@@ -781,7 +810,9 @@ class CalendarScreenState extends State<CalendarScreen> {
                                         vertical: 16.0,
                                       ),
                                       child: Text(
-                                        '${_selectedDay?.year} 年 ${_selectedDay?.month} 月 ${_selectedDay?.day} 日',
+                                        _selectedDay != null
+                                            ? DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(_selectedDay!)
+                                            : '',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -796,11 +827,11 @@ class CalendarScreenState extends State<CalendarScreen> {
                           }
 
                           if (selectedEvents.isEmpty) {
-                            return const Padding(
-                              padding: EdgeInsets.only(left: 48.0, top: 16.0),
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 48.0, top: 16.0),
                               child: Text(
-                                '本日無行程',
-                                style: TextStyle(color: Colors.grey),
+                                AppLocalizations.of(context).noEventsToday,
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             );
                           }
@@ -900,23 +931,23 @@ class CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: '行事曆',
+        title: AppLocalizations.of(context).calendarTitle,
         onRefresh: () async {
           await CalendarCacheService.clearAllCache();
           _cachedGroupedEvents.clear();
           _cachedHolidaysType.clear();
           _fetchingYears.clear();
-          _fetchYearIfNeeded(_currentYear);
+          await _fetchYearIfNeeded(_currentYear);
         },
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
-            tooltip: '圖示說明',
+            tooltip: AppLocalizations.of(context).legendTooltip,
             onPressed: _showLegendDialog,
           ),
           IconButton(
             icon: const Icon(Icons.today),
-            tooltip: '回到今日',
+            tooltip: AppLocalizations.of(context).backToTodayTooltip,
             onPressed: () {
               final now = DateTime.now();
               setState(() {

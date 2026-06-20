@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
-import 'graduation_screen.dart';
 import 'course_detail_screen.dart';
 
 class GradesScreen extends StatefulWidget {
@@ -32,9 +32,9 @@ class _GradesScreenState extends State<GradesScreen> {
       if (widget.embed) {
         return const Center(child: CircularProgressIndicator());
       }
-      return const Scaffold(
-        appBar: CustomAppBar(title: '成績查詢'),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: CustomAppBar(title: AppLocalizations.of(context).gradesTitle),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -46,7 +46,7 @@ class _GradesScreenState extends State<GradesScreen> {
             Icon(Icons.lock_outline, size: 64, color: colorScheme.outline),
             const SizedBox(height: 16),
             Text(
-              '登入使用所有功能',
+              AppLocalizations.of(context).loginToUseAllFeatures,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -55,9 +55,9 @@ class _GradesScreenState extends State<GradesScreen> {
             FilledButton.tonal(
               onPressed: () {
                 context.read<NavigationProvider>().setIndex(4);
-                showTopSnackBar(context, '請在此登入以查看成績');
+                showTopSnackBar(context, AppLocalizations.of(context).pleaseLoginToViewGrades);
               },
-              child: const Text('前往登入'),
+              child: Text(AppLocalizations.of(context).goToLogin),
             ),
           ],
         ),
@@ -68,7 +68,7 @@ class _GradesScreenState extends State<GradesScreen> {
       }
 
       return Scaffold(
-        appBar: const CustomAppBar(title: '成績查詢'),
+        appBar: CustomAppBar(title: AppLocalizations.of(context).gradesTitle),
         body: notLoggedInBody,
       );
     }
@@ -80,16 +80,16 @@ class _GradesScreenState extends State<GradesScreen> {
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<int>(
-              segments: const <ButtonSegment<int>>[
+              segments: <ButtonSegment<int>>[
                 ButtonSegment<int>(
                   value: 0,
-                  label: Text('學期'),
-                  icon: Icon(Icons.calendar_view_day),
+                  label: Text(AppLocalizations.of(context).gradesSegmentSemester),
+                  icon: const Icon(Icons.calendar_view_day),
                 ),
                 ButtonSegment<int>(
                   value: 1,
-                  label: Text('歷年'),
-                  icon: Icon(Icons.history),
+                  label: Text(AppLocalizations.of(context).gradesSegmentHistory),
+                  icon: const Icon(Icons.history),
                 ),
               ],
               selected: <int>{_selectedSegment},
@@ -113,8 +113,9 @@ class _GradesScreenState extends State<GradesScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: '成績查詢',
-        onRefresh: data.isLoadingGrades ? null : () => data.fetchGrades(),
+        title: AppLocalizations.of(context).gradesTitle,
+        onRefresh: () => data.fetchGrades(),
+        isLoading: data.isLoadingGrades,
       ),
       body: bodyContent,
     );
@@ -128,16 +129,16 @@ class _GradesScreenState extends State<GradesScreen> {
           children: [
             const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              '無法載入成績',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+            Text(
+              AppLocalizations.of(context).loadGradesFailed,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            const Text('請確認網路連線後重試', style: TextStyle(color: Colors.grey)),
+            Text(AppLocalizations.of(context).checkNetworkRetry, style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () => data.fetchGrades(),
-              child: const Text('重試'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -149,7 +150,7 @@ class _GradesScreenState extends State<GradesScreen> {
     }
 
     if (data.gradesData == null) {
-      return const Center(child: Text('尚無成績資料'));
+      return Center(child: Text(AppLocalizations.of(context).gradesNoData));
     }
 
     return _buildGradesList(data.gradesData!, colorScheme);
@@ -164,7 +165,9 @@ class _GradesScreenState extends State<GradesScreen> {
     if (originalGrades.isEmpty) {
       return Center(
         child: Text(
-          _selectedSegment == 0 ? '尚無成績資料' : '尚無歷年成績資料',
+          _selectedSegment == 0
+              ? AppLocalizations.of(context).gradesNoData
+              : AppLocalizations.of(context).gradesNoHistoryData,
           style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
       );
@@ -197,6 +200,7 @@ class _GradesScreenState extends State<GradesScreen> {
 
     List grades = [];
 
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     if (_selectedSegment == 0) {
       if (isGraduatedOrInactive) {
         return Center(
@@ -206,7 +210,7 @@ class _GradesScreenState extends State<GradesScreen> {
               Icon(Icons.info_outline, size: 48, color: colorScheme.outline),
               const SizedBox(height: 16),
               Text(
-                '尚無當前學期的成績資料',
+                AppLocalizations.of(context).gradesNoCurrentData,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -215,7 +219,7 @@ class _GradesScreenState extends State<GradesScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                '（已畢業或本學期未在學）',
+                AppLocalizations.of(context).gradesNotEnrolled,
                 style: TextStyle(
                   fontSize: 14,
                   color: colorScheme.onSurfaceVariant,
@@ -295,7 +299,10 @@ class _GradesScreenState extends State<GradesScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${semester["academic_year"]}學年 第${semester["semester"]}學期',
+                    AppLocalizations.of(context).gradesSemesterTitle(
+                      semester["academic_year"]?.toString() ?? '',
+                      semester["semester"]?.toString() ?? '',
+                    ),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -311,21 +318,21 @@ class _GradesScreenState extends State<GradesScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildStatCard(
-                  label: '平均成績',
+                  label: AppLocalizations.of(context).gradesAverage,
                   value: displayAverage,
                   icon: Icons.analytics_outlined,
                   colorScheme: colorScheme,
                 ),
                 const SizedBox(width: 12),
                 _buildStatCard(
-                  label: '班級排名',
+                  label: AppLocalizations.of(context).gradesRank,
                   value: displayRank,
                   icon: Icons.format_list_numbered_outlined,
                   colorScheme: colorScheme,
                 ),
                 const SizedBox(width: 12),
                 _buildStatCard(
-                  label: '實得學分',
+                  label: AppLocalizations.of(context).gradesEarnedCredits,
                   value: passRate,
                   icon: Icons.menu_book_outlined,
                   colorScheme: colorScheme,
@@ -338,7 +345,7 @@ class _GradesScreenState extends State<GradesScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12, left: 4),
               child: Text(
-                '本學期修課成績明細',
+                AppLocalizations.of(context).gradesDetailHeader,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -364,7 +371,30 @@ class _GradesScreenState extends State<GradesScreen> {
                           : scoreRaw.contains('通過') ||
                                 scoreRaw.toLowerCase().contains('pass'));
                   final effectivePass = isPass;
-                  final displayScore = isEmpty ? '無資料' : scoreRaw;
+                  
+                  String displayScore = scoreRaw;
+                  if (isEmpty) {
+                    displayScore = AppLocalizations.of(context).notSpecified;
+                  } else if (isEnglish) {
+                    if (scoreRaw == '通過') displayScore = 'Pass';
+                    if (scoreRaw == '不通過') displayScore = 'Fail';
+                  }
+
+                  final cName = (isEnglish && course['name_en'] != null && course['name_en'].toString().trim().isNotEmpty)
+                      ? course['name_en']
+                      : (course['name'] ?? 'Unknown Course');
+                  
+                  final typeZh = course['type'] ?? '';
+                  String type = typeZh;
+                  if (isEnglish) {
+                    if (typeZh == '必修') {
+                      type = 'Required';
+                    } else if (typeZh == '選修') {
+                      type = 'Elective';
+                    } else if (typeZh == '通識') {
+                      type = 'General Education';
+                    }
+                  }
 
                   return InkWell(
                     onTap: () {
@@ -379,14 +409,14 @@ class _GradesScreenState extends State<GradesScreen> {
                               year: semester['academic_year'].toString(),
                               semester: semester['semester'].toString(),
                               courseNo: courseNo,
-                              courseName: course['name'] ?? 'Unknown Course',
+                              courseName: cName,
                             ),
                           ),
                         );
                       } else {
                         showTopSnackBar(
                           context,
-                          '這門課沒有提供詳細課綱',
+                          AppLocalizations.of(context).noCourseDetail,
                           type: SnackBarType.warning,
                         );
                       }
@@ -414,7 +444,7 @@ class _GradesScreenState extends State<GradesScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    course['name'] ?? 'Unknown Course',
+                                    cName,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -424,29 +454,31 @@ class _GradesScreenState extends State<GradesScreen> {
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.secondaryContainer,
-                                          borderRadius: BorderRadius.circular(
-                                            4,
+                                      if (type.isNotEmpty) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.secondaryContainer,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            type,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: colorScheme
+                                                  .onSecondaryContainer,
+                                            ),
                                           ),
                                         ),
-                                        child: Text(
-                                          course['type'] ?? '',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: colorScheme
-                                                .onSecondaryContainer,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
+                                        const SizedBox(width: 8),
+                                      ],
                                       Text(
-                                        '${course["credits"]} 學分',
+                                        AppLocalizations.of(context).courseCreditsFormat(course["credits"]?.toString() ?? '0'),
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: colorScheme.onSurfaceVariant,
@@ -510,7 +542,7 @@ class _GradesScreenState extends State<GradesScreen> {
       } else {
         return Center(
           child: Text(
-            '尚無歷年成績資料',
+            AppLocalizations.of(context).gradesNoHistoryData,
             style: TextStyle(color: colorScheme.onSurfaceVariant),
           ),
         );
@@ -574,6 +606,12 @@ class _GradesScreenState extends State<GradesScreen> {
             ? apiAverage
             : calculatedAverage;
 
+        final avgText = AppLocalizations.of(context).gradesAverageShort(displayAverage);
+        final rankText = AppLocalizations.of(context).gradesRankShort(
+          (semester["summary"]?["rank"]?.toString().isEmpty ?? true) ? "-" : semester["summary"]["rank"]
+        );
+        final creditsText = AppLocalizations.of(context).gradesCreditsShort(passRate);
+
         return Card(
           elevation: 0,
           color: colorScheme.surfaceContainerHighest,
@@ -591,11 +629,14 @@ class _GradesScreenState extends State<GradesScreen> {
               );
             },
             title: Text(
-              '${semester["academic_year"]}學年 第${semester["semester"]}學期',
+              AppLocalizations.of(context).gradesSemesterTitle(
+                semester["academic_year"]?.toString() ?? '',
+                semester["semester"]?.toString() ?? '',
+              ),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              '平均: $displayAverage  |  排名: ${(semester["summary"]?["rank"]?.toString().isEmpty ?? true) ? "-" : semester["summary"]["rank"]}  |  學分: $passRate',
+              '$avgText  |  $rankText  |  $creditsText',
               style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             trailing: Icon(Icons.chevron_right, color: colorScheme.primary),
@@ -734,6 +775,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final courses = semester['courses'] as List;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
 
     // 計算統計數據
     double totalWeightedScore = 0;
@@ -783,7 +825,10 @@ class SemesterGradesDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: '${semester["academic_year"]}學年 第${semester["semester"]}學期',
+        title: AppLocalizations.of(context).gradesSemesterTitle(
+          semester["academic_year"]?.toString() ?? '',
+          semester["semester"]?.toString() ?? '',
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -793,21 +838,21 @@ class SemesterGradesDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildStatCard(
-                label: '平均成績',
+                label: AppLocalizations.of(context).gradesAverage,
                 value: displayAverage,
                 icon: Icons.analytics_outlined,
                 colorScheme: colorScheme,
               ),
               const SizedBox(width: 12),
               _buildStatCard(
-                label: '班級排名',
+                label: AppLocalizations.of(context).gradesRank,
                 value: displayRank,
                 icon: Icons.format_list_numbered_outlined,
                 colorScheme: colorScheme,
               ),
               const SizedBox(width: 12),
               _buildStatCard(
-                label: '實得學分',
+                label: AppLocalizations.of(context).gradesEarnedCredits,
                 value: passRate,
                 icon: Icons.menu_book_outlined,
                 colorScheme: colorScheme,
@@ -820,7 +865,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 12, left: 4),
             child: Text(
-              '修課成績明細',
+              AppLocalizations.of(context).gradesAllDetailHeader,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -845,7 +890,30 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                         : scoreRaw.contains('通過') ||
                             scoreRaw.toLowerCase().contains('pass'));
                 final effectivePass = isPass;
-                final displayScore = isEmpty ? '無資料' : scoreRaw;
+
+                String displayScore = scoreRaw;
+                if (isEmpty) {
+                  displayScore = AppLocalizations.of(context).notSpecified;
+                } else if (isEnglish) {
+                  if (scoreRaw == '通過') displayScore = 'Pass';
+                  if (scoreRaw == '不通過') displayScore = 'Fail';
+                }
+
+                final cName = (isEnglish && course['name_en'] != null && course['name_en'].toString().trim().isNotEmpty)
+                    ? course['name_en']
+                    : (course['name'] ?? 'Unknown Course');
+
+                final typeZh = course['type'] ?? '';
+                String type = typeZh;
+                if (isEnglish) {
+                  if (typeZh == '必修') {
+                    type = 'Required';
+                  } else if (typeZh == '選修') {
+                    type = 'Elective';
+                  } else if (typeZh == '通識') {
+                    type = 'General Education';
+                  }
+                }
 
                 return InkWell(
                   onTap: () {
@@ -860,14 +928,14 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                             year: semester['academic_year'].toString(),
                             semester: semester['semester'].toString(),
                             courseNo: courseNo,
-                            courseName: course['name'] ?? 'Unknown Course',
+                            courseName: cName,
                           ),
                         ),
                       );
                     } else {
                       showTopSnackBar(
                         context,
-                        '這門課沒有提供詳細課綱',
+                        AppLocalizations.of(context).noCourseDetail,
                         type: SnackBarType.warning,
                       );
                     }
@@ -895,7 +963,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  course['name'] ?? 'Unknown Course',
+                                  cName,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -905,26 +973,28 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: colorScheme.secondaryContainer,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        course['type'] ?? '',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: colorScheme.onSecondaryContainer,
+                                    if (type.isNotEmpty) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.secondaryContainer,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          type,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: colorScheme.onSecondaryContainer,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
+                                      const SizedBox(width: 8),
+                                    ],
                                     Text(
-                                      '${course["credits"]} 學分',
+                                      AppLocalizations.of(context).courseCreditsFormat(course["credits"]?.toString() ?? '0'),
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: colorScheme.onSurfaceVariant,

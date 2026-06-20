@@ -1,0 +1,303 @@
+{
+  "@@locale": "zh",
+  "appName": "NYUST+",
+  "settingsTitle": "設定",
+  "navOverview": "總覽",
+  "navSchedule": "課表",
+  "navInfo": "資訊",
+  "navCalendar": "行事曆",
+  "navSettings": "設定",
+  "languageSetting": "語言設定",
+  "languageSettingSub": "至系統設定修改 App 語言",
+  "privacyPolicy": "YunTech 單一入口隱私權政策",
+  "termsOfService": "NYUST+ 使用者條款",
+  "logout": "登出",
+  "reportIssue": "回報問題",
+  "installApp": "安裝 APP",
+  "notPromoted": "不再提示",
+  "ok": "好的",
+  "confirm": "確定",
+  "install": "安裝",
+  "profileDisclaimer": "※ 此頁面僅供參考，無法作為在學證明等正式用途",
+  "installError": "目前無法安裝：您可能已安裝，或瀏覽器不支援此功能",
+  "featureNotFinished": "此功能尚未完成",
+  "installTitle": "安裝 NYUST+ APP",
+  "installDescIos": "將 NYUST+ 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」",
+  "installDescAndroid": "將 NYUST+ 安裝到您的裝置，不用開啟瀏覽器即可直接操作。",
+  
+  "vacationLabelStart": "開學",
+  "vacationLabelWinter": "寒假",
+  "vacationLabelSummer": "暑假",
+  "vacationError": "無法顯示寒暑假時間",
+  "vacationCountdownPrefix": "還有",
+  "vacationCountdownSuffix": "天",
+  "vacationElapsed": "已度過 {percentage}%",
+  "@vacationElapsed": {
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "todayClassesTitle": "今日課程",
+  "notLoggedInMessage": "您尚未登入，請先登入以使用完整功能",
+  "noClassesToday": "今日無課程！",
+  "upcomingEventsTitle": "近期校園行事曆",
+  "noUpcomingEvents": "近期無任何校園行事曆事項安排。",
+  "noCourseDetail": "這門課沒有提供詳細課綱",
+  "notSpecified": "未指定",
+  "classPeriods": "第 {periods} 節",
+  "@classPeriods": {
+    "placeholders": {
+      "periods": {
+        "type": "String"
+      }
+    }
+  },
+
+  "loginToUseAllFeatures": "登入使用所有功能",
+  "goToLogin": "前往登入",
+  "pleaseLoginToViewSchedule": "請在此登入以查看課表",
+  "mapModeEnabled": "已開啟地圖定位模式，點擊課程直接前往地圖",
+  "mapModeDisabled": "已關閉地圖定位模式",
+  "mapModeTooltip": "地圖定位模式",
+  "loadScheduleFailed": "無法載入課表",
+  "checkNetworkRetry": "請確認網路連線後重試",
+  "retry": "重試",
+  "noScheduleData": "目前沒有任何課表資料",
+  "weekdayHeader": "星期{day}",
+  "@weekdayHeader": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayMon": "一",
+  "weekdayTue": "二",
+  "weekdayWed": "三",
+  "weekdayThu": "四",
+  "weekdayFri": "五",
+  "weekdaySat": "六",
+  "weekdaySun": "日",
+  "periodHeader": "節",
+  "periodDetails": "第 {period} 節：{time}",
+  "@periodDetails": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noClassroomForLocation": "此課程無指定教室，無法定位",
+  "classroomLabel": "教室: {room}",
+  "@classroomLabel": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherLabel": "教師: {teacher}",
+  "@teacherLabel": {
+    "placeholders": {
+      "teacher": {
+        "type": "String"
+      }
+    }
+  },
+  "timeLabel": "時段: {time}",
+  "@timeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "close": "關閉",
+  "notDecided": "未定",
+
+  "infoTitle": "資訊",
+  "infoGradesTitle": "成績查詢",
+  "infoGradesDesc": "查詢學期與歷年成績及班級排名",
+  "infoGradTitle": "畢業學分",
+  "infoGradDesc": "檢視畢業門檻與修課學分進度",
+  "infoMapTitle": "校園地圖",
+  "infoMapDesc": "查看校園地圖，提供搜尋功能快速查看系館位置",
+
+  "calendarTitle": "行事曆",
+  "legendTitle": "行事曆圖示說明",
+  "legendBgColor": "日期背景顏色：",
+  "legendToday": "今天日期",
+  "legendSelected": "當前選取日期",
+  "legendHoliday": "國定假日",
+  "legendVacation": "寒假 / 暑假",
+  "legendDots": "事件小點點：",
+  "legendEvent": "一般事件",
+  "legendImportant": "重要事件",
+  "noEventsToday": "本日無行程",
+  "legendTooltip": "圖示說明",
+  "backToTodayTooltip": "回到今日",
+  "loadCalendarFailed": "載入失敗",
+  "loadErrorPrefix": "發生錯誤：{error}",
+  "@loadErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesTitle": "成績查詢",
+  "gradesSegmentSemester": "學期",
+  "gradesSegmentHistory": "歷年",
+  "gradesNoData": "尚無成績資料",
+  "gradesNoHistoryData": "尚無歷年成績資料",
+  "gradesNoCurrentData": "尚無當前學期的成績資料",
+  "gradesNotEnrolled": "（已畢業或本學期未在學）",
+  "loadGradesFailed": "無法載入成績",
+  "pleaseLoginToViewGrades": "請在此登入以查看成績",
+  "gradesAverage": "平均成績",
+  "gradesRank": "班級排名",
+  "gradesEarnedCredits": "實得學分",
+  "gradesDetailHeader": "本學期修課成績明細",
+  "gradesAllDetailHeader": "修課成績明細",
+  "gradesAverageShort": "平均: {avg}",
+  "@gradesAverageShort": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesRankShort": "排名: {rank}",
+  "@gradesRankShort": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesCreditsShort": "學分: {credits}",
+  "@gradesCreditsShort": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "courseCreditsFormat": "{credits} 學分",
+  "@courseCreditsFormat": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesSemesterTitle": "{year}學年 第{semester}學期",
+  "@gradesSemesterTitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "semester": {
+        "type": "String"
+      }
+    }
+  },
+  "courseInstructor": "授課教師",
+  "courseContactInfo": "聯絡資訊",
+  "courseCurriculumNo": "系所課號",
+  "courseCredits": "學分數",
+  "courseScheduleClassroom": "上課時間教室",
+  "courseClass": "開課班級",
+  "courseRequiredElective": "修別",
+  "courseType": "授課方式",
+  "courseRemark": "備註",
+  "courseGoal": "教學目標",
+  "courseOutline": "課程大綱",
+  "courseGrading": "成績評量方式",
+  "courseSyllabus": "教學計畫與進度",
+  "courseNoData": "無資料",
+  "courseNone": "無",
+  "courseOpenInBrowser": "在瀏覽器開啟",
+  "courseOpenWebpageFailed": "無法開啟網頁",
+  "courseSelectRoomLocation": "選擇上課教室定位",
+  "courseGoToRoomLocation": "前往 {room} 定位",
+  "@courseGoToRoomLocation": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "courseInvalidRoomCode": "教室代號格式無效，無法定位",
+  "courseBuildingNotFound": "查無大樓 [{prefix}] 的定位資訊",
+  "@courseBuildingNotFound": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "courseLoadMapDataFailed": "讀取地圖資料失敗: {error}",
+  "@courseLoadMapDataFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gradLoadFailed": "無法載入畢業學分",
+  "gradNoData": "尚無畢業學分資料",
+  "gradDetailTitle": "學分統計詳細",
+  "gradTotalNotice": "* 合計欄位為通識 + 必修 + 選修",
+  "gradMissingRequiredCourses": "未修通過必修課",
+  "gradTotalEarnedCredits": "總實得學分",
+  "gradEnglishThreshold": "英文門檻",
+  "gradInternshipThreshold": "實習門檻",
+  "gradCategory": "類別",
+  "gradRequired": "應修",
+  "gradEarned": "實得",
+  "gradMissing": "尚缺",
+  "gradYearFormat": "{year}年級",
+  "@gradYearFormat": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "gradLabelPE": "體育",
+  "gradLabelCivilization": "文明",
+  "gradLabelLiterature": "文學",
+  "gradLabelGeneral": "通識",
+  "gradLabelDeptRequired": "必修",
+  "gradLabelElective": "選修",
+  "gradLabelTotal": "合計",
+
+  "mapLoadingText": "正在繪製向量校園地圖...",
+  "mapSearchHint": "搜尋系館名稱或代號",
+  "mapQueryRoom": "查詢教室：{room}",
+  "@mapQueryRoom": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "mapNoDescription": "暫無此建築物之詳細介紹。",
+  "mapExternalNav": "外部地圖導航",
+  "mapFloorPlanUnderConstruction": "平面圖建置中",
+  "mapFloorPlanUnavailable": "{room} 平面圖不可用",
+  "@mapFloorPlanUnavailable": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  }
+}
+

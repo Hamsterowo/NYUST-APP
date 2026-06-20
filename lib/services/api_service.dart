@@ -1,7 +1,9 @@
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'cookie_manager/cookie_manager_api.dart';
 import 'scrapers/sso_scraper.dart';
@@ -51,6 +53,7 @@ class ApiService {
         },
       ),
     );
+    _dio.interceptors.add(LanguageInterceptor());
     _ssoScraper = SsoScraper(_dio);
     _infoScraper = InfoScraper(_dio);
     _scheduleScraper = ScheduleScraper(_dio);
@@ -234,20 +237,20 @@ class ApiService {
     return _infoScraper.getUserInfo();
   }
 
-  Future<Map<String, dynamic>> getCalendarEvents(String year) async {
+  Future<Map<String, dynamic>> getCalendarEvents(String year, {String? lang}) async {
     await _ensureInit();
-    return _calendarScraper.getCalendarEvents(year);
+    return _calendarScraper.getCalendarEvents(year, languageCode: lang);
   }
 
-  Future<Map<String, dynamic>> getHolidays(int year) async {
+  Future<Map<String, dynamic>> getHolidays(int year, {String? lang}) async {
     await _ensureInit();
-    return _calendarScraper.getHolidays(year);
+    return _calendarScraper.getHolidays(year, languageCode: lang);
   }
 
   /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
-  Future<Map<String, dynamic>> getCalendarCombined(String year) async {
-    final events = await getCalendarEvents(year);
-    final holidays = await getHolidays(int.parse(year));
+  Future<Map<String, dynamic>> getCalendarCombined(String year, {String? lang}) async {
+    final events = await getCalendarEvents(year, lang: lang);
+    final holidays = await getHolidays(int.parse(year), lang: lang);
 
     return {
       'success': events['success'] == true && holidays['success'] == true,
@@ -377,8 +380,8 @@ class ApiService {
   }
 
   /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
-  Future<Map<String, dynamic>> getCalendar(int year) async {
-    return getCalendarCombined(year.toString());
+  Future<Map<String, dynamic>> getCalendar(int year, {String? lang}) async {
+    return getCalendarCombined(year.toString(), lang: lang);
   }
 
   Future<Map<String, dynamic>> getPrivacyPolicy() async {
@@ -511,4 +514,47 @@ class ApiService {
 
   SsoScraper get ssoScraper => _ssoScraper;
   InfoScraper get infoScraper => _infoScraper;
+}
+
+class LanguageInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final uri = options.uri;
+    final path = uri.path.toLowerCase();
+
+    // Only intercept student portal pages (WebNewCAS and eStudent) on webapp.yuntech.edu.tw
+    if (uri.host == 'webapp.yuntech.edu.tw' &&
+        (path.contains('/webnewcas/') || path.contains('/estudent/'))) {
+      String languageCode = 'zh';
+      try {
+        if (Intl.defaultLocale != null && Intl.defaultLocale!.isNotEmpty) {
+          languageCode = Intl.defaultLocale!.split('_').first.split('-').first.toLowerCase();
+        } else {
+          languageCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+        }
+      } catch (_) {
+        try {
+          languageCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+        } catch (_) {}
+      }
+
+      final langValue = languageCode == 'en' ? 'en' : 'zh-TW';
+
+      String currentPath = options.path;
+      if (!currentPath.contains('lang=')) {
+        if (currentPath.contains('?')) {
+          final lastChar = currentPath.substring(currentPath.length - 1);
+          if (lastChar == '?' || lastChar == '&') {
+            currentPath = '${currentPath}lang=$langValue';
+          } else {
+            currentPath = '$currentPath&lang=$langValue';
+          }
+        } else {
+          currentPath = '$currentPath?lang=$langValue';
+        }
+        options.path = currentPath;
+      }
+    }
+    super.onRequest(options, handler);
+  }
 }

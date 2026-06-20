@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'providers/data_provider.dart';
 import 'providers/navigation_provider.dart';
@@ -41,9 +43,23 @@ class MyApp extends StatelessWidget {
             defaultTargetPlatform == TargetPlatform.macOS ||
             defaultTargetPlatform == TargetPlatform.linux);
 
+    final localizationsDelegates = [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ];
+
+    const supportedLocales = [
+      Locale('zh'),
+      Locale('en'),
+    ];
+
     if (isDesktopWeb) {
       return MaterialApp(
         title: 'NYUST+',
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           useMaterial3: true,
@@ -56,6 +72,8 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'NYUST+',
+      localizationsDelegates: localizationsDelegates,
+      supportedLocales: supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,

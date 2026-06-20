@@ -2,6 +2,7 @@ class ScheduleEvent {
   final String semesterCourseNo;
   final String deptCourseNo;
   final String name;
+  final String? nameEn;
   final String courseClass;
   final String classType;
   final String requiredType;
@@ -23,6 +24,7 @@ class ScheduleEvent {
     required this.semesterCourseNo,
     required this.deptCourseNo,
     required this.name,
+    this.nameEn,
     required this.courseClass,
     required this.classType,
     required this.requiredType,
@@ -44,6 +46,7 @@ class ScheduleEvent {
       semesterCourseNo: json['semesterCourseNo'] ?? '',
       deptCourseNo: json['deptCourseNo'] ?? '',
       name: json['name'] ?? '',
+      nameEn: json['nameEn'] ?? json['name_en'],
       courseClass: json['courseClass'] ?? '',
       classType: json['classType'] ?? '',
       requiredType: json['requiredType'] ?? '',

@@ -71,6 +71,7 @@ class ScheduleScraper extends BaseScraper {
 
           final semesterCourseNo = _findTextById(row, '_current_subj');
           final deptCourseNo = _findTextById(row, '_Dept_Cour_No');
+          final nameEn = _findTextById(row, '_cour_ename');
           final courseClass = _findTextById(row, '_Cour_Class');
           final classType = _findTextById(row, '_Subj_Team');
           final requiredType = _findTextById(row, '_maj_op');
@@ -113,6 +114,7 @@ class ScheduleScraper extends BaseScraper {
             'semesterCourseNo': semesterCourseNo,
             'deptCourseNo': deptCourseNo,
             'name': name,
+            'nameEn': nameEn,
             'courseClass': courseClass,
             'classType': classType,
             'requiredType': requiredType,
