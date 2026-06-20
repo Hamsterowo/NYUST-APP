@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../models/schedule_event.dart';
@@ -24,13 +25,22 @@ class _OverviewScreenState extends State<OverviewScreen> {
   List<CalendarEvent>? _todayEvents;
   List<CalendarEvent>? _allEvents;
   bool _isLoadingCalendar = true;
+  String? _currentLanguageCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _currentLanguageCode = Localizations.localeOf(context).languageCode;
+  }
 
   @override
   void initState() {
     super.initState();
-    _fetchTodayCalendar();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkTermsAgreement();
+      if (mounted) {
+        _fetchTodayCalendar();
+        _checkTermsAgreement();
+      }
     });
   }
 
@@ -67,10 +77,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
     try {
       final now = DateTime.now();
       final api = Provider.of<AuthProvider>(context, listen: false).api;
+      final lang = _currentLanguageCode ?? 'zh';
 
       final response = await CalendarCacheService.getOrFetch(
         now.year,
-        (year) => api.getCalendar(year),
+        lang,
+        (year, {lang}) => api.getCalendar(year, lang: lang),
       );
 
       if (response != null && response['success'] == true && mounted) {
@@ -132,35 +144,48 @@ class _OverviewScreenState extends State<OverviewScreen> {
       if (date.year != year) continue;
 
       final name = event.name;
+      final normalized = name.toLowerCase();
 
-      if ((name.contains('寒假') &&
+      final isWinterVacationStart = (name.contains('寒假') &&
               (name.contains('開始') ||
                   name.contains('起') ||
-                  name.contains('放'))) &&
-          (date.month == 12 || date.month == 1)) {
+                  name.contains('放'))) ||
+          (normalized.contains('winter vacation') &&
+              (normalized.contains('begin') ||
+                  normalized.contains('start') ||
+                  normalized.contains('first day')));
+
+      final isSummerVacationStart = (name.contains('暑假') &&
+              (name.contains('開始') ||
+                  name.contains('起') ||
+                  name.contains('放'))) ||
+          (normalized.contains('summer vacation') &&
+              (normalized.contains('begin') ||
+                  normalized.contains('start') ||
+                  normalized.contains('first day')));
+
+      final isClassesStart = name.contains('開始上課') ||
+          name.contains('上課開始') ||
+          name.contains('開學') ||
+          name.contains('正式上課') ||
+          normalized.contains('classes begin') ||
+          normalized.contains('classes start') ||
+          normalized.contains('school begin') ||
+          normalized.contains('school start');
+
+      if (isWinterVacationStart && (date.month == 12 || date.month == 1)) {
         winterStart = date;
       }
-      if ((name.contains('開始上課') ||
-              name.contains('上課開始') ||
-              name.contains('開學') ||
-              name.contains('正式上課')) &&
-          (date.month == 2 || date.month == 3)) {
+      if (isClassesStart && (date.month == 2 || date.month == 3)) {
         if (sem2Start == null || date.isBefore(sem2Start)) {
           sem2Start = date;
         }
       }
-      if ((name.contains('暑假') &&
-              (name.contains('開始') ||
-                  name.contains('起') ||
-                  name.contains('放'))) &&
+      if (isSummerVacationStart &&
           (date.month == 5 || date.month == 6 || date.month == 7)) {
         summerStart = date;
       }
-      if ((name.contains('開始上課') ||
-              name.contains('上課開始') ||
-              name.contains('開學') ||
-              name.contains('正式上課')) &&
-          (date.month == 8 || date.month == 9)) {
+      if (isClassesStart && (date.month == 8 || date.month == 9)) {
         if (sem1Start == null || date.isBefore(sem1Start)) {
           sem1Start = date;
         }
@@ -171,12 +196,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
         sem2Start == null ||
         summerStart == null ||
         sem1Start == null) {
-      return {'error': true, 'message': '無法顯示寒暑假時間'};
+      return {'error': true, 'messageKey': 'vacationError'};
     }
 
     DateTime start;
     DateTime end;
-    String label;
+    String labelKey;
     bool isVacation;
 
     final nowZero = DateTime(now.year, now.month, now.day);
@@ -204,29 +229,29 @@ class _OverviewScreenState extends State<OverviewScreen> {
     if (nowZero.isAfter(winterStartZero) && nowZero.isBefore(sem2StartZero)) {
       start = winterStartZero;
       end = sem2StartZero;
-      label = '開學';
+      labelKey = 'start';
       isVacation = true;
     } else if (nowZero.isAfter(sem2StartZero) &&
         nowZero.isBefore(summerStartZero)) {
       start = sem2StartZero;
       end = summerStartZero;
-      label = '暑假';
+      labelKey = 'summer';
       isVacation = false;
     } else if (nowZero.isAfter(summerStartZero) &&
         nowZero.isBefore(sem1StartZero)) {
       start = summerStartZero;
       end = sem1StartZero;
-      label = '開學';
+      labelKey = 'start';
       isVacation = true;
     } else if (nowZero.isAfter(sem1StartZero)) {
       start = sem1StartZero;
       end = DateTime(year + 1, winterStartZero.month, winterStartZero.day);
-      label = '寒假';
+      labelKey = 'winter';
       isVacation = false;
     } else {
       start = DateTime(year - 1, sem1StartZero.month, sem1StartZero.day);
       end = winterStartZero;
-      label = '寒假';
+      labelKey = 'winter';
       isVacation = false;
     }
 
@@ -234,7 +259,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final remainingDays = end.difference(nowZero).inDays;
 
     if (totalDays <= 0 || remainingDays < 0) {
-      return {'error': true, 'message': '無法顯示寒暑假時間'};
+      return {'error': true, 'messageKey': 'vacationError'};
     }
 
     final elapsedDays = totalDays - remainingDays;
@@ -244,7 +269,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     return {
       'error': false,
-      'label': label,
+      'labelKey': labelKey,
       'remainingDays': remainingDays,
       'progress': progress,
       'isVacation': isVacation,
@@ -291,6 +316,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final data = _getCountdownData(_allEvents!, now);
 
     if (data['error'] == true) {
+      final msgKey = data['messageKey'] as String;
+      String errorMsg = '無法顯示寒暑假時間';
+      if (msgKey == 'vacationError') {
+        errorMsg = AppLocalizations.of(context).vacationError;
+      }
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -315,7 +345,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               const Icon(Icons.info_outline, color: Colors.white70, size: 24),
               const SizedBox(width: 12),
               Text(
-                data['message'] ?? '無法顯示寒暑假時間',
+                errorMsg,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -326,6 +356,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
           ),
         ),
       );
+    }
+
+    final String labelKey = data['labelKey'] ?? '';
+    String label = '';
+    if (labelKey == 'start') {
+      label = AppLocalizations.of(context).vacationLabelStart;
+    } else if (labelKey == 'winter') {
+      label = AppLocalizations.of(context).vacationLabelWinter;
+    } else if (labelKey == 'summer') {
+      label = AppLocalizations.of(context).vacationLabelSummer;
     }
 
     final bool isVacation = data['isVacation'] ?? false;
@@ -363,7 +403,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  '${data['label']}',
+                  label,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -375,9 +415,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    const Text(
-                      '還有',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).vacationCountdownPrefix,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.white70,
@@ -393,9 +433,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Text(
-                      '天',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).vacationCountdownSuffix,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.white70,
@@ -420,7 +460,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '已度過 ${(progress * 100).toStringAsFixed(0)}%',
+                  AppLocalizations.of(context).vacationElapsed((progress * 100).toStringAsFixed(0)),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.white70,
@@ -443,19 +483,30 @@ class _OverviewScreenState extends State<OverviewScreen> {
     );
   }
 
+  String? _lastLocale;
+
   @override
   Widget build(BuildContext context) {
+    final newLocale = Localizations.localeOf(context).toString();
+    if (_lastLocale != null && _lastLocale != newLocale) {
+      _isLoadingCalendar = true;
+      _allEvents = null;
+      _todayEvents = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchTodayCalendar();
+      });
+    }
+    _lastLocale = newLocale;
+
     final colorScheme = Theme.of(context).colorScheme;
     final now = DateTime.now();
 
     return Scaffold(
-      appBar: const CustomAppBar(title: '總覽'),
+      appBar: CustomAppBar(title: AppLocalizations.of(context).navOverview),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
         child: Consumer2<AuthProvider, DataProvider>(
           builder: (context, auth, data, child) {
-            final userName = auth.user?['user']?['name']?.toString() ?? '';
-
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16.0),
@@ -484,7 +535,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '近期校園行事曆',
+          AppLocalizations.of(context).upcomingEventsTitle,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -503,10 +554,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   (_todayEvents == null || _todayEvents!.isEmpty))
               ? _buildCalendarSkeleton()
               : (_todayEvents == null || _todayEvents!.isEmpty) &&
-                    !_isLoadingCalendar
-              ? const Text(
-                  '近期無任何校園行事曆事項安排。',
-                  style: TextStyle(color: Colors.grey),
+                     !_isLoadingCalendar
+              ? Text(
+                  AppLocalizations.of(context).noUpcomingEvents,
+                  style: const TextStyle(color: Colors.grey),
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -552,7 +603,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '今日課程',
+            AppLocalizations.of(context).todayClassesTitle,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -564,12 +615,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
               side: BorderSide(color: colorScheme.outlineVariant),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Padding(
-              padding: EdgeInsets.all(24.0),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
-                  '您尚未登入，請先登入以使用完整功能',
-                  style: TextStyle(color: Colors.grey),
+                  AppLocalizations.of(context).notLoggedInMessage,
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ),
             ),
@@ -587,7 +638,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '今日課程',
+            AppLocalizations.of(context).todayClassesTitle,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -637,7 +688,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '今日課程',
+            AppLocalizations.of(context).todayClassesTitle,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -649,10 +700,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
               side: BorderSide(color: colorScheme.outlineVariant),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Padding(
-              padding: EdgeInsets.all(24.0),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
               child: Center(
-                child: Text('今日無課程！', style: TextStyle(color: Colors.grey)),
+                child: Text(
+                  AppLocalizations.of(context).noClassesToday,
+                  style: const TextStyle(color: Colors.grey),
+                ),
               ),
             ),
           ),
@@ -744,7 +798,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '今日課程',
+          AppLocalizations.of(context).todayClassesTitle,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -767,7 +821,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
             }
           }
 
-          String timeStr = '第 ${c.times.join(", ")} 節';
+          String timeStr = AppLocalizations.of(context).classPeriods(c.times.join(", "));
 
           if (c.times.isNotEmpty) {
             final firstPeriod = c.times.first;
@@ -788,7 +842,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               className: c.name,
               location: (c.room != null && c.room!.isNotEmpty)
                   ? c.room!
-                  : '未指定',
+                  : AppLocalizations.of(context).notSpecified,
               state: classState,
               year: c.year,
               semester: c.semester,
@@ -861,7 +915,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               ),
             );
           } else {
-            showTopSnackBar(context, '這門課沒有提供詳細課綱', type: SnackBarType.warning);
+            showTopSnackBar(context, AppLocalizations.of(context).noCourseDetail, type: SnackBarType.warning);
           }
         },
         child: Padding(

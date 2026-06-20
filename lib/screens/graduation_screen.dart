@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../models/schedule_event.dart';
@@ -14,6 +15,15 @@ import 'map_screen.dart';
 class GraduationContent extends StatelessWidget {
   const GraduationContent({super.key});
 
+  String _formatCreditsText(BuildContext context, String? rawText) {
+    if (rawText == null || rawText.isEmpty) return '-';
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+    if (isEnglish) {
+      return rawText.replaceAll('學分', ' Credits').trim();
+    }
+    return rawText;
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
@@ -26,16 +36,16 @@ class GraduationContent extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              '無法載入畢業學分',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+            Text(
+              AppLocalizations.of(context).gradLoadFailed,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            const Text('請確認網路連線後重試', style: TextStyle(color: Colors.grey)),
+            Text(AppLocalizations.of(context).checkNetworkRetry, style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () => data.fetchGraduation(),
-              child: const Text('重試'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -48,7 +58,7 @@ class GraduationContent extends StatelessWidget {
 
     final info = data.graduationData?['graduation_info'];
     if (info == null) {
-      return const Center(child: Text('尚無畢業學分資料'));
+      return Center(child: Text(AppLocalizations.of(context).gradNoData));
     }
 
     final breakdown =
@@ -71,7 +81,7 @@ class GraduationContent extends StatelessWidget {
           _buildSummaryCard(context, info),
           const SizedBox(height: 24),
           Text(
-            '學分統計詳細',
+            AppLocalizations.of(context).gradDetailTitle,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: colorScheme.primary,
@@ -81,7 +91,7 @@ class GraduationContent extends StatelessWidget {
           _buildCreditTable(context, breakdown),
           const SizedBox(height: 6),
           Text(
-            '* 合計欄位為通識 + 必修 + 選修',
+            AppLocalizations.of(context).gradTotalNotice,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -90,7 +100,7 @@ class GraduationContent extends StatelessWidget {
               info['missing_courses_text'].isNotEmpty) ...[
             const SizedBox(height: 24),
             Text(
-              '未修通過必修課',
+              AppLocalizations.of(context).gradMissingRequiredCourses,
               style: TextStyle(
                 color: colorScheme.error,
                 fontWeight: FontWeight.bold,
@@ -186,9 +196,9 @@ class GraduationContent extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Text('總實得學分', style: Theme.of(context).textTheme.labelLarge),
+            Text(AppLocalizations.of(context).gradTotalEarnedCredits, style: Theme.of(context).textTheme.labelLarge),
             Text(
-              '${info["total_credits"]}',
+              _formatCreditsText(context, info["total_credits"]?.toString()),
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -200,10 +210,10 @@ class GraduationContent extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildBadge(context, '英文門檻', info['english_threshold']),
+                _buildBadge(context, AppLocalizations.of(context).gradEnglishThreshold, info['english_threshold']),
                 _buildBadge(
                   context,
-                  '實習門檻',
+                  AppLocalizations.of(context).gradInternshipThreshold,
                   info['internship_threshold'] ?? "N/A",
                 ),
               ],
@@ -217,6 +227,21 @@ class GraduationContent extends StatelessWidget {
   Widget _buildBadge(BuildContext context, String label, String value) {
     final isPassed = value.contains("通過") || value == "已修過";
     final colorScheme = Theme.of(context).colorScheme;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
+    String displayValue = value;
+    if (isEnglish) {
+      final trimmed = value.trim();
+      if (trimmed.contains('已通過') || trimmed.contains('通過')) {
+        displayValue = 'Passed';
+      } else if (trimmed.contains('未通過') || trimmed.contains('不通過')) {
+        displayValue = 'Not Passed';
+      } else if (trimmed.contains('已修過') || trimmed.contains('修過')) {
+        displayValue = 'Completed';
+      } else if (trimmed.contains('免修')) {
+        displayValue = 'Waived';
+      }
+    }
 
     return Column(
       children: [
@@ -234,7 +259,7 @@ class GraduationContent extends StatelessWidget {
             ),
           ),
           child: Text(
-            value,
+            displayValue,
             style: TextStyle(
               color: isPassed
                   ? colorScheme.onPrimaryContainer
@@ -258,13 +283,13 @@ class GraduationContent extends StatelessWidget {
       'total',
     ];
     final labels = {
-      'pe': '體育',
-      'civilization': '文明',
-      'literature': '文學',
-      'general': '通識',
-      'dept_required': '必修',
-      'elective': '選修',
-      'total': '合計',
+      'pe': AppLocalizations.of(context).gradLabelPE,
+      'civilization': AppLocalizations.of(context).gradLabelCivilization,
+      'literature': AppLocalizations.of(context).gradLabelLiterature,
+      'general': AppLocalizations.of(context).gradLabelGeneral,
+      'dept_required': AppLocalizations.of(context).gradLabelDeptRequired,
+      'elective': AppLocalizations.of(context).gradLabelElective,
+      'total': AppLocalizations.of(context).gradLabelTotal,
     };
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -288,7 +313,12 @@ class GraduationContent extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest,
             ),
-            children: ['類別', '應修', '實得', '尚缺']
+            children: [
+              AppLocalizations.of(context).gradCategory,
+              AppLocalizations.of(context).gradRequired,
+              AppLocalizations.of(context).gradEarned,
+              AppLocalizations.of(context).gradMissing,
+            ]
                 .map(
                   (h) => Padding(
                     padding: const EdgeInsets.all(12),
@@ -323,7 +353,7 @@ class GraduationContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    breakdown['required_goal'][key] ?? '-',
+                    _formatCreditsText(context, breakdown['required_goal'][key]),
                     style: TextStyle(
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -332,7 +362,7 @@ class GraduationContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    breakdown['earned'][key] ?? '-',
+                    _formatCreditsText(context, breakdown['earned'][key]),
                     style: TextStyle(
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -341,12 +371,13 @@ class GraduationContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    breakdown['missing'][key] ?? '-',
+                    _formatCreditsText(context, breakdown['missing'][key]),
                     style: TextStyle(
                       color:
-                          (breakdown['missing'][key] == "0" ||
-                              breakdown['missing'][key] == "Pass" ||
-                              breakdown['missing'][key] == null)
+                          (() {
+                            final val = breakdown['missing'][key]?.toString() ?? '';
+                            return val == "0" || val.startsWith('0') || val == "Pass" || val.isEmpty;
+                          })()
                           ? colorScheme.onSurface
                           : colorScheme.error,
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
@@ -383,7 +414,7 @@ class GraduationContent extends StatelessWidget {
       children: items.map((item) {
         final year = item['year'] as int;
         final label =
-            '${year > 0 ? '$year年級' : '??'} - ${item['code']} ${item['name']}';
+            '${year > 0 ? AppLocalizations.of(context).gradYearFormat(year.toString()) : '??'} - ${item['code']} ${item['name']}';
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
           child: Row(
@@ -465,9 +496,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       if (widget.embed) {
         return const Center(child: CircularProgressIndicator());
       }
-      return const Scaffold(
-        appBar: CustomAppBar(title: '課表'),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: CustomAppBar(title: AppLocalizations.of(context).navSchedule),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -479,7 +510,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             Icon(Icons.lock_outline, size: 64, color: colorScheme.outline),
             const SizedBox(height: 16),
             Text(
-              '登入使用所有功能',
+              AppLocalizations.of(context).loginToUseAllFeatures,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -488,9 +519,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             FilledButton.tonal(
               onPressed: () {
                 context.read<NavigationProvider>().setIndex(4);
-                showTopSnackBar(context, '請在此登入以查看課表');
+                showTopSnackBar(context, AppLocalizations.of(context).pleaseLoginToViewSchedule);
               },
-              child: const Text('前往登入'),
+              child: Text(AppLocalizations.of(context).goToLogin),
             ),
           ],
         ),
@@ -501,7 +532,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       }
 
       return Scaffold(
-        appBar: const CustomAppBar(title: '課表'),
+        appBar: CustomAppBar(title: AppLocalizations.of(context).navSchedule),
         body: notLoggedInBody,
       );
     }
@@ -515,8 +546,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: '課表',
-        onRefresh: data.isLoadingSchedule ? null : () => data.fetchSchedule(),
+        title: AppLocalizations.of(context).navSchedule,
+        onRefresh: () => data.fetchSchedule(),
+        isLoading: data.isLoadingSchedule,
         actions: [
           IconButton(
             icon: Icon(
@@ -529,10 +561,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               });
               showTopSnackBar(
                 context,
-                _isMapMode ? '已開啟地圖定位模式，點擊課程直接前往地圖' : '已關閉地圖定位模式',
+                _isMapMode
+                    ? AppLocalizations.of(context).mapModeEnabled
+                    : AppLocalizations.of(context).mapModeDisabled,
               );
             },
-            tooltip: '地圖定位模式',
+            tooltip: AppLocalizations.of(context).mapModeTooltip,
           ),
         ],
       ),
@@ -548,16 +582,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           children: [
             const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              '無法載入課表',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+            Text(
+              AppLocalizations.of(context).loadScheduleFailed,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            const Text('請確認網路連線後重試', style: TextStyle(color: Colors.grey)),
+            Text(
+              AppLocalizations.of(context).checkNetworkRetry,
+              style: const TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () => data.fetchSchedule(),
-              child: const Text('重試'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -613,7 +650,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ];
 
     if (!hasData && !data.isLoadingSchedule) {
-      return const Center(child: Text('目前沒有任何課表資料'));
+      return Center(child: Text(AppLocalizations.of(context).noScheduleData));
     }
 
     if (data.isLoadingSchedule && !hasData) {
@@ -695,11 +732,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             availableForDays / activeDayIndices.length < minCellWidth;
 
         Widget dayCell(String day) {
+          String translatedDay = day;
+          if (day == '一') translatedDay = AppLocalizations.of(context).weekdayMon;
+          else if (day == '二') translatedDay = AppLocalizations.of(context).weekdayTue;
+          else if (day == '三') translatedDay = AppLocalizations.of(context).weekdayWed;
+          else if (day == '四') translatedDay = AppLocalizations.of(context).weekdayThu;
+          else if (day == '五') translatedDay = AppLocalizations.of(context).weekdayFri;
+          else if (day == '六') translatedDay = AppLocalizations.of(context).weekdaySat;
+          else if (day == '日') translatedDay = AppLocalizations.of(context).weekdaySun;
+
           final label = isLoading
               ? const SizedBox.shrink()
               : Center(
                   child: Text(
-                    '星期$day',
+                    AppLocalizations.of(context).weekdayHeader(translatedDay),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 );
@@ -820,10 +866,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         width: timeColumnWidth,
                         child: isLoading
                             ? const SizedBox.shrink()
-                            : const Center(
+                            : Center(
                                 child: Text(
-                                  '節',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  AppLocalizations.of(context).periodHeader,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                       ),
@@ -868,7 +916,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                         final time = _periodTimes[period] ?? '';
                                         showTopSnackBar(
                                           context,
-                                          '第 $period 節：$time',
+                                          AppLocalizations.of(context).periodDetails(period, time),
                                         );
                                       },
                                       child: Container(
@@ -937,6 +985,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final hasRoom = event.room != null && event.room!.isNotEmpty;
     final isLocatable = _isMapMode && hasRoom;
 
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+    final displayName = (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
+        ? event.nameEn!
+        : event.name;
+
     return GestureDetector(
       onTap: () {
         if (_isMapMode) {
@@ -953,7 +1006,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           } else {
             showTopSnackBar(
               context,
-              '此課程無指定教室，無法定位',
+              AppLocalizations.of(context).noClassroomForLocation,
               type: SnackBarType.warning,
             );
           }
@@ -970,7 +1023,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 year: event.year!,
                 semester: event.semester!,
                 courseNo: event.courseNo!,
-                courseName: event.name,
+                courseName: displayName,
               ),
             ),
           );
@@ -978,23 +1031,23 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text(event.name),
+              title: Text(displayName),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('教室: ${event.room ?? "未定"}'),
-                    Text('教師: ${event.teacher}'),
+                    Text(AppLocalizations.of(context).classroomLabel(event.room ?? AppLocalizations.of(context).notDecided)),
+                    Text(AppLocalizations.of(context).teacherLabel(event.teacher)),
                     const Divider(),
-                    Text('時段: ${event.timeRoomStr}'),
+                    Text(AppLocalizations.of(context).timeLabel(event.timeRoomStr)),
                   ],
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('關閉'),
+                  child: Text(AppLocalizations.of(context).close),
                 ),
               ],
             ),
@@ -1018,7 +1071,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           children: [
             Expanded(
               child: Text(
-                event.name,
+                displayName,
                 style: TextStyle(
                   fontSize: 15,
                   color: isLocatable
@@ -1075,10 +1128,9 @@ class GraduationScreen extends StatelessWidget {
     final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: CustomAppBar(
-        title: '畢業學分',
-        onRefresh: data.isLoadingGraduation
-            ? null
-            : () => data.fetchGraduation(),
+        title: AppLocalizations.of(context).infoGradTitle,
+        onRefresh: () => data.fetchGraduation(),
+        isLoading: data.isLoadingGraduation,
       ),
       body: const GraduationContent(),
     );

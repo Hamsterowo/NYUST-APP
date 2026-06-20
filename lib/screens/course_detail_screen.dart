@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/app_localizations.dart';
 import '../models/course_detail_model.dart';
 import '../models/map_building_model.dart';
 import '../services/api_service.dart';
@@ -62,22 +63,34 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         });
       } else {
         setState(() {
-          _errorMessage = response?['message'] ?? '載入失敗';
+          _errorMessage = response?['message'] ?? AppLocalizations.of(context).loadCalendarFailed;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = '發生錯誤: $e';
+        _errorMessage = AppLocalizations.of(context).loadErrorPrefix(e.toString());
         _isLoading = false;
       });
     }
   }
 
   String _formatContent(String text) {
-    if (text.isEmpty) return '無資料';
+    if (text.isEmpty) return AppLocalizations.of(context).courseNoData;
     return text.split('\n').map((line) => line.trimLeft()).join('\n').trim();
+  }
+
+  String _annotateRequiredType(String rawType) {
+    final type = rawType.trim();
+    if (type == '必修' || type.toLowerCase() == 'required') {
+      return '必修 (Required)';
+    } else if (type == '選修' || type.toLowerCase() == 'elective') {
+      return '選修 (Elective)';
+    } else if (type == '通識' || type.toLowerCase() == 'general education' || type.toLowerCase().contains('general')) {
+      return '通識 (General Education)';
+    }
+    return type;
   }
 
   List<String> _extractRoomCodes(String timeRoomStr) {
@@ -119,7 +132,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       if (match == null) {
         showTopSnackBar(
           context,
-          '教室代號格式無效，無法定位',
+          AppLocalizations.of(context).courseInvalidRoomCode,
           type: SnackBarType.warning,
         );
         return;
@@ -149,13 +162,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       } else {
         showTopSnackBar(
           context,
-          '查無大樓 [$codePrefix] 的定位資訊',
+          AppLocalizations.of(context).courseBuildingNotFound(codePrefix),
           type: SnackBarType.warning,
         );
       }
     } catch (e) {
       if (mounted) {
-        showTopSnackBar(context, '讀取地圖資料失敗: $e', isError: true);
+        showTopSnackBar(context, AppLocalizations.of(context).courseLoadMapDataFailed(e.toString()), isError: true);
       }
     }
   }
@@ -175,7 +188,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Text(
-                  '選擇上課教室定位',
+                  AppLocalizations.of(context).courseSelectRoomLocation,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -188,7 +201,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     Icons.map_outlined,
                     color: colorScheme.primary,
                   ),
-                  title: Text('前往 $room 定位'),
+                  title: Text(AppLocalizations.of(context).courseGoToRoomLocation(room)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.pop(context);
@@ -213,7 +226,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.open_in_browser),
-            tooltip: '在瀏覽器開啟',
+            tooltip: AppLocalizations.of(context).courseOpenInBrowser,
             onPressed: () async {
               final url = Uri.parse(
                 'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
@@ -222,7 +235,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               } catch (_) {
                 if (context.mounted) {
-                  showTopSnackBar(context, '無法開啟網頁', isError: true);
+                  showTopSnackBar(context, AppLocalizations.of(context).courseOpenWebpageFailed, isError: true);
                 }
               }
             },
@@ -254,7 +267,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 });
                 _fetchDetail();
               },
-              child: const Text('重試'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -269,13 +282,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       children: [
         _buildInfoCard(detail),
         const SizedBox(height: 24),
-        _buildSectionTitle('教學目標'),
+        _buildSectionTitle(AppLocalizations.of(context).courseGoal),
         _buildContentCard(_formatContent(detail.goal)),
         const SizedBox(height: 24),
-        _buildSectionTitle('課程大綱'),
+        _buildSectionTitle(AppLocalizations.of(context).courseOutline),
         _buildContentCard(_formatContent(detail.outline)),
         const SizedBox(height: 24),
-        _buildSectionTitle('成績評量方式'),
+        _buildSectionTitle(AppLocalizations.of(context).courseGrading),
         _buildContentCard(_formatContent(detail.grade)),
         const SizedBox(height: 24),
         _buildSyllabusPanel(detail.syllabus),
@@ -293,7 +306,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         title: Text(
-          '教學計畫與進度',
+          AppLocalizations.of(context).courseSyllabus,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: colorScheme.primary,
@@ -394,22 +407,22 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
           children: [
-            _buildInfoRow('授課教師', detail.teacher),
+            _buildInfoRow(AppLocalizations.of(context).courseInstructor, detail.teacher),
             if (detail.teacherEmailAndTel != null &&
                 detail.teacherEmailAndTel!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow('聯絡資訊', detail.teacherEmailAndTel!),
+              _buildInfoRow(AppLocalizations.of(context).courseContactInfo, detail.teacherEmailAndTel!),
             ],
             if (detail.deptCourseNo != null &&
                 detail.deptCourseNo!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow('系所課號', detail.deptCourseNo!),
+              _buildInfoRow(AppLocalizations.of(context).courseCurriculumNo, detail.deptCourseNo!),
             ],
             const Divider(height: 8),
-            _buildInfoRow('學分數', detail.credits),
+            _buildInfoRow(AppLocalizations.of(context).courseCredits, detail.credits),
             const Divider(height: 8),
             _buildInfoRow(
-              '上課時間教室',
+              AppLocalizations.of(context).courseScheduleClassroom,
               detail.timeRoom,
               crossAxisAlignment: CrossAxisAlignment.center,
               trailing: () {
@@ -417,7 +430,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 if (rooms.isEmpty) return null;
                 return IconButton(
                   icon: const Icon(Icons.map_outlined),
-                  tooltip: '查看地圖定位',
+                  tooltip: AppLocalizations.of(context).mapModeTooltip,
                   onPressed: () {
                     if (rooms.length == 1) {
                       _handleNavigateToMap(rooms.first);
@@ -431,18 +444,18 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             if (detail.courseClass != null &&
                 detail.courseClass!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow('開課班級', detail.courseClass!),
+              _buildInfoRow(AppLocalizations.of(context).courseClass, detail.courseClass!),
             ],
             const Divider(height: 8),
-            _buildInfoRow('修別', detail.requiredType),
+            _buildInfoRow(AppLocalizations.of(context).courseRequiredElective, _annotateRequiredType(detail.requiredType)),
             if (detail.courseType != null && detail.courseType!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow('授課方式', detail.courseType!),
+              _buildInfoRow(AppLocalizations.of(context).courseType, detail.courseType!),
             ],
             if (detail.courseRemark != null &&
                 detail.courseRemark!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow('備註', detail.courseRemark!),
+              _buildInfoRow(AppLocalizations.of(context).courseRemark, detail.courseRemark!),
             ],
           ],
         ),
@@ -462,7 +475,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         crossAxisAlignment: crossAxisAlignment,
         children: [
           SizedBox(
-            width: 100,
+            width: 110,
             child: Text(
               label,
               style: TextStyle(
@@ -473,11 +486,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? '無' : value,
+              value.isEmpty ? AppLocalizations.of(context).courseNone : value,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
-          if (trailing != null) trailing,
+          ?trailing,
         ],
       ),
     );

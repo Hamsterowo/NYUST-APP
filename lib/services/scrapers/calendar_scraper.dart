@@ -1,5 +1,7 @@
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 import 'base_scraper.dart';
 
 /// 處理行事曆與假日爬取的類別
@@ -7,9 +9,28 @@ class CalendarScraper extends BaseScraper {
   CalendarScraper(super.dio);
 
   /// 獲取特定年份的行事曆事件
-  Future<Map<String, dynamic>> getCalendarEvents(String year) async {
+  Future<Map<String, dynamic>> getCalendarEvents(String year, {String? languageCode}) async {
     try {
-      final calendarUrl = 'https://events.yuntech.edu.tw/index.php?&y=$year&view=YunTech&';
+      String langValue = 'zh-tw';
+      if (languageCode != null) {
+        langValue = languageCode.toLowerCase() == 'en' ? 'en' : 'zh-tw';
+      } else {
+        String detectedCode = 'zh';
+        try {
+          if (Intl.defaultLocale != null && Intl.defaultLocale!.isNotEmpty) {
+            detectedCode = Intl.defaultLocale!.split('_').first.split('-').first.toLowerCase();
+          } else {
+            detectedCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+          }
+        } catch (_) {
+          try {
+            detectedCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+          } catch (_) {}
+        }
+        langValue = detectedCode == 'en' ? 'en' : 'zh-tw';
+      }
+
+      final calendarUrl = 'https://events.yuntech.edu.tw/?&y=$year&view=YunTech&lang=$langValue';
       if (kDebugMode) print('CalendarScraper: Fetching events from $calendarUrl');
 
       final response = await dio.get(
@@ -29,7 +50,10 @@ class CalendarScraper extends BaseScraper {
           final name = element.text.trim();
 
           try {
-            final uri = Uri.parse('https://events.yuntech.edu.tw/$href');
+            final baseUri = Uri.parse('https://events.yuntech.edu.tw/');
+            final uri = href.startsWith('http')
+                ? Uri.parse(href)
+                : baseUri.resolve(href);
             final eventYear = uri.queryParameters['y'];
             final eventMonth = uri.queryParameters['m'];
             final eventDay = uri.queryParameters['d'];
@@ -41,7 +65,18 @@ class CalendarScraper extends BaseScraper {
 
             if (eventYear != null && eventMonth != null && eventDay != null && name.isNotEmpty) {
 
-              final eventNames = name.split('；').map((n) => n.trim()).where((n) => n.isNotEmpty);
+              Iterable<String> eventNames;
+              if (langValue == 'en') {
+                final tempNames = name.split('；').map((n) => n.trim()).where((n) => n.isNotEmpty);
+                final List<String> splitNames = [];
+                final commaRegex = RegExp(r', \s*(?=[A-Z\u4e00-\u9fa5])');
+                for (var tempName in tempNames) {
+                  splitNames.addAll(tempName.split(commaRegex).map((n) => n.trim()).where((n) => n.isNotEmpty));
+                }
+                eventNames = splitNames;
+              } else {
+                eventNames = name.split('；').map((n) => n.trim()).where((n) => n.isNotEmpty);
+              }
 
               int index = 0;
               for (var singleName in eventNames) {
@@ -75,7 +110,7 @@ class CalendarScraper extends BaseScraper {
   }
 
   /// 獲取特定年份的假日 (包含國定假日與寒暑假)
-  Future<Map<String, dynamic>> getHolidays(int year) async {
+  Future<Map<String, dynamic>> getHolidays(int year, {String? languageCode}) async {
     try {
       if (kDebugMode) print('CalendarScraper: Fetching holidays for $year');
 
@@ -103,7 +138,7 @@ class CalendarScraper extends BaseScraper {
       final summerHolidays = <String>[];
 
       try {
-        final calendarUrl = 'https://events.yuntech.edu.tw/index.php?&y=$year&view=YunTech&';
+        final calendarUrl = 'https://events.yuntech.edu.tw/?&y=$year&view=YunTech&lang=zh-tw';
         final response = await dio.get(calendarUrl);
         final document = parseHtml(response.data);
 
@@ -114,7 +149,10 @@ class CalendarScraper extends BaseScraper {
           final href = element.attributes['href'];
           if (href != null && href.contains('eventdatetime_id=')) {
             final name = element.text.trim();
-            final uri = Uri.parse('https://events.yuntech.edu.tw/$href');
+            final baseUri = Uri.parse('https://events.yuntech.edu.tw/');
+            final uri = href.startsWith('http')
+                ? Uri.parse(href)
+                : baseUri.resolve(href);
             final evYear = uri.queryParameters['y'];
             final evMonth = uri.queryParameters['m'];
             final evDay = uri.queryParameters['d'];

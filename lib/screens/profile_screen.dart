@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
 import '../utils/pwa_interop.dart';
+import '../utils/settings_utils.dart';
 import 'yuntech_privacy_screen.dart';
 import 'terms_of_service_screen.dart';
 
@@ -42,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (result != true) {
         showTopSnackBar(
           context,
-          '目前無法安裝：您可能已安裝，或瀏覽器不支援此功能',
+          AppLocalizations.of(context).installError,
           type: SnackBarType.warning,
         );
       }
@@ -50,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showReportDialog(BuildContext context) {
-    showTopSnackBar(context, '此功能尚未完成', type: SnackBarType.info);
+    showTopSnackBar(context, AppLocalizations.of(context).featureNotFinished, type: SnackBarType.info);
   }
 
   @override
@@ -61,21 +63,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     if (!auth.isInitialized) {
-      return const Scaffold(
-        appBar: CustomAppBar(title: '設定'),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: CustomAppBar(title: AppLocalizations.of(context).settingsTitle),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (!auth.isLoggedIn) {
-      return const Scaffold(
-        appBar: CustomAppBar(title: '設定'),
-        body: Center(child: LoginForm()),
+      return Scaffold(
+        appBar: CustomAppBar(title: AppLocalizations.of(context).settingsTitle),
+        body: const Center(child: LoginForm()),
       );
     }
 
     return Scaffold(
-      appBar: const CustomAppBar(title: '設定'),
+      appBar: CustomAppBar(title: AppLocalizations.of(context).settingsTitle),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -169,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '※ 此頁面僅供參考，無法作為在學證明等正式用途',
+                          AppLocalizations.of(context).profileDisclaimer,
                           style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant.withValues(
                               alpha: 0.7,
@@ -188,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icons.privacy_tip_outlined,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                title: const Text('YunTech 單一入口隱私權政策'),
+                                title: Text(AppLocalizations.of(context).privacyPolicy),
                                 trailing: Icon(
                                   Icons.chevron_right,
                                   color: colorScheme.onSurfaceVariant,
@@ -214,7 +216,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icons.description_outlined,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                title: const Text('NYUST+ 使用者條款'),
+                                title: Text(AppLocalizations.of(context).termsOfService),
+                                trailing: Icon(
+                                  Icons.chevron_right,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const TermsOfServiceScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const Divider(height: 1, indent: 56),
+                              ListTile(
+                                leading: Icon(
+                                  Icons.language,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                title: Text(AppLocalizations.of(context).languageSetting),
+                                subtitle: Text(
+                                  AppLocalizations.of(context).languageSettingSub,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                  ),
+                                ),
                                 trailing: Icon(
                                   Icons.chevron_right,
                                   color: colorScheme.onSurfaceVariant,
@@ -225,14 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     bottomRight: Radius.circular(12),
                                   ),
                                 ),
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const TermsOfServiceScreen(),
-                                    ),
-                                  );
-                                },
+                                onTap: () => SettingsUtils.openLanguageSettings(),
                               ),
                             ],
                           ),
@@ -260,15 +281,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.install_mobile_outlined,
                                       size: 20,
                                     ),
-                                    SizedBox(width: 8),
-                                    Text('安裝 APP'),
+                                    const SizedBox(width: 8),
+                                    Text(AppLocalizations.of(context).installApp),
                                   ],
                                 ),
                               ),
@@ -290,12 +311,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.bug_report_outlined, size: 20),
-                                  SizedBox(width: 8),
-                                  Text('回報問題'),
+                                  const Icon(Icons.bug_report_outlined, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(AppLocalizations.of(context).reportIssue),
                                 ],
                               ),
                             ),
@@ -316,12 +337,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.logout, size: 20),
-                                  SizedBox(width: 8),
-                                  Text('登出'),
+                                  const Icon(Icons.logout, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(AppLocalizations.of(context).logout),
                                 ],
                               ),
                             ),
