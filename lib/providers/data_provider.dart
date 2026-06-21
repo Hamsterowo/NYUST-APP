@@ -14,6 +14,8 @@ class DataProvider with ChangeNotifier {
   final AuthProvider _auth;
 
   Future<void>? _cacheLoadingFuture;
+  bool _isCacheLoaded = false;
+  bool get isCacheLoaded => _isCacheLoaded;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -84,10 +86,11 @@ class DataProvider with ChangeNotifier {
           return ScheduleEvent.fromJson(newMap);
         }).toList();
       }
-
-      notifyListeners();
     } catch (e) {
       if (kDebugMode) print('DataProvider: _loadCache error: $e');
+    } finally {
+      _isCacheLoaded = true;
+      notifyListeners();
     }
   }
 
