@@ -8,7 +8,7 @@ import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
 import '../utils/pwa_interop.dart';
 import '../utils/settings_utils.dart';
-import 'yuntech_privacy_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'terms_of_service_screen.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
@@ -201,13 +201,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     topRight: Radius.circular(12),
                                   ),
                                 ),
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const YuntechPrivacyScreen(),
-                                    ),
-                                  );
+                                onTap: () async {
+                                  final Uri url =
+                                      Uri.parse('https://sso.yuntech.edu.tw/');
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(
+                                      url,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  } else {
+                                    if (context.mounted) {
+                                      showTopSnackBar(
+                                        context,
+                                        '無法開啟隱私權政策網頁',
+                                        type: SnackBarType.warning,
+                                      );
+                                    }
+                                  }
                                 },
                               ),
                               const Divider(height: 1, indent: 56),

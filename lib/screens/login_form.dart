@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/top_snack_bar.dart';
 import 'dart:convert';
-import 'yuntech_privacy_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginForm extends StatefulWidget {
@@ -21,13 +20,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordFocusNode = FocusNode();
   final bool _rememberMe = true;
 
-  bool _hasReadPrivacy = false;
-  bool _isCheckedPrivacy = false;
   String _versionStr = '';
-
-  void _showMustReadSnackBar() {
-    showTopSnackBar(context, '請先點選閱讀條款內容後，再進行勾選。', type: SnackBarType.warning);
-  }
 
   @override
   void initState() {
@@ -95,8 +88,6 @@ class _LoginFormState extends State<LoginForm> {
     final auth = context.watch<AuthProvider>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    final bool canLogin = _isCheckedPrivacy;
 
     return SingleChildScrollView(
       child: Padding(
@@ -185,89 +176,6 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: _isCheckedPrivacy,
-                      onChanged: (val) {
-                        if (!_hasReadPrivacy) {
-                          _showMustReadSnackBar();
-                          return;
-                        }
-                        setState(() {
-                          _isCheckedPrivacy = val ?? false;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const YuntechPrivacyScreen(
-                                showAgreementButtons: true,
-                              ),
-                            ),
-                          ).then((agreed) {
-                            if (agreed == true) {
-                              setState(() {
-                                _hasReadPrivacy = true;
-                                _isCheckedPrivacy = true;
-                              });
-                            }
-                          });
-                        },
-                        child: Text(
-                          '我已閱讀並同意「YunTech 單一入口隱私權政策」',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: _hasReadPrivacy
-                                ? colorScheme.onSurface
-                                : colorScheme.primary,
-                            decoration: _hasReadPrivacy
-                                ? null
-                                : TextDecoration.underline,
-                            fontWeight: _hasReadPrivacy
-                                ? FontWeight.normal
-                                : FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_forward_ios,
-                        color: colorScheme.onSurfaceVariant,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const YuntechPrivacyScreen(
-                              showAgreementButtons: true,
-                            ),
-                          ),
-                        ).then((agreed) {
-                          if (agreed == true) {
-                            setState(() {
-                              _hasReadPrivacy = true;
-                              _isCheckedPrivacy = true;
-                            });
-                          }
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 24),
 
               if (auth.isLoading)
@@ -276,7 +184,7 @@ class _LoginFormState extends State<LoginForm> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: canLogin ? () => _submit(auth) : null,
+                    onPressed: () => _submit(auth),
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
