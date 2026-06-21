@@ -42,6 +42,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsOfService => 'NYUST+ Terms of Service';
 
   @override
+  String get termsUpdateTitle => 'Notice';
+
+  @override
+  String get termsUpdateAlert =>
+      'The terms of service have been updated. Please agree to them before continuing.';
+
+  @override
+  String get continueLabel => 'Continue';
+
+  @override
   String get logout => 'Logout';
 
   @override
