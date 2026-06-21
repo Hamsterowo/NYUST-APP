@@ -654,7 +654,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     final now = DateTime.now();
     final todayWeekday = now.weekday.toString();
-    final isLoading = !data.isCacheLoaded || (data.isLoadingSchedule && data.scheduleData.isEmpty);
+    final isLoading = !data.isCacheLoaded ||
+        ((data.isPrefetching || data.isLoadingSchedule) && data.scheduleData.isEmpty);
 
     if (isLoading) {
       return Column(
@@ -670,29 +671,55 @@ class _OverviewScreenState extends State<OverviewScreen> {
           for (int i = 0; i < 2; i++)
             Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
+              child: Card(
+                elevation: 0,
+                color: colorScheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: colorScheme.outlineVariant),
                 ),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    ShimmerBox(
-                      width: 200,
-                      height: 18,
-                      margin: EdgeInsets.only(bottom: 8),
-                    ),
-                    ShimmerBox(
-                      width: 150,
-                      height: 14,
-                      margin: EdgeInsets.only(bottom: 4),
-                    ),
-                    ShimmerBox(width: 100, height: 14),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          ShimmerBox(
+                            width: 120,
+                            height: 16,
+                            margin: EdgeInsets.only(bottom: 8),
+                          ),
+                          ShimmerBox(
+                            width: 180,
+                            height: 18,
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 4),
+                            const ShimmerBox(width: 60, height: 14),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

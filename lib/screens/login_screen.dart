@@ -2,21 +2,17 @@ import 'package:flutter/material.dart';
 import 'login_form.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  final bool showIcon;
+  const LoginScreen({super.key, this.showIcon = true});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '登入 NYUST+',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: const SingleChildScrollView(
+      appBar: AppBar(),
+      body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(children: [LoginForm(), SizedBox(height: 32)]),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(children: [LoginForm(showIcon: showIcon), const SizedBox(height: 32)]),
         ),
       ),
     );

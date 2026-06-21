@@ -5,9 +5,11 @@ import '../providers/auth_provider.dart';
 import '../utils/top_snack_bar.dart';
 import 'dart:convert';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../l10n/app_localizations.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+  final bool showIcon;
+  const LoginForm({super.key, this.showIcon = true});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -54,18 +56,18 @@ class _LoginFormState extends State<LoginForm> {
     final captcha = _captchaController.text.trim();
 
     if (username.isEmpty) {
-      showTopSnackBar(context, '請輸入學號', type: SnackBarType.warning);
+      showTopSnackBar(context, AppLocalizations.of(context).loginUsernamePrompt, type: SnackBarType.warning);
       return;
     }
     final isDebug = username == 'debug' || username.toLowerCase() == 'test';
 
     if (!isDebug) {
       if (password.isEmpty) {
-        showTopSnackBar(context, '請輸入密碼', type: SnackBarType.warning);
+        showTopSnackBar(context, AppLocalizations.of(context).loginPasswordPrompt, type: SnackBarType.warning);
         return;
       }
       if (captcha.isEmpty) {
-        showTopSnackBar(context, '請輸入驗證碼', type: SnackBarType.warning);
+        showTopSnackBar(context, AppLocalizations.of(context).loginCaptchaPrompt, type: SnackBarType.warning);
         return;
       }
     }
@@ -94,10 +96,13 @@ class _LoginFormState extends State<LoginForm> {
         child: AutofillGroup(
           child: Column(
             children: [
-              Icon(Icons.school, size: 64, color: colorScheme.primary),
-              SizedBox(height: 16),
+              Opacity(
+                opacity: widget.showIcon ? 1.0 : 0.0,
+                child: Icon(Icons.school, size: 64, color: colorScheme.primary),
+              ),
+              const SizedBox(height: 16),
               Text(
-                '登入雲科單一入口服務網',
+                AppLocalizations.of(context).loginHeading,
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
@@ -109,7 +114,7 @@ class _LoginFormState extends State<LoginForm> {
                 onSubmitted: (_) =>
                     FocusScope.of(context).requestFocus(_passwordFocusNode),
                 decoration: InputDecoration(
-                  labelText: '學號',
+                  labelText: AppLocalizations.of(context).loginUsernameLabel,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
                   filled: true,
@@ -123,7 +128,7 @@ class _LoginFormState extends State<LoginForm> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _submit(auth),
                 decoration: InputDecoration(
-                  labelText: '密碼',
+                  labelText: AppLocalizations.of(context).loginPasswordLabel,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
                   filled: true,
@@ -149,7 +154,7 @@ class _LoginFormState extends State<LoginForm> {
                         }
                       },
                       decoration: InputDecoration(
-                        labelText: '驗證碼',
+                        labelText: AppLocalizations.of(context).loginCaptchaLabel,
                         border: OutlineInputBorder(),
                         filled: true,
                       ),
@@ -171,7 +176,7 @@ class _LoginFormState extends State<LoginForm> {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () => auth.fetchCaptcha(),
-                    tooltip: '重新整理驗證碼',
+                    tooltip: AppLocalizations.of(context).loginCaptchaRefreshTooltip,
                   ),
                 ],
               ),
@@ -187,7 +192,7 @@ class _LoginFormState extends State<LoginForm> {
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text('登入', style: TextStyle(fontSize: 16)),
+                    child: Text(AppLocalizations.of(context).loginButton, style: TextStyle(fontSize: 16)),
                   ),
                 ),
               const SizedBox(height: 16),

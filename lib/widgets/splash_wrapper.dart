@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
+import '../providers/navigation_provider.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/terms_of_service_screen.dart';
@@ -21,6 +22,8 @@ class _SplashWrapperState extends State<SplashWrapper>
   bool _splashDone = false;
   bool _animationTriggered = false;
   bool? _goingToLogin;
+  bool? _wasLoggedIn;
+  bool _isLogout = false;
 
   @override
   void initState() {
@@ -46,9 +49,13 @@ class _SplashWrapperState extends State<SplashWrapper>
     if (_animationTriggered) return;
     _animationTriggered = true;
 
-    await _checkTermsAgreement(auth);
+    final isLogout = _isLogout;
+    _isLogout = false;
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    if (!isLogout) {
+      await _checkTermsAgreement(auth);
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
 
     if (!mounted) return;
 
@@ -116,6 +123,23 @@ class _SplashWrapperState extends State<SplashWrapper>
     final auth = context.watch<AuthProvider>();
     final colorScheme = Theme.of(context).colorScheme;
 
+    if (_wasLoggedIn == true && !auth.isLoggedIn) {
+      _splashDone = false;
+      _animationTriggered = false;
+      _goingToLogin = null;
+      _controller.reset();
+      _isLogout = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          try {
+            context.read<NavigationProvider>().setIndex(0);
+          } catch (_) {}
+        }
+      });
+    }
+    _wasLoggedIn = auth.isLoggedIn;
+
     if (auth.isInitialized && !_animationTriggered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _onAuthReady(auth);
@@ -123,7 +147,7 @@ class _SplashWrapperState extends State<SplashWrapper>
     }
 
     if (_splashDone) {
-      return auth.isLoggedIn ? const HomeScreen() : const LoginScreen();
+      return auth.isLoggedIn ? const HomeScreen() : LoginScreen();
     }
 
     if (_goingToLogin == null) {
@@ -136,7 +160,7 @@ class _SplashWrapperState extends State<SplashWrapper>
     }
 
     final destination =
-        _goingToLogin! ? const LoginScreen() : const HomeScreen();
+        _goingToLogin! ? LoginScreen(showIcon: false) : const HomeScreen();
 
     return Stack(
       children: [
@@ -168,9 +192,7 @@ class _SplashWrapperState extends State<SplashWrapper>
       final currentLeft = screenSize.width / 2 - currentSize / 2;
       final currentTop = currentCenterY - currentSize / 2;
 
-      final iconOpacity = t > 0.9
-          ? lerpDouble(1.0, 0.0, (t - 0.9) / 0.1)!.clamp(0.0, 1.0)
-          : 1.0;
+      const iconOpacity = 1.0;
 
       return IgnorePointer(
         ignoring: t > 0.5,

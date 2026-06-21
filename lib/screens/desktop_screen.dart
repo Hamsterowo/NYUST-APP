@@ -35,7 +35,7 @@ class DesktopScreen extends StatelessWidget {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) =>
-            auth.isLoggedIn ? const HomeScreen() : const LoginScreen(),
+            auth.isLoggedIn ? const HomeScreen() : LoginScreen(),
       ),
     );
   }
