@@ -4,7 +4,6 @@ import '../services/course_detail_cache.dart';
 import '../services/calendar_cache_service.dart';
 import '../models/schedule_event.dart';
 import 'auth_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
@@ -19,26 +18,7 @@ class DataProvider with ChangeNotifier {
   final _secureStorage = const FlutterSecureStorage();
 
   Future<String?> _loadDataCache(String key) async {
-    // 1. 嘗試從安全儲存區讀取
-    final raw = await _secureStorage.read(key: key);
-    if (raw != null && raw.isNotEmpty) {
-      return raw;
-    }
-
-    // 2. 若無，自 SharedPreferences 轉移舊明文資料
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final oldRaw = prefs.getString(key);
-      if (oldRaw != null && oldRaw.isNotEmpty) {
-        await _secureStorage.write(key: key, value: oldRaw);
-        await prefs.remove(key);
-        if (kDebugMode) {
-          print('DataProvider: Migrated cache key $key to FlutterSecureStorage');
-        }
-        return oldRaw;
-      }
-    } catch (_) {}
-    return null;
+    return await _secureStorage.read(key: key);
   }
 
   Future<void> _saveDataCache(String key, String value) async {
@@ -49,12 +29,6 @@ class DataProvider with ChangeNotifier {
     await _secureStorage.delete(key: 'cache_grades');
     await _secureStorage.delete(key: 'cache_graduation');
     await _secureStorage.delete(key: 'cache_schedule');
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('cache_grades');
-      await prefs.remove('cache_graduation');
-      await prefs.remove('cache_schedule');
-    } catch (_) {}
   }
 
   DataProvider(this._api, this._auth) {

@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -138,9 +137,8 @@ class ApiService {
     }
   }
 
-  /// 從 FlutterSecureStorage 讀取學校 Cookies（支援 SharedPreferences 舊資料轉移）
+  /// 從 FlutterSecureStorage 讀取學校 Cookies
   Future<List<Map<String, dynamic>>> _loadSchoolCookies() async {
-    // 1. 嘗試從安全儲存區讀取
     final raw = await _secureStorage.read(key: _schoolCookiesKey);
     if (raw != null && raw.isNotEmpty) {
       try {
@@ -157,33 +155,6 @@ class ApiService {
         if (kDebugMode) print('ApiService: Failed to parse secure cookies: $e');
       }
     }
-
-    // 2. 若安全儲存區無資料，嘗試自 SharedPreferences 轉移舊明文資料
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final oldRaw = prefs.getString(_schoolCookiesKey);
-      if (oldRaw != null && oldRaw.isNotEmpty) {
-        final decoded = jsonDecode(oldRaw) as List<dynamic>;
-        final cookies = decoded.map((e) {
-          final map = e as Map;
-          final newMap = <String, dynamic>{};
-          map.forEach((key, value) {
-            newMap[key.toString()] = value;
-          });
-          return newMap;
-        }).toList();
-
-        // 寫入安全儲存區，並清除舊有明文資料
-        await _secureStorage.write(key: _schoolCookiesKey, value: oldRaw);
-        await prefs.remove(_schoolCookiesKey);
-
-        if (kDebugMode) print('ApiService: Migrated cookies from SharedPreferences to FlutterSecureStorage');
-        return cookies;
-      }
-    } catch (e) {
-      if (kDebugMode) print('ApiService: Failed to migrate cookies: $e');
-    }
-
     return [];
   }
 
@@ -195,11 +166,6 @@ class ApiService {
   /// 清除學校 Cookies (從 FlutterSecureStorage)
   Future<void> _clearSchoolCookies() async {
     await _secureStorage.delete(key: _schoolCookiesKey);
-    // 保險起見，也清除可能殘留的 SharedPreferences 資料
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_schoolCookiesKey);
-    } catch (_) {}
   }
 
   /// 檢查是否有儲存的學校 Cookies
