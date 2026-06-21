@@ -52,7 +52,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showReportDialog(BuildContext context) {
-    showTopSnackBar(context, AppLocalizations.of(context).featureNotFinished, type: SnackBarType.info);
+    showTopSnackBar(
+      context,
+      AppLocalizations.of(context).featureNotFinished,
+      type: SnackBarType.info,
+    );
   }
 
   @override
@@ -93,7 +97,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Column(
                       children: [
-
                         SizedBox(
                           width: double.infinity,
                           child: Card(
@@ -107,7 +110,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -132,7 +134,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           user?["user"]?["學號"] ?? "ID Unknown",
                                           style: textTheme.titleMedium
                                               ?.copyWith(
-                                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                                                color: colorScheme
+                                                    .onSurfaceVariant
+                                                    .withValues(alpha: 0.8),
                                               ),
                                         ),
                                       ],
@@ -190,9 +194,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icons.privacy_tip_outlined,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                title: Text(AppLocalizations.of(context).privacyPolicy),
+                                title: Text(
+                                  AppLocalizations.of(context).privacyPolicy,
+                                ),
                                 trailing: Icon(
-                                  Icons.chevron_right,
+                                  Icons.open_in_new,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
                                 shape: const RoundedRectangleBorder(
@@ -202,8 +208,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 onTap: () async {
-                                  final Uri url =
-                                      Uri.parse('https://sso.yuntech.edu.tw/');
+                                  final isEnglish =
+                                      Localizations.localeOf(
+                                        context,
+                                      ).languageCode ==
+                                      'en';
+                                  final Uri url = Uri.parse(
+                                    isEnglish
+                                        ? 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=en'
+                                        : 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=zh-TW',
+                                  );
                                   if (await canLaunchUrl(url)) {
                                     await launchUrl(
                                       url,
@@ -226,7 +240,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icons.description_outlined,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                title: Text(AppLocalizations.of(context).termsOfService),
+                                title: Text(
+                                  AppLocalizations.of(context).termsOfService,
+                                ),
                                 trailing: Icon(
                                   Icons.chevron_right,
                                   color: colorScheme.onSurfaceVariant,
@@ -246,11 +262,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icons.language,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                title: Text(AppLocalizations.of(context).languageSetting),
+                                title: Text(
+                                  AppLocalizations.of(context).languageSetting,
+                                ),
                                 subtitle: Text(
-                                  AppLocalizations.of(context).languageSettingSub,
+                                  AppLocalizations.of(
+                                    context,
+                                  ).languageSettingSub,
                                   style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                    color: colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.6),
                                   ),
                                 ),
                                 trailing: Icon(
@@ -263,7 +284,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     bottomRight: Radius.circular(12),
                                   ),
                                 ),
-                                onTap: () => SettingsUtils.openLanguageSettings(),
+                                onTap: () =>
+                                    SettingsUtils.openLanguageSettings(),
                               ),
                             ],
                           ),
@@ -275,7 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.only(top: 32.0),
                       child: Column(
                         children: [
-
                           if (kIsWeb) ...[
                             SizedBox(
                               width: double.infinity,
@@ -299,7 +320,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context).installApp),
+                                    Text(
+                                      AppLocalizations.of(context).installApp,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -324,9 +347,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.bug_report_outlined, size: 20),
+                                  const Icon(
+                                    Icons.bug_report_outlined,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 8),
-                                  Text(AppLocalizations.of(context).reportIssue),
+                                  Text(
+                                    AppLocalizations.of(context).reportIssue,
+                                  ),
                                 ],
                               ),
                             ),
