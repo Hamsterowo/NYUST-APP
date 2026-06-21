@@ -42,6 +42,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get termsOfService => 'NYUST+ 使用者條款';
 
   @override
+  String get termsUpdateTitle => '提示';
+
+  @override
+  String get termsUpdateAlert => '條款已更新請同意後再繼續使用';
+
+  @override
+  String get continueLabel => '繼續';
+
+  @override
   String get logout => '登出';
 
   @override

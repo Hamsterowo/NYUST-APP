@@ -70,6 +70,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
     }
 
     if (shouldShow && mounted) {
+      if (lastAcceptedDate.isNotEmpty) {
+        await TermsOfServiceScreen.showUpdateAlert(context);
+      }
+
+      if (!mounted) return;
+
       final agreedDate = await Navigator.push<String>(
         context,
         MaterialPageRoute(

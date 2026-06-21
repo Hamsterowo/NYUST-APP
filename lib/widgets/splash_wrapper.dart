@@ -90,6 +90,12 @@ class _SplashWrapperState extends State<SplashWrapper>
     }
 
     if (shouldShow && mounted) {
+      if (lastAcceptedDate.isNotEmpty) {
+        await TermsOfServiceScreen.showUpdateAlert(context);
+      }
+
+      if (!mounted) return;
+
       final agreedDate = await Navigator.push<String>(
         context,
         MaterialPageRoute(
