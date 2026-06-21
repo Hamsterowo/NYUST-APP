@@ -4,15 +4,19 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
-late PersistCookieJar _globalCookieJar;
+late CookieJar _globalCookieJar;
 
 Future<void> setupCookieManager(Dio dio) async {
-  Directory appDocDir = await getApplicationDocumentsDirectory();
-  String appDocPath = appDocDir.path;
+  // Clear any legacy unencrypted cookie files stored on disk
+  try {
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final legacyCookiesDir = Directory("${appDocDir.path}/.cookies");
+    if (await legacyCookiesDir.exists()) {
+      await legacyCookiesDir.delete(recursive: true);
+    }
+  } catch (_) {}
 
-  _globalCookieJar = PersistCookieJar(
-    storage: FileStorage("$appDocPath/.cookies/"),
-  );
+  _globalCookieJar = CookieJar();
   dio.interceptors.add(CookieManager(_globalCookieJar));
 }
 

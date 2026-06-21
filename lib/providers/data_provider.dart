@@ -5,6 +5,7 @@ import '../services/calendar_cache_service.dart';
 import '../models/schedule_event.dart';
 import 'auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
 /// 集中管理所有已載入的 App 資料，避免切換頁面時重複呼叫 API。
@@ -14,6 +15,47 @@ class DataProvider with ChangeNotifier {
   final AuthProvider _auth;
 
   Future<void>? _cacheLoadingFuture;
+
+  final _secureStorage = const FlutterSecureStorage();
+
+  Future<String?> _loadDataCache(String key) async {
+    // 1. 嘗試從安全儲存區讀取
+    final raw = await _secureStorage.read(key: key);
+    if (raw != null && raw.isNotEmpty) {
+      return raw;
+    }
+
+    // 2. 若無，自 SharedPreferences 轉移舊明文資料
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final oldRaw = prefs.getString(key);
+      if (oldRaw != null && oldRaw.isNotEmpty) {
+        await _secureStorage.write(key: key, value: oldRaw);
+        await prefs.remove(key);
+        if (kDebugMode) {
+          print('DataProvider: Migrated cache key $key to FlutterSecureStorage');
+        }
+        return oldRaw;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<void> _saveDataCache(String key, String value) async {
+    await _secureStorage.write(key: key, value: value);
+  }
+
+  Future<void> _clearDataCaches() async {
+    await _secureStorage.delete(key: 'cache_grades');
+    await _secureStorage.delete(key: 'cache_graduation');
+    await _secureStorage.delete(key: 'cache_schedule');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('cache_grades');
+      await prefs.remove('cache_graduation');
+      await prefs.remove('cache_schedule');
+    } catch (_) {}
+  }
 
   DataProvider(this._api, this._auth) {
     _cacheLoadingFuture = _loadCache();
@@ -33,10 +75,8 @@ class DataProvider with ChangeNotifier {
 
   Future<void> _loadCache() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
       // Load grades cache
-      final cachedGrades = prefs.getString('cache_grades');
+      final cachedGrades = await _loadDataCache('cache_grades');
       if (cachedGrades != null && gradesData == null) {
         final map = jsonDecode(cachedGrades) as Map;
         final newMap = <String, dynamic>{};
@@ -47,7 +87,7 @@ class DataProvider with ChangeNotifier {
       }
 
       // Load graduation cache
-      final cachedGraduation = prefs.getString('cache_graduation');
+      final cachedGraduation = await _loadDataCache('cache_graduation');
       if (cachedGraduation != null && graduationData == null) {
         final map = jsonDecode(cachedGraduation) as Map;
         final newMap = <String, dynamic>{};
@@ -58,7 +98,7 @@ class DataProvider with ChangeNotifier {
       }
 
       // Load schedule cache
-      final cachedSchedule = prefs.getString('cache_schedule');
+      final cachedSchedule = await _loadDataCache('cache_schedule');
       if (cachedSchedule != null && scheduleData.isEmpty) {
         final List<dynamic> raw = jsonDecode(cachedSchedule);
         scheduleData = raw.map((e) {
@@ -101,16 +141,11 @@ class DataProvider with ChangeNotifier {
 
   /// 強制重新抓取（不使用快取）
   Future<void> forceFetchAll() async {
-
     gradesData = null;
     graduationData = null;
     scheduleData = [];
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('cache_grades');
-    await prefs.remove('cache_graduation');
-    await prefs.remove('cache_schedule');
-
+    await _clearDataCaches();
     await prefetchAll();
   }
 
@@ -138,10 +173,7 @@ class DataProvider with ChangeNotifier {
     await CalendarCacheService.clearAllCache();
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('cache_grades');
-    await prefs.remove('cache_graduation');
-    await prefs.remove('cache_schedule');
+    await _clearDataCaches();
   }
 
   Future<void> fetchGrades() async {
@@ -150,8 +182,7 @@ class DataProvider with ChangeNotifier {
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
 
     if (gradesData == null) {
-      final prefs = await SharedPreferences.getInstance();
-      final cached = prefs.getString('cache_grades');
+      final cached = await _loadDataCache('cache_grades');
       if (cached != null) {
         try {
           final map = jsonDecode(cached) as Map;
@@ -177,9 +208,7 @@ class DataProvider with ChangeNotifier {
       if (response['success'] == true) {
         gradesData = response;
         gradesFailed = false;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cache_grades', jsonEncode(response));
+        await _saveDataCache('cache_grades', jsonEncode(response));
       } else {
         gradesFailed = true;
       }
@@ -197,8 +226,7 @@ class DataProvider with ChangeNotifier {
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
 
     if (graduationData == null) {
-      final prefs = await SharedPreferences.getInstance();
-      final cached = prefs.getString('cache_graduation');
+      final cached = await _loadDataCache('cache_graduation');
       if (cached != null) {
         try {
           final map = jsonDecode(cached) as Map;
@@ -224,9 +252,7 @@ class DataProvider with ChangeNotifier {
       if (response['success'] == true) {
         graduationData = response;
         graduationFailed = false;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cache_graduation', jsonEncode(response));
+        await _saveDataCache('cache_graduation', jsonEncode(response));
       } else {
         graduationFailed = true;
       }
@@ -244,8 +270,7 @@ class DataProvider with ChangeNotifier {
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
 
     if (scheduleData.isEmpty) {
-      final prefs = await SharedPreferences.getInstance();
-      final cached = prefs.getString('cache_schedule');
+      final cached = await _loadDataCache('cache_schedule');
       if (cached != null) {
         try {
           final List<dynamic> raw = jsonDecode(cached);
@@ -280,9 +305,7 @@ class DataProvider with ChangeNotifier {
             )
             .toList();
         scheduleFailed = false;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cache_schedule', jsonEncode(raw));
+        await _saveDataCache('cache_schedule', jsonEncode(raw));
       } else {
         scheduleFailed = true;
       }

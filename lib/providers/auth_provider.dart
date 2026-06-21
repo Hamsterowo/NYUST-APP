@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -9,6 +10,44 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   Map<String, dynamic>? _user;
   String? _error;
+
+  final _secureStorage = const FlutterSecureStorage();
+  static const String _cachedUserInfoKey = 'cached_user_info';
+
+  Future<String?> _loadUserCache() async {
+    // 1. 嘗試從安全儲存區讀取
+    final raw = await _secureStorage.read(key: _cachedUserInfoKey);
+    if (raw != null && raw.isNotEmpty) {
+      return raw;
+    }
+
+    // 2. 若無，自 SharedPreferences 轉移舊明文資料
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final oldRaw = prefs.getString(_cachedUserInfoKey);
+      if (oldRaw != null && oldRaw.isNotEmpty) {
+        await _secureStorage.write(key: _cachedUserInfoKey, value: oldRaw);
+        await prefs.remove(_cachedUserInfoKey);
+        if (kDebugMode) {
+          print('AuthProvider: Migrated user info to FlutterSecureStorage');
+        }
+        return oldRaw;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<void> _saveUserCache(Map<String, dynamic> info) async {
+    await _secureStorage.write(key: _cachedUserInfoKey, value: jsonEncode(info));
+  }
+
+  Future<void> _clearUserCache() async {
+    await _secureStorage.delete(key: _cachedUserInfoKey);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_cachedUserInfoKey);
+    } catch (_) {}
+  }
 
   String? _captchaUrl;
   String? _verificationToken;
@@ -43,9 +82,7 @@ class AuthProvider with ChangeNotifier {
     final hasCookies = await _apiService.hasSavedCookies();
 
     if (!hasCookies) {
-
-      final prefs = await SharedPreferences.getInstance();
-      final cachedStr = prefs.getString('cached_user_info');
+      final cachedStr = await _loadUserCache();
       if (cachedStr != null) {
         final cachedUser = jsonDecode(cachedStr);
         if (cachedUser['user']?['id'] == 'D11012345') {
@@ -65,8 +102,7 @@ class AuthProvider with ChangeNotifier {
 
     // Load cached user info immediately if available, so that isLoggedIn is true from startup
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final cachedStr = prefs.getString('cached_user_info');
+      final cachedStr = await _loadUserCache();
       if (cachedStr != null) {
         final cachedUser = jsonDecode(cachedStr);
         _user = cachedUser;
@@ -87,10 +123,7 @@ class AuthProvider with ChangeNotifier {
 
       if (info['success'] == true && hasValidUser) {
         _user = info;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cached_user_info', jsonEncode(info));
-
+        await _saveUserCache(info);
         onLoginSuccess?.call();
       } else if (info['status'] == 'session_expired' ||
           info['success'] == false ||
@@ -100,10 +133,7 @@ class AuthProvider with ChangeNotifier {
         await _clearUserCache();
         await _apiService.logout();
       } else if (info['status'] == 'error') {
-
-        final prefs = await SharedPreferences.getInstance();
-        final cachedStr = prefs.getString('cached_user_info');
-
+        final cachedStr = await _loadUserCache();
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
           onLoginSuccess?.call();
@@ -111,15 +141,12 @@ class AuthProvider with ChangeNotifier {
           await _clearUserCache();
         }
       } else {
-
         await _clearUserCache();
         await _apiService.logout();
       }
     } catch (e) {
-
       try {
-        final prefs = await SharedPreferences.getInstance();
-        final cachedStr = prefs.getString('cached_user_info');
+        final cachedStr = await _loadUserCache();
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
           onLoginSuccess?.call();
@@ -179,8 +206,7 @@ class AuthProvider with ChangeNotifier {
           },
           'username': username,
         };
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cached_user_info', jsonEncode(_user));
+        await _saveUserCache(_user!);
         _isLoading = false;
         notifyListeners();
         onLoginSuccess?.call();
@@ -205,8 +231,7 @@ class AuthProvider with ChangeNotifier {
         _user = info;
         _user?['username'] = username;
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cached_user_info', jsonEncode(_user));
+        await _saveUserCache(_user!);
 
         notifyListeners();
         onLoginSuccess?.call();
@@ -243,15 +268,7 @@ class AuthProvider with ChangeNotifier {
   void updateUserInfo(Map<String, dynamic> info) {
     _user = info;
     notifyListeners();
-
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString('cached_user_info', jsonEncode(info));
-    });
-  }
-
-  Future<void> _clearUserCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('cached_user_info');
+    _saveUserCache(info);
   }
 
   ApiService get api => _apiService;
