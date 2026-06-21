@@ -186,7 +186,6 @@ class AuthProvider with ChangeNotifier {
     String username,
     String password,
     String captcha,
-    bool rememberMe,
   ) async {
     _isLoading = true;
     _error = null;
@@ -222,7 +221,6 @@ class AuthProvider with ChangeNotifier {
         password,
         captcha,
         _verificationToken!,
-        rememberMe,
       );
 
       if (result['success'] == true) {
