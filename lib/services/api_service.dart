@@ -3,9 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'cookie_manager/cookie_manager_api.dart';
 import 'scrapers/sso_scraper.dart';
 import 'scrapers/info_scraper.dart';
@@ -27,10 +24,6 @@ class ApiService {
   bool _isInit = false;
 
   Dio get dio => _dio;
-
-  final _secureStorage = const FlutterSecureStorage();
-
-  static const String _schoolCookiesKey = 'school_session_cookies';
 
   static const String _apiSecretKey = String.fromEnvironment(
     'API_SECRET',
@@ -56,7 +49,6 @@ class ApiService {
       ),
     );
     _dio.interceptors.add(LanguageInterceptor());
-    _dio.interceptors.add(CookieSyncInterceptor(this));
     _ssoScraper = SsoScraper(_dio);
     _infoScraper = InfoScraper(_dio);
     _scheduleScraper = ScheduleScraper(_dio);
@@ -77,52 +69,6 @@ class ApiService {
 
     try {
       await setupCookieManager(_dio);
-
-      // --- 載入加密的 Cookie 並還原至 CookieJar 中 ---
-      final cookies = await _loadSchoolCookies();
-      if (cookies.isNotEmpty) {
-        final cookieJar = _dio.interceptors
-            .whereType<CookieManager>()
-            .firstOrNull
-            ?.cookieJar;
-        if (cookieJar != null) {
-          final Map<String, List<Cookie>> domainCookies = {};
-          for (var cMap in cookies) {
-            final name = cMap['name'] as String?;
-            final value = cMap['value'] as String?;
-            if (name != null && value != null) {
-              final cookie = Cookie(name, value);
-              if (cMap['domain'] != null) cookie.domain = cMap['domain'] as String;
-              if (cMap['path'] != null) cookie.path = cMap['path'] as String;
-              if (cMap['httpOnly'] != null) cookie.httpOnly = cMap['httpOnly'] as bool;
-              if (cMap['secure'] != null) cookie.secure = cMap['secure'] as bool;
-              if (cMap['expires'] != null) {
-                try {
-                  cookie.expires = DateTime.parse(cMap['expires'] as String);
-                } catch (_) {}
-              }
-
-              var domain = cMap['domain'] as String? ?? 'yuntech.edu.tw';
-              if (domain.startsWith('.')) {
-                domain = domain.substring(1);
-              }
-              final scheme = (cMap['secure'] == true) ? 'https' : 'http';
-              final uriStr = '$scheme://$domain';
-              domainCookies.putIfAbsent(uriStr, () => []).add(cookie);
-            }
-          }
-
-          for (var entry in domainCookies.entries) {
-            try {
-              await cookieJar.saveFromResponse(Uri.parse(entry.key), entry.value);
-            } catch (_) {}
-          }
-          if (kDebugMode) {
-            print('ApiService: Loaded and restored cookies from FlutterSecureStorage');
-          }
-        }
-      }
-
       _isInit = true;
     } catch (e) {
       if (kDebugMode) print('ApiService: Init failed: $e');
@@ -137,40 +83,14 @@ class ApiService {
     }
   }
 
-  /// 從 FlutterSecureStorage 讀取學校 Cookies
-  Future<List<Map<String, dynamic>>> _loadSchoolCookies() async {
-    final raw = await _secureStorage.read(key: _schoolCookiesKey);
-    if (raw != null && raw.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(raw) as List<dynamic>;
-        return decoded.map((e) {
-          final map = e as Map;
-          final newMap = <String, dynamic>{};
-          map.forEach((key, value) {
-            newMap[key.toString()] = value;
-          });
-          return newMap;
-        }).toList();
-      } catch (e) {
-        if (kDebugMode) print('ApiService: Failed to parse secure cookies: $e');
-      }
-    }
-    return [];
-  }
-
-  /// 將學校 Cookies 儲存到 FlutterSecureStorage
-  Future<void> _saveSchoolCookies(List<dynamic> cookies) async {
-    await _secureStorage.write(key: _schoolCookiesKey, value: jsonEncode(cookies));
-  }
-
-  /// 清除學校 Cookies (從 FlutterSecureStorage)
-  Future<void> _clearSchoolCookies() async {
-    await _secureStorage.delete(key: _schoolCookiesKey);
-  }
-
   /// 檢查是否有儲存的學校 Cookies
   Future<bool> hasSavedCookies() async {
-    final cookies = await _loadSchoolCookies();
+    final cookieJar = _dio.interceptors
+        .whereType<CookieManager>()
+        .firstOrNull
+        ?.cookieJar;
+    if (cookieJar == null) return false;
+    final cookies = await cookieJar.loadForRequest(Uri.parse('https://webapp.yuntech.edu.tw'));
     return cookies.isNotEmpty;
   }
 
@@ -198,53 +118,9 @@ class ApiService {
         verificationToken: requestVerificationToken,
         rememberMe: true,
       );
-
-      if (result['success'] == true) {
-        await _syncCookiesFromJar();
-      }
       return result;
     } catch (e) {
       throw Exception('Login failed: $e');
-    }
-  }
-
-  /// 從 CookieJar 中同步學校 Cookies 到 SharedPreferences (供舊版 API 使用)
-  Future<void> _syncCookiesFromJar() async {
-    try {
-      final cookieJar = _dio.interceptors
-          .whereType<CookieManager>()
-          .firstOrNull
-          ?.cookieJar;
-
-      if (cookieJar == null) return;
-
-      final domains = [
-        'https://webapp.yuntech.edu.tw',
-        'https://yunportal.yuntech.edu.tw'
-      ];
-
-      final List<Map<String, dynamic>> allCookies = [];
-      for (var domain in domains) {
-        final cookies = await cookieJar.loadForRequest(Uri.parse(domain));
-        for (var c in cookies) {
-          allCookies.add({
-            'name': c.name,
-            'value': c.value,
-            'domain': c.domain,
-            'path': c.path,
-            'expires': c.expires?.toIso8601String(),
-            'httpOnly': c.httpOnly,
-            'secure': c.secure,
-          });
-        }
-      }
-
-      if (allCookies.isNotEmpty) {
-        await _saveSchoolCookies(allCookies);
-        if (kDebugMode) print('ApiService: Cookies synced to SharedPreferences');
-      }
-    } catch (e) {
-      if (kDebugMode) print('ApiService: Failed to sync cookies: $e');
     }
   }
 
@@ -517,7 +393,6 @@ class ApiService {
   }
 
   Future<void> logout() async {
-    await _clearSchoolCookies();
     await clearCookies();
   }
 
@@ -565,22 +440,5 @@ class LanguageInterceptor extends Interceptor {
       }
     }
     super.onRequest(options, handler);
-  }
-}
-
-class CookieSyncInterceptor extends Interceptor {
-  final ApiService _apiService;
-  CookieSyncInterceptor(this._apiService);
-
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    await _apiService._syncCookiesFromJar();
-    super.onResponse(response, handler);
-  }
-
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
-    await _apiService._syncCookiesFromJar();
-    super.onError(err, handler);
   }
 }
