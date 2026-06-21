@@ -5,10 +5,12 @@ import '../providers/auth_provider.dart';
 
 class TermsOfServiceScreen extends StatefulWidget {
   final bool showAgreementButtons;
+  final Map<String, dynamic>? initialTerms;
 
   const TermsOfServiceScreen({
     super.key,
     this.showAgreementButtons = false,
+    this.initialTerms,
   });
 
   @override
@@ -17,11 +19,31 @@ class TermsOfServiceScreen extends StatefulWidget {
 
 class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   late Future<Map<String, dynamic>> _termsFuture;
+  String _lastUpdated = '';
 
   @override
   void initState() {
     super.initState();
-    _termsFuture = context.read<AuthProvider>().api.getTermsOfService();
+    if (widget.initialTerms != null) {
+      _termsFuture = Future.value(widget.initialTerms!);
+      _lastUpdated = widget.initialTerms!['data']?['lastUpdated'] ?? '';
+    } else {
+      _termsFuture = _fetchTerms();
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchTerms() async {
+    try {
+      final res = await context.read<AuthProvider>().api.getTermsOfService();
+      if (res['status'] == 'success') {
+        setState(() {
+          _lastUpdated = res['data']?['lastUpdated'] ?? '';
+        });
+      }
+      return res;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -62,9 +84,11 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: FilledButton(
-                        onPressed: () {
-                          Navigator.pop(context, true);
-                        },
+                        onPressed: _lastUpdated.isNotEmpty
+                            ? () {
+                                Navigator.pop(context, _lastUpdated);
+                              }
+                            : null,
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -101,10 +125,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   FilledButton.tonal(
                     onPressed: () {
                       setState(() {
-                        _termsFuture = context
-                            .read<AuthProvider>()
-                            .api
-                            .getTermsOfService();
+                        _termsFuture = _fetchTerms();
                       });
                     },
                     child: const Text('重新整理'),

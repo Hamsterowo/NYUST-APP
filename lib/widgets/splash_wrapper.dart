@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/auth_provider.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
@@ -47,7 +46,7 @@ class _SplashWrapperState extends State<SplashWrapper>
     if (_animationTriggered) return;
     _animationTriggered = true;
 
-    await _checkTermsAgreement();
+    await _checkTermsAgreement(auth);
 
     await Future.delayed(const Duration(milliseconds: 500));
 
@@ -64,22 +63,44 @@ class _SplashWrapperState extends State<SplashWrapper>
     _controller.forward();
   }
 
-  Future<void> _checkTermsAgreement() async {
+  Future<void> _checkTermsAgreement(AuthProvider auth) async {
     final prefs = await SharedPreferences.getInstance();
-    final info = await PackageInfo.fromPlatform();
-    final currentVersion = info.version;
-    final lastAccepted = prefs.getString('accepted_terms_version') ?? '';
+    final lastAcceptedDate = prefs.getString('accepted_terms_date') ?? '';
 
-    if (lastAccepted != currentVersion && mounted) {
-      final agreed = await Navigator.push<bool>(
+    Map<String, dynamic>? initialTerms;
+    bool shouldShow = false;
+
+    if (lastAcceptedDate.isEmpty) {
+      shouldShow = true;
+    } else {
+      try {
+        final terms = await auth.api
+            .getTermsOfService()
+            .timeout(const Duration(seconds: 3));
+        if (terms['status'] == 'success') {
+          final lastUpdated = terms['data']?['lastUpdated'] ?? '';
+          if (lastUpdated != lastAcceptedDate) {
+            shouldShow = true;
+            initialTerms = terms;
+          }
+        }
+      } catch (_) {
+        shouldShow = false;
+      }
+    }
+
+    if (shouldShow && mounted) {
+      final agreedDate = await Navigator.push<String>(
         context,
         MaterialPageRoute(
-          builder: (_) =>
-              const TermsOfServiceScreen(showAgreementButtons: true),
+          builder: (_) => TermsOfServiceScreen(
+            showAgreementButtons: true,
+            initialTerms: initialTerms,
+          ),
         ),
       );
-      if (agreed == true) {
-        await prefs.setString('accepted_terms_version', currentVersion);
+      if (agreedDate != null && agreedDate.isNotEmpty) {
+        await prefs.setString('accepted_terms_date', agreedDate);
       }
     }
   }
