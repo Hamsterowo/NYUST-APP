@@ -106,14 +106,24 @@ class DataProvider with ChangeNotifier {
   bool isLoadingSchedule = false;
   bool scheduleFailed = false;
 
+  bool _isPrefetching = false;
+  bool get isPrefetching => _isPrefetching;
+
   /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）
   Future<void> prefetchAll() async {
-    await fetchUserInfo();
-    await Future.delayed(const Duration(milliseconds: 200));
-    await fetchGrades();
-    await Future.delayed(const Duration(milliseconds: 200));
-    await fetchGraduation();
-    await fetchSchedule();
+    _isPrefetching = true;
+    notifyListeners();
+    try {
+      await fetchUserInfo();
+      await Future.delayed(const Duration(milliseconds: 200));
+      await fetchGrades();
+      await Future.delayed(const Duration(milliseconds: 200));
+      await fetchGraduation();
+      await fetchSchedule();
+    } finally {
+      _isPrefetching = false;
+      notifyListeners();
+    }
   }
 
   /// 強制重新抓取（不使用快取）
@@ -145,6 +155,7 @@ class DataProvider with ChangeNotifier {
     gradesFailed = false;
     graduationFailed = false;
     scheduleFailed = false;
+    _isPrefetching = false;
 
     await CourseDetailCache.clearAll();
     await CalendarCacheService.clearAllCache();

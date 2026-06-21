@@ -362,6 +362,66 @@ abstract class AppLocalizations {
   /// **'前往登入'**
   String get goToLogin;
 
+  /// No description provided for @loginTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'登入 NYUST+'**
+  String get loginTitle;
+
+  /// No description provided for @loginUsernamePrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'請輸入學號'**
+  String get loginUsernamePrompt;
+
+  /// No description provided for @loginPasswordPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'請輸入密碼'**
+  String get loginPasswordPrompt;
+
+  /// No description provided for @loginCaptchaPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'請輸入驗證碼'**
+  String get loginCaptchaPrompt;
+
+  /// No description provided for @loginHeading.
+  ///
+  /// In zh, this message translates to:
+  /// **'登入雲科單一入口服務網'**
+  String get loginHeading;
+
+  /// No description provided for @loginUsernameLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'學號'**
+  String get loginUsernameLabel;
+
+  /// No description provided for @loginPasswordLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'密碼'**
+  String get loginPasswordLabel;
+
+  /// No description provided for @loginCaptchaLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'驗證碼'**
+  String get loginCaptchaLabel;
+
+  /// No description provided for @loginCaptchaRefreshTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新整理驗證碼'**
+  String get loginCaptchaRefreshTooltip;
+
+  /// No description provided for @loginButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'登入'**
+  String get loginButton;
+
   /// No description provided for @pleaseLoginToViewSchedule.
   ///
   /// In zh, this message translates to:

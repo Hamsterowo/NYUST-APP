@@ -29,12 +29,6 @@ class SsoScraper extends BaseScraper {
         ),
       );
 
-      if (kDebugMode) {
-        print('SsoScraper: Response Status: ${response.statusCode}');
-
-        final body = response.data.toString();
-        print('SsoScraper: Response Body Preview: ${body.length > 1000 ? body.substring(0, 1000) : body}');
-      }
 
       final document = parseHtml(response.data);
 

@@ -146,6 +146,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get goToLogin => '前往登入';
 
   @override
+  String get loginTitle => '登入 NYUST+';
+
+  @override
+  String get loginUsernamePrompt => '請輸入學號';
+
+  @override
+  String get loginPasswordPrompt => '請輸入密碼';
+
+  @override
+  String get loginCaptchaPrompt => '請輸入驗證碼';
+
+  @override
+  String get loginHeading => '登入雲科單一入口服務網';
+
+  @override
+  String get loginUsernameLabel => '學號';
+
+  @override
+  String get loginPasswordLabel => '密碼';
+
+  @override
+  String get loginCaptchaLabel => '驗證碼';
+
+  @override
+  String get loginCaptchaRefreshTooltip => '重新整理驗證碼';
+
+  @override
+  String get loginButton => '登入';
+
+  @override
   String get pleaseLoginToViewSchedule => '請在此登入以查看課表';
 
   @override

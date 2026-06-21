@@ -152,6 +152,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToLogin => 'Go to Login';
 
   @override
+  String get loginTitle => 'Login to NYUST+';
+
+  @override
+  String get loginUsernamePrompt => 'Please enter student ID';
+
+  @override
+  String get loginPasswordPrompt => 'Please enter password';
+
+  @override
+  String get loginCaptchaPrompt => 'Please enter captcha';
+
+  @override
+  String get loginHeading => 'Login to YunTech SSO';
+
+  @override
+  String get loginUsernameLabel => 'Student ID';
+
+  @override
+  String get loginPasswordLabel => 'Password';
+
+  @override
+  String get loginCaptchaLabel => 'Captcha';
+
+  @override
+  String get loginCaptchaRefreshTooltip => 'Refresh Captcha';
+
+  @override
+  String get loginButton => 'Login';
+
+  @override
   String get pleaseLoginToViewSchedule =>
       'Please log in here to view your schedule.';
 
