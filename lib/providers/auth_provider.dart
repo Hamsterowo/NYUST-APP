@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_service.dart';
 
@@ -14,26 +13,7 @@ class AuthProvider with ChangeNotifier {
   static const String _cachedUserInfoKey = 'cached_user_info';
 
   Future<String?> _loadUserCache() async {
-    // 1. 嘗試從安全儲存區讀取
-    final raw = await _secureStorage.read(key: _cachedUserInfoKey);
-    if (raw != null && raw.isNotEmpty) {
-      return raw;
-    }
-
-    // 2. 若無，自 SharedPreferences 轉移舊明文資料
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final oldRaw = prefs.getString(_cachedUserInfoKey);
-      if (oldRaw != null && oldRaw.isNotEmpty) {
-        await _secureStorage.write(key: _cachedUserInfoKey, value: oldRaw);
-        await prefs.remove(_cachedUserInfoKey);
-        if (kDebugMode) {
-          print('AuthProvider: Migrated user info to FlutterSecureStorage');
-        }
-        return oldRaw;
-      }
-    } catch (_) {}
-    return null;
+    return await _secureStorage.read(key: _cachedUserInfoKey);
   }
 
   Future<void> _saveUserCache(Map<String, dynamic> info) async {
@@ -42,10 +22,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _clearUserCache() async {
     await _secureStorage.delete(key: _cachedUserInfoKey);
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_cachedUserInfoKey);
-    } catch (_) {}
   }
 
   String? _captchaUrl;
