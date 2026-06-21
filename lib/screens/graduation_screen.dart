@@ -733,8 +733,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
         Widget dayCell(String day) {
           String translatedDay = day;
-          if (day == '一') translatedDay = AppLocalizations.of(context).weekdayMon;
-          else if (day == '二') translatedDay = AppLocalizations.of(context).weekdayTue;
+          if (day == '一') {
+            translatedDay = AppLocalizations.of(context).weekdayMon;
+          } else if (day == '二') translatedDay = AppLocalizations.of(context).weekdayTue;
           else if (day == '三') translatedDay = AppLocalizations.of(context).weekdayWed;
           else if (day == '四') translatedDay = AppLocalizations.of(context).weekdayThu;
           else if (day == '五') translatedDay = AppLocalizations.of(context).weekdayFri;

@@ -212,7 +212,7 @@ class ScheduleScraper extends BaseScraper {
         'teacherEmailAndTel': text('#ctl00_MainContent_Teacher_emailAndTel').isNotEmpty
             ? text('#ctl00_MainContent_Teacher_emailAndTel')
             : text('span[id*="Teacher_emailAndTel"]'),
-        'courseRemark': (text('#ctl00_MainContent_CourRemarkLabel') + ' ' + text('#ctl00_MainContent_Remark')).trim(),
+        'courseRemark': ('${text('#ctl00_MainContent_CourRemarkLabel')} ${text('#ctl00_MainContent_Remark')}').trim(),
         'syllabus': []
       };
 
