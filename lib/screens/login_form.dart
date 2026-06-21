@@ -18,7 +18,6 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   final _captchaController = TextEditingController();
   final _passwordFocusNode = FocusNode();
-  final bool _rememberMe = true;
 
   String _versionStr = '';
 
@@ -71,7 +70,7 @@ class _LoginFormState extends State<LoginForm> {
       }
     }
 
-    await auth.login(username, password, captcha, _rememberMe);
+    await auth.login(username, password, captcha);
 
     if (auth.error != null) {
       if (mounted) {

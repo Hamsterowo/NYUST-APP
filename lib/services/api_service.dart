@@ -32,7 +32,6 @@ class ApiService {
   final _secureStorage = const FlutterSecureStorage();
 
   static const String _schoolCookiesKey = 'school_session_cookies';
-  static const String _sessionOnlyKey = 'session_only_login';
 
   static const String _apiSecretKey = String.fromEnvironment(
     'API_SECRET',
@@ -80,61 +79,47 @@ class ApiService {
     try {
       await setupCookieManager(_dio);
 
-      final prefs = await SharedPreferences.getInstance();
-      final rememberMe = prefs.getBool(_sessionOnlyKey) == false;
-
-      if (!rememberMe) {
-        if (kDebugMode) {
-          print('ApiService: sessionOnlyLogin or unknown state, clearing cookies for safety...');
-        }
-        await _clearSchoolCookies();
-      } else {
-        if (kDebugMode) {
-          print('ApiService: rememberMe was explicitly enabled, keeping cookies.');
-        }
-
-        // --- 載入加密的 Cookie 並還原至 CookieJar 中 ---
-        final cookies = await _loadSchoolCookies();
-        if (cookies.isNotEmpty) {
-          final cookieJar = _dio.interceptors
-              .whereType<CookieManager>()
-              .firstOrNull
-              ?.cookieJar;
-          if (cookieJar != null) {
-            final Map<String, List<Cookie>> domainCookies = {};
-            for (var cMap in cookies) {
-              final name = cMap['name'] as String?;
-              final value = cMap['value'] as String?;
-              if (name != null && value != null) {
-                final cookie = Cookie(name, value);
-                if (cMap['domain'] != null) cookie.domain = cMap['domain'] as String;
-                if (cMap['path'] != null) cookie.path = cMap['path'] as String;
-                if (cMap['httpOnly'] != null) cookie.httpOnly = cMap['httpOnly'] as bool;
-                if (cMap['secure'] != null) cookie.secure = cMap['secure'] as bool;
-                if (cMap['expires'] != null) {
-                  try {
-                    cookie.expires = DateTime.parse(cMap['expires'] as String);
-                  } catch (_) {}
-                }
-
-                var domain = cMap['domain'] as String? ?? 'yuntech.edu.tw';
-                if (domain.startsWith('.')) {
-                  domain = domain.substring(1);
-                }
-                final scheme = (cMap['secure'] == true) ? 'https' : 'http';
-                final uriStr = '$scheme://$domain';
-                domainCookies.putIfAbsent(uriStr, () => []).add(cookie);
+      // --- 載入加密的 Cookie 並還原至 CookieJar 中 ---
+      final cookies = await _loadSchoolCookies();
+      if (cookies.isNotEmpty) {
+        final cookieJar = _dio.interceptors
+            .whereType<CookieManager>()
+            .firstOrNull
+            ?.cookieJar;
+        if (cookieJar != null) {
+          final Map<String, List<Cookie>> domainCookies = {};
+          for (var cMap in cookies) {
+            final name = cMap['name'] as String?;
+            final value = cMap['value'] as String?;
+            if (name != null && value != null) {
+              final cookie = Cookie(name, value);
+              if (cMap['domain'] != null) cookie.domain = cMap['domain'] as String;
+              if (cMap['path'] != null) cookie.path = cMap['path'] as String;
+              if (cMap['httpOnly'] != null) cookie.httpOnly = cMap['httpOnly'] as bool;
+              if (cMap['secure'] != null) cookie.secure = cMap['secure'] as bool;
+              if (cMap['expires'] != null) {
+                try {
+                  cookie.expires = DateTime.parse(cMap['expires'] as String);
+                } catch (_) {}
               }
-            }
 
-            for (var entry in domainCookies.entries) {
-              try {
-                await cookieJar.saveFromResponse(Uri.parse(entry.key), entry.value);
-              } catch (_) {}
+              var domain = cMap['domain'] as String? ?? 'yuntech.edu.tw';
+              if (domain.startsWith('.')) {
+                domain = domain.substring(1);
+              }
+              final scheme = (cMap['secure'] == true) ? 'https' : 'http';
+              final uriStr = '$scheme://$domain';
+              domainCookies.putIfAbsent(uriStr, () => []).add(cookie);
             }
-            if (kDebugMode) {
-              print('ApiService: Loaded and restored cookies from FlutterSecureStorage');
-            }
+          }
+
+          for (var entry in domainCookies.entries) {
+            try {
+              await cookieJar.saveFromResponse(Uri.parse(entry.key), entry.value);
+            } catch (_) {}
+          }
+          if (kDebugMode) {
+            print('ApiService: Loaded and restored cookies from FlutterSecureStorage');
           }
         }
       }
@@ -237,7 +222,6 @@ class ApiService {
     String password,
     String captcha,
     String requestVerificationToken,
-    bool rememberMe,
   ) async {
     await _ensureInit();
     try {
@@ -246,15 +230,11 @@ class ApiService {
         password: password,
         captcha: captcha,
         verificationToken: requestVerificationToken,
-        rememberMe: rememberMe,
+        rememberMe: true,
       );
 
       if (result['success'] == true) {
-
         await _syncCookiesFromJar();
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(_sessionOnlyKey, !rememberMe);
       }
       return result;
     } catch (e) {
