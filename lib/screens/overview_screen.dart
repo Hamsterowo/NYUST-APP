@@ -648,7 +648,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     final now = DateTime.now();
     final todayWeekday = now.weekday.toString();
-    final isLoading = data.isLoadingSchedule && data.scheduleData.isEmpty;
+    final isLoading = !data.isCacheLoaded || (data.isLoadingSchedule && data.scheduleData.isEmpty);
 
     if (isLoading) {
       return Column(
