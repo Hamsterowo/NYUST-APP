@@ -50,7 +50,7 @@
   "upcomingEventsTitle": "近期校園行事曆",
   "noUpcomingEvents": "近期無任何校園行事曆事項安排。",
   "noCourseDetail": "這門課沒有提供詳細課綱",
-  "notSpecified": "未指定",
+  "notSpecified": "無資料",
   "classPeriods": "第 {periods} 節",
   "@classPeriods": {
     "placeholders": {
