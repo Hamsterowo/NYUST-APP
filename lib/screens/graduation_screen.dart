@@ -1,6 +1,12 @@
 import 'dart:math';
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
@@ -451,6 +457,44 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   bool _isMapMode = false;
+  final GlobalKey _repaintKey = GlobalKey();
+
+  Future<void> _shareScheduleImage() async {
+    try {
+      final boundary = _repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return;
+      final pngBytes = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        await Share.shareXFiles(
+          [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'schedule.png')],
+        );
+      } else {
+        final tempDir = await getTemporaryDirectory();
+        final file = await File('${tempDir.path}/nyust_schedule.png').create();
+        await file.writeAsBytes(pngBytes);
+
+        final box = context.findRenderObject() as RenderBox?;
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) print("Share schedule error: $e");
+      final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+      showTopSnackBar(
+        context,
+        isEnglish ? 'Failed to share schedule' : '分享課表失敗',
+        type: SnackBarType.error,
+      );
+    }
+  }
+
   final List<String> _periods = [
     'X',
     'A',
@@ -544,12 +588,33 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       return bodyContent;
     }
 
+    final mainBody = Stack(
+      children: [
+        bodyContent,
+        Positioned(
+          left: -9999,
+          top: -9999,
+          child: RepaintBoundary(
+            key: _repaintKey,
+            child: _ShareScheduleCard(courses: data.scheduleData),
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).navSchedule,
         onRefresh: () => data.fetchSchedule(),
         isLoading: data.isLoadingSchedule,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: data.isLoadingSchedule || data.scheduleData.isEmpty
+                ? null
+                : _shareScheduleImage,
+            tooltip: Localizations.localeOf(context).languageCode == 'en' ? 'Share Schedule' : '分享課表',
+          ),
           IconButton(
             icon: Icon(
               _isMapMode ? Icons.map : Icons.map_outlined,
@@ -570,7 +635,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
         ],
       ),
-      body: bodyContent,
+      body: mainBody,
     );
   }
 
@@ -1136,5 +1201,453 @@ class GraduationScreen extends StatelessWidget {
       body: const GraduationContent(),
     );
   }
+}
+
+class _ShareScheduleCard extends StatelessWidget {
+  final List<ScheduleEvent> courses;
+
+  const _ShareScheduleCard({required this.courses});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
+    // 1. 提取學年與學期
+    String year = '';
+    String semester = '';
+    for (var c in courses) {
+      if (c.year != null && c.year!.isNotEmpty) {
+        year = c.year!;
+      }
+      if (c.semester != null && c.semester!.isNotEmpty) {
+        semester = c.semester!;
+      }
+      if (year.isNotEmpty && semester.isNotEmpty) break;
+    }
+
+    String titleText = '';
+    if (year.isNotEmpty && semester.isNotEmpty) {
+      titleText = isEnglish
+          ? 'Academic Year $year, Sem $semester'
+          : '$year學年度 第$semester學期 課表';
+    } else {
+      titleText = isEnglish ? 'Class Schedule' : '課表';
+    }
+
+    final schoolName = isEnglish
+        ? 'National Yunlin University of Science and Technology'
+        : '國立雲林科技大學';
+
+    // 2. 計算活躍的星期與節次
+    final periods = [
+      'X', 'A', 'B', 'C', 'D', 'Y', 'E', 'F', 'G', 'H', 'Z', 'I', 'J', 'K', 'L'
+    ];
+
+    int minDayIndex = 0;
+    int maxDayIndex = 4;
+    int minPeriodIndex = 1; // 預設 A
+    int maxPeriodIndex = 9; // 預設 H
+
+    if (courses.isNotEmpty) {
+      int minDay = 6;
+      int maxDay = 0;
+      int minP = periods.length;
+      int maxP = 0;
+      bool hasClass = false;
+
+      for (var course in courses) {
+        if (course.name.isNotEmpty) {
+          hasClass = true;
+          int d = int.tryParse(course.weekday ?? '') ?? 1;
+          int dIndex = d - 1;
+          if (dIndex < minDay) minDay = dIndex;
+          if (dIndex > maxDay) maxDay = dIndex;
+
+          for (var t in course.times) {
+            int pIndex = periods.indexOf(t);
+            if (pIndex != -1) {
+              if (pIndex < minP) minP = pIndex;
+              if (pIndex > maxP) maxP = pIndex;
+            }
+          }
+        }
+      }
+
+      if (hasClass) {
+        minDayIndex = min(minDay, 0).clamp(0, 6);
+        maxDayIndex = max(maxDay, 4).clamp(minDayIndex, 6);
+        minPeriodIndex = min(minP, 1).clamp(0, periods.length - 1);
+        maxPeriodIndex = max(maxP, 9).clamp(minPeriodIndex, periods.length - 1);
+      }
+    }
+
+    final activeDayIndices = List.generate(
+      maxDayIndex - minDayIndex + 1,
+      (i) => minDayIndex + i,
+    );
+    final activePeriods = periods.sublist(minPeriodIndex, maxPeriodIndex + 1);
+    final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
+
+    // 3. 取得某天某節的課
+    ScheduleEvent getEventFor(int dayIndex, String period) {
+      final weekdayStr = (dayIndex + 1).toString();
+      return courses.firstWhere(
+        (c) => c.weekday == weekdayStr && c.times.contains(period),
+        orElse: () => ScheduleEvent(
+          semesterCourseNo: '',
+          deptCourseNo: '',
+          name: '',
+          courseClass: '',
+          classType: '',
+          requiredType: '',
+          credits: '',
+          timeRoomStr: '',
+          teacher: '',
+          remark: '',
+          times: [],
+        ),
+      );
+    }
+
+    return Container(
+      width: 480,
+      height: 640,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border.all(color: colorScheme.outlineVariant, width: 2),
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header 區
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                schoolName,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                titleText,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Grid 區
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Row(
+                children: [
+                  // 左側節次欄
+                  SizedBox(
+                    width: 32,
+                    child: Column(
+                      children: [
+                        // 左上角空白格
+                        Container(
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            border: Border(
+                              bottom: BorderSide(color: colorScheme.outlineVariant),
+                              right: BorderSide(color: colorScheme.outlineVariant),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              isEnglish ? 'Pd.' : '節',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // 節次列表
+                        Expanded(
+                          child: Column(
+                            children: activePeriods.map((period) {
+                              return Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(color: colorScheme.outlineVariant),
+                                      right: BorderSide(color: colorScheme.outlineVariant),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      period,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 右側星期與課程
+                  Expanded(
+                    child: Column(
+                      children: [
+                        // 頂部星期欄
+                        Container(
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            border: Border(
+                              bottom: BorderSide(color: colorScheme.outlineVariant),
+                            ),
+                          ),
+                          child: Row(
+                            children: activeDayIndices.map((i) {
+                              String day = allWeekDays[i];
+                              String displayDay = day;
+                              if (isEnglish) {
+                                if (day == '一') displayDay = 'Mon';
+                                else if (day == '二') displayDay = 'Tue';
+                                else if (day == '三') displayDay = 'Wed';
+                                else if (day == '四') displayDay = 'Thu';
+                                else if (day == '五') displayDay = 'Fri';
+                                else if (day == '六') displayDay = 'Sat';
+                                else if (day == '日') displayDay = 'Sun';
+                              } else {
+                                displayDay = '週$day';
+                              }
+                              return Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      right: i == activeDayIndices.last
+                                          ? BorderSide.none
+                                          : BorderSide(color: colorScheme.outlineVariant),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      displayDay,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        // 課程內容網格
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: activeDayIndices.map((dayIndex) {
+                              List<Widget> dayColumnCells = [];
+                              for (int i = 0; i < activePeriods.length; i++) {
+                                final period = activePeriods[i];
+                                final event = getEventFor(dayIndex, period);
+
+                                int span = 1;
+                                if (event.name.isNotEmpty) {
+                                  while (i + span < activePeriods.length) {
+                                    final nextPeriod = activePeriods[i + span];
+                                    final nextEvent = getEventFor(dayIndex, nextPeriod);
+                                    if (nextEvent.name == event.name &&
+                                        nextEvent.semesterCourseNo == event.semesterCourseNo) {
+                                      span++;
+                                    } else {
+                                      break;
+                                    }
+                                  }
+                                }
+
+                                final hasCourse = event.name.isNotEmpty;
+                                Widget cellChild;
+                                if (hasCourse) {
+                                  final displayName = (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
+                                      ? event.nameEn!
+                                      : event.name;
+
+                                  cellChild = Container(
+                                    margin: const EdgeInsets.all(2.0),
+                                    padding: const EdgeInsets.all(4.0),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer.withValues(alpha: 0.85),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                      border: Border.all(
+                                        color: colorScheme.primary.withValues(alpha: 0.3),
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          displayName,
+                                          maxLines: span > 1 ? 4 : 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: span > 1 ? 9.5 : 8.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.onPrimaryContainer,
+                                            height: 1.1,
+                                          ),
+                                        ),
+                                        if (event.room != null && event.room!.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            event.room!,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 7.5,
+                                              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.75),
+                                              height: 1.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  cellChild = const SizedBox.shrink();
+                                }
+
+                                dayColumnCells.add(
+                                  Expanded(
+                                    flex: span,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: i + span >= activePeriods.length
+                                              ? BorderSide.none
+                                              : BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                                          right: dayIndex == activeDayIndices.last
+                                              ? BorderSide.none
+                                              : BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                                        ),
+                                      ),
+                                      child: cellChild,
+                                    ),
+                                  ),
+                                );
+                                i += span - 1;
+                              }
+
+                              return Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: dayColumnCells,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CourseColor {
+  final Color backgroundColor;
+  final Color textColor;
+  final Color borderColor;
+
+  const CourseColor({
+    required this.backgroundColor,
+    required this.textColor,
+    required this.borderColor,
+  });
+}
+
+CourseColor getCourseColor(BuildContext context, String courseName) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  // 淺色模式調色盤 (8種和諧柔和的粉彩配色)
+  final lightPalette = [
+    // 藍
+    const CourseColor(backgroundColor: Color(0xFFE0F2FE), textColor: Color(0xFF0369A1), borderColor: Color(0xFFBAE6FD)),
+    // 綠
+    const CourseColor(backgroundColor: Color(0xFFDCFCE7), textColor: Color(0xFF15803D), borderColor: Color(0xFFBBF7D0)),
+    // 粉紅
+    const CourseColor(backgroundColor: Color(0xFFFCE7F3), textColor: Color(0xFFBE185D), borderColor: Color(0xFFFBCFE8)),
+    // 黃橘
+    const CourseColor(backgroundColor: Color(0xFFFEF3C7), textColor: Color(0xFFB45309), borderColor: Color(0xFFFDE68A)),
+    // 紫
+    const CourseColor(backgroundColor: Color(0xFFF3E8FF), textColor: Color(0xFF6B21A8), borderColor: Color(0xFFE9D5FF)),
+    // 青
+    const CourseColor(backgroundColor: Color(0xFFE0F7FA), textColor: Color(0xFF006064), borderColor: Color(0xFFB2EBF2)),
+    // 靛藍
+    const CourseColor(backgroundColor: Color(0xFFE0E7FF), textColor: Color(0xFF4338CA), borderColor: Color(0xFFC7D2FE)),
+    // 橙
+    const CourseColor(backgroundColor: Color(0xFFFFEED9), textColor: Color(0xFFC2410C), borderColor: Color(0xFFFFD8A8)),
+  ];
+
+  // 深色模式調色盤 (8種和諧明亮的深色配色)
+  final darkPalette = [
+    // 藍
+    const CourseColor(backgroundColor: Color(0xFF082F49), textColor: Color(0xFF38BDF8), borderColor: Color(0xFF0C4A6E)),
+    // 綠
+    const CourseColor(backgroundColor: Color(0xFF064E3B), textColor: Color(0xFF4ADE80), borderColor: Color(0xFF065F46)),
+    // 粉紅
+    const CourseColor(backgroundColor: Color(0xFF500724), textColor: Color(0xFFF472B6), borderColor: Color(0xFF701A40)),
+    // 黃橘
+    const CourseColor(backgroundColor: Color(0xFF451A03), textColor: Color(0xFFFBBF24), borderColor: Color(0xFF78350F)),
+    // 紫
+    const CourseColor(backgroundColor: Color(0xFF3B0764), textColor: Color(0xFFC084FC), borderColor: Color(0xFF581C87)),
+    // 青
+    const CourseColor(backgroundColor: Color(0xFF083344), textColor: Color(0xFF22D3EE), borderColor: Color(0xFF155E75)),
+    // 靛藍
+    const CourseColor(backgroundColor: Color(0xFF1E1B4B), textColor: Color(0xFF818CF8), borderColor: Color(0xFF312E81)),
+    // 橙
+    const CourseColor(backgroundColor: Color(0xFF431407), textColor: Color(0xFFFB923C), borderColor: Color(0xFF7C2D12)),
+  ];
+
+  final palette = isDark ? darkPalette : lightPalette;
+  if (courseName.isEmpty) {
+    return palette[0];
+  }
+
+  // 透過 hashCode 決定顏色
+  final index = (courseName.hashCode.abs()) % palette.length;
+  return palette[index];
 }
 
