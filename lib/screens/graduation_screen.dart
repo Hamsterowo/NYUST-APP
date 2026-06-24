@@ -54,7 +54,7 @@ class GraduationContent extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             FilledButton.tonal(
-              onPressed: () => data.fetchGraduation(),
+              onPressed: () => data.fetchGraduation(force: true),
               child: Text(AppLocalizations.of(context).retry),
             ),
           ],
@@ -705,7 +705,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).navSchedule,
-        onRefresh: () => data.fetchSchedule(),
+        onRefresh: () => data.fetchSchedule(force: true),
         isLoading: data.isLoadingSchedule,
         actions: [
           IconButton(
@@ -760,7 +760,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
             const SizedBox(height: 24),
             FilledButton.tonal(
-              onPressed: () => data.fetchSchedule(),
+              onPressed: () => data.fetchSchedule(force: true),
               child: Text(AppLocalizations.of(context).retry),
             ),
           ],
@@ -1363,7 +1363,7 @@ class GraduationScreen extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).infoGradTitle,
-        onRefresh: () => data.fetchGraduation(),
+        onRefresh: () => data.fetchGraduation(force: true),
         isLoading: data.isLoadingGraduation,
       ),
       body: const GraduationContent(),

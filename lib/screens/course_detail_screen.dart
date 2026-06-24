@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../models/course_detail_model.dart';
 import '../models/map_building_model.dart';
@@ -9,6 +8,7 @@ import '../services/api_service.dart';
 import '../services/course_detail_cache.dart';
 import '../utils/top_snack_bar.dart';
 import 'map_screen.dart';
+import 'web_view_screen.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String year;
@@ -227,17 +227,15 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           IconButton(
             icon: const Icon(Icons.open_in_browser),
             tooltip: AppLocalizations.of(context).courseOpenInBrowser,
-            onPressed: () async {
-              final url = Uri.parse(
-                'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AppWebViewScreen(
+                    url: 'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
+                  ),
+                ),
               );
-              try {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              } catch (_) {
-                if (context.mounted) {
-                  showTopSnackBar(context, AppLocalizations.of(context).courseOpenWebpageFailed, isError: true);
-                }
-              }
             },
           ),
         ],
