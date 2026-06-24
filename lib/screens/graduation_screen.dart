@@ -735,6 +735,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     const minCellWidth = 46.0;
     const minCellHeight = 28.0;
 
+    final uniqueCourseNames = courses
+        .map((c) => c.name)
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .toList()..sort();
+
     int minDayIndex = 0;
     int maxDayIndex = 4;
     int minPeriodIndex = 1;
@@ -876,7 +882,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
             final child = isLoading || !event.name.isNotEmpty
                 ? null
-                : _buildCourseCard(event);
+                : _buildCourseCard(event, uniqueCourseNames);
 
             final cellWidget = Container(
               height: cellHeight * span,
@@ -1046,7 +1052,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  Widget _buildCourseCard(ScheduleEvent event) {
+  Widget _buildCourseCard(ScheduleEvent event, List<String> uniqueCourseNames) {
     final colorScheme = Theme.of(context).colorScheme;
     final hasRoom = event.room != null && event.room!.isNotEmpty;
     final isLocatable = _isMapMode && hasRoom;
@@ -1055,6 +1061,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final displayName = (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
         ? event.nameEn!
         : event.name;
+
+    final courseIndex = uniqueCourseNames.indexOf(event.name);
+    final courseColor = getCourseColor(context, courseIndex);
+
+    final cardBgColor = isLocatable
+        ? colorScheme.secondaryContainer.withValues(alpha: 0.95)
+        : courseColor.backgroundColor;
+    final cardBorder = isLocatable
+        ? Border.all(color: colorScheme.secondary, width: 1.5)
+        : Border.all(color: courseColor.borderColor, width: 0.5);
+    final textThemeColor = isLocatable
+        ? colorScheme.onSecondaryContainer
+        : courseColor.textColor;
+    final roomThemeColor = isLocatable
+        ? colorScheme.onSecondaryContainer.withValues(alpha: 0.8)
+        : courseColor.textColor.withValues(alpha: 0.75);
 
     return GestureDetector(
       onTap: () {
@@ -1124,13 +1146,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         margin: const EdgeInsets.all(2),
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: isLocatable
-              ? colorScheme.secondaryContainer.withValues(alpha: 0.95)
-              : colorScheme.primaryContainer.withValues(alpha: 0.8),
+          color: cardBgColor,
           borderRadius: BorderRadius.circular(6),
-          border: isLocatable
-              ? Border.all(color: colorScheme.secondary, width: 1.5)
-              : null,
+          border: cardBorder,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1140,9 +1158,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 displayName,
                 style: TextStyle(
                   fontSize: 15,
-                  color: isLocatable
-                      ? colorScheme.onSecondaryContainer
-                      : colorScheme.onPrimaryContainer,
+                  color: textThemeColor,
                   height: 1.15,
                   fontWeight: isLocatable ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -1159,13 +1175,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       event.room!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isLocatable
-                            ? colorScheme.onSecondaryContainer.withValues(
-                                alpha: 0.8,
-                              )
-                            : colorScheme.onPrimaryContainer.withValues(
-                                alpha: 0.7,
-                              ),
+                        color: roomThemeColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1212,6 +1222,12 @@ class _ShareScheduleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
+    final uniqueCourseNames = courses
+        .map((c) => c.name)
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .toList()..sort();
 
     // 1. 提取學年與學期
     String year = '';
@@ -1495,14 +1511,17 @@ class _ShareScheduleCard extends StatelessWidget {
                                       ? event.nameEn!
                                       : event.name;
 
+                                  final courseIndex = uniqueCourseNames.indexOf(event.name);
+                                  final courseColor = getCourseColor(context, courseIndex);
+
                                   cellChild = Container(
                                     margin: const EdgeInsets.all(2.0),
                                     padding: const EdgeInsets.all(4.0),
                                     decoration: BoxDecoration(
-                                      color: colorScheme.primaryContainer.withValues(alpha: 0.85),
+                                      color: courseColor.backgroundColor,
                                       borderRadius: BorderRadius.circular(6.0),
                                       border: Border.all(
-                                        color: colorScheme.primary.withValues(alpha: 0.3),
+                                        color: courseColor.borderColor,
                                         width: 0.5,
                                       ),
                                     ),
@@ -1518,7 +1537,7 @@ class _ShareScheduleCard extends StatelessWidget {
                                           style: TextStyle(
                                             fontSize: span > 1 ? 9.5 : 8.5,
                                             fontWeight: FontWeight.bold,
-                                            color: colorScheme.onPrimaryContainer,
+                                            color: courseColor.textColor,
                                             height: 1.1,
                                           ),
                                         ),
@@ -1531,7 +1550,7 @@ class _ShareScheduleCard extends StatelessWidget {
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontSize: 7.5,
-                                              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.75),
+                                              color: courseColor.textColor.withValues(alpha: 0.75),
                                               height: 1.0,
                                             ),
                                           ),
@@ -1598,56 +1617,85 @@ class CourseColor {
   });
 }
 
-CourseColor getCourseColor(BuildContext context, String courseName) {
+CourseColor getCourseColor(BuildContext context, int index) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  // 淺色模式調色盤 (8種和諧柔和的粉彩配色)
+  // 淺色模式調色盤 (16種和諧柔和的粉彩莫蘭迪配色)
   final lightPalette = [
-    // 藍
+    // 1. 藍色
     const CourseColor(backgroundColor: Color(0xFFE0F2FE), textColor: Color(0xFF0369A1), borderColor: Color(0xFFBAE6FD)),
-    // 綠
+    // 2. 綠色
     const CourseColor(backgroundColor: Color(0xFFDCFCE7), textColor: Color(0xFF15803D), borderColor: Color(0xFFBBF7D0)),
-    // 粉紅
+    // 3. 粉紅
     const CourseColor(backgroundColor: Color(0xFFFCE7F3), textColor: Color(0xFFBE185D), borderColor: Color(0xFFFBCFE8)),
-    // 黃橘
+    // 4. 黃橘
     const CourseColor(backgroundColor: Color(0xFFFEF3C7), textColor: Color(0xFFB45309), borderColor: Color(0xFFFDE68A)),
-    // 紫
+    // 5. 紫色
     const CourseColor(backgroundColor: Color(0xFFF3E8FF), textColor: Color(0xFF6B21A8), borderColor: Color(0xFFE9D5FF)),
-    // 青
+    // 6. 青色
     const CourseColor(backgroundColor: Color(0xFFE0F7FA), textColor: Color(0xFF006064), borderColor: Color(0xFFB2EBF2)),
-    // 靛藍
+    // 7. 靛藍
     const CourseColor(backgroundColor: Color(0xFFE0E7FF), textColor: Color(0xFF4338CA), borderColor: Color(0xFFC7D2FE)),
-    // 橙
+    // 8. 橙色
     const CourseColor(backgroundColor: Color(0xFFFFEED9), textColor: Color(0xFFC2410C), borderColor: Color(0xFFFFD8A8)),
+    // 9. 薄荷綠
+    const CourseColor(backgroundColor: Color(0xFFECFDF5), textColor: Color(0xFF047857), borderColor: Color(0xFFD1FAE5)),
+    // 10. 玫瑰紅
+    const CourseColor(backgroundColor: Color(0xFFFFF1F2), textColor: Color(0xFFBE123C), borderColor: Color(0xFFFFE4E6)),
+    // 11. 琥珀黃
+    const CourseColor(backgroundColor: Color(0xFFFEF9C3), textColor: Color(0xFF854D0E), borderColor: Color(0xFFFEF08A)),
+    // 12. 翠青綠
+    const CourseColor(backgroundColor: Color(0xFFCCFBF1), textColor: Color(0xFF0F766E), borderColor: Color(0xFF99F6E4)),
+    // 13. 珊瑚紅
+    const CourseColor(backgroundColor: Color(0xFFFFE4E6), textColor: Color(0xFF9F1239), borderColor: Color(0xFFFECDD3)),
+    // 14. 丁香紫
+    const CourseColor(backgroundColor: Color(0xFFFAE8FF), textColor: Color(0xFF86198F), borderColor: Color(0xFFF5D0FE)),
+    // 15. 石頭褐
+    const CourseColor(backgroundColor: Color(0xFFF5F5F4), textColor: Color(0xFF44403C), borderColor: Color(0xFFE7E5E4)),
+    // 16. 藍板岩
+    const CourseColor(backgroundColor: Color(0xFFF1F5F9), textColor: Color(0xFF334155), borderColor: Color(0xFFE2E8F0)),
   ];
 
-  // 深色模式調色盤 (8種和諧明亮的深色配色)
+  // 深色模式調色盤 (16種和諧明亮的深暗莫蘭迪配色)
   final darkPalette = [
-    // 藍
+    // 1. 藍色
     const CourseColor(backgroundColor: Color(0xFF082F49), textColor: Color(0xFF38BDF8), borderColor: Color(0xFF0C4A6E)),
-    // 綠
+    // 2. 綠色
     const CourseColor(backgroundColor: Color(0xFF064E3B), textColor: Color(0xFF4ADE80), borderColor: Color(0xFF065F46)),
-    // 粉紅
+    // 3. 粉紅
     const CourseColor(backgroundColor: Color(0xFF500724), textColor: Color(0xFFF472B6), borderColor: Color(0xFF701A40)),
-    // 黃橘
+    // 4. 黃橘
     const CourseColor(backgroundColor: Color(0xFF451A03), textColor: Color(0xFFFBBF24), borderColor: Color(0xFF78350F)),
-    // 紫
+    // 5. 紫色
     const CourseColor(backgroundColor: Color(0xFF3B0764), textColor: Color(0xFFC084FC), borderColor: Color(0xFF581C87)),
-    // 青
+    // 6. 青色
     const CourseColor(backgroundColor: Color(0xFF083344), textColor: Color(0xFF22D3EE), borderColor: Color(0xFF155E75)),
-    // 靛藍
+    // 7. 靛藍
     const CourseColor(backgroundColor: Color(0xFF1E1B4B), textColor: Color(0xFF818CF8), borderColor: Color(0xFF312E81)),
-    // 橙
+    // 8. 橙色
     const CourseColor(backgroundColor: Color(0xFF431407), textColor: Color(0xFFFB923C), borderColor: Color(0xFF7C2D12)),
+    // 9. 薄荷綠
+    const CourseColor(backgroundColor: Color(0xFF022C22), textColor: Color(0xFF34D399), borderColor: Color(0xFF064E3B)),
+    // 10. 玫瑰紅
+    const CourseColor(backgroundColor: Color(0xFF4C0519), textColor: Color(0xFFFDA4AF), borderColor: Color(0xFF881337)),
+    // 11. 琥珀黃
+    const CourseColor(backgroundColor: Color(0xFF3F2F00), textColor: Color(0xFFFDE047), borderColor: Color(0xFF713F12)),
+    // 12. 翠青綠
+    const CourseColor(backgroundColor: Color(0xFF042F2E), textColor: Color(0xFF2DD4BF), borderColor: Color(0xFF115E59)),
+    // 13. 珊瑚紅
+    const CourseColor(backgroundColor: Color(0xFF3B100E), textColor: Color(0xFFFB7185), borderColor: Color(0xFF6F1D1B)),
+    // 14. 丁香紫
+    const CourseColor(backgroundColor: Color(0xFF300B3B), textColor: Color(0xFFE879F9), borderColor: Color(0xFF4A1054)),
+    // 15. 石頭褐
+    const CourseColor(backgroundColor: Color(0xFF292524), textColor: Color(0xFFD6D3D1), borderColor: Color(0xFF44403C)),
+    // 16. 藍板岩
+    const CourseColor(backgroundColor: Color(0xFF1E293B), textColor: Color(0xFF94A3B8), borderColor: Color(0xFF334155)),
   ];
 
   final palette = isDark ? darkPalette : lightPalette;
-  if (courseName.isEmpty) {
+  if (index < 0) {
     return palette[0];
   }
-
-  // 透過 hashCode 決定顏色
-  final index = (courseName.hashCode.abs()) % palette.length;
-  return palette[index];
+  return palette[index % palette.length];
 }
 
