@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../providers/auth_provider.dart';
 
@@ -55,12 +57,17 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
             }
           },
           onWebResourceError: (WebResourceError error) {
+            debugPrint("WebView Error: code=${error.errorCode}, description=${error.description}, type=${error.errorType}, url=${error.url}, isForMainFrame=${error.isForMainFrame}");
             if (error.description.contains("net::ERR_ABORTED")) return;
-            if (mounted) {
-              setState(() {
-                _hasError = true;
-                _isLoading = false;
-              });
+            
+            // Only trigger error screen if the error is for the main page frame
+            if (error.isForMainFrame ?? true) {
+              if (mounted) {
+                setState(() {
+                  _hasError = true;
+                  _isLoading = false;
+                });
+              }
             }
           },
         ),
@@ -133,6 +140,53 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () => _controller.reload(),
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) async {
+                final currentUrl = await _controller.currentUrl();
+                if (currentUrl == null || currentUrl.isEmpty) return;
+
+                if (value == 'open_in_browser') {
+                  final uri = Uri.parse(currentUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                } else if (value == 'copy_link') {
+                  await Clipboard.setData(ClipboardData(text: currentUrl));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('已複製連結至剪貼簿'),
+                        behavior: SnackBarBehavior.floating,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                const PopupMenuItem<String>(
+                  value: 'open_in_browser',
+                  child: Row(
+                    children: [
+                      Icon(Icons.open_in_new, size: 20),
+                      SizedBox(width: 8),
+                      Text('用外部瀏覽器開啟'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'copy_link',
+                  child: Row(
+                    children: [
+                      Icon(Icons.copy, size: 20),
+                      SizedBox(width: 8),
+                      Text('複製連結'),
+                    ],
+                  ),
+                ),
+              ],
             ),
             IconButton(
               icon: const Icon(Icons.close),
