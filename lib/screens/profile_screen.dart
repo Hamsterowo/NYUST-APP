@@ -112,56 +112,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ],
                             ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                CircleAvatar(
-                                  radius: 40,
-                                  backgroundColor: colorScheme.primaryContainer,
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: colorScheme.onPrimaryContainer,
-                                  ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: colorScheme.primaryContainer,
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 24),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            user?["user"]?["name"] ??
+                                                user?["user"]?["姓名"] ??
+                                                "Student",
+                                            style: textTheme.headlineSmall?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            user?["user"]?["系(所)別"] ??
+                                                user?["user"]?["department"] ??
+                                                "Unknown",
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              color: Colors.white.withValues(alpha: 0.7),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          _buildInfoRow(
+                                            Icons.badge_outlined,
+                                            user?["user"]?["學號"] ?? "ID Unknown",
+                                          ),
+                                          const SizedBox(height: 8),
+                                          _buildInfoRow(
+                                            Icons.school_outlined,
+                                            user?["user"]?["班級"] ?? "No Class Info",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 24),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        user?["user"]?["name"] ??
-                                            user?["user"]?["姓名"] ??
-                                            "Student",
-                                        style: textTheme.headlineSmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        user?["user"]?["系(所)別"] ??
-                                            user?["user"]?["department"] ??
-                                            "Unknown",
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: Colors.white.withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      _buildInfoRow(
-                                        Icons.badge_outlined,
-                                        user?["user"]?["學號"] ?? "ID Unknown",
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildInfoRow(
-                                        Icons.school_outlined,
-                                        user?["user"]?["班級"] ?? "No Class Info",
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                ..._buildExtraInfoSection(user?["user"]),
                               ],
                             ),
                           ),
@@ -403,5 +409,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildExtraInfoSection(Map<String, dynamic>? userInfo) {
+    if (userInfo == null) return [];
+
+    final List<Map<String, String>> extraFields = [];
+    final fieldsToCheck = {
+      '輔系/雙主修': Icons.account_tree_outlined,
+      '學程': Icons.collections_bookmark_outlined,
+      '教育學程': Icons.menu_book_outlined,
+    };
+
+    fieldsToCheck.forEach((field, icon) {
+      final value = userInfo[field]?.toString().trim() ?? '';
+      if (value.isNotEmpty &&
+          value != '無' &&
+          value != 'None' &&
+          value != 'null') {
+        extraFields.add({
+          'label': field,
+          'value': value,
+        });
+      }
+    });
+
+    if (extraFields.isEmpty) return [];
+
+    return [
+      const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.0),
+        child: Divider(
+          color: Colors.white24,
+          height: 1,
+        ),
+      ),
+      Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
+        children: extraFields.map((field) {
+          final label = field['label']!;
+          final value = field['value']!;
+          
+          String displayLabel = label;
+          IconData icon;
+          if (label == '輔系/雙主修') {
+            icon = Icons.account_tree_outlined;
+            displayLabel = AppLocalizations.of(context).profileMinorDoubleMajor;
+          } else if (label == '學程') {
+            icon = Icons.collections_bookmark_outlined;
+            displayLabel = AppLocalizations.of(context).profileProgram;
+          } else {
+            icon = Icons.menu_book_outlined;
+            displayLabel = AppLocalizations.of(context).profileTeacherEducation;
+          }
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: Colors.amber[200],
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$displayLabel: $value',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.0,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    ];
   }
 }

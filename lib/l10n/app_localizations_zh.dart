@@ -572,4 +572,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get webViewRefresh => '重新整理';
+
+  @override
+  String get profileMinorDoubleMajor => '輔系/雙主修';
+
+  @override
+  String get profileProgram => '學程';
+
+  @override
+  String get profileTeacherEducation => '教育學程';
 }
