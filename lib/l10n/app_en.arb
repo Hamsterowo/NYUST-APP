@@ -50,7 +50,7 @@
   "upcomingEventsTitle": "Upcoming Campus Events",
   "noUpcomingEvents": "No upcoming campus events scheduled.",
   "noCourseDetail": "Detailed syllabus is not available for this course.",
-  "notSpecified": "Not Specified",
+  "notSpecified": "No Data",
   "classPeriods": "Period {periods}",
   "@classPeriods": {
     "placeholders": {
@@ -177,6 +177,20 @@
   "gradesAverage": "Average Score",
   "gradesRank": "Class Rank",
   "gradesEarnedCredits": "Earned Credits",
+  "gradesGPA": "GPA",
+  "gradesCumulativeAverage": "Cum. Average",
+  "gradesCumulativeGPA": "Cum. GPA",
+  "gradesCumulativeRank": "Cum. Rank",
+  "gradesCumulativeEarnedCredits": "Cum. Credits",
+  "gradesCumulativeSummary": "Cumulative Academic Summary",
+  "gradesGPAShort": "GPA: {gpa}",
+  "@gradesGPAShort": {
+    "placeholders": {
+      "gpa": {
+        "type": "String"
+      }
+    }
+  },
   "gradesDetailHeader": "Course Grade Details for This Semester",
   "gradesAllDetailHeader": "Course Grade Details",
   "gradesAverageShort": "Avg: {avg}",

@@ -170,6 +170,25 @@ class DataProvider with ChangeNotifier {
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
 
     if (!force && gradesData != null) {
+      final gradesList = gradesData!['grades'] as List?;
+      bool hasValidGPA = false;
+      if (gradesList != null && gradesList.isNotEmpty) {
+        for (var sem in gradesList) {
+          final gpa = sem['summary']?['gpa']?.toString();
+          if (gpa != null && gpa.isNotEmpty && gpa != '-' && gpa != 'N/A') {
+            hasValidGPA = true;
+            break;
+          }
+        }
+      }
+      final cumulative = gradesData!['cumulative'] as Map?;
+      final cumGPA = cumulative?['gpa']?.toString() ?? '';
+      final hasValidCumGPA = cumGPA.isNotEmpty && cumGPA != '-' && cumGPA != 'N/A';
+
+      if (!hasValidGPA || !hasValidCumGPA) {
+        if (kDebugMode) print('DataProvider: Stale/missing GPA data in-memory, forcing background fetch');
+        fetchGrades(force: true);
+      }
       return;
     }
 
@@ -185,6 +204,27 @@ class DataProvider with ChangeNotifier {
           gradesData = newMap;
           gradesFailed = false;
           notifyListeners();
+
+          // Auto-refresh in background if the cached data is missing valid GPA or cumulative data
+          final gradesList = newMap['grades'] as List?;
+          bool hasValidGPA = false;
+          if (gradesList != null && gradesList.isNotEmpty) {
+            for (var sem in gradesList) {
+              final gpa = sem['summary']?['gpa']?.toString();
+              if (gpa != null && gpa.isNotEmpty && gpa != '-' && gpa != 'N/A') {
+                hasValidGPA = true;
+                break;
+              }
+            }
+          }
+          final cumulative = newMap['cumulative'] as Map?;
+          final cumGPA = cumulative?['gpa']?.toString() ?? '';
+          final hasValidCumGPA = cumGPA.isNotEmpty && cumGPA != '-' && cumGPA != 'N/A';
+
+          if (!hasValidGPA || !hasValidCumGPA) {
+            if (kDebugMode) print('DataProvider: Stale cache detected (missing valid GPA/cumulative data), auto-refreshing in background');
+            fetchGrades(force: true);
+          }
         } catch (e) {
           if (kDebugMode) print('Parse grades cache error: $e');
         }
@@ -193,6 +233,26 @@ class DataProvider with ChangeNotifier {
 
     // Double check in case cache loading populated it and force is false
     if (!force && gradesData != null) {
+      // Still refresh if it is missing cumulative and GPA metrics
+      final gradesList = gradesData!['grades'] as List?;
+      bool hasValidGPA = false;
+      if (gradesList != null && gradesList.isNotEmpty) {
+        for (var sem in gradesList) {
+          final gpa = sem['summary']?['gpa']?.toString();
+          if (gpa != null && gpa.isNotEmpty && gpa != '-' && gpa != 'N/A') {
+            hasValidGPA = true;
+            break;
+          }
+        }
+      }
+      final cumulative = gradesData!['cumulative'] as Map?;
+      final cumGPA = cumulative?['gpa']?.toString() ?? '';
+      final hasValidCumGPA = cumGPA.isNotEmpty && cumGPA != '-' && cumGPA != 'N/A';
+
+      if (!hasValidGPA || !hasValidCumGPA) {
+        if (kDebugMode) print('DataProvider: In-memory grades missing valid GPA/cumulative data, loading in background');
+        fetchGrades(force: true);
+      }
       return;
     }
 

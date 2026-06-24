@@ -287,11 +287,7 @@ class _GradesScreenState extends State<GradesScreen> {
         final passRate =
             '${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}';
 
-        final apiAverage = semester['summary']?['average_score']?.toString();
-        final displayAverage =
-            (apiAverage != null && apiAverage.isNotEmpty && apiAverage != 'N/A')
-            ? apiAverage
-            : calculatedAverage;
+        final displayAverage = calculatedAverage;
         final displayRank =
             (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
             ? "-"
@@ -330,9 +326,8 @@ class _GradesScreenState extends State<GradesScreen> {
               ),
             ),
 
-            // 數據儀表板橫列
+            // 數據儀表板橫列 (一排四個)
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildStatCard(
                   label: AppLocalizations.of(context).gradesAverage,
@@ -340,14 +335,23 @@ class _GradesScreenState extends State<GradesScreen> {
                   icon: Icons.analytics_outlined,
                   colorScheme: colorScheme,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
+                _buildStatCard(
+                  label: AppLocalizations.of(context).gradesGPA,
+                  value: (semester['summary']?['gpa']?.toString().isEmpty ?? true)
+                      ? "-"
+                      : semester['summary']['gpa'].toString(),
+                  icon: Icons.grade_outlined,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 8),
                 _buildStatCard(
                   label: AppLocalizations.of(context).gradesRank,
                   value: displayRank,
                   icon: Icons.format_list_numbered_outlined,
                   colorScheme: colorScheme,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 _buildStatCard(
                   label: AppLocalizations.of(context).gradesEarnedCredits,
                   value: passRate,
@@ -557,21 +561,116 @@ class _GradesScreenState extends State<GradesScreen> {
             .reversed
             .toList();
       } else {
-        return Center(
-          child: Text(
-            AppLocalizations.of(context).gradesNoHistoryData,
-            style: TextStyle(color: colorScheme.onSurfaceVariant),
-          ),
-        );
+        grades = [];
       }
+    }
+
+    final cumulative = gradesData['cumulative'] as Map<String, dynamic>?;
+    Widget? cumulativeDashboard;
+    if (cumulative != null) {
+      final cumAverage = cumulative['average']?.toString() ?? '-';
+      final cumGPA = cumulative['gpa']?.toString() ?? '-';
+      final cumRank = cumulative['rank']?.toString() ?? '';
+      final cumTotal = cumulative['total_students']?.toString() ?? '';
+      final cumRankText = cumRank.isNotEmpty && cumTotal.isNotEmpty
+          ? '$cumRank / $cumTotal'
+          : cumRank.isNotEmpty
+              ? cumRank
+              : '-';
+      final cumCredits = cumulative['earned_credits']?.toString() ?? '';
+      final cumAttempted = cumulative['attempted_credits']?.toString() ?? '';
+      final cumCreditsText = cumCredits.isNotEmpty && cumAttempted.isNotEmpty
+          ? '$cumCredits/$cumAttempted'
+          : cumCredits.isNotEmpty
+              ? cumCredits
+              : '-';
+
+      cumulativeDashboard = Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, left: 4),
+              child: Text(
+                AppLocalizations.of(context).gradesCumulativeSummary,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                _buildStatCard(
+                  label: AppLocalizations.of(context).gradesAverage,
+                  value: cumAverage,
+                  icon: Icons.analytics_outlined,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 8),
+                _buildStatCard(
+                  label: AppLocalizations.of(context).gradesGPA,
+                  value: cumGPA,
+                  icon: Icons.grade_outlined,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 8),
+                _buildStatCard(
+                  label: AppLocalizations.of(context).gradesRank,
+                  value: cumRankText,
+                  icon: Icons.format_list_numbered_outlined,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 8),
+                _buildStatCard(
+                  label: AppLocalizations.of(context).gradesEarnedCredits,
+                  value: cumCreditsText,
+                  icon: Icons.menu_book_outlined,
+                  colorScheme: colorScheme,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Divider(height: 24),
+            if (grades.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, left: 4),
+                child: Text(
+                  AppLocalizations.of(context).gradesAllDetailHeader,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    if (grades.isEmpty && cumulativeDashboard == null) {
+      return Center(
+        child: Text(
+          AppLocalizations.of(context).gradesNoHistoryData,
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
+      );
     }
 
     return ListView.builder(
       key: ValueKey(_selectedSegment),
       padding: const EdgeInsets.all(16),
-      itemCount: grades.length,
+      itemCount: grades.length + (cumulativeDashboard != null ? 1 : 0),
       itemBuilder: (context, index) {
-        final semester = grades[index];
+        if (cumulativeDashboard != null && index == 0) {
+          return cumulativeDashboard;
+        }
+
+        final semesterIndex = cumulativeDashboard != null ? index - 1 : index;
+        final semester = grades[semesterIndex];
         final courses = semester['courses'] as List;
         final semesterKey =
             '${semester["academic_year"]}-${semester["semester"]}';
@@ -623,7 +722,11 @@ class _GradesScreenState extends State<GradesScreen> {
             ? apiAverage
             : calculatedAverage;
 
+        final apiGPA = semester['summary']?['gpa']?.toString() ?? '';
+        final displayGPA = apiGPA.isNotEmpty ? apiGPA : '-';
+
         final avgText = AppLocalizations.of(context).gradesAverageShort(displayAverage);
+        final gpaText = AppLocalizations.of(context).gradesGPAShort(displayGPA);
         final rankText = AppLocalizations.of(context).gradesRankShort(
           (semester["summary"]?["rank"]?.toString().isEmpty ?? true) ? "-" : semester["summary"]["rank"]
         );
@@ -653,7 +756,7 @@ class _GradesScreenState extends State<GradesScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              '$avgText  |  $rankText  |  $creditsText',
+              '$avgText  |  $gpaText  |  $rankText  |  $creditsText',
               style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             trailing: Icon(Icons.chevron_right, color: colorScheme.primary),
@@ -744,23 +847,24 @@ Widget _buildStatCard({
 }) {
   return Expanded(
     child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.1),
+          color: colorScheme.primary.withValues(alpha: 0.08),
           width: 1,
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 20, color: colorScheme.primary),
-          const SizedBox(height: 6),
+          Icon(icon, size: 16, color: colorScheme.primary),
+          const SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: colorScheme.onPrimaryContainer,
             ),
@@ -768,14 +872,16 @@ Widget _buildStatCard({
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 9,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -830,11 +936,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
     final passRate =
         '${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}';
 
-    final apiAverage = semester['summary']?['average_score']?.toString();
-    final displayAverage =
-        (apiAverage != null && apiAverage.isNotEmpty && apiAverage != 'N/A')
-            ? apiAverage
-            : calculatedAverage;
+    final displayAverage = calculatedAverage;
     final displayRank =
         (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
             ? "-"
@@ -851,8 +953,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // 數據儀表板橫列
+          // 數據儀表板橫列 (一排四個)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildStatCard(
                 label: AppLocalizations.of(context).gradesAverage,
@@ -860,14 +962,23 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                 icon: Icons.analytics_outlined,
                 colorScheme: colorScheme,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
+              _buildStatCard(
+                label: AppLocalizations.of(context).gradesGPA,
+                value: (semester['summary']?['gpa']?.toString().isEmpty ?? true)
+                    ? "-"
+                    : semester['summary']['gpa'].toString(),
+                icon: Icons.grade_outlined,
+                colorScheme: colorScheme,
+              ),
+              const SizedBox(width: 8),
               _buildStatCard(
                 label: AppLocalizations.of(context).gradesRank,
                 value: displayRank,
                 icon: Icons.format_list_numbered_outlined,
                 colorScheme: colorScheme,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               _buildStatCard(
                 label: AppLocalizations.of(context).gradesEarnedCredits,
                 value: passRate,

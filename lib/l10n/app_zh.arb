@@ -177,6 +177,20 @@
   "gradesAverage": "平均成績",
   "gradesRank": "班級排名",
   "gradesEarnedCredits": "實得學分",
+  "gradesGPA": "GPA",
+  "gradesCumulativeAverage": "累計平均成績",
+  "gradesCumulativeGPA": "累計 GPA",
+  "gradesCumulativeRank": "累計排名",
+  "gradesCumulativeEarnedCredits": "累計學分",
+  "gradesCumulativeSummary": "歷年累計成績",
+  "gradesGPAShort": "GPA: {gpa}",
+  "@gradesGPAShort": {
+    "placeholders": {
+      "gpa": {
+        "type": "String"
+      }
+    }
+  },
   "gradesDetailHeader": "本學期修課成績明細",
   "gradesAllDetailHeader": "修課成績明細",
   "gradesAverageShort": "平均: {avg}",

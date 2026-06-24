@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
-import '../providers/navigation_provider.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
@@ -75,8 +72,6 @@ class CalendarScreenState extends State<CalendarScreen> {
 
   int _currentYear = DateTime.now().year;
 
-  bool _hasCheckedLegend = false;
-
   PageController? _pageController;
 
   @override
@@ -94,14 +89,6 @@ class CalendarScreenState extends State<CalendarScreen> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  Future<void> _checkAndShowLegend() async {
-    final prefs = await SharedPreferences.getInstance();
-    final bool hideLegend = prefs.getBool('hide_calendar_legend') ?? false;
-    if (!hideLegend && mounted) {
-      _showLegendDialog();
-    }
   }
 
   void _showLegendDialog() {
@@ -253,14 +240,6 @@ class CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('hide_calendar_legend', true);
-                if (context.mounted) Navigator.of(context).pop();
-              },
-              child: Text(AppLocalizations.of(context).notPromoted),
-            ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(AppLocalizations.of(context).confirm),
@@ -474,14 +453,6 @@ class CalendarScreenState extends State<CalendarScreen> {
       });
     }
     _lastLocale = newLocale;
-
-    final navProvider = context.watch<NavigationProvider>();
-    if (navProvider.currentIndex == 3 && !_hasCheckedLegend) {
-      _hasCheckedLegend = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _checkAndShowLegend();
-      });
-    }
 
     final colorScheme = Theme.of(context).colorScheme;
     final selectedEvents = _selectedDay != null
