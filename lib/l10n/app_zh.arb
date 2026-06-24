@@ -313,6 +313,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "webViewOpenInBrowser": "用外部瀏覽器開啟",
+  "webViewCopyLink": "複製連結",
+  "webViewLinkCopied": "已複製連結至剪貼簿",
+  "webViewLoadFailed": "網頁載入失敗",
+  "webViewRefresh": "重新整理"
 }
 

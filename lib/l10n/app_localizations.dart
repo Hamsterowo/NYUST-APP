@@ -1117,6 +1117,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'{room} 平面圖不可用'**
   String mapFloorPlanUnavailable(String room);
+
+  /// No description provided for @webViewOpenInBrowser.
+  ///
+  /// In zh, this message translates to:
+  /// **'用外部瀏覽器開啟'**
+  String get webViewOpenInBrowser;
+
+  /// No description provided for @webViewCopyLink.
+  ///
+  /// In zh, this message translates to:
+  /// **'複製連結'**
+  String get webViewCopyLink;
+
+  /// No description provided for @webViewLinkCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已複製連結至剪貼簿'**
+  String get webViewLinkCopied;
+
+  /// No description provided for @webViewLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'網頁載入失敗'**
+  String get webViewLoadFailed;
+
+  /// No description provided for @webViewRefresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新整理'**
+  String get webViewRefresh;
 }
 
 class _AppLocalizationsDelegate

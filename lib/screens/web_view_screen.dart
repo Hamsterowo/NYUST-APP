@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class AppWebViewScreen extends StatefulWidget {
@@ -156,33 +157,33 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
                   await Clipboard.setData(ClipboardData(text: currentUrl));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('已複製連結至剪貼簿'),
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context).webViewLinkCopied),
                         behavior: SnackBarBehavior.floating,
-                        duration: Duration(seconds: 2),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   }
                 }
               },
               itemBuilder: (BuildContext context) => [
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'open_in_browser',
                   child: Row(
                     children: [
-                      Icon(Icons.open_in_new, size: 20),
-                      SizedBox(width: 8),
-                      Text('用外部瀏覽器開啟'),
+                      const Icon(Icons.open_in_new, size: 20),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context).webViewOpenInBrowser),
                     ],
                   ),
                 ),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'copy_link',
                   child: Row(
                     children: [
-                      Icon(Icons.copy, size: 20),
-                      SizedBox(width: 8),
-                      Text('複製連結'),
+                      const Icon(Icons.copy, size: 20),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context).webViewCopyLink),
                     ],
                   ),
                 ),
@@ -215,7 +216,7 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
                   children: [
                     Icon(Icons.error_outline, size: 64, color: colorScheme.error),
                     const SizedBox(height: 16),
-                    const Text('網頁載入失敗', style: TextStyle(fontSize: 18)),
+                    Text(AppLocalizations.of(context).webViewLoadFailed, style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 16),
                     FilledButton.tonal(
                       onPressed: () {
@@ -225,7 +226,7 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
                         });
                         _controller.reload();
                       },
-                      child: const Text('重新整理'),
+                      child: Text(AppLocalizations.of(context).webViewRefresh),
                     ),
                   ],
                 ),
