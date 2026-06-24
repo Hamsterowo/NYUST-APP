@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
@@ -92,6 +93,16 @@ class ApiService {
     if (cookieJar == null) return false;
     final cookies = await cookieJar.loadForRequest(Uri.parse('https://webapp.yuntech.edu.tw'));
     return cookies.isNotEmpty;
+  }
+
+  /// 取得特定網域的 Cookies
+  Future<List<Cookie>> getCookiesForUri(Uri uri) async {
+    final cookieJar = _dio.interceptors
+        .whereType<CookieManager>()
+        .firstOrNull
+        ?.cookieJar;
+    if (cookieJar == null) return [];
+    return await cookieJar.loadForRequest(uri);
   }
 
   Future<Map<String, dynamic>> loginInit() async {

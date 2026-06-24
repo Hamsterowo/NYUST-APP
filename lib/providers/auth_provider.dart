@@ -54,6 +54,8 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     };
 
+    bool isAlreadyLoggedIn = false;
+
     final hasCookies = await _apiService.hasSavedCookies();
 
     if (!hasCookies) {
@@ -84,6 +86,7 @@ class AuthProvider with ChangeNotifier {
         if (cachedUser['user']?['id'] == 'D11012345') {
           _apiService.isMockMode = true;
         }
+        isAlreadyLoggedIn = true;
         notifyListeners();
         onLoginSuccess?.call();
       }
@@ -99,7 +102,9 @@ class AuthProvider with ChangeNotifier {
       if (info['success'] == true && hasValidUser) {
         _user = info;
         await _saveUserCache(info);
-        onLoginSuccess?.call();
+        if (!isAlreadyLoggedIn) {
+          onLoginSuccess?.call();
+        }
       } else if (info['status'] == 'session_expired' ||
           info['success'] == false ||
           (info['success'] == true && !hasValidUser)) {
@@ -111,7 +116,9 @@ class AuthProvider with ChangeNotifier {
         final cachedStr = await _loadUserCache();
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
-          onLoginSuccess?.call();
+          if (!isAlreadyLoggedIn) {
+            onLoginSuccess?.call();
+          }
         } else {
           await _clearUserCache();
         }
@@ -124,7 +131,9 @@ class AuthProvider with ChangeNotifier {
         final cachedStr = await _loadUserCache();
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
-          onLoginSuccess?.call();
+          if (!isAlreadyLoggedIn) {
+            onLoginSuccess?.call();
+          }
         }
       } catch (_) {}
     } finally {

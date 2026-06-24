@@ -110,16 +110,16 @@ class DataProvider with ChangeNotifier {
   bool get isPrefetching => _isPrefetching;
 
   /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）
-  Future<void> prefetchAll() async {
+  Future<void> prefetchAll({bool force = false}) async {
     _isPrefetching = true;
     notifyListeners();
     try {
       await fetchUserInfo();
       await Future.delayed(const Duration(milliseconds: 200));
-      await fetchGrades();
+      await fetchGrades(force: force);
       await Future.delayed(const Duration(milliseconds: 200));
-      await fetchGraduation();
-      await fetchSchedule();
+      await fetchGraduation(force: force);
+      await fetchSchedule(force: force);
     } finally {
       _isPrefetching = false;
       notifyListeners();
@@ -133,7 +133,7 @@ class DataProvider with ChangeNotifier {
     scheduleData = [];
 
     await _clearDataCaches();
-    await prefetchAll();
+    await prefetchAll(force: true);
   }
 
   Future<void> fetchUserInfo() async {
@@ -164,10 +164,14 @@ class DataProvider with ChangeNotifier {
     await _clearDataCaches();
   }
 
-  Future<void> fetchGrades() async {
+  Future<void> fetchGrades({bool force = false}) async {
     if (isLoadingGrades) return;
 
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
+
+    if (!force && gradesData != null) {
+      return;
+    }
 
     if (gradesData == null) {
       final cached = await _loadDataCache('cache_grades');
@@ -185,6 +189,11 @@ class DataProvider with ChangeNotifier {
           if (kDebugMode) print('Parse grades cache error: $e');
         }
       }
+    }
+
+    // Double check in case cache loading populated it and force is false
+    if (!force && gradesData != null) {
+      return;
     }
 
     isLoadingGrades = true;
@@ -208,10 +217,14 @@ class DataProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchGraduation() async {
+  Future<void> fetchGraduation({bool force = false}) async {
     if (isLoadingGraduation) return;
 
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
+
+    if (!force && graduationData != null) {
+      return;
+    }
 
     if (graduationData == null) {
       final cached = await _loadDataCache('cache_graduation');
@@ -229,6 +242,11 @@ class DataProvider with ChangeNotifier {
           if (kDebugMode) print('Parse graduation cache error: $e');
         }
       }
+    }
+
+    // Double check in case cache loading populated it and force is false
+    if (!force && graduationData != null) {
+      return;
     }
 
     isLoadingGraduation = true;
@@ -252,10 +270,14 @@ class DataProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchSchedule() async {
+  Future<void> fetchSchedule({bool force = false}) async {
     if (isLoadingSchedule) return;
 
     if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
+
+    if (!force && scheduleData.isNotEmpty) {
+      return;
+    }
 
     if (scheduleData.isEmpty) {
       final cached = await _loadDataCache('cache_schedule');
@@ -276,6 +298,11 @@ class DataProvider with ChangeNotifier {
           if (kDebugMode) print('Parse schedule cache error: $e');
         }
       }
+    }
+
+    // Double check in case cache loading populated it and force is false
+    if (!force && scheduleData.isNotEmpty) {
+      return;
     }
 
     isLoadingSchedule = true;

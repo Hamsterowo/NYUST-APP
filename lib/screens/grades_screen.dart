@@ -114,7 +114,7 @@ class _GradesScreenState extends State<GradesScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).gradesTitle,
-        onRefresh: () => data.fetchGrades(),
+        onRefresh: () => data.fetchGrades(force: true),
         isLoading: data.isLoadingGrades,
       ),
       body: bodyContent,
@@ -137,7 +137,7 @@ class _GradesScreenState extends State<GradesScreen> {
             Text(AppLocalizations.of(context).checkNetworkRetry, style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 24),
             FilledButton.tonal(
-              onPressed: () => data.fetchGrades(),
+              onPressed: () => data.fetchGrades(force: true),
               child: Text(AppLocalizations.of(context).retry),
             ),
           ],
