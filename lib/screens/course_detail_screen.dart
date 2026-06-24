@@ -225,7 +225,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         scrolledUnderElevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.open_in_browser),
+            icon: const Icon(Icons.open_in_new),
             tooltip: AppLocalizations.of(context).courseOpenInBrowser,
             onPressed: () {
               Navigator.push(
