@@ -109,8 +109,12 @@ class _HomeScreenState extends State<HomeScreen> {
     required ColorScheme colorScheme,
   }) {
     final isSelected = index == currentIndex;
-    final activeColor = colorScheme.primary;
+    final activeColor = const Color.fromARGB(255, 45, 177, 163);
     final inactiveColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final splashFillColor = isDark
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFF0FDFA);
 
     return Expanded(
       child: InkWell(
@@ -118,7 +122,9 @@ class _HomeScreenState extends State<HomeScreen> {
           context.read<NavigationProvider>().setIndex(index);
         },
         borderRadius: BorderRadius.circular(24),
-        splashColor: colorScheme.primary.withValues(alpha: 0.1),
+        splashColor: splashFillColor,
+        hoverColor: splashFillColor,
+        focusColor: splashFillColor,
         highlightColor: Colors.transparent,
         child: Center(
           child: Column(
@@ -126,7 +132,10 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: AnimatedScale(
                   scale: isSelected ? 1.15 : 1.0,
                   duration: const Duration(milliseconds: 200),
@@ -163,7 +172,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final newLocale = Localizations.localeOf(context).toString();
     if (_lastLocale != null && _lastLocale != newLocale) {
       if (kDebugMode) {
-        print('HomeScreen: Locale changed from $_lastLocale to $newLocale. Refreshing all data...');
+        print(
+          'HomeScreen: Locale changed from $_lastLocale to $newLocale. Refreshing all data...',
+        );
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<DataProvider>().forceFetchAll();

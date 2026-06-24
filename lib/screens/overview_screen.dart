@@ -55,9 +55,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
       shouldShow = true;
     } else {
       try {
-        final terms = await auth.api
-            .getTermsOfService()
-            .timeout(const Duration(seconds: 3));
+        final terms = await auth.api.getTermsOfService().timeout(
+          const Duration(seconds: 3),
+        );
         if (terms['status'] == 'success') {
           final lastUpdated = terms['data']?['lastUpdated'] ?? '';
           if (lastUpdated != lastAcceptedDate) {
@@ -177,7 +177,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final name = event.name;
       final normalized = name.toLowerCase();
 
-      final isWinterVacationStart = (name.contains('寒假') &&
+      final isWinterVacationStart =
+          (name.contains('寒假') &&
               (name.contains('開始') ||
                   name.contains('起') ||
                   name.contains('放'))) ||
@@ -186,7 +187,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   normalized.contains('start') ||
                   normalized.contains('first day')));
 
-      final isSummerVacationStart = (name.contains('暑假') &&
+      final isSummerVacationStart =
+          (name.contains('暑假') &&
               (name.contains('開始') ||
                   name.contains('起') ||
                   name.contains('放'))) ||
@@ -195,7 +197,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   normalized.contains('start') ||
                   normalized.contains('first day')));
 
-      final isClassesStart = name.contains('開始上課') ||
+      final isClassesStart =
+          name.contains('開始上課') ||
           name.contains('上課開始') ||
           name.contains('開學') ||
           name.contains('正式上課') ||
@@ -326,7 +329,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
     };
   }
 
-  DateTime _adjustStartDate(DateTime nominalStart, List<String> holidays, int currentYear) {
+  DateTime _adjustStartDate(
+    DateTime nominalStart,
+    List<String> holidays,
+    int currentYear,
+  ) {
     DateTime adjusted = nominalStart;
     while (true) {
       final prevDay = adjusted.subtract(const Duration(days: 1));
@@ -345,7 +352,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       return holidays.contains(dateStr);
     } else {
-      return date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+      return date.weekday == DateTime.saturday ||
+          date.weekday == DateTime.sunday;
     }
   }
 
@@ -524,7 +532,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    AppLocalizations.of(context).vacationElapsed((progress * 100).toStringAsFixed(0)),
+                    AppLocalizations.of(
+                      context,
+                    ).vacationElapsed((progress * 100).toStringAsFixed(0)),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.white70,
@@ -637,7 +647,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   (_todayEvents == null || _todayEvents!.isEmpty))
               ? _buildCalendarSkeleton()
               : (_todayEvents == null || _todayEvents!.isEmpty) &&
-                     !_isLoadingCalendar
+                    !_isLoadingCalendar
               ? Text(
                   AppLocalizations.of(context).noUpcomingEvents,
                   style: const TextStyle(color: Colors.grey),
@@ -714,8 +724,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     final now = DateTime.now();
     final todayWeekday = now.weekday.toString();
-    final isLoading = !data.isCacheLoaded ||
-        ((data.isPrefetching || data.isLoadingSchedule) && data.scheduleData.isEmpty);
+    final isLoading =
+        !data.isCacheLoaded ||
+        ((data.isPrefetching || data.isLoadingSchedule) &&
+            data.scheduleData.isEmpty);
 
     if (isLoading) {
       return Column(
@@ -750,10 +762,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                             height: 16,
                             margin: EdgeInsets.only(bottom: 8),
                           ),
-                          ShimmerBox(
-                            width: 180,
-                            height: 18,
-                          ),
+                          ShimmerBox(width: 180, height: 18),
                         ],
                       ),
                       const Spacer(),
@@ -771,7 +780,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
                             Icon(
                               Icons.location_on_outlined,
                               size: 16,
-                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                             const SizedBox(width: 4),
                             const ShimmerBox(width: 60, height: 14),
@@ -931,7 +942,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
             }
           }
 
-          String timeStr = AppLocalizations.of(context).classPeriods(c.times.join(", "));
+          String timeStr = AppLocalizations.of(
+            context,
+          ).classPeriods(c.times.join(", "));
 
           if (c.times.isNotEmpty) {
             final firstPeriod = c.times.first;
@@ -979,8 +992,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final isCurrent = state == 'current';
     final isPast = state == 'past';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isCurrent
-        ? colorScheme.primaryContainer.withValues(alpha: 0.5)
+        ? (isDark
+              ? const Color(0xFF0F2D2A)
+              : const Color.fromARGB(255, 172, 255, 251))
         : colorScheme.surface;
     final borderColor = isCurrent
         ? Colors.transparent
@@ -1025,7 +1041,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
               ),
             );
           } else {
-            showTopSnackBar(context, AppLocalizations.of(context).noCourseDetail, type: SnackBarType.warning);
+            showTopSnackBar(
+              context,
+              AppLocalizations.of(context).noCourseDetail,
+              type: SnackBarType.warning,
+            );
           }
         },
         child: Padding(
