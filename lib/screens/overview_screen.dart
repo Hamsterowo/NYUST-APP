@@ -112,6 +112,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       if (response != null && response['success'] == true && mounted) {
         final List<dynamic> data = response['events'] ?? [];
         final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
+        events.sort((a, b) => a.date.compareTo(b.date));
         final List<dynamic> holidaysData = response['holidays'] ?? [];
         final holidays = holidaysData.map((h) => h.toString()).toList();
 
@@ -207,6 +208,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
         winterStart = date;
       }
       if (isClassesStart && (date.month == 2 || date.month == 3)) {
+        // Classes start must be at least 21 days after winter vacation starts.
+        // This avoids matching administrative semester starts (like Feb 1st).
+        if (winterStart != null && date.difference(winterStart).inDays < 21) {
+          continue;
+        }
         if (sem2Start == null || date.isBefore(sem2Start)) {
           sem2Start = date;
         }
@@ -216,6 +222,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
         summerStart = date;
       }
       if (isClassesStart && (date.month == 8 || date.month == 9)) {
+        // Classes start must be at least 35 days after summer vacation starts.
+        // This avoids matching administrative semester starts (like Aug 1st).
+        if (summerStart != null && date.difference(summerStart).inDays < 35) {
+          continue;
+        }
         if (sem1Start == null || date.isBefore(sem1Start)) {
           sem1Start = date;
         }
