@@ -698,11 +698,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         Positioned(
           left: -9999,
           top: -9999,
-          width: 480,
-          height: 640,
+          width: 496,
+          height: 656,
           child: RepaintBoundary(
             key: _repaintKey,
-            child: _ShareScheduleCard(courses: data.scheduleData),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _ShareScheduleCard(courses: data.scheduleData),
+            ),
           ),
         ),
       ],
@@ -1567,7 +1570,7 @@ class _ShareScheduleCard extends StatelessWidget {
                 border: Border.all(color: colorScheme.outlineVariant),
                 borderRadius: BorderRadius.circular(8),
               ),
-              clipBehavior: Clip.hardEdge,
+              clipBehavior: Clip.antiAlias,
               child: Row(
                 children: [
                   // 左側節次欄
@@ -1608,9 +1611,11 @@ class _ShareScheduleCard extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border(
-                                      bottom: BorderSide(
-                                        color: colorScheme.outlineVariant,
-                                      ),
+                                      bottom: period == activePeriods.last
+                                          ? BorderSide.none
+                                          : BorderSide(
+                                              color: colorScheme.outlineVariant,
+                                            ),
                                       right: BorderSide(
                                         color: colorScheme.outlineVariant,
                                       ),
