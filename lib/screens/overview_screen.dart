@@ -23,6 +23,7 @@ class OverviewScreen extends StatefulWidget {
 class _OverviewScreenState extends State<OverviewScreen> {
   List<CalendarEvent>? _todayEvents;
   List<CalendarEvent>? _allEvents;
+  List<String>? _holidays;
   bool _isLoadingCalendar = true;
   String? _currentLanguageCode;
 
@@ -111,12 +112,15 @@ class _OverviewScreenState extends State<OverviewScreen> {
       if (response != null && response['success'] == true && mounted) {
         final List<dynamic> data = response['events'] ?? [];
         final events = data.map((e) => CalendarEvent.fromJson(e)).toList();
+        final List<dynamic> holidaysData = response['holidays'] ?? [];
+        final holidays = holidaysData.map((h) => h.toString()).toList();
 
         final todayStr =
             "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
         setState(() {
           _allEvents = events;
+          _holidays = holidays;
           final upcomingEvents = events
               .where((e) => e.date.compareTo(todayStr) >= 0)
               .toList();
@@ -135,6 +139,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         if (mounted) {
           setState(() {
             _allEvents = [];
+            _holidays = [];
             _isLoadingCalendar = false;
             _todayEvents = [];
           });
@@ -144,6 +149,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       if (mounted) {
         setState(() {
           _allEvents = [];
+          _holidays = [];
           _isLoadingCalendar = false;
           _todayEvents = [];
         });
@@ -153,6 +159,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Map<String, dynamic> _getCountdownData(
     List<CalendarEvent> events,
+    List<String> holidays,
     DateTime now,
   ) {
     final year = now.year;
@@ -222,6 +229,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
       return {'error': true, 'messageKey': 'vacationError'};
     }
 
+    final adjustedWinterStart = _adjustStartDate(winterStart, holidays, year);
+    final adjustedSummerStart = _adjustStartDate(summerStart, holidays, year);
+
     DateTime start;
     DateTime end;
     String labelKey;
@@ -229,9 +239,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     final nowZero = DateTime(now.year, now.month, now.day);
     final winterStartZero = DateTime(
-      winterStart.year,
-      winterStart.month,
-      winterStart.day,
+      adjustedWinterStart.year,
+      adjustedWinterStart.month,
+      adjustedWinterStart.day,
     );
     final sem2StartZero = DateTime(
       sem2Start.year,
@@ -239,9 +249,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
       sem2Start.day,
     );
     final summerStartZero = DateTime(
-      summerStart.year,
-      summerStart.month,
-      summerStart.day,
+      adjustedSummerStart.year,
+      adjustedSummerStart.month,
+      adjustedSummerStart.day,
     );
     final sem1StartZero = DateTime(
       sem1Start.year,
@@ -249,24 +259,24 @@ class _OverviewScreenState extends State<OverviewScreen> {
       sem1Start.day,
     );
 
-    if (nowZero.isAfter(winterStartZero) && nowZero.isBefore(sem2StartZero)) {
+    if (!nowZero.isBefore(winterStartZero) && nowZero.isBefore(sem2StartZero)) {
       start = winterStartZero;
       end = sem2StartZero;
       labelKey = 'start';
       isVacation = true;
-    } else if (nowZero.isAfter(sem2StartZero) &&
+    } else if (!nowZero.isBefore(sem2StartZero) &&
         nowZero.isBefore(summerStartZero)) {
       start = sem2StartZero;
       end = summerStartZero;
       labelKey = 'summer';
       isVacation = false;
-    } else if (nowZero.isAfter(summerStartZero) &&
+    } else if (!nowZero.isBefore(summerStartZero) &&
         nowZero.isBefore(sem1StartZero)) {
       start = summerStartZero;
       end = sem1StartZero;
       labelKey = 'start';
       isVacation = true;
-    } else if (nowZero.isAfter(sem1StartZero)) {
+    } else if (!nowZero.isBefore(sem1StartZero)) {
       start = sem1StartZero;
       end = DateTime(year + 1, winterStartZero.month, winterStartZero.day);
       labelKey = 'winter';
@@ -290,6 +300,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
     if (progress < 0.0) progress = 0.0;
     if (progress > 1.0) progress = 1.0;
 
+    final displayEnd = end.subtract(const Duration(days: 1));
+
     return {
       'error': false,
       'labelKey': labelKey,
@@ -299,8 +311,31 @@ class _OverviewScreenState extends State<OverviewScreen> {
       'startStr':
           '${start.month.toString().padLeft(2, '0')}/${start.day.toString().padLeft(2, '0')}',
       'endStr':
-          '${end.month.toString().padLeft(2, '0')}/${end.day.toString().padLeft(2, '0')}',
+          '${displayEnd.month.toString().padLeft(2, '0')}/${displayEnd.day.toString().padLeft(2, '0')}',
     };
+  }
+
+  DateTime _adjustStartDate(DateTime nominalStart, List<String> holidays, int currentYear) {
+    DateTime adjusted = nominalStart;
+    while (true) {
+      final prevDay = adjusted.subtract(const Duration(days: 1));
+      if (_isHoliday(prevDay, holidays, currentYear)) {
+        adjusted = prevDay;
+      } else {
+        break;
+      }
+    }
+    return adjusted;
+  }
+
+  bool _isHoliday(DateTime date, List<String> holidays, int currentYear) {
+    if (date.year == currentYear) {
+      final dateStr =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      return holidays.contains(dateStr);
+    } else {
+      return date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+    }
   }
 
   Widget _buildCountdownCard(
@@ -336,7 +371,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       );
     }
 
-    final data = _getCountdownData(_allEvents!, now);
+    final data = _getCountdownData(_allEvents!, _holidays ?? [], now);
 
     if (data['error'] == true) {
       final msgKey = data['messageKey'] as String;
