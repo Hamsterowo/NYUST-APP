@@ -302,6 +302,18 @@ abstract class AppLocalizations {
   /// **'已度過 {percentage}%'**
   String vacationElapsed(String percentage);
 
+  /// No description provided for @vacationInfoTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'放假小卡說明'**
+  String get vacationInfoTitle;
+
+  /// No description provided for @vacationInfoContent.
+  ///
+  /// In zh, this message translates to:
+  /// **'這是一張倒數放假及開學日子的功能小卡。\n\n如何計算：\n1. 假期起點提前：若放假日前有連續假日（週末或國定假日），假期起點會提前至假期的第一天。\n2. 倒數與進度：倒數顯示今日到目標日期的實際天數，進度條則顯示目前已經的度過的比例。'**
+  String get vacationInfoContent;
+
   /// No description provided for @todayClassesTitle.
   ///
   /// In zh, this message translates to:

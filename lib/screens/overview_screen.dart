@@ -390,18 +390,15 @@ class _OverviewScreenState extends State<OverviewScreen> {
       if (msgKey == 'vacationError') {
         errorMsg = AppLocalizations.of(context).vacationError;
       }
+      const Color errorColor = Color(0xFF475569);
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF64748B), Color(0xFF475569)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: errorColor,
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF475569).withValues(alpha: 0.3),
+              color: errorColor.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -438,117 +435,134 @@ class _OverviewScreenState extends State<OverviewScreen> {
     }
 
     final bool isVacation = data['isVacation'] ?? false;
-    final List<Color> gradientColors = isVacation
-        ? const [Color(0xFFEA580C), Color(0xFFF59E0B)]
-        : const [Color(0xFF0284C7), Color(0xFF10B981)];
+    final Color cardColor = isVacation
+        ? const Color(0xFFEA580C)
+        : const Color(0xFF0284C7);
 
     final double progress = data['progress'] ?? 0.0;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: gradientColors.last.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context).vacationCountdownPrefix,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${data['remainingDays']}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      AppLocalizations.of(context).vacationCountdownSuffix,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                minHeight: 8,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context).vacationElapsed((progress * 100).toStringAsFixed(0)),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  '${data['startStr']} - ${data['endStr']}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () => _showVacationInfoDialog(context),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: cardColor.withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).vacationCountdownPrefix,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${data['remainingDays']}',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        AppLocalizations.of(context).vacationCountdownSuffix,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                  minHeight: 8,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).vacationElapsed((progress * 100).toStringAsFixed(0)),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    '${data['startStr']} - ${data['endStr']}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+
+  void _showVacationInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context).vacationInfoTitle),
+          content: Text(AppLocalizations.of(context).vacationInfoContent),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(AppLocalizations.of(context).close),
+            ),
+          ],
+        );
+      },
     );
   }
 
