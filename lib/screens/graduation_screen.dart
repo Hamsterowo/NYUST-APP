@@ -243,7 +243,10 @@ class GraduationContent extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context, String label, String value) {
-    final isPassed = (value.contains("通過") || value.contains("已修過") || value.contains("免修")) &&
+    final isPassed =
+        (value.contains("通過") ||
+            value.contains("已修過") ||
+            value.contains("免修")) &&
         !value.contains("未") &&
         !value.contains("不");
     final colorScheme = Theme.of(context).colorScheme;
@@ -1375,7 +1378,8 @@ class GraduationScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AppWebViewScreen(
-                    url: 'https://webapp.yuntech.edu.tw/WebNewCAS/Graduation/Score/StudGradCour.aspx',
+                    url:
+                        'https://webapp.yuntech.edu.tw/WebNewCAS/Graduation/Score/StudGradCour.aspx',
                   ),
                 ),
               );
@@ -1759,7 +1763,7 @@ class _ShareScheduleCard extends StatelessWidget {
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontSize: span > 1 ? 9.5 : 8.5,
+                                            fontSize: span > 1 ? 13.5 : 12.5,
                                             fontWeight: FontWeight.bold,
                                             color: courseColor.textColor,
                                             height: 1.1,
@@ -1774,7 +1778,7 @@ class _ShareScheduleCard extends StatelessWidget {
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
-                                              fontSize: 7.5,
+                                              fontSize: 10.5,
                                               color: courseColor.textColor
                                                   .withValues(alpha: 0.75),
                                               height: 1.0,
