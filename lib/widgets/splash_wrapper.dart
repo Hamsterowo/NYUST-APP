@@ -30,7 +30,7 @@ class _SplashWrapperState extends State<SplashWrapper>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400),
     );
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -54,7 +54,7 @@ class _SplashWrapperState extends State<SplashWrapper>
 
     if (!isLogout) {
       await _checkTermsAgreement(auth);
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
 
     if (!mounted) return;
@@ -81,9 +81,9 @@ class _SplashWrapperState extends State<SplashWrapper>
       shouldShow = true;
     } else {
       try {
-        final terms = await auth.api
-            .getTermsOfService()
-            .timeout(const Duration(seconds: 3));
+        final terms = await auth.api.getTermsOfService().timeout(
+          const Duration(seconds: 3),
+        );
         if (terms['status'] == 'success') {
           final lastUpdated = terms['data']?['lastUpdated'] ?? '';
           if (lastUpdated != lastAcceptedDate) {
@@ -159,8 +159,9 @@ class _SplashWrapperState extends State<SplashWrapper>
       );
     }
 
-    final destination =
-        _goingToLogin! ? LoginScreen(showIcon: false) : const HomeScreen();
+    final destination = _goingToLogin!
+        ? LoginScreen(showIcon: false)
+        : const HomeScreen();
 
     return Stack(
       children: [
