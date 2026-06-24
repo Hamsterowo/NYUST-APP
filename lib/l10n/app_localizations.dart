@@ -353,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @notSpecified.
   ///
   /// In zh, this message translates to:
-  /// **'未指定'**
+  /// **'無資料'**
   String get notSpecified;
 
   /// No description provided for @classPeriods.

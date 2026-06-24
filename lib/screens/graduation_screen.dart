@@ -698,6 +698,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         Positioned(
           left: -9999,
           top: -9999,
+          width: 480,
+          height: 640,
           child: RepaintBoundary(
             key: _repaintKey,
             child: _ShareScheduleCard(courses: data.scheduleData),
@@ -1073,6 +1075,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         return Padding(
           padding: const EdgeInsets.all(12.0),
           child: Card(
+            margin: EdgeInsets.zero,
             clipBehavior: Clip.hardEdge,
             elevation: 0,
             shape: RoundedRectangleBorder(

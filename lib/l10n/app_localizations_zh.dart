@@ -139,7 +139,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noCourseDetail => '這門課沒有提供詳細課綱';
 
   @override
-  String get notSpecified => '未指定';
+  String get notSpecified => '無資料';
 
   @override
   String classPeriods(String periods) {
