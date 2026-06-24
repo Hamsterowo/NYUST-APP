@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'dart:io';
@@ -47,7 +48,10 @@ class GraduationContent extends StatelessWidget {
               style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            Text(AppLocalizations.of(context).checkNetworkRetry, style: const TextStyle(color: Colors.grey)),
+            Text(
+              AppLocalizations.of(context).checkNetworkRetry,
+              style: const TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () => data.fetchGraduation(),
@@ -202,7 +206,10 @@ class GraduationContent extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Text(AppLocalizations.of(context).gradTotalEarnedCredits, style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              AppLocalizations.of(context).gradTotalEarnedCredits,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             Text(
               _formatCreditsText(context, info["total_credits"]?.toString()),
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
@@ -216,7 +223,11 @@ class GraduationContent extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildBadge(context, AppLocalizations.of(context).gradEnglishThreshold, info['english_threshold']),
+                _buildBadge(
+                  context,
+                  AppLocalizations.of(context).gradEnglishThreshold,
+                  info['english_threshold'],
+                ),
                 _buildBadge(
                   context,
                   AppLocalizations.of(context).gradInternshipThreshold,
@@ -231,17 +242,25 @@ class GraduationContent extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context, String label, String value) {
-    final isPassed = value.contains("通過") || value == "已修過";
+    final isPassed = (value.contains("通過") || value.contains("已修過") || value.contains("免修")) &&
+        !value.contains("未") &&
+        !value.contains("不");
     final colorScheme = Theme.of(context).colorScheme;
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
 
     String displayValue = value;
     if (isEnglish) {
       final trimmed = value.trim();
-      if (trimmed.contains('已通過') || trimmed.contains('通過')) {
+      if (trimmed.contains('未') || trimmed.contains('不')) {
+        if (trimmed.contains('通過')) {
+          displayValue = 'Not Passed';
+        } else if (trimmed.contains('修過')) {
+          displayValue = 'Not Completed';
+        } else {
+          displayValue = 'Not Passed';
+        }
+      } else if (trimmed.contains('已通過') || trimmed.contains('通過')) {
         displayValue = 'Passed';
-      } else if (trimmed.contains('未通過') || trimmed.contains('不通過')) {
-        displayValue = 'Not Passed';
       } else if (trimmed.contains('已修過') || trimmed.contains('修過')) {
         displayValue = 'Completed';
       } else if (trimmed.contains('免修')) {
@@ -319,22 +338,23 @@ class GraduationContent extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest,
             ),
-            children: [
-              AppLocalizations.of(context).gradCategory,
-              AppLocalizations.of(context).gradRequired,
-              AppLocalizations.of(context).gradEarned,
-              AppLocalizations.of(context).gradMissing,
-            ]
-                .map(
-                  (h) => Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      h,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )
-                .toList(),
+            children:
+                [
+                      AppLocalizations.of(context).gradCategory,
+                      AppLocalizations.of(context).gradRequired,
+                      AppLocalizations.of(context).gradEarned,
+                      AppLocalizations.of(context).gradMissing,
+                    ]
+                    .map(
+                      (h) => Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          h,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    )
+                    .toList(),
           ),
           ...rows.map((key) {
             final isTotal = key == 'total';
@@ -359,7 +379,10 @@ class GraduationContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    _formatCreditsText(context, breakdown['required_goal'][key]),
+                    _formatCreditsText(
+                      context,
+                      breakdown['required_goal'][key],
+                    ),
                     style: TextStyle(
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -381,8 +404,12 @@ class GraduationContent extends StatelessWidget {
                     style: TextStyle(
                       color:
                           (() {
-                            final val = breakdown['missing'][key]?.toString() ?? '';
-                            return val == "0" || val.startsWith('0') || val == "Pass" || val.isEmpty;
+                            final val =
+                                breakdown['missing'][key]?.toString() ?? '';
+                            return val == "0" ||
+                                val.startsWith('0') ||
+                                val == "Pass" ||
+                                val.isEmpty;
                           })()
                           ? colorScheme.onSurface
                           : colorScheme.error,
@@ -422,7 +449,7 @@ class GraduationContent extends StatelessWidget {
         final label =
             '${year > 0 ? AppLocalizations.of(context).gradYearFormat(year.toString()) : '??'} - ${item['code']} ${item['name']}';
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.0),
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -459,9 +486,77 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   bool _isMapMode = false;
   final GlobalKey _repaintKey = GlobalKey();
 
+  Timer? _timeLineTimer;
+
+  static const Map<String, List<int>> _periodMinutes = {
+    'X': [430, 480],
+    'A': [490, 540],
+    'B': [550, 600],
+    'C': [610, 660],
+    'D': [670, 720],
+    'Y': [730, 780],
+    'E': [790, 840],
+    'F': [850, 900],
+    'G': [910, 960],
+    'H': [970, 1020],
+    'Z': [1030, 1080],
+    'I': [1105, 1155],
+    'J': [1160, 1210],
+    'K': [1215, 1265],
+    'L': [1270, 1320],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _timeLineTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timeLineTimer?.cancel();
+    super.dispose();
+  }
+
+  double? _calculateTimeLineY(List<String> activePeriods, double cellHeight) {
+    final now = DateTime.now();
+    final nowMinutes = now.hour * 60 + now.minute;
+
+    for (int i = 0; i < activePeriods.length; i++) {
+      final period = activePeriods[i];
+      final times = _periodMinutes[period];
+      if (times == null) continue;
+      final start = times[0];
+      final end = times[1];
+
+      if (nowMinutes >= start && nowMinutes <= end) {
+        final ratio = (nowMinutes - start) / (end - start);
+        return i * cellHeight + ratio * cellHeight;
+      }
+
+      if (i < activePeriods.length - 1) {
+        final nextPeriod = activePeriods[i + 1];
+        final nextTimes = _periodMinutes[nextPeriod];
+        if (nextTimes != null) {
+          final nextStart = nextTimes[0];
+          if (nowMinutes > end && nowMinutes < nextStart) {
+            return (i + 1) * cellHeight;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   Future<void> _shareScheduleImage() async {
     try {
-      final boundary = _repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          _repaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) return;
 
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -470,9 +565,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       final pngBytes = byteData.buffer.asUint8List();
 
       if (kIsWeb) {
-        await Share.shareXFiles(
-          [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'schedule.png')],
-        );
+        await Share.shareXFiles([
+          XFile.fromData(pngBytes, mimeType: 'image/png', name: 'schedule.png'),
+        ]);
       } else {
         final tempDir = await getTemporaryDirectory();
         final file = await File('${tempDir.path}/nyust_schedule.png').create();
@@ -481,7 +576,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         final box = context.findRenderObject() as RenderBox?;
         await Share.shareXFiles(
           [XFile(file.path)],
-          sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+          sharePositionOrigin: box != null
+              ? box.localToGlobal(Offset.zero) & box.size
+              : null,
         );
       }
     } catch (e) {
@@ -563,7 +660,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             FilledButton.tonal(
               onPressed: () {
                 context.read<NavigationProvider>().setIndex(4);
-                showTopSnackBar(context, AppLocalizations.of(context).pleaseLoginToViewSchedule);
+                showTopSnackBar(
+                  context,
+                  AppLocalizations.of(context).pleaseLoginToViewSchedule,
+                );
               },
               child: Text(AppLocalizations.of(context).goToLogin),
             ),
@@ -613,7 +713,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             onPressed: data.isLoadingSchedule || data.scheduleData.isEmpty
                 ? null
                 : _shareScheduleImage,
-            tooltip: Localizations.localeOf(context).languageCode == 'en' ? 'Share Schedule' : '分享課表',
+            tooltip: Localizations.localeOf(context).languageCode == 'en'
+                ? 'Share Schedule'
+                : '分享課表',
           ),
           IconButton(
             icon: Icon(
@@ -735,11 +837,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     const minCellWidth = 46.0;
     const minCellHeight = 28.0;
 
-    final uniqueCourseNames = courses
-        .map((c) => c.name)
-        .where((name) => name.isNotEmpty)
-        .toSet()
-        .toList()..sort();
+    final uniqueCourseNames =
+        courses
+            .map((c) => c.name)
+            .where((name) => name.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
     int minDayIndex = 0;
     int maxDayIndex = 4;
@@ -792,7 +896,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-
         final availableHeight = constraints.maxHeight - headerHeight - 24.0;
         final rawCellHeight = availableHeight / activePeriods.length;
         final needsVerticalScroll = rawCellHeight < minCellHeight;
@@ -806,12 +909,18 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           String translatedDay = day;
           if (day == '一') {
             translatedDay = AppLocalizations.of(context).weekdayMon;
-          } else if (day == '二') translatedDay = AppLocalizations.of(context).weekdayTue;
-          else if (day == '三') translatedDay = AppLocalizations.of(context).weekdayWed;
-          else if (day == '四') translatedDay = AppLocalizations.of(context).weekdayThu;
-          else if (day == '五') translatedDay = AppLocalizations.of(context).weekdayFri;
-          else if (day == '六') translatedDay = AppLocalizations.of(context).weekdaySat;
-          else if (day == '日') translatedDay = AppLocalizations.of(context).weekdaySun;
+          } else if (day == '二')
+            translatedDay = AppLocalizations.of(context).weekdayTue;
+          else if (day == '三')
+            translatedDay = AppLocalizations.of(context).weekdayWed;
+          else if (day == '四')
+            translatedDay = AppLocalizations.of(context).weekdayThu;
+          else if (day == '五')
+            translatedDay = AppLocalizations.of(context).weekdayFri;
+          else if (day == '六')
+            translatedDay = AppLocalizations.of(context).weekdaySat;
+          else if (day == '日')
+            translatedDay = AppLocalizations.of(context).weekdaySun;
 
           final label = isLoading
               ? const SizedBox.shrink()
@@ -855,7 +964,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
             int span = 1;
             if (event.name.isNotEmpty) {
-
               while (i + span < activePeriods.length) {
                 final nextPeriod = activePeriods[i + span];
                 final nextEvent = getEventFor(dayIndex, nextPeriod);
@@ -895,10 +1003,56 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             i += span - 1;
           }
 
-          final column = Column(children: cells);
+          Widget columnWidget = Column(children: cells);
+
+          final todayWeekday = DateTime.now().weekday;
+          if (dayIndex + 1 == todayWeekday) {
+            final lineY = _calculateTimeLineY(activePeriods, cellHeight);
+            if (lineY != null) {
+              columnWidget = Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  columnWidget,
+                  Positioned(
+                    top: lineY - 4,
+                    left: 0,
+                    right: 0,
+                    height: 8,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(height: 3.0, color: Colors.red),
+                        Positioned(
+                          left: 0,
+                          child: CustomPaint(
+                            size: const Size(6, 8),
+                            painter: TrianglePainter(
+                              color: Colors.red,
+                              isRight: true,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          child: CustomPaint(
+                            size: const Size(6, 8),
+                            painter: TrianglePainter(
+                              color: Colors.red,
+                              isRight: false,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+          }
+
           return needsScroll
-              ? SizedBox(width: minCellWidth, child: column)
-              : Expanded(child: column);
+              ? SizedBox(width: minCellWidth, child: columnWidget)
+              : Expanded(child: columnWidget);
         }
 
         Widget headerDays() => Row(
@@ -923,7 +1077,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
             child: Column(
               children: [
-
                 Container(
                   height: headerHeight,
                   decoration: BoxDecoration(
@@ -977,7 +1130,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
                           SizedBox(
                             width: timeColumnWidth,
                             child: Column(
@@ -988,7 +1140,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                         final time = _periodTimes[period] ?? '';
                                         showTopSnackBar(
                                           context,
-                                          AppLocalizations.of(context).periodDetails(period, time),
+                                          AppLocalizations.of(
+                                            context,
+                                          ).periodDetails(period, time),
                                         );
                                       },
                                       child: Container(
@@ -1058,7 +1212,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final isLocatable = _isMapMode && hasRoom;
 
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
-    final displayName = (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
+    final displayName =
+        (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
         ? event.nameEn!
         : event.name;
 
@@ -1085,10 +1240,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MapScreen(
-                  embed: false,
-                  targetRoomCode: event.room,
-                ),
+                builder: (context) =>
+                    MapScreen(embed: false, targetRoomCode: event.room),
               ),
             );
           } else {
@@ -1125,10 +1278,18 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(AppLocalizations.of(context).classroomLabel(event.room ?? AppLocalizations.of(context).notDecided)),
-                    Text(AppLocalizations.of(context).teacherLabel(event.teacher)),
+                    Text(
+                      AppLocalizations.of(context).classroomLabel(
+                        event.room ?? AppLocalizations.of(context).notDecided,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.of(context).teacherLabel(event.teacher),
+                    ),
                     const Divider(),
-                    Text(AppLocalizations.of(context).timeLabel(event.timeRoomStr)),
+                    Text(
+                      AppLocalizations.of(context).timeLabel(event.timeRoomStr),
+                    ),
                   ],
                 ),
               ),
@@ -1173,10 +1334,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   Expanded(
                     child: Text(
                       event.room!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: roomThemeColor,
-                      ),
+                      style: TextStyle(fontSize: 12, color: roomThemeColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1223,11 +1381,13 @@ class _ShareScheduleCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
 
-    final uniqueCourseNames = courses
-        .map((c) => c.name)
-        .where((name) => name.isNotEmpty)
-        .toSet()
-        .toList()..sort();
+    final uniqueCourseNames =
+        courses
+            .map((c) => c.name)
+            .where((name) => name.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
     // 1. 提取學年與學期
     String year = '';
@@ -1257,7 +1417,21 @@ class _ShareScheduleCard extends StatelessWidget {
 
     // 2. 計算活躍的星期與節次
     final periods = [
-      'X', 'A', 'B', 'C', 'D', 'Y', 'E', 'F', 'G', 'H', 'Z', 'I', 'J', 'K', 'L'
+      'X',
+      'A',
+      'B',
+      'C',
+      'D',
+      'Y',
+      'E',
+      'F',
+      'G',
+      'H',
+      'Z',
+      'I',
+      'J',
+      'K',
+      'L',
     ];
 
     int minDayIndex = 0;
@@ -1383,8 +1557,12 @@ class _ShareScheduleCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: colorScheme.surfaceContainerHighest,
                             border: Border(
-                              bottom: BorderSide(color: colorScheme.outlineVariant),
-                              right: BorderSide(color: colorScheme.outlineVariant),
+                              bottom: BorderSide(
+                                color: colorScheme.outlineVariant,
+                              ),
+                              right: BorderSide(
+                                color: colorScheme.outlineVariant,
+                              ),
                             ),
                           ),
                           child: Center(
@@ -1406,8 +1584,12 @@ class _ShareScheduleCard extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border(
-                                      bottom: BorderSide(color: colorScheme.outlineVariant),
-                                      right: BorderSide(color: colorScheme.outlineVariant),
+                                      bottom: BorderSide(
+                                        color: colorScheme.outlineVariant,
+                                      ),
+                                      right: BorderSide(
+                                        color: colorScheme.outlineVariant,
+                                      ),
                                     ),
                                   ),
                                   child: Center(
@@ -1438,7 +1620,9 @@ class _ShareScheduleCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: colorScheme.surfaceContainerHighest,
                             border: Border(
-                              bottom: BorderSide(color: colorScheme.outlineVariant),
+                              bottom: BorderSide(
+                                color: colorScheme.outlineVariant,
+                              ),
                             ),
                           ),
                           child: Row(
@@ -1446,13 +1630,20 @@ class _ShareScheduleCard extends StatelessWidget {
                               String day = allWeekDays[i];
                               String displayDay = day;
                               if (isEnglish) {
-                                if (day == '一') displayDay = 'Mon';
-                                else if (day == '二') displayDay = 'Tue';
-                                else if (day == '三') displayDay = 'Wed';
-                                else if (day == '四') displayDay = 'Thu';
-                                else if (day == '五') displayDay = 'Fri';
-                                else if (day == '六') displayDay = 'Sat';
-                                else if (day == '日') displayDay = 'Sun';
+                                if (day == '一')
+                                  displayDay = 'Mon';
+                                else if (day == '二')
+                                  displayDay = 'Tue';
+                                else if (day == '三')
+                                  displayDay = 'Wed';
+                                else if (day == '四')
+                                  displayDay = 'Thu';
+                                else if (day == '五')
+                                  displayDay = 'Fri';
+                                else if (day == '六')
+                                  displayDay = 'Sat';
+                                else if (day == '日')
+                                  displayDay = 'Sun';
                               } else {
                                 displayDay = '週$day';
                               }
@@ -1462,7 +1653,9 @@ class _ShareScheduleCard extends StatelessWidget {
                                     border: Border(
                                       right: i == activeDayIndices.last
                                           ? BorderSide.none
-                                          : BorderSide(color: colorScheme.outlineVariant),
+                                          : BorderSide(
+                                              color: colorScheme.outlineVariant,
+                                            ),
                                     ),
                                   ),
                                   child: Center(
@@ -1494,9 +1687,13 @@ class _ShareScheduleCard extends StatelessWidget {
                                 if (event.name.isNotEmpty) {
                                   while (i + span < activePeriods.length) {
                                     final nextPeriod = activePeriods[i + span];
-                                    final nextEvent = getEventFor(dayIndex, nextPeriod);
+                                    final nextEvent = getEventFor(
+                                      dayIndex,
+                                      nextPeriod,
+                                    );
                                     if (nextEvent.name == event.name &&
-                                        nextEvent.semesterCourseNo == event.semesterCourseNo) {
+                                        nextEvent.semesterCourseNo ==
+                                            event.semesterCourseNo) {
                                       span++;
                                     } else {
                                       break;
@@ -1507,12 +1704,20 @@ class _ShareScheduleCard extends StatelessWidget {
                                 final hasCourse = event.name.isNotEmpty;
                                 Widget cellChild;
                                 if (hasCourse) {
-                                  final displayName = (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
+                                  final displayName =
+                                      (isEnglish &&
+                                          event.nameEn != null &&
+                                          event.nameEn!.trim().isNotEmpty)
                                       ? event.nameEn!
                                       : event.name;
 
-                                  final courseIndex = uniqueCourseNames.indexOf(event.name);
-                                  final courseColor = getCourseColor(context, courseIndex);
+                                  final courseIndex = uniqueCourseNames.indexOf(
+                                    event.name,
+                                  );
+                                  final courseColor = getCourseColor(
+                                    context,
+                                    courseIndex,
+                                  );
 
                                   cellChild = Container(
                                     margin: const EdgeInsets.all(2.0),
@@ -1526,8 +1731,10 @@ class _ShareScheduleCard extends StatelessWidget {
                                       ),
                                     ),
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
                                           displayName,
@@ -1541,7 +1748,8 @@ class _ShareScheduleCard extends StatelessWidget {
                                             height: 1.1,
                                           ),
                                         ),
-                                        if (event.room != null && event.room!.isNotEmpty) ...[
+                                        if (event.room != null &&
+                                            event.room!.isNotEmpty) ...[
                                           const SizedBox(height: 2),
                                           Text(
                                             event.room!,
@@ -1550,7 +1758,8 @@ class _ShareScheduleCard extends StatelessWidget {
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontSize: 7.5,
-                                              color: courseColor.textColor.withValues(alpha: 0.75),
+                                              color: courseColor.textColor
+                                                  .withValues(alpha: 0.75),
                                               height: 1.0,
                                             ),
                                           ),
@@ -1568,12 +1777,22 @@ class _ShareScheduleCard extends StatelessWidget {
                                     child: Container(
                                       decoration: BoxDecoration(
                                         border: Border(
-                                          bottom: i + span >= activePeriods.length
+                                          bottom:
+                                              i + span >= activePeriods.length
                                               ? BorderSide.none
-                                              : BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-                                          right: dayIndex == activeDayIndices.last
+                                              : BorderSide(
+                                                  color: colorScheme
+                                                      .outlineVariant
+                                                      .withValues(alpha: 0.5),
+                                                ),
+                                          right:
+                                              dayIndex == activeDayIndices.last
                                               ? BorderSide.none
-                                              : BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                                              : BorderSide(
+                                                  color: colorScheme
+                                                      .outlineVariant
+                                                      .withValues(alpha: 0.5),
+                                                ),
                                         ),
                                       ),
                                       child: cellChild,
@@ -1585,7 +1804,8 @@ class _ShareScheduleCard extends StatelessWidget {
 
                               return Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: dayColumnCells,
                                 ),
                               );
@@ -1623,73 +1843,201 @@ CourseColor getCourseColor(BuildContext context, int index) {
   // 淺色模式調色盤 (16種和諧柔和的粉彩莫蘭迪配色)
   final lightPalette = [
     // 1. 藍色
-    const CourseColor(backgroundColor: Color(0xFFE0F2FE), textColor: Color(0xFF0369A1), borderColor: Color(0xFFBAE6FD)),
+    const CourseColor(
+      backgroundColor: Color(0xFFE0F2FE),
+      textColor: Color(0xFF0369A1),
+      borderColor: Color(0xFFBAE6FD),
+    ),
     // 2. 綠色
-    const CourseColor(backgroundColor: Color(0xFFDCFCE7), textColor: Color(0xFF15803D), borderColor: Color(0xFFBBF7D0)),
+    const CourseColor(
+      backgroundColor: Color(0xFFDCFCE7),
+      textColor: Color(0xFF15803D),
+      borderColor: Color(0xFFBBF7D0),
+    ),
     // 3. 粉紅
-    const CourseColor(backgroundColor: Color(0xFFFCE7F3), textColor: Color(0xFFBE185D), borderColor: Color(0xFFFBCFE8)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFCE7F3),
+      textColor: Color(0xFFBE185D),
+      borderColor: Color(0xFFFBCFE8),
+    ),
     // 4. 黃橘
-    const CourseColor(backgroundColor: Color(0xFFFEF3C7), textColor: Color(0xFFB45309), borderColor: Color(0xFFFDE68A)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFEF3C7),
+      textColor: Color(0xFFB45309),
+      borderColor: Color(0xFFFDE68A),
+    ),
     // 5. 紫色
-    const CourseColor(backgroundColor: Color(0xFFF3E8FF), textColor: Color(0xFF6B21A8), borderColor: Color(0xFFE9D5FF)),
+    const CourseColor(
+      backgroundColor: Color(0xFFF3E8FF),
+      textColor: Color(0xFF6B21A8),
+      borderColor: Color(0xFFE9D5FF),
+    ),
     // 6. 青色
-    const CourseColor(backgroundColor: Color(0xFFE0F7FA), textColor: Color(0xFF006064), borderColor: Color(0xFFB2EBF2)),
+    const CourseColor(
+      backgroundColor: Color(0xFFE0F7FA),
+      textColor: Color(0xFF006064),
+      borderColor: Color(0xFFB2EBF2),
+    ),
     // 7. 靛藍
-    const CourseColor(backgroundColor: Color(0xFFE0E7FF), textColor: Color(0xFF4338CA), borderColor: Color(0xFFC7D2FE)),
+    const CourseColor(
+      backgroundColor: Color(0xFFE0E7FF),
+      textColor: Color(0xFF4338CA),
+      borderColor: Color(0xFFC7D2FE),
+    ),
     // 8. 橙色
-    const CourseColor(backgroundColor: Color(0xFFFFEED9), textColor: Color(0xFFC2410C), borderColor: Color(0xFFFFD8A8)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFFEED9),
+      textColor: Color(0xFFC2410C),
+      borderColor: Color(0xFFFFD8A8),
+    ),
     // 9. 薄荷綠
-    const CourseColor(backgroundColor: Color(0xFFECFDF5), textColor: Color(0xFF047857), borderColor: Color(0xFFD1FAE5)),
+    const CourseColor(
+      backgroundColor: Color(0xFFECFDF5),
+      textColor: Color(0xFF047857),
+      borderColor: Color(0xFFD1FAE5),
+    ),
     // 10. 玫瑰紅
-    const CourseColor(backgroundColor: Color(0xFFFFF1F2), textColor: Color(0xFFBE123C), borderColor: Color(0xFFFFE4E6)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFFF1F2),
+      textColor: Color(0xFFBE123C),
+      borderColor: Color(0xFFFFE4E6),
+    ),
     // 11. 琥珀黃
-    const CourseColor(backgroundColor: Color(0xFFFEF9C3), textColor: Color(0xFF854D0E), borderColor: Color(0xFFFEF08A)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFEF9C3),
+      textColor: Color(0xFF854D0E),
+      borderColor: Color(0xFFFEF08A),
+    ),
     // 12. 翠青綠
-    const CourseColor(backgroundColor: Color(0xFFCCFBF1), textColor: Color(0xFF0F766E), borderColor: Color(0xFF99F6E4)),
+    const CourseColor(
+      backgroundColor: Color(0xFFCCFBF1),
+      textColor: Color(0xFF0F766E),
+      borderColor: Color(0xFF99F6E4),
+    ),
     // 13. 珊瑚紅
-    const CourseColor(backgroundColor: Color(0xFFFFE4E6), textColor: Color(0xFF9F1239), borderColor: Color(0xFFFECDD3)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFFE4E6),
+      textColor: Color(0xFF9F1239),
+      borderColor: Color(0xFFFECDD3),
+    ),
     // 14. 丁香紫
-    const CourseColor(backgroundColor: Color(0xFFFAE8FF), textColor: Color(0xFF86198F), borderColor: Color(0xFFF5D0FE)),
+    const CourseColor(
+      backgroundColor: Color(0xFFFAE8FF),
+      textColor: Color(0xFF86198F),
+      borderColor: Color(0xFFF5D0FE),
+    ),
     // 15. 石頭褐
-    const CourseColor(backgroundColor: Color(0xFFF5F5F4), textColor: Color(0xFF44403C), borderColor: Color(0xFFE7E5E4)),
+    const CourseColor(
+      backgroundColor: Color(0xFFF5F5F4),
+      textColor: Color(0xFF44403C),
+      borderColor: Color(0xFFE7E5E4),
+    ),
     // 16. 藍板岩
-    const CourseColor(backgroundColor: Color(0xFFF1F5F9), textColor: Color(0xFF334155), borderColor: Color(0xFFE2E8F0)),
+    const CourseColor(
+      backgroundColor: Color(0xFFF1F5F9),
+      textColor: Color(0xFF334155),
+      borderColor: Color(0xFFE2E8F0),
+    ),
   ];
 
   // 深色模式調色盤 (16種和諧明亮的深暗莫蘭迪配色)
   final darkPalette = [
     // 1. 藍色
-    const CourseColor(backgroundColor: Color(0xFF082F49), textColor: Color(0xFF38BDF8), borderColor: Color(0xFF0C4A6E)),
+    const CourseColor(
+      backgroundColor: Color(0xFF082F49),
+      textColor: Color(0xFF38BDF8),
+      borderColor: Color(0xFF0C4A6E),
+    ),
     // 2. 綠色
-    const CourseColor(backgroundColor: Color(0xFF064E3B), textColor: Color(0xFF4ADE80), borderColor: Color(0xFF065F46)),
+    const CourseColor(
+      backgroundColor: Color(0xFF064E3B),
+      textColor: Color(0xFF4ADE80),
+      borderColor: Color(0xFF065F46),
+    ),
     // 3. 粉紅
-    const CourseColor(backgroundColor: Color(0xFF500724), textColor: Color(0xFFF472B6), borderColor: Color(0xFF701A40)),
+    const CourseColor(
+      backgroundColor: Color(0xFF500724),
+      textColor: Color(0xFFF472B6),
+      borderColor: Color(0xFF701A40),
+    ),
     // 4. 黃橘
-    const CourseColor(backgroundColor: Color(0xFF451A03), textColor: Color(0xFFFBBF24), borderColor: Color(0xFF78350F)),
+    const CourseColor(
+      backgroundColor: Color(0xFF451A03),
+      textColor: Color(0xFFFBBF24),
+      borderColor: Color(0xFF78350F),
+    ),
     // 5. 紫色
-    const CourseColor(backgroundColor: Color(0xFF3B0764), textColor: Color(0xFFC084FC), borderColor: Color(0xFF581C87)),
+    const CourseColor(
+      backgroundColor: Color(0xFF3B0764),
+      textColor: Color(0xFFC084FC),
+      borderColor: Color(0xFF581C87),
+    ),
     // 6. 青色
-    const CourseColor(backgroundColor: Color(0xFF083344), textColor: Color(0xFF22D3EE), borderColor: Color(0xFF155E75)),
+    const CourseColor(
+      backgroundColor: Color(0xFF083344),
+      textColor: Color(0xFF22D3EE),
+      borderColor: Color(0xFF155E75),
+    ),
     // 7. 靛藍
-    const CourseColor(backgroundColor: Color(0xFF1E1B4B), textColor: Color(0xFF818CF8), borderColor: Color(0xFF312E81)),
+    const CourseColor(
+      backgroundColor: Color(0xFF1E1B4B),
+      textColor: Color(0xFF818CF8),
+      borderColor: Color(0xFF312E81),
+    ),
     // 8. 橙色
-    const CourseColor(backgroundColor: Color(0xFF431407), textColor: Color(0xFFFB923C), borderColor: Color(0xFF7C2D12)),
+    const CourseColor(
+      backgroundColor: Color(0xFF431407),
+      textColor: Color(0xFFFB923C),
+      borderColor: Color(0xFF7C2D12),
+    ),
     // 9. 薄荷綠
-    const CourseColor(backgroundColor: Color(0xFF022C22), textColor: Color(0xFF34D399), borderColor: Color(0xFF064E3B)),
+    const CourseColor(
+      backgroundColor: Color(0xFF022C22),
+      textColor: Color(0xFF34D399),
+      borderColor: Color(0xFF064E3B),
+    ),
     // 10. 玫瑰紅
-    const CourseColor(backgroundColor: Color(0xFF4C0519), textColor: Color(0xFFFDA4AF), borderColor: Color(0xFF881337)),
+    const CourseColor(
+      backgroundColor: Color(0xFF4C0519),
+      textColor: Color(0xFFFDA4AF),
+      borderColor: Color(0xFF881337),
+    ),
     // 11. 琥珀黃
-    const CourseColor(backgroundColor: Color(0xFF3F2F00), textColor: Color(0xFFFDE047), borderColor: Color(0xFF713F12)),
+    const CourseColor(
+      backgroundColor: Color(0xFF3F2F00),
+      textColor: Color(0xFFFDE047),
+      borderColor: Color(0xFF713F12),
+    ),
     // 12. 翠青綠
-    const CourseColor(backgroundColor: Color(0xFF042F2E), textColor: Color(0xFF2DD4BF), borderColor: Color(0xFF115E59)),
+    const CourseColor(
+      backgroundColor: Color(0xFF042F2E),
+      textColor: Color(0xFF2DD4BF),
+      borderColor: Color(0xFF115E59),
+    ),
     // 13. 珊瑚紅
-    const CourseColor(backgroundColor: Color(0xFF3B100E), textColor: Color(0xFFFB7185), borderColor: Color(0xFF6F1D1B)),
+    const CourseColor(
+      backgroundColor: Color(0xFF3B100E),
+      textColor: Color(0xFFFB7185),
+      borderColor: Color(0xFF6F1D1B),
+    ),
     // 14. 丁香紫
-    const CourseColor(backgroundColor: Color(0xFF300B3B), textColor: Color(0xFFE879F9), borderColor: Color(0xFF4A1054)),
+    const CourseColor(
+      backgroundColor: Color(0xFF300B3B),
+      textColor: Color(0xFFE879F9),
+      borderColor: Color(0xFF4A1054),
+    ),
     // 15. 石頭褐
-    const CourseColor(backgroundColor: Color(0xFF292524), textColor: Color(0xFFD6D3D1), borderColor: Color(0xFF44403C)),
+    const CourseColor(
+      backgroundColor: Color(0xFF292524),
+      textColor: Color(0xFFD6D3D1),
+      borderColor: Color(0xFF44403C),
+    ),
     // 16. 藍板岩
-    const CourseColor(backgroundColor: Color(0xFF1E293B), textColor: Color(0xFF94A3B8), borderColor: Color(0xFF334155)),
+    const CourseColor(
+      backgroundColor: Color(0xFF1E293B),
+      textColor: Color(0xFF94A3B8),
+      borderColor: Color(0xFF334155),
+    ),
   ];
 
   final palette = isDark ? darkPalette : lightPalette;
@@ -1699,3 +2047,32 @@ CourseColor getCourseColor(BuildContext context, int index) {
   return palette[index % palette.length];
 }
 
+class TrianglePainter extends CustomPainter {
+  final Color color;
+  final bool isRight;
+
+  TrianglePainter({required this.color, required this.isRight});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    if (isRight) {
+      path.moveTo(0, 0);
+      path.lineTo(size.width, size.height / 2);
+      path.lineTo(0, size.height);
+    } else {
+      path.moveTo(size.width, 0);
+      path.lineTo(0, size.height / 2);
+      path.lineTo(size.width, size.height);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
