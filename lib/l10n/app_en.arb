@@ -313,6 +313,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "webViewOpenInBrowser": "Open in External Browser",
+  "webViewCopyLink": "Copy Link",
+  "webViewLinkCopied": "Link copied to clipboard",
+  "webViewLoadFailed": "Failed to load page",
+  "webViewRefresh": "Refresh"
 }
 

@@ -572,4 +572,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String mapFloorPlanUnavailable(String room) {
     return '$room Floor Plan Unavailable';
   }
+
+  @override
+  String get webViewOpenInBrowser => 'Open in External Browser';
+
+  @override
+  String get webViewCopyLink => 'Copy Link';
+
+  @override
+  String get webViewLinkCopied => 'Link copied to clipboard';
+
+  @override
+  String get webViewLoadFailed => 'Failed to load page';
+
+  @override
+  String get webViewRefresh => 'Refresh';
 }

@@ -557,4 +557,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String mapFloorPlanUnavailable(String room) {
     return '$room 平面圖不可用';
   }
+
+  @override
+  String get webViewOpenInBrowser => '用外部瀏覽器開啟';
+
+  @override
+  String get webViewCopyLink => '複製連結';
+
+  @override
+  String get webViewLinkCopied => '已複製連結至剪貼簿';
+
+  @override
+  String get webViewLoadFailed => '網頁載入失敗';
+
+  @override
+  String get webViewRefresh => '重新整理';
 }
