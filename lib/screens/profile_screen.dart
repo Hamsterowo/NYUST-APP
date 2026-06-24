@@ -99,77 +99,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         SizedBox(
                           width: double.infinity,
-                          child: Card(
-                            elevation: 0,
-                            color: colorScheme.surfaceContainerHighest,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0,
-                                vertical: 28.0,
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          user?["user"]?["name"] ??
-                                              user?["user"]?["姓名"] ??
-                                              "Student",
-                                          style: textTheme.headlineLarge
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
-                                              ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          user?["user"]?["學號"] ?? "ID Unknown",
-                                          style: textTheme.titleMedium
-                                              ?.copyWith(
-                                                color: colorScheme
-                                                    .onSurfaceVariant
-                                                    .withValues(alpha: 0.8),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
+                          child: Container(
+                            padding: const EdgeInsets.all(24.0),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(16.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: colorScheme.primaryContainer,
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: colorScheme.onPrimaryContainer,
                                   ),
-
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
+                                ),
+                                const SizedBox(width: 24),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
+                                      Text(
+                                        user?["user"]?["name"] ??
+                                            user?["user"]?["姓名"] ??
+                                            "Student",
+                                        style: textTheme.headlineSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
                                       Text(
                                         user?["user"]?["系(所)別"] ??
                                             user?["user"]?["department"] ??
                                             "Unknown",
-                                        style: textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: colorScheme.onSurfaceVariant,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: Colors.white.withValues(alpha: 0.7),
                                         ),
-                                        textAlign: TextAlign.right,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        user?["user"]?["班級"] ?? "",
-                                        style: textTheme.bodyLarge?.copyWith(
-                                          color: colorScheme.onSurfaceVariant
-                                              .withValues(alpha: 0.8),
-                                        ),
-                                        textAlign: TextAlign.right,
+                                      const SizedBox(height: 16),
+                                      _buildInfoRow(
+                                        Icons.badge_outlined,
+                                        user?["user"]?["學號"] ?? "ID Unknown",
+                                      ),
+                                      const SizedBox(height: 8),
+                                      _buildInfoRow(
+                                        Icons.school_outlined,
+                                        user?["user"]?["班級"] ?? "No Class Info",
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -403,6 +396,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.7)),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 14, color: Colors.white),
+        ),
+      ],
     );
   }
 }
