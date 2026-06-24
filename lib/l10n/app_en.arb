@@ -318,6 +318,9 @@
   "webViewCopyLink": "Copy Link",
   "webViewLinkCopied": "Link copied to clipboard",
   "webViewLoadFailed": "Failed to load page",
-  "webViewRefresh": "Refresh"
+  "webViewRefresh": "Refresh",
+  "profileMinorDoubleMajor": "Minor / Double Major",
+  "profileProgram": "Program",
+  "profileTeacherEducation": "Teacher Education Program"
 }
 

@@ -8,6 +8,7 @@ import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
 import 'course_detail_screen.dart';
+import 'web_view_screen.dart';
 
 class GradesScreen extends StatefulWidget {
   final bool embed;
@@ -116,6 +117,22 @@ class _GradesScreenState extends State<GradesScreen> {
         title: AppLocalizations.of(context).gradesTitle,
         onRefresh: () => data.fetchGrades(force: true),
         isLoading: data.isLoadingGrades,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.open_in_new),
+            tooltip: AppLocalizations.of(context).courseOpenInBrowser,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AppWebViewScreen(
+                    url: 'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: bodyContent,
     );

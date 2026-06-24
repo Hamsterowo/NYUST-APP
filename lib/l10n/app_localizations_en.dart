@@ -587,4 +587,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webViewRefresh => 'Refresh';
+
+  @override
+  String get profileMinorDoubleMajor => 'Minor / Double Major';
+
+  @override
+  String get profileProgram => 'Program';
+
+  @override
+  String get profileTeacherEducation => 'Teacher Education Program';
 }

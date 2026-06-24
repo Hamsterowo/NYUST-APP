@@ -18,6 +18,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
 import 'course_detail_screen.dart';
 import 'map_screen.dart';
+import 'web_view_screen.dart';
 
 class GraduationContent extends StatelessWidget {
   const GraduationContent({super.key});
@@ -1365,6 +1366,22 @@ class GraduationScreen extends StatelessWidget {
         title: AppLocalizations.of(context).infoGradTitle,
         onRefresh: () => data.fetchGraduation(force: true),
         isLoading: data.isLoadingGraduation,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.open_in_new),
+            tooltip: AppLocalizations.of(context).courseOpenInBrowser,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AppWebViewScreen(
+                    url: 'https://webapp.yuntech.edu.tw/WebNewCAS/Graduation/Score/StudGradCour.aspx',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: const GraduationContent(),
     );

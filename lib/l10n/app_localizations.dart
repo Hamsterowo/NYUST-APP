@@ -1147,6 +1147,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'重新整理'**
   String get webViewRefresh;
+
+  /// No description provided for @profileMinorDoubleMajor.
+  ///
+  /// In zh, this message translates to:
+  /// **'輔系/雙主修'**
+  String get profileMinorDoubleMajor;
+
+  /// No description provided for @profileProgram.
+  ///
+  /// In zh, this message translates to:
+  /// **'學程'**
+  String get profileProgram;
+
+  /// No description provided for @profileTeacherEducation.
+  ///
+  /// In zh, this message translates to:
+  /// **'教育學程'**
+  String get profileTeacherEducation;
 }
 
 class _AppLocalizationsDelegate
