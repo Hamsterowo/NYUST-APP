@@ -574,7 +574,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         ]);
       } else {
         final tempDir = await getTemporaryDirectory();
-        final file = await File('${tempDir.path}/nyust_schedule.png').create();
+        final file = await File('${tempDir.path}/schedule.png').create();
         await file.writeAsBytes(pngBytes);
 
         final box = context.findRenderObject() as RenderBox?;

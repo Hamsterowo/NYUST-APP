@@ -782,6 +782,48 @@ abstract class AppLocalizations {
   /// **'實得學分'**
   String get gradesEarnedCredits;
 
+  /// No description provided for @gradesGPA.
+  ///
+  /// In zh, this message translates to:
+  /// **'GPA'**
+  String get gradesGPA;
+
+  /// No description provided for @gradesCumulativeAverage.
+  ///
+  /// In zh, this message translates to:
+  /// **'累計平均成績'**
+  String get gradesCumulativeAverage;
+
+  /// No description provided for @gradesCumulativeGPA.
+  ///
+  /// In zh, this message translates to:
+  /// **'累計 GPA'**
+  String get gradesCumulativeGPA;
+
+  /// No description provided for @gradesCumulativeRank.
+  ///
+  /// In zh, this message translates to:
+  /// **'累計排名'**
+  String get gradesCumulativeRank;
+
+  /// No description provided for @gradesCumulativeEarnedCredits.
+  ///
+  /// In zh, this message translates to:
+  /// **'累計學分'**
+  String get gradesCumulativeEarnedCredits;
+
+  /// No description provided for @gradesCumulativeSummary.
+  ///
+  /// In zh, this message translates to:
+  /// **'歷年累計成績'**
+  String get gradesCumulativeSummary;
+
+  /// No description provided for @gradesGPAShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'GPA: {gpa}'**
+  String gradesGPAShort(String gpa);
+
   /// No description provided for @gradesDetailHeader.
   ///
   /// In zh, this message translates to:

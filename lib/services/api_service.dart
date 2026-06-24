@@ -185,6 +185,10 @@ class ApiService {
             'summary': {
               'average_score': '89.50',
               'rank': '3 / 48',
+              'gpa': '3.90',
+              'conduct': '88',
+              'attempted_credits': '18',
+              'earned_credits': '18',
             },
             'courses': [
               {
@@ -216,6 +220,10 @@ class ApiService {
             'summary': {
               'average_score': '92.30',
               'rank': '1 / 48',
+              'gpa': '4.15',
+              'conduct': '90',
+              'attempted_credits': '17',
+              'earned_credits': '17',
             },
             'courses': [
               {
@@ -241,7 +249,15 @@ class ApiService {
               }
             ]
           }
-        ]
+        ],
+        'cumulative': {
+          'average': '90.90',
+          'rank': '2',
+          'total_students': '48',
+          'gpa': '4.02',
+          'attempted_credits': '35',
+          'earned_credits': '35',
+        }
       };
     }
     await _ensureInit();

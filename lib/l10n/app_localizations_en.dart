@@ -145,7 +145,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Detailed syllabus is not available for this course.';
 
   @override
-  String get notSpecified => 'Not Specified';
+  String get notSpecified => 'No Data';
 
   @override
   String classPeriods(String periods) {
@@ -379,6 +379,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gradesEarnedCredits => 'Earned Credits';
+
+  @override
+  String get gradesGPA => 'GPA';
+
+  @override
+  String get gradesCumulativeAverage => 'Cum. Average';
+
+  @override
+  String get gradesCumulativeGPA => 'Cum. GPA';
+
+  @override
+  String get gradesCumulativeRank => 'Cum. Rank';
+
+  @override
+  String get gradesCumulativeEarnedCredits => 'Cum. Credits';
+
+  @override
+  String get gradesCumulativeSummary => 'Cumulative Academic Summary';
+
+  @override
+  String gradesGPAShort(String gpa) {
+    return 'GPA: $gpa';
+  }
 
   @override
   String get gradesDetailHeader => 'Course Grade Details for This Semester';

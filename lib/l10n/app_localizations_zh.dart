@@ -369,6 +369,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gradesEarnedCredits => '實得學分';
 
   @override
+  String get gradesGPA => 'GPA';
+
+  @override
+  String get gradesCumulativeAverage => '累計平均成績';
+
+  @override
+  String get gradesCumulativeGPA => '累計 GPA';
+
+  @override
+  String get gradesCumulativeRank => '累計排名';
+
+  @override
+  String get gradesCumulativeEarnedCredits => '累計學分';
+
+  @override
+  String get gradesCumulativeSummary => '歷年累計成績';
+
+  @override
+  String gradesGPAShort(String gpa) {
+    return 'GPA: $gpa';
+  }
+
+  @override
   String get gradesDetailHeader => '本學期修課成績明細';
 
   @override
