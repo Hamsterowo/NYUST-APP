@@ -980,7 +980,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final isPast = state == 'past';
 
     final cardColor = isCurrent
-        ? colorScheme.primaryContainer
+        ? colorScheme.primaryContainer.withValues(alpha: 0.5)
         : colorScheme.surface;
     final borderColor = isCurrent
         ? Colors.transparent
