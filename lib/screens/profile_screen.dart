@@ -129,6 +129,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           checkGradesTask,
         );
       }
+      
+      if (mounted) {
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context).settingsGradeNotificationSub,
+          type: SnackBarType.success,
+        );
+      }
     } else {
       await Workmanager().cancelByUniqueName("1");
     }
