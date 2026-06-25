@@ -12,6 +12,10 @@ import 'terms_of_service_screen.dart';
 import 'web_view_screen.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workmanager/workmanager.dart';
+import '../services/notification_service.dart';
+import '../services/background_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,11 +26,63 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _versionStr = '';
+  bool _gradeNotificationEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadNotificationSettings();
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _gradeNotificationEnabled =
+            prefs.getBool('grade_notification_enabled') ?? false;
+      });
+    } catch (_) {}
+  }
+
+  void _toggleGradeNotification(bool enabled) async {
+    if (enabled) {
+      final hasPermission = await NotificationService().requestPermissions();
+      if (!hasPermission) {
+        if (mounted) {
+          showTopSnackBar(
+            context,
+            AppLocalizations.of(context).notificationPermissionDenied,
+            type: SnackBarType.warning,
+          );
+        }
+        return;
+      }
+
+      await Workmanager().registerPeriodicTask(
+        "1",
+        checkGradesTask,
+        frequency: const Duration(minutes: 15),
+        existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
+      );
+      if (kDebugMode) {
+        await Workmanager().registerOneOffTask(
+          "test_oneoff_${DateTime.now().millisecondsSinceEpoch}",
+          checkGradesTask,
+        );
+      }
+    } else {
+      await Workmanager().cancelByUniqueName("1");
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('grade_notification_enabled', enabled);
+    } catch (_) {}
+
+    setState(() {
+      _gradeNotificationEnabled = enabled;
+    });
   }
 
   Future<void> _loadVersion() async {
@@ -270,15 +326,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icons.chevron_right,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                shape: const RoundedRectangleBorder(
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(12),
-                                    bottomRight: Radius.circular(12),
+                                    bottomLeft: kIsWeb ? const Radius.circular(12) : Radius.zero,
+                                    bottomRight: kIsWeb ? const Radius.circular(12) : Radius.zero,
                                   ),
                                 ),
                                 onTap: () =>
                                     SettingsUtils.openLanguageSettings(),
                               ),
+                              if (!kIsWeb) ...[
+                                const Divider(height: 1, indent: 56),
+                                SwitchListTile(
+                                  secondary: Icon(
+                                    Icons.notifications_active_outlined,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  title: Text(
+                                    AppLocalizations.of(context)
+                                        .settingsGradeNotification,
+                                  ),
+                                  subtitle: Text(
+                                    AppLocalizations.of(context)
+                                        .settingsGradeNotificationSub,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                  value: _gradeNotificationEnabled,
+                                  onChanged: _toggleGradeNotification,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 4.0,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: kDebugMode ? Radius.zero : const Radius.circular(12),
+                                      bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              if (kDebugMode && !kIsWeb) ...[
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  leading: const Icon(
+                                    Icons.bug_report_outlined,
+                                    color: Colors.orange,
+                                  ),
+                                  title: const Text('【開發者】立即觸發一次背景檢查'),
+                                  subtitle: const Text('點擊後將會立刻在背景啟動一次排程任務進行測試'),
+                                  trailing: const Icon(Icons.play_arrow),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    await Workmanager().registerOneOffTask(
+                                      "manual_oneoff_${DateTime.now().millisecondsSinceEpoch}",
+                                      checkGradesTask,
+                                    );
+                                    if (!context.mounted) return;
+                                    showTopSnackBar(
+                                      context,
+                                      '已註冊立即執行的背景任務，請查看通知！',
+                                      type: SnackBarType.info,
+                                    );
+                                  },
+                                ),
+                              ],
                             ],
                           ),
                         ),

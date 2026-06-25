@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:workmanager/workmanager.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'providers/data_provider.dart';
@@ -11,9 +12,25 @@ import 'screens/grades_screen.dart';
 import 'screens/graduation_screen.dart';
 import 'screens/desktop_screen.dart';
 import 'widgets/splash_wrapper.dart';
+import 'services/background_service.dart';
+import 'services/notification_service.dart';
+
+final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb) {
+    // 初始化本地通知服務
+    final notificationService = NotificationService();
+    NotificationService.navigatorKey = globalNavigatorKey;
+    await notificationService.init();
+
+    // 初始化背景排程 Workmanager
+    await Workmanager().initialize(
+      callbackDispatcher,
+    );
+  }
 
   runApp(
     MultiProvider(
@@ -72,6 +89,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'NYUST+',
+      navigatorKey: globalNavigatorKey,
       localizationsDelegates: localizationsDelegates,
       supportedLocales: supportedLocales,
       theme: ThemeData(

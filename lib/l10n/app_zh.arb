@@ -335,6 +335,13 @@
   "webViewRefresh": "重新整理",
   "profileMinorDoubleMajor": "輔系/雙主修",
   "profileProgram": "學程",
-  "profileTeacherEducation": "教育學程"
+  "profileTeacherEducation": "教育學程",
+  "settingsGradeNotification": "成績更新通知",
+  "settingsGradeNotificationSub": "背景每 15 分鐘檢查一次成績，有異動時發送通知",
+  "notificationPermissionDenied": "無法開啟通知：請前往系統設定啟用通知權限",
+  "gradeNotificationTitle": "成績更新通知",
+  "gradeNotificationNewCourse": "新增學期科目：{courseName}，成績為 {score} 分",
+  "gradeNotificationScoreChanged": "【{courseName}】成績已更新：{oldScore} -> {newScore} 分",
+  "gradeNotificationRankChanged": "學期排名更新為：{rank}"
 }
 
