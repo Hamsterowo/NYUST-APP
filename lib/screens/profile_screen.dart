@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final splashColor = Theme.of(context).splashColor;
     final textDirection = Directionality.of(context);
 
-    final splash = Theme.of(context).splashFactory.create(
+    final splash = InkRipple.splashFactory.create(
       controller: inkController,
       referenceBox: renderBox,
       position: Offset(renderBox.size.width / 2, renderBox.size.height / 2),
@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
     
-    inkController.addInkFeature(splash);
+    splash.confirm();
   }
 
   @override
