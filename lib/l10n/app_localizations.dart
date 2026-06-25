@@ -1253,6 +1253,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'學期排名更新為：{rank}'**
   String gradeNotificationRankChanged(Object rank);
+
+  /// No description provided for @termsAgree.
+  ///
+  /// In zh, this message translates to:
+  /// **'同意'**
+  String get termsAgree;
+
+  /// No description provided for @termsRejectAndExit.
+  ///
+  /// In zh, this message translates to:
+  /// **'拒絕並退出程式'**
+  String get termsRejectAndExit;
+
+  /// No description provided for @termsLastUpdated.
+  ///
+  /// In zh, this message translates to:
+  /// **'最後更新日期：{date}'**
+  String termsLastUpdated(String date);
+
+  /// No description provided for @termsLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法載入使用者條款'**
+  String get termsLoadFailed;
+
+  /// No description provided for @refresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新整理'**
+  String get refresh;
 }
 
 class _AppLocalizationsDelegate

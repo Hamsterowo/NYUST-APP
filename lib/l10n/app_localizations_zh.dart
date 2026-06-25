@@ -635,4 +635,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String gradeNotificationRankChanged(Object rank) {
     return '學期排名更新為：$rank';
   }
+
+  @override
+  String get termsAgree => '同意';
+
+  @override
+  String get termsRejectAndExit => '拒絕並退出程式';
+
+  @override
+  String termsLastUpdated(String date) {
+    return '最後更新日期：$date';
+  }
+
+  @override
+  String get termsLoadFailed => '無法載入使用者條款';
+
+  @override
+  String get refresh => '重新整理';
 }
