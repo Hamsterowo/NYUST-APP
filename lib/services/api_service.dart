@@ -316,10 +316,13 @@ class ApiService {
 
 
 
-  Future<Map<String, dynamic>> getTermsOfService() async {
+  Future<Map<String, dynamic>> getTermsOfService({String? lang}) async {
     await _ensureInit();
     try {
-      final response = await _dio.get('/api/policy/terms');
+      final response = await _dio.get(
+        '/api/policy/terms',
+        queryParameters: lang != null ? {'lang': lang} : null,
+      );
       return response.data;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
