@@ -619,4 +619,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileTeacherEducation => 'Teacher Education Program';
+
+  @override
+  String get settingsGradeNotification => 'Grade Update Notifications';
+
+  @override
+  String get settingsGradeNotificationSub =>
+      'Check grades in background every 15 mins and notify you';
+
+  @override
+  String get notificationPermissionDenied =>
+      'Cannot enable notifications: Please grant notification permission in system settings';
+
+  @override
+  String get gradeNotificationTitle => 'Grade Update Notification';
+
+  @override
+  String gradeNotificationNewCourse(Object courseName, Object score) {
+    return 'New course: $courseName, Grade: $score';
+  }
+
+  @override
+  String gradeNotificationScoreChanged(
+    Object courseName,
+    Object newScore,
+    Object oldScore,
+  ) {
+    return '[$courseName] Grade updated: $oldScore -> $newScore';
+  }
+
+  @override
+  String gradeNotificationRankChanged(Object rank) {
+    return 'Semester rank updated to: $rank';
+  }
 }

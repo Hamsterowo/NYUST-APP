@@ -335,6 +335,13 @@
   "webViewRefresh": "Refresh",
   "profileMinorDoubleMajor": "Minor / Double Major",
   "profileProgram": "Program",
-  "profileTeacherEducation": "Teacher Education Program"
+  "profileTeacherEducation": "Teacher Education Program",
+  "settingsGradeNotification": "Grade Update Notifications",
+  "settingsGradeNotificationSub": "Check grades in background every 15 mins and notify you",
+  "notificationPermissionDenied": "Cannot enable notifications: Please grant notification permission in system settings",
+  "gradeNotificationTitle": "Grade Update Notification",
+  "gradeNotificationNewCourse": "New course: {courseName}, Grade: {score}",
+  "gradeNotificationScoreChanged": "[{courseName}] Grade updated: {oldScore} -> {newScore}",
+  "gradeNotificationRankChanged": "Semester rank updated to: {rank}"
 }
 

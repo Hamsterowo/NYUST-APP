@@ -604,4 +604,35 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get profileTeacherEducation => '教育學程';
+
+  @override
+  String get settingsGradeNotification => '成績更新通知';
+
+  @override
+  String get settingsGradeNotificationSub => '背景每 15 分鐘檢查一次成績，有異動時發送通知';
+
+  @override
+  String get notificationPermissionDenied => '無法開啟通知：請前往系統設定啟用通知權限';
+
+  @override
+  String get gradeNotificationTitle => '成績更新通知';
+
+  @override
+  String gradeNotificationNewCourse(Object courseName, Object score) {
+    return '新增學期科目：$courseName，成績為 $score 分';
+  }
+
+  @override
+  String gradeNotificationScoreChanged(
+    Object courseName,
+    Object newScore,
+    Object oldScore,
+  ) {
+    return '【$courseName】成績已更新：$oldScore -> $newScore 分';
+  }
+
+  @override
+  String gradeNotificationRankChanged(Object rank) {
+    return '學期排名更新為：$rank';
+  }
 }

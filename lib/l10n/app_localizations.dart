@@ -1207,6 +1207,52 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'教育學程'**
   String get profileTeacherEducation;
+
+  /// No description provided for @settingsGradeNotification.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績更新通知'**
+  String get settingsGradeNotification;
+
+  /// No description provided for @settingsGradeNotificationSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'背景每 15 分鐘檢查一次成績，有異動時發送通知'**
+  String get settingsGradeNotificationSub;
+
+  /// No description provided for @notificationPermissionDenied.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法開啟通知：請前往系統設定啟用通知權限'**
+  String get notificationPermissionDenied;
+
+  /// No description provided for @gradeNotificationTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績更新通知'**
+  String get gradeNotificationTitle;
+
+  /// No description provided for @gradeNotificationNewCourse.
+  ///
+  /// In zh, this message translates to:
+  /// **'新增學期科目：{courseName}，成績為 {score} 分'**
+  String gradeNotificationNewCourse(Object courseName, Object score);
+
+  /// No description provided for @gradeNotificationScoreChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'【{courseName}】成績已更新：{oldScore} -> {newScore} 分'**
+  String gradeNotificationScoreChanged(
+    Object courseName,
+    Object newScore,
+    Object oldScore,
+  );
+
+  /// No description provided for @gradeNotificationRankChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期排名更新為：{rank}'**
+  String gradeNotificationRankChanged(Object rank);
 }
 
 class _AppLocalizationsDelegate
