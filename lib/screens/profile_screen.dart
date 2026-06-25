@@ -10,6 +10,7 @@ import '../utils/pwa_interop.dart';
 import '../utils/settings_utils.dart';
 import 'terms_of_service_screen.dart';
 import 'web_view_screen.dart';
+import '../widgets/bug_report_dialog.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -174,10 +175,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showReportDialog(BuildContext context) {
-    showTopSnackBar(
-      context,
-      AppLocalizations.of(context).featureNotFinished,
-      type: SnackBarType.info,
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => const BugReportDialog(),
     );
   }
 

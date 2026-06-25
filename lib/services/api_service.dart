@@ -11,6 +11,7 @@ import 'scrapers/schedule_scraper.dart';
 import 'scrapers/grades_scraper.dart';
 import 'scrapers/graduation_scraper.dart';
 import 'scrapers/calendar_scraper.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ApiService {
   late Dio _dio;
@@ -323,6 +324,53 @@ class ApiService {
         '/api/policy/terms',
         queryParameters: lang != null ? {'lang': lang} : null,
       );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
+      }
+      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
+    } catch (e) {
+      return {'status': 'error', 'message': 'API call failed: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> submitBugReport({
+    required String description,
+    String? contact,
+    required String deviceInfo,
+    XFile? imageFile,
+  }) async {
+    await _ensureInit();
+    try {
+      final Map<String, dynamic> data = {
+        'description': description,
+        'contact': contact ?? '',
+        'deviceInfo': deviceInfo,
+      };
+
+      if (imageFile != null) {
+        if (kIsWeb) {
+          final bytes = await imageFile.readAsBytes();
+          data['file'] = MultipartFile.fromBytes(
+            bytes,
+            filename: imageFile.name,
+          );
+        } else {
+          data['file'] = await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.name,
+          );
+        }
+      }
+
+      final formData = FormData.fromMap(data);
+      final response = await _dio.post('/api/report', data: formData);
       return response.data;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
