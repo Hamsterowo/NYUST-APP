@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In zh, this message translates to:
-  /// **'NYUST+'**
+  /// **'雲科工具箱'**
   String get appName;
 
   /// No description provided for @settingsTitle.
@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsOfService.
   ///
   /// In zh, this message translates to:
-  /// **'NYUST+ 使用者條款'**
+  /// **'雲科工具箱 使用者條款'**
   String get termsOfService;
 
   /// No description provided for @termsUpdateTitle.
@@ -245,19 +245,19 @@ abstract class AppLocalizations {
   /// No description provided for @installTitle.
   ///
   /// In zh, this message translates to:
-  /// **'安裝 NYUST+ APP'**
+  /// **'安裝 雲科工具箱 APP'**
   String get installTitle;
 
   /// No description provided for @installDescIos.
   ///
   /// In zh, this message translates to:
-  /// **'將 NYUST+ 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」'**
+  /// **'將 雲科工具箱 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」'**
   String get installDescIos;
 
   /// No description provided for @installDescAndroid.
   ///
   /// In zh, this message translates to:
-  /// **'將 NYUST+ 安裝到您的裝置，不用開啟瀏覽器即可直接操作。'**
+  /// **'將 雲科工具箱 安裝到您的裝置，不用開啟瀏覽器即可直接操作。'**
   String get installDescAndroid;
 
   /// No description provided for @vacationLabelStart.
@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginTitle.
   ///
   /// In zh, this message translates to:
-  /// **'登入 NYUST+'**
+  /// **'登入 雲科工具箱'**
   String get loginTitle;
 
   /// No description provided for @loginUsernamePrompt.
@@ -433,6 +433,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'登入'**
   String get loginButton;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'帳密或驗證碼錯誤'**
+  String get loginFailed;
 
   /// No description provided for @pleaseLoginToViewSchedule.
   ///

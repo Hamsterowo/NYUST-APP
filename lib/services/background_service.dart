@@ -8,7 +8,7 @@ import 'api_service.dart';
 import 'notification_service.dart';
 import '../utils/grades_comparator.dart';
 
-const String checkGradesTask = "tw.hamster.nyustplus.checkGradesTask";
+const String checkGradesTask = "tw.hamster.yuntool.checkGradesTask";
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {

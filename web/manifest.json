@@ -1,6 +1,6 @@
 {
-    "name": "NYUST+",
-    "short_name": "NYUST+",
+    "name": "雲科工具箱",
+    "short_name": "雲工具",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",

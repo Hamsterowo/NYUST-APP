@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
 
     if (isDesktopWeb) {
       return MaterialApp(
-        title: 'NYUST+',
+        title: '雲科工具箱',
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales,
         theme: ThemeData(
@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
     }
 
     return MaterialApp(
-      title: 'NYUST+',
+      title: '雲科工具箱',
       navigatorKey: globalNavigatorKey,
       localizationsDelegates: localizationsDelegates,
       supportedLocales: supportedLocales,

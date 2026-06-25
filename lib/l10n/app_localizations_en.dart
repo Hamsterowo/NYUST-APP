@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'NYUST+';
+  String get appName => 'YunTool';
 
   @override
   String get settingsTitle => 'Settings';
@@ -39,7 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicy => 'YunTech Portal Privacy Policy';
 
   @override
-  String get termsOfService => 'NYUST+ Terms of Service';
+  String get termsOfService => 'YunTool Terms of Service';
 
   @override
   String get termsUpdateTitle => 'Notice';
@@ -84,15 +84,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featureNotFinished => 'This feature is not finished yet.';
 
   @override
-  String get installTitle => 'Install NYUST+ APP';
+  String get installTitle => 'Install YunTool APP';
 
   @override
   String get installDescIos =>
-      'Install NYUST+ shortcut to your device:\n\n1️⃣ Tap the \"Share\" icon at the bottom ⧧\n2️⃣ Scroll down and select \"Add to Home Screen\"\n3️⃣ Tap \"Add\"';
+      'Install YunTool shortcut to your device:\n\n1️⃣ Tap the \"Share\" icon at the bottom ⧧\n2️⃣ Scroll down and select \"Add to Home Screen\"\n3️⃣ Tap \"Add\"';
 
   @override
   String get installDescAndroid =>
-      'Install NYUST+ to your device to run directly without opening a browser.';
+      'Install YunTool to your device to run directly without opening a browser.';
 
   @override
   String get vacationLabelStart => 'Semester Starts';
@@ -159,7 +159,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToLogin => 'Go to Login';
 
   @override
-  String get loginTitle => 'Login to NYUST+';
+  String get loginTitle => 'Login to YunTool';
 
   @override
   String get loginUsernamePrompt => 'Please enter student ID';
@@ -187,6 +187,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginButton => 'Login';
+
+  @override
+  String get loginFailed => 'Invalid username, password, or captcha';
 
   @override
   String get pleaseLoginToViewSchedule =>

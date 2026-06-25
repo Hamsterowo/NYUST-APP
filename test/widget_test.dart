@@ -7,10 +7,10 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:nyust_plus/main.dart';
-import 'package:nyust_plus/providers/auth_provider.dart';
-import 'package:nyust_plus/providers/data_provider.dart';
-import 'package:nyust_plus/providers/navigation_provider.dart';
+import 'package:yun_tool/main.dart';
+import 'package:yun_tool/providers/auth_provider.dart';
+import 'package:yun_tool/providers/data_provider.dart';
+import 'package:yun_tool/providers/navigation_provider.dart';
 
 void main() {
   testWidgets('App boot smoke test', (WidgetTester tester) async {

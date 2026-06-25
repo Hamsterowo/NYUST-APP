@@ -1,4 +1,4 @@
-package tw.hamster.nyustplus
+package tw.hamster.yuntool
 
 import android.content.Intent
 import android.net.Uri
@@ -9,7 +9,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "tw.hamster.nyustplus/settings"
+    private val CHANNEL = "tw.hamster.yuntool/settings"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
