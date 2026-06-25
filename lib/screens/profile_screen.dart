@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import '../services/notification_service.dart';
 import '../services/background_service.dart';
+import '../providers/navigation_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -27,12 +28,69 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String _versionStr = '';
   bool _gradeNotificationEnabled = false;
+  final GlobalKey _notificationKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
     _loadNotificationSettings();
+  }
+
+  void _triggerNativeSplash() {
+    final context = _notificationKey.currentContext;
+    if (context == null) return;
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final inkController = Material.of(context);
+    final splashColor = Theme.of(context).splashColor;
+    final textDirection = Directionality.of(context);
+
+    final splash = Theme.of(context).splashFactory.create(
+      controller: inkController,
+      referenceBox: renderBox,
+      position: Offset(renderBox.size.width / 2, renderBox.size.height / 2),
+      color: splashColor,
+      textDirection: textDirection,
+      containedInkWell: true,
+      rectCallback: () => Offset.zero & renderBox.size,
+      borderRadius: BorderRadius.only(
+        bottomLeft: kDebugMode ? Radius.zero : const Radius.circular(12),
+        bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
+      ),
+    );
+    
+    inkController.addInkFeature(splash);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    final navProvider = Provider.of<NavigationProvider>(context, listen: true);
+    if (navProvider.shouldScrollToNotification) {
+      navProvider.clearScrollFlag();
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final targetContext = _notificationKey.currentContext;
+        if (targetContext != null) {
+          Scrollable.ensureVisible(
+            targetContext,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+          );
+        }
+        
+        // Trigger standard native splash effect after scroll finishes
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            _triggerNativeSplash();
+          }
+        });
+      });
+    }
   }
 
   Future<void> _loadNotificationSettings() async {
@@ -62,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await Workmanager().registerPeriodicTask(
         "1",
         checkGradesTask,
-        frequency: const Duration(minutes: 15),
+        frequency: const Duration(minutes: 30),
         existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
       );
       if (kDebugMode) {
@@ -313,15 +371,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 title: Text(
                                   AppLocalizations.of(context).languageSetting,
                                 ),
-                                subtitle: Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  ).languageSettingSub,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant
-                                        .withValues(alpha: 0.6),
-                                  ),
-                                ),
                                 trailing: Icon(
                                   Icons.chevron_right,
                                   color: colorScheme.onSurfaceVariant,
@@ -336,37 +385,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     SettingsUtils.openLanguageSettings(),
                               ),
                               if (!kIsWeb) ...[
-                                const Divider(height: 1, indent: 56),
-                                SwitchListTile(
-                                  secondary: Icon(
-                                    Icons.notifications_active_outlined,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  title: Text(
-                                    AppLocalizations.of(context)
-                                        .settingsGradeNotification,
-                                  ),
-                                  subtitle: Text(
-                                    AppLocalizations.of(context)
-                                        .settingsGradeNotificationSub,
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant
-                                          .withValues(alpha: 0.6),
-                                    ),
-                                  ),
-                                  value: _gradeNotificationEnabled,
-                                  onChanged: _toggleGradeNotification,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 4.0,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: kDebugMode ? Radius.zero : const Radius.circular(12),
-                                      bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
-                                    ),
-                                  ),
-                                ),
+                                 const Divider(height: 1, indent: 56),
+                                 ListTile(
+                                   key: _notificationKey,
+                                   leading: Icon(
+                                     Icons.notifications_active_outlined,
+                                     color: colorScheme.onSurfaceVariant,
+                                   ),
+                                   title: Text(
+                                     AppLocalizations.of(context)
+                                         .settingsGradeNotification,
+                                   ),
+                                   trailing: Transform.scale(
+                                     scale: 0.8, // 縮小 20%
+                                     alignment: Alignment.centerRight, // 靠右對齊
+                                     child: Switch.adaptive(
+                                       value: _gradeNotificationEnabled,
+                                       onChanged: _toggleGradeNotification,
+                                     ),
+                                   ),
+                                   shape: RoundedRectangleBorder(
+                                     borderRadius: BorderRadius.only(
+                                       bottomLeft: kDebugMode ? Radius.zero : const Radius.circular(12),
+                                       bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
+                                     ),
+                                   ),
+                                   onTap: () => _toggleGradeNotification(!_gradeNotificationEnabled),
+                                 ),
                               ],
                               if (kDebugMode && !kIsWeb) ...[
                                 const Divider(height: 1, indent: 56),
