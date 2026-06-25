@@ -146,14 +146,24 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   late Future<Map<String, dynamic>> _termsFuture;
   String _lastUpdated = '';
 
+  bool _isInitialized = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.initialTerms != null) {
-      _termsFuture = Future.value(widget.initialTerms!);
-      _lastUpdated = widget.initialTerms!['data']?['lastUpdated'] ?? '';
-    } else {
-      _termsFuture = _fetchTerms();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      if (widget.initialTerms != null) {
+        _termsFuture = Future.value(widget.initialTerms!);
+        _lastUpdated = widget.initialTerms!['data']?['lastUpdated'] ?? '';
+      } else {
+        _termsFuture = _fetchTerms();
+      }
     }
   }
 
@@ -179,9 +189,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'NYUST+ 使用者條款',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Text(
+          AppLocalizations.of(context).termsOfService,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         scrolledUnderElevation: 0,
 
@@ -204,7 +214,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                           side: BorderSide(color: colorScheme.error),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('拒絕並退出程式'),
+                        child: Text(AppLocalizations.of(context).termsRejectAndExit),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -218,7 +228,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('同意'),
+                        child: Text(AppLocalizations.of(context).termsAgree),
                       ),
                     ),
                   ],
@@ -243,7 +253,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   Icon(Icons.error_outline, size: 48, color: colorScheme.error),
                   const SizedBox(height: 16),
                   Text(
-                    '無法載入使用者條款\n${snapshot.error ?? snapshot.data?['message'] ?? '未知錯誤'}',
+                    '${AppLocalizations.of(context).termsLoadFailed}\n${snapshot.error ?? snapshot.data?['message'] ?? ""}',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: colorScheme.error),
                   ),
@@ -254,7 +264,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                         _termsFuture = _fetchTerms();
                       });
                     },
-                    child: const Text('重新整理'),
+                    child: Text(AppLocalizations.of(context).refresh),
                   ),
                 ],
               ),
@@ -284,7 +294,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   const SizedBox(height: 32),
                   Center(
                     child: Text(
-                      '最後更新日期：$lastUpdated',
+                      AppLocalizations.of(context).termsLastUpdated(lastUpdated),
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.outline,
                       ),

@@ -342,6 +342,18 @@
   "gradeNotificationTitle": "成績更新通知",
   "gradeNotificationNewCourse": "新增學期科目：{courseName}，成績為 {score} 分",
   "gradeNotificationScoreChanged": "【{courseName}】成績已更新：{oldScore} -> {newScore} 分",
-  "gradeNotificationRankChanged": "學期排名更新為：{rank}"
+  "gradeNotificationRankChanged": "學期排名更新為：{rank}",
+  "termsAgree": "同意",
+  "termsRejectAndExit": "拒絕並退出程式",
+  "termsLastUpdated": "最後更新日期：{date}",
+  "@termsLastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsLoadFailed": "無法載入使用者條款",
+  "refresh": "重新整理"
 }
 

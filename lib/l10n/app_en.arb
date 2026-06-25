@@ -342,6 +342,18 @@
   "gradeNotificationTitle": "Grade Update Notification",
   "gradeNotificationNewCourse": "New course: {courseName}, Grade: {score}",
   "gradeNotificationScoreChanged": "[{courseName}] Grade updated: {oldScore} -> {newScore}",
-  "gradeNotificationRankChanged": "Semester rank updated to: {rank}"
+  "gradeNotificationRankChanged": "Semester rank updated to: {rank}",
+  "termsAgree": "Agree",
+  "termsRejectAndExit": "Decline & Exit",
+  "termsLastUpdated": "Last updated: {date}",
+  "@termsLastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsLoadFailed": "Failed to load terms of service",
+  "refresh": "Refresh"
 }
 

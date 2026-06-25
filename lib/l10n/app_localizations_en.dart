@@ -652,4 +652,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String gradeNotificationRankChanged(Object rank) {
     return 'Semester rank updated to: $rank';
   }
+
+  @override
+  String get termsAgree => 'Agree';
+
+  @override
+  String get termsRejectAndExit => 'Decline & Exit';
+
+  @override
+  String termsLastUpdated(String date) {
+    return 'Last updated: $date';
+  }
+
+  @override
+  String get termsLoadFailed => 'Failed to load terms of service';
+
+  @override
+  String get refresh => 'Refresh';
 }
