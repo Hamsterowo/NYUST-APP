@@ -119,6 +119,14 @@ class _GradesScreenState extends State<GradesScreen> {
         isLoading: data.isLoadingGrades,
         actions: [
           IconButton(
+            icon: const Icon(Icons.notifications_active_outlined),
+            tooltip: AppLocalizations.of(context).settingsGradeNotification,
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<NavigationProvider>().setIndex(4, scrollToNotification: true);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.open_in_new),
             tooltip: AppLocalizations.of(context).courseOpenInBrowser,
             onPressed: () {

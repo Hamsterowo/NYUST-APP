@@ -1217,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsGradeNotificationSub.
   ///
   /// In zh, this message translates to:
-  /// **'背景每 15 分鐘檢查一次成績，有異動時發送通知'**
+  /// **'背景每 30 分鐘檢查一次成績'**
   String get settingsGradeNotificationSub;
 
   /// No description provided for @notificationPermissionDenied.

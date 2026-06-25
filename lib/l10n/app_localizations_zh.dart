@@ -609,7 +609,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsGradeNotification => '成績更新通知';
 
   @override
-  String get settingsGradeNotificationSub => '背景每 15 分鐘檢查一次成績，有異動時發送通知';
+  String get settingsGradeNotificationSub => '背景每 30 分鐘檢查一次成績';
 
   @override
   String get notificationPermissionDenied => '無法開啟通知：請前往系統設定啟用通知權限';

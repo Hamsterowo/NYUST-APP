@@ -621,11 +621,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTeacherEducation => 'Teacher Education Program';
 
   @override
-  String get settingsGradeNotification => 'Grade Update Notifications';
+  String get settingsGradeNotification => 'Grade Update Notification';
 
   @override
   String get settingsGradeNotificationSub =>
-      'Check grades in background every 15 mins and notify you';
+      'Check grades in background every 30 mins';
 
   @override
   String get notificationPermissionDenied =>
