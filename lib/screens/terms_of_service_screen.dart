@@ -159,7 +159,8 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
 
   Future<Map<String, dynamic>> _fetchTerms() async {
     try {
-      final res = await context.read<AuthProvider>().api.getTermsOfService();
+      final lang = Localizations.localeOf(context).languageCode;
+      final res = await context.read<AuthProvider>().api.getTermsOfService(lang: lang);
       if (res['status'] == 'success') {
         setState(() {
           _lastUpdated = res['data']?['lastUpdated'] ?? '';

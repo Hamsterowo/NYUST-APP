@@ -45,6 +45,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Future<void> _checkTermsAgreement() async {
+    final lang = Localizations.localeOf(context).languageCode;
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final prefs = await SharedPreferences.getInstance();
     final lastAcceptedDate = prefs.getString('accepted_terms_date') ?? '';
@@ -55,7 +56,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       shouldShow = true;
     } else {
       try {
-        final terms = await auth.api.getTermsOfService().timeout(
+        final terms = await auth.api.getTermsOfService(lang: lang).timeout(
           const Duration(seconds: 3),
         );
         if (terms['status'] == 'success') {
