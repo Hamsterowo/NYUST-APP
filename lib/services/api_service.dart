@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -371,19 +372,62 @@ class ApiService {
 
       final formData = FormData.fromMap(data);
       final response = await _dio.post('/api/report', data: formData);
-      return response.data;
+      
+      if (response.statusCode != 200) {
+        return {
+          'status': 'error',
+          'code': 'server_error',
+          'statusCode': response.statusCode,
+          'message': '伺服器回應錯誤 (${response.statusCode})',
+        };
+      }
+
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      } else if (response.data is String) {
+        try {
+          final decoded = jsonDecode(response.data as String);
+          if (decoded is Map<String, dynamic>) {
+            return decoded;
+          }
+        } catch (_) {}
+      }
+
+      return {
+        'status': 'error',
+        'code': 'format_error',
+        'message': '伺服器回應格式錯誤',
+      };
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout) {
-        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
+        return {
+          'status': 'error',
+          'code': 'timeout',
+          'message': '連線逾時，請稍後再試',
+        };
       }
       if (e.type == DioExceptionType.connectionError) {
-        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
+        return {
+          'status': 'error',
+          'code': 'connection_error',
+          'message': '無法連線至伺服器，請檢查網路連線',
+        };
       }
-      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
+      return {
+        'status': 'error',
+        'code': 'api_failed',
+        'error': e.message ?? e.toString(),
+        'message': 'API 呼叫失敗: ${e.message}',
+      };
     } catch (e) {
-      return {'status': 'error', 'message': 'API call failed: $e'};
+      return {
+        'status': 'error',
+        'code': 'api_failed',
+        'error': e.toString(),
+        'message': 'API call failed: $e',
+      };
     }
   }
 

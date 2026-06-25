@@ -678,11 +678,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please describe your issue in detail...';
 
   @override
-  String get reportContactPrompt => 'Contact Info (Optional, e.g., Email/Line)';
+  String get reportContactPrompt => 'Contact Info (Optional)';
 
   @override
   String reportEmailOrContactUs(String email) {
-    return 'You can also contact us directly at $email';
+    return 'You can also contact us at $email';
   }
 
   @override
@@ -701,4 +701,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportRemoveImage => 'Remove Image';
+
+  @override
+  String get reportCopiedEmail => 'Copied support email to clipboard';
+
+  @override
+  String reportImagePickError(String error) {
+    return 'Failed to pick image: $error';
+  }
+
+  @override
+  String get reportSubmitError => 'Failed to send, please try again later';
+
+  @override
+  String reportSendError(String error) {
+    return 'Failed to send: $error';
+  }
+
+  @override
+  String get errorTimeout => 'Connection timed out, please try again later';
+
+  @override
+  String get errorConnection =>
+      'Cannot connect to server, please check your network connection';
+
+  @override
+  String get errorServer => 'Server responded with an error';
+
+  @override
+  String get errorFormat => 'Server response format is invalid';
+
+  @override
+  String errorApiCallFailed(String error) {
+    return 'API call failed: $error';
+  }
 }

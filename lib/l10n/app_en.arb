@@ -357,8 +357,8 @@
   "refresh": "Refresh",
   "reportIssueTitle": "Report an Issue",
   "reportDescriptionPrompt": "Please describe your issue in detail...",
-  "reportContactPrompt": "Contact Info (Optional, e.g., Email/Line)",
-  "reportEmailOrContactUs": "You can also contact us directly at {email}",
+  "reportContactPrompt": "Contact Info (Optional)",
+  "reportEmailOrContactUs": "You can also contact us at {email}",
   "@reportEmailOrContactUs": {
     "placeholders": {
       "email": {
@@ -377,6 +377,36 @@
   "reportSend": "Send",
   "reportEmptyDescriptionWarning": "Please fill in the description",
   "reportAddImage": "Add Image",
-  "reportRemoveImage": "Remove Image"
+  "reportRemoveImage": "Remove Image",
+  "reportCopiedEmail": "Copied support email to clipboard",
+  "reportImagePickError": "Failed to pick image: {error}",
+  "@reportImagePickError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSubmitError": "Failed to send, please try again later",
+  "reportSendError": "Failed to send: {error}",
+  "@reportSendError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorTimeout": "Connection timed out, please try again later",
+  "errorConnection": "Cannot connect to server, please check your network connection",
+  "errorServer": "Server responded with an error",
+  "errorFormat": "Server response format is invalid",
+  "errorApiCallFailed": "API call failed: {error}",
+  "@errorApiCallFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
 

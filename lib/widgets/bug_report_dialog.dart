@@ -47,7 +47,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
       if (mounted) {
         showTopSnackBar(
           context,
-          '無法選取圖片：$e',
+          AppLocalizations.of(context).reportImagePickError(e.toString()),
           type: SnackBarType.error,
         );
       }
@@ -108,9 +108,31 @@ class _BugReportDialogState extends State<BugReportDialog> {
           final caseId = result['caseId'] ?? 'unknown';
           _showSuccessDialog(caseId);
         } else {
+          final l10n = AppLocalizations.of(context);
+          String errorMessage;
+          switch (result['code']) {
+            case 'timeout':
+              errorMessage = l10n.errorTimeout;
+              break;
+            case 'connection_error':
+              errorMessage = l10n.errorConnection;
+              break;
+            case 'server_error':
+              errorMessage = '${l10n.errorServer} (${result['statusCode']})';
+              break;
+            case 'format_error':
+              errorMessage = l10n.errorFormat;
+              break;
+            case 'api_failed':
+              errorMessage = l10n.errorApiCallFailed(result['error'] ?? '');
+              break;
+            default:
+              errorMessage = result['message'] ?? l10n.reportSubmitError;
+              break;
+          }
           showTopSnackBar(
             context,
-            result['message'] ?? '發送失敗，請稍後再試',
+            errorMessage,
             type: SnackBarType.error,
           );
         }
@@ -119,7 +141,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
       if (mounted) {
         showTopSnackBar(
           context,
-          '傳送失敗：$e',
+          AppLocalizations.of(context).reportSendError(e.toString()),
           type: SnackBarType.error,
         );
       }
@@ -162,7 +184,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
     Clipboard.setData(const ClipboardData(text: 'support@hamster.tw'));
     showTopSnackBar(
       context,
-      '已複製客服信箱至剪貼簿',
+      AppLocalizations.of(context).reportCopiedEmail,
       type: SnackBarType.success,
     );
   }
