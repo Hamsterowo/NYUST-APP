@@ -58,7 +58,7 @@ class DesktopScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'NYUST+ 是為行動裝置設計的工具',
+                  '雲科工具箱 是為行動裝置設計的工具',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.teal.shade800,

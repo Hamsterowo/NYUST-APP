@@ -76,7 +76,11 @@ class _LoginFormState extends State<LoginForm> {
 
     if (auth.error != null) {
       if (mounted) {
-        showTopSnackBar(context, auth.error!, isError: true);
+        final errorMsg = auth.error == 'loginFailed'
+            ? AppLocalizations.of(context).loginFailed
+            : auth.error!;
+        showTopSnackBar(context, errorMsg, isError: true);
+        _captchaController.clear();
       }
     } else {
 

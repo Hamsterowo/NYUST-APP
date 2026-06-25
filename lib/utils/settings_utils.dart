@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsUtils {
-  static const _channel = MethodChannel('tw.hamster.nyustplus/settings');
+  static const _channel = MethodChannel('tw.hamster.yuntool/settings');
 
   static Future<void> openLanguageSettings() async {
     if (kIsWeb) {

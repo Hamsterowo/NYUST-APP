@@ -9,7 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appName => 'NYUST+';
+  String get appName => '雲科工具箱';
 
   @override
   String get settingsTitle => '設定';
@@ -39,7 +39,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacyPolicy => 'YunTech 單一入口隱私權政策';
 
   @override
-  String get termsOfService => 'NYUST+ 使用者條款';
+  String get termsOfService => '雲科工具箱 使用者條款';
 
   @override
   String get termsUpdateTitle => '提示';
@@ -81,14 +81,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureNotFinished => '此功能尚未完成';
 
   @override
-  String get installTitle => '安裝 NYUST+ APP';
+  String get installTitle => '安裝 雲科工具箱 APP';
 
   @override
   String get installDescIos =>
-      '將 NYUST+ 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」';
+      '將 雲科工具箱 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」';
 
   @override
-  String get installDescAndroid => '將 NYUST+ 安裝到您的裝置，不用開啟瀏覽器即可直接操作。';
+  String get installDescAndroid => '將 雲科工具箱 安裝到您的裝置，不用開啟瀏覽器即可直接操作。';
 
   @override
   String get vacationLabelStart => '開學';
@@ -153,7 +153,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get goToLogin => '前往登入';
 
   @override
-  String get loginTitle => '登入 NYUST+';
+  String get loginTitle => '登入 雲科工具箱';
 
   @override
   String get loginUsernamePrompt => '請輸入學號';
@@ -181,6 +181,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get loginButton => '登入';
+
+  @override
+  String get loginFailed => '帳密或驗證碼錯誤';
 
   @override
   String get pleaseLoginToViewSchedule => '請在此登入以查看課表';

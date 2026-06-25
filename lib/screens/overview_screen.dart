@@ -958,12 +958,17 @@ class _OverviewScreenState extends State<OverviewScreen> {
             }
           }
 
+          final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+          final displayName = (isEnglish && c.nameEn != null && c.nameEn!.trim().isNotEmpty)
+              ? c.nameEn!
+              : c.name;
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: _buildUpcomingClass(
               context,
               time: timeStr,
-              className: c.name,
+              className: displayName,
               location: (c.room != null && c.room!.isNotEmpty)
                   ? c.room!
                   : AppLocalizations.of(context).notSpecified,

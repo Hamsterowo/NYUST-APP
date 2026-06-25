@@ -219,14 +219,14 @@ class AuthProvider with ChangeNotifier {
         onLoginSuccess?.call();
         return true;
       } else {
-        final loginError = '帳密或驗證碼錯誤';
+        final loginError = 'loginFailed';
         await fetchCaptcha();
         _error = loginError;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      final loginError = '帳密或驗證碼錯誤';
+      final loginError = 'loginFailed';
       await fetchCaptcha();
       _error = loginError;
       notifyListeners();
