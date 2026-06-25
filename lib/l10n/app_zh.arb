@@ -357,7 +357,7 @@
   "refresh": "重新整理",
   "reportIssueTitle": "回報問題",
   "reportDescriptionPrompt": "請詳細描述您遇到的問題...",
-  "reportContactPrompt": "聯絡資訊 (選填，如 Email/Line ID)",
+  "reportContactPrompt": "聯絡資訊 (選填)",
   "reportEmailOrContactUs": "您也可以直接發送電子郵件至 {email} 聯絡我們",
   "@reportEmailOrContactUs": {
     "placeholders": {
@@ -377,6 +377,36 @@
   "reportSend": "傳送",
   "reportEmptyDescriptionWarning": "請填寫問題描述",
   "reportAddImage": "加入圖片",
-  "reportRemoveImage": "移除圖片"
+  "reportRemoveImage": "移除圖片",
+  "reportCopiedEmail": "已複製客服信箱至剪貼簿",
+  "reportImagePickError": "無法選取圖片: {error}",
+  "@reportImagePickError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSubmitError": "發送失敗，請稍後再試",
+  "reportSendError": "傳送失敗: {error}",
+  "@reportSendError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorTimeout": "連線逾時，請稍後再試",
+  "errorConnection": "無法連線至伺服器，請檢查網路連線",
+  "errorServer": "伺服器回應錯誤",
+  "errorFormat": "伺服器回應格式錯誤",
+  "errorApiCallFailed": "API 呼叫失敗: {error}",
+  "@errorApiCallFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
 

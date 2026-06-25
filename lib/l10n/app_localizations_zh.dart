@@ -660,7 +660,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportDescriptionPrompt => '請詳細描述您遇到的問題...';
 
   @override
-  String get reportContactPrompt => '聯絡資訊 (選填，如 Email/Line ID)';
+  String get reportContactPrompt => '聯絡資訊 (選填)';
 
   @override
   String reportEmailOrContactUs(String email) {
@@ -683,4 +683,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reportRemoveImage => '移除圖片';
+
+  @override
+  String get reportCopiedEmail => '已複製客服信箱至剪貼簿';
+
+  @override
+  String reportImagePickError(String error) {
+    return '無法選取圖片: $error';
+  }
+
+  @override
+  String get reportSubmitError => '發送失敗，請稍後再試';
+
+  @override
+  String reportSendError(String error) {
+    return '傳送失敗: $error';
+  }
+
+  @override
+  String get errorTimeout => '連線逾時，請稍後再試';
+
+  @override
+  String get errorConnection => '無法連線至伺服器，請檢查網路連線';
+
+  @override
+  String get errorServer => '伺服器回應錯誤';
+
+  @override
+  String get errorFormat => '伺服器回應格式錯誤';
+
+  @override
+  String errorApiCallFailed(String error) {
+    return 'API 呼叫失敗: $error';
+  }
 }

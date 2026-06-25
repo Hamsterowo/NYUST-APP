@@ -1299,7 +1299,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportContactPrompt.
   ///
   /// In zh, this message translates to:
-  /// **'聯絡資訊 (選填，如 Email/Line ID)'**
+  /// **'聯絡資訊 (選填)'**
   String get reportContactPrompt;
 
   /// No description provided for @reportEmailOrContactUs.
@@ -1337,6 +1337,60 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'移除圖片'**
   String get reportRemoveImage;
+
+  /// No description provided for @reportCopiedEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'已複製客服信箱至剪貼簿'**
+  String get reportCopiedEmail;
+
+  /// No description provided for @reportImagePickError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法選取圖片: {error}'**
+  String reportImagePickError(String error);
+
+  /// No description provided for @reportSubmitError.
+  ///
+  /// In zh, this message translates to:
+  /// **'發送失敗，請稍後再試'**
+  String get reportSubmitError;
+
+  /// No description provided for @reportSendError.
+  ///
+  /// In zh, this message translates to:
+  /// **'傳送失敗: {error}'**
+  String reportSendError(String error);
+
+  /// No description provided for @errorTimeout.
+  ///
+  /// In zh, this message translates to:
+  /// **'連線逾時，請稍後再試'**
+  String get errorTimeout;
+
+  /// No description provided for @errorConnection.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法連線至伺服器，請檢查網路連線'**
+  String get errorConnection;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In zh, this message translates to:
+  /// **'伺服器回應錯誤'**
+  String get errorServer;
+
+  /// No description provided for @errorFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'伺服器回應格式錯誤'**
+  String get errorFormat;
+
+  /// No description provided for @errorApiCallFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'API 呼叫失敗: {error}'**
+  String errorApiCallFailed(String error);
 }
 
 class _AppLocalizationsDelegate
