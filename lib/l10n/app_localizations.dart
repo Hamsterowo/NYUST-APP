@@ -1283,6 +1283,60 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'重新整理'**
   String get refresh;
+
+  /// No description provided for @reportIssueTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'回報問題'**
+  String get reportIssueTitle;
+
+  /// No description provided for @reportDescriptionPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'請詳細描述您遇到的問題...'**
+  String get reportDescriptionPrompt;
+
+  /// No description provided for @reportContactPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'聯絡資訊 (選填，如 Email/Line ID)'**
+  String get reportContactPrompt;
+
+  /// No description provided for @reportEmailOrContactUs.
+  ///
+  /// In zh, this message translates to:
+  /// **'您也可以直接發送電子郵件至 {email} 聯絡我們'**
+  String reportEmailOrContactUs(String email);
+
+  /// No description provided for @reportSubmitSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'回報成功！\n您的案件編號為：{caseId}'**
+  String reportSubmitSuccess(String caseId);
+
+  /// No description provided for @reportSend.
+  ///
+  /// In zh, this message translates to:
+  /// **'傳送'**
+  String get reportSend;
+
+  /// No description provided for @reportEmptyDescriptionWarning.
+  ///
+  /// In zh, this message translates to:
+  /// **'請填寫問題描述'**
+  String get reportEmptyDescriptionWarning;
+
+  /// No description provided for @reportAddImage.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入圖片'**
+  String get reportAddImage;
+
+  /// No description provided for @reportRemoveImage.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除圖片'**
+  String get reportRemoveImage;
 }
 
 class _AppLocalizationsDelegate

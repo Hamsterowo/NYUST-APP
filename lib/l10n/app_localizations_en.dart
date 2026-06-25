@@ -669,4 +669,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refresh => 'Refresh';
+
+  @override
+  String get reportIssueTitle => 'Report an Issue';
+
+  @override
+  String get reportDescriptionPrompt =>
+      'Please describe your issue in detail...';
+
+  @override
+  String get reportContactPrompt => 'Contact Info (Optional, e.g., Email/Line)';
+
+  @override
+  String reportEmailOrContactUs(String email) {
+    return 'You can also contact us directly at $email';
+  }
+
+  @override
+  String reportSubmitSuccess(String caseId) {
+    return 'Submitted successfully!\nYour case number is: $caseId';
+  }
+
+  @override
+  String get reportSend => 'Send';
+
+  @override
+  String get reportEmptyDescriptionWarning => 'Please fill in the description';
+
+  @override
+  String get reportAddImage => 'Add Image';
+
+  @override
+  String get reportRemoveImage => 'Remove Image';
 }

@@ -652,4 +652,35 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get refresh => '重新整理';
+
+  @override
+  String get reportIssueTitle => '回報問題';
+
+  @override
+  String get reportDescriptionPrompt => '請詳細描述您遇到的問題...';
+
+  @override
+  String get reportContactPrompt => '聯絡資訊 (選填，如 Email/Line ID)';
+
+  @override
+  String reportEmailOrContactUs(String email) {
+    return '您也可以直接發送電子郵件至 $email 聯絡我們';
+  }
+
+  @override
+  String reportSubmitSuccess(String caseId) {
+    return '回報成功！\n您的案件編號為：$caseId';
+  }
+
+  @override
+  String get reportSend => '傳送';
+
+  @override
+  String get reportEmptyDescriptionWarning => '請填寫問題描述';
+
+  @override
+  String get reportAddImage => '加入圖片';
+
+  @override
+  String get reportRemoveImage => '移除圖片';
 }

@@ -354,6 +354,29 @@
     }
   },
   "termsLoadFailed": "Failed to load terms of service",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "reportIssueTitle": "Report an Issue",
+  "reportDescriptionPrompt": "Please describe your issue in detail...",
+  "reportContactPrompt": "Contact Info (Optional, e.g., Email/Line)",
+  "reportEmailOrContactUs": "You can also contact us directly at {email}",
+  "@reportEmailOrContactUs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSubmitSuccess": "Submitted successfully!\nYour case number is: {caseId}",
+  "@reportSubmitSuccess": {
+    "placeholders": {
+      "caseId": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSend": "Send",
+  "reportEmptyDescriptionWarning": "Please fill in the description",
+  "reportAddImage": "Add Image",
+  "reportRemoveImage": "Remove Image"
 }
 

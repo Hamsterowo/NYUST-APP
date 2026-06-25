@@ -354,6 +354,29 @@
     }
   },
   "termsLoadFailed": "無法載入使用者條款",
-  "refresh": "重新整理"
+  "refresh": "重新整理",
+  "reportIssueTitle": "回報問題",
+  "reportDescriptionPrompt": "請詳細描述您遇到的問題...",
+  "reportContactPrompt": "聯絡資訊 (選填，如 Email/Line ID)",
+  "reportEmailOrContactUs": "您也可以直接發送電子郵件至 {email} 聯絡我們",
+  "@reportEmailOrContactUs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSubmitSuccess": "回報成功！\n您的案件編號為：{caseId}",
+  "@reportSubmitSuccess": {
+    "placeholders": {
+      "caseId": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSend": "傳送",
+  "reportEmptyDescriptionWarning": "請填寫問題描述",
+  "reportAddImage": "加入圖片",
+  "reportRemoveImage": "移除圖片"
 }
 
