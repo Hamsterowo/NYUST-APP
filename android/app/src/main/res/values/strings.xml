@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 顯示於系統設定、應用程式管理員、安裝提示 -->
+    <string name="app_name">雲科工具箱</string>
+    <!-- 顯示於桌面圖示下方、應用程式集 -->
+    <string name="launcher_name">雲工具</string>
+</resources>
