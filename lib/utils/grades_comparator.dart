@@ -52,9 +52,9 @@ class GradesComparator {
               final displayName = isEnglish && nameEn.isNotEmpty ? nameEn : nameZh;
               if (displayName.isNotEmpty && score.isNotEmpty) {
                 if (isEnglish) {
-                  changes.add('[$displayName] Grade updated: $score');
+                  changes.add('$displayName: $score');
                 } else {
-                  changes.add('【$displayName】成績更新：$score 分');
+                  changes.add('$displayName：$score 分');
                 }
               }
             }
@@ -93,9 +93,9 @@ class GradesComparator {
               // 新增科目
               if (displayName.isNotEmpty && newScore.isNotEmpty) {
                 if (isEnglish) {
-                  changes.add('[$displayName] Grade updated: $newScore');
+                  changes.add('$displayName: $newScore');
                 } else {
-                  changes.add('【$displayName】成績更新：$newScore 分');
+                  changes.add('$displayName：$newScore 分');
                 }
               }
             } else {
@@ -103,9 +103,9 @@ class GradesComparator {
               final oldScore = oldCourse['score']?.toString() ?? '';
               if (newScore != oldScore && newScore.isNotEmpty) {
                 if (isEnglish) {
-                  changes.add('[$displayName] Grade updated: $oldScore -> $newScore');
+                  changes.add('$displayName: $newScore');
                 } else {
-                  changes.add('【$displayName】成績更新：$oldScore -> $newScore 分');
+                  changes.add('$displayName：$newScore 分');
                 }
               }
             }
@@ -120,9 +120,9 @@ class GradesComparator {
           final newRank = newSummary['rank']?.toString() ?? '';
           if (newRank.isNotEmpty && newRank != oldRank) {
             if (isEnglish) {
-              changes.add('Semester rank updated to: $newRank');
+              changes.add('Semester Rank: No. $newRank');
             } else {
-              changes.add('學期排名更新為：$newRank');
+              changes.add('學期排名：第$newRank名');
             }
           }
         }

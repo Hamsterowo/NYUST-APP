@@ -77,7 +77,7 @@ void callbackDispatcher() {
             final notificationService = NotificationService();
             await notificationService.init();
 
-            final String title = isEnglish ? 'Grade Update Notification' : '成績更新通知';
+            final String title = isEnglish ? '🎓 Grade Update Notification' : '🎓 成績更新通知';
             final String body = changes.join('\n');
 
             await notificationService.showNotification(
