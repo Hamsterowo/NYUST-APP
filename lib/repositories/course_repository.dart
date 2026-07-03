@@ -1,0 +1,135 @@
+import 'dart:convert';
+import 'package:drift/drift.dart';
+import '../database/database.dart';
+import '../services/api_service.dart';
+
+/// 課表資料的 Repository。將課表課程正規化寫入 [ScheduleCourses]，
+/// 重建時還原成與 scraper 相同結構的 Map（`status` / `data.schedule`）。
+///
+/// 透過 [ApiService] facade 取得資料，使 demo/除錯模式的切換即時生效。
+class CourseRepository {
+  final AppDatabase _db;
+  final ApiService _api;
+
+  static const String _datasetKey = 'schedule';
+  static const Duration _ttl = Duration(hours: 1);
+
+  CourseRepository(this._db, this._api);
+
+  Stream<Map<String, dynamic>?> watchSchedule() {
+    return _db.select(_db.scheduleCourses).watch().asyncMap((_) => _buildMap());
+  }
+
+  Future<bool> refresh({bool force = false}) async {
+    if (!force && !await _isStale()) return true;
+
+    final resp = await _api.getSchedule();
+    if (resp['status'] != 'success' || resp['data'] == null) return false;
+
+    await _write(resp);
+    return true;
+  }
+
+  Future<void> clear() async {
+    await _db.transaction(() async {
+      await _db.delete(_db.scheduleCourses).go();
+      await (_db.delete(_db.cacheMeta)
+            ..where((t) => t.datasetKey.equals(_datasetKey)))
+          .go();
+    });
+  }
+
+  Future<bool> _isStale() async {
+    final meta = await (_db.select(_db.cacheMeta)
+          ..where((t) => t.datasetKey.equals(_datasetKey)))
+        .getSingleOrNull();
+    if (meta == null) return true;
+    return DateTime.now().difference(meta.updatedAt) > _ttl;
+  }
+
+  Future<Map<String, dynamic>?> _buildMap() async {
+    final rows = await (_db.select(_db.scheduleCourses)
+          ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+        .get();
+    if (rows.isEmpty) return null;
+
+    final schedule = rows.map((c) {
+      List<dynamic> times;
+      try {
+        times = jsonDecode(c.timesJson) as List<dynamic>;
+      } catch (_) {
+        times = const [];
+      }
+      return {
+        'semesterCourseNo': c.semesterCourseNo,
+        'deptCourseNo': c.deptCourseNo,
+        'name': c.name,
+        'nameEn': c.nameEn,
+        'courseClass': c.courseClass,
+        'classType': c.classType,
+        'requiredType': c.requiredType,
+        'credits': c.credits,
+        'timeRoomStr': c.timeRoomStr,
+        'teacher': c.teacher,
+        'remark': c.remark,
+        'weekday': c.weekday,
+        'times': times,
+        'room': c.room,
+        'syllabusUrl': c.syllabusUrl,
+        'year': c.year,
+        'semester': c.semester,
+        'courseNo': c.courseNo,
+      };
+    }).toList();
+
+    return {
+      'status': 'success',
+      'data': {'schedule': schedule},
+    };
+  }
+
+  Future<void> _write(Map<String, dynamic> resp) async {
+    final List courses = (resp['data']?['schedule'] as List?) ?? const [];
+
+    await _db.transaction(() async {
+      await _db.delete(_db.scheduleCourses).go();
+
+      for (var i = 0; i < courses.length; i++) {
+        final c = courses[i] as Map;
+        await _db.into(_db.scheduleCourses).insert(
+              ScheduleCoursesCompanion.insert(
+                sortOrder: Value(i),
+                semesterCourseNo: Value(_s(c['semesterCourseNo'])),
+                deptCourseNo: Value(_s(c['deptCourseNo'])),
+                name: Value(_s(c['name'])),
+                nameEn: Value(_s(c['nameEn'] ?? c['name_en'])),
+                courseClass: Value(_s(c['courseClass'])),
+                classType: Value(_s(c['classType'])),
+                requiredType: Value(_s(c['requiredType'])),
+                credits: Value(_s(c['credits'])),
+                timeRoomStr: Value(_s(c['timeRoomStr'])),
+                teacher: Value(_s(c['teacher'])),
+                remark: Value(_s(c['remark'])),
+                weekday: Value(_s(c['weekday'])),
+                timesJson: Value(jsonEncode(c['times'] ?? const [])),
+                room: Value(_s(c['room'])),
+                syllabusUrl: Value(_s(c['syllabusUrl'])),
+                year: Value(_s(c['year'])),
+                semester: Value(_s(c['semester'])),
+                courseNo: Value(_s(c['courseNo'])),
+              ),
+            );
+      }
+
+      await _db.into(_db.cacheMeta).insert(
+            CacheMetaCompanion.insert(
+              datasetKey: _datasetKey,
+              updatedAt: DateTime.now(),
+            ),
+            mode: InsertMode.insertOrReplace,
+          );
+    });
+  }
+
+  static String _s(dynamic v) => v?.toString() ?? '';
+}

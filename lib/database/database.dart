@@ -6,16 +6,52 @@ part 'database.g.dart';
 
 /// App 的本地 Drift (SQLite) 資料庫。
 ///
-/// 目前只承載非敏感的**快取**資料（課程詳情、行事曆）。
+/// 承載非敏感的快取與學術資料：
+/// - Stage 3A：課程詳情、行事曆的 keyed JSON 快取表
+/// - Stage 3B：正規化的成績 / 課表 / 畢業審核資料表（供 Repository 與未來統計查詢）
+///
 /// 敏感資料（帳號、密碼、Cookie）仍保留在 `flutter_secure_storage`，不進此資料庫。
-@DriftDatabase(tables: [CourseDetailCacheTable, CalendarCacheTable])
+@DriftDatabase(
+  tables: [
+    // Stage 3A
+    CourseDetailCacheTable,
+    CalendarCacheTable,
+    // Stage 3B
+    CacheMeta,
+    GradesSemesters,
+    GradesCourses,
+    GradesCumulative,
+    ScheduleCourses,
+    GraduationInfo,
+    GraduationCredits,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _open());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
-  /// 全 App 共用的單例。各快取服務透過此存取資料庫。
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          // v1 (Stage 3A) → v2 (Stage 3B): 新增正規化的學術資料表。
+          if (from < 2) {
+            await m.createTable(cacheMeta);
+            await m.createTable(gradesSemesters);
+            await m.createTable(gradesCourses);
+            await m.createTable(gradesCumulative);
+            await m.createTable(scheduleCourses);
+            await m.createTable(graduationInfo);
+            await m.createTable(graduationCredits);
+          }
+        },
+      );
+
+  /// 全 App 共用的單例。各快取服務與 Repository 透過此存取資料庫。
   static AppDatabase? _instance;
   static AppDatabase get instance => _instance ??= AppDatabase();
 

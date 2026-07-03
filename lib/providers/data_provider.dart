@@ -1,98 +1,34 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../database/database.dart';
+import '../repositories/grades_repository.dart';
+import '../repositories/graduation_repository.dart';
+import '../repositories/course_repository.dart';
 import '../services/api_service.dart';
 import '../services/course_detail_cache.dart';
 import '../services/calendar_cache_service.dart';
 import '../models/schedule_event.dart';
 import 'auth_provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
 
 /// 集中管理所有已載入的 App 資料，避免切換頁面時重複呼叫 API。
-/// 在使用者登入後自動預先載入所有資料。
+///
+/// Stage 3B 起改為架在 Repository 之上：資料流為 網路 → Drift → stream → UI。
+/// 本類別不再自行做 JSON 快取或成績新鮮度判斷（已下放到各 Repository + Drift），
+/// 只負責訂閱 Repository 的 stream、維持既有的對外欄位與 loading 狀態給畫面使用。
 class DataProvider with ChangeNotifier {
   final ApiService _api;
   final AuthProvider _auth;
 
-  Future<void>? _cacheLoadingFuture;
+  late final GradesRepository _gradesRepo;
+  late final GraduationRepository _graduationRepo;
+  late final CourseRepository _courseRepo;
+
+  StreamSubscription<Map<String, dynamic>?>? _gradesSub;
+  StreamSubscription<Map<String, dynamic>?>? _graduationSub;
+  StreamSubscription<Map<String, dynamic>?>? _scheduleSub;
+
   bool _isCacheLoaded = false;
   bool get isCacheLoaded => _isCacheLoaded;
-
-  final _secureStorage = const FlutterSecureStorage();
-
-  Future<String?> _loadDataCache(String key) async {
-    return await _secureStorage.read(key: key);
-  }
-
-  Future<void> _saveDataCache(String key, String value) async {
-    await _secureStorage.write(key: key, value: value);
-  }
-
-  Future<void> _clearDataCaches() async {
-    await _secureStorage.delete(key: 'cache_grades');
-    await _secureStorage.delete(key: 'cache_graduation');
-    await _secureStorage.delete(key: 'cache_schedule');
-  }
-
-  DataProvider(this._api, this._auth) {
-    _cacheLoadingFuture = _loadCache();
-    _init();
-  }
-
-  void _init() {
-
-    if (_auth.isLoggedIn) {
-      prefetchAll();
-    }
-
-    _auth.onLoginSuccess = () => prefetchAll();
-
-    _auth.onLogoutCallback = () => clearAll();
-  }
-
-  Future<void> _loadCache() async {
-    try {
-      // Load grades cache
-      final cachedGrades = await _loadDataCache('cache_grades');
-      if (cachedGrades != null && gradesData == null) {
-        final map = jsonDecode(cachedGrades) as Map;
-        final newMap = <String, dynamic>{};
-        map.forEach((key, value) {
-          newMap[key.toString()] = value;
-        });
-        gradesData = newMap;
-      }
-
-      // Load graduation cache
-      final cachedGraduation = await _loadDataCache('cache_graduation');
-      if (cachedGraduation != null && graduationData == null) {
-        final map = jsonDecode(cachedGraduation) as Map;
-        final newMap = <String, dynamic>{};
-        map.forEach((key, value) {
-          newMap[key.toString()] = value;
-        });
-        graduationData = newMap;
-      }
-
-      // Load schedule cache
-      final cachedSchedule = await _loadDataCache('cache_schedule');
-      if (cachedSchedule != null && scheduleData.isEmpty) {
-        final List<dynamic> raw = jsonDecode(cachedSchedule);
-        scheduleData = raw.map((e) {
-          final map = e as Map;
-          final newMap = <String, dynamic>{};
-          map.forEach((key, value) {
-            newMap[key.toString()] = value;
-          });
-          return ScheduleEvent.fromJson(newMap);
-        }).toList();
-      }
-    } catch (e) {
-      if (kDebugMode) print('DataProvider: _loadCache error: $e');
-    } finally {
-      _isCacheLoaded = true;
-      notifyListeners();
-    }
-  }
 
   Map<String, dynamic>? gradesData;
   bool isLoadingGrades = false;
@@ -109,7 +45,56 @@ class DataProvider with ChangeNotifier {
   bool _isPrefetching = false;
   bool get isPrefetching => _isPrefetching;
 
-  /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）
+  DataProvider(this._api, this._auth) {
+    final db = AppDatabase.instance;
+    _gradesRepo = GradesRepository(db, _api);
+    _graduationRepo = GraduationRepository(db, _api);
+    _courseRepo = CourseRepository(db, _api);
+    _subscribe();
+    _init();
+  }
+
+  /// 訂閱各 Repository 的 Drift stream。訂閱當下即會收到目前 DB 中的快取資料
+  /// （離線也能顯示上次結果），之後 refresh 寫入 DB 時會自動再次推送。
+  void _subscribe() {
+    _gradesSub = _gradesRepo.watchGrades().listen((map) {
+      gradesData = map;
+      _markCacheLoaded();
+      notifyListeners();
+    });
+    _graduationSub = _graduationRepo.watchGraduation().listen((map) {
+      graduationData = map;
+      _markCacheLoaded();
+      notifyListeners();
+    });
+    _scheduleSub = _courseRepo.watchSchedule().listen((map) {
+      scheduleData = _parseSchedule(map);
+      _markCacheLoaded();
+      notifyListeners();
+    });
+  }
+
+  void _markCacheLoaded() {
+    if (!_isCacheLoaded) _isCacheLoaded = true;
+  }
+
+  List<ScheduleEvent> _parseSchedule(Map<String, dynamic>? map) {
+    if (map == null) return [];
+    final raw = (map['data']?['schedule'] as List?) ?? const [];
+    return raw
+        .map((e) => ScheduleEvent.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
+  void _init() {
+    if (_auth.isLoggedIn) {
+      prefetchAll();
+    }
+    _auth.onLoginSuccess = () => prefetchAll();
+    _auth.onLogoutCallback = () => clearAll();
+  }
+
+  /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）。
   Future<void> prefetchAll({bool force = false}) async {
     _isPrefetching = true;
     notifyListeners();
@@ -126,13 +111,8 @@ class DataProvider with ChangeNotifier {
     }
   }
 
-  /// 強制重新抓取（不使用快取）
+  /// 強制重新抓取（忽略 TTL）。
   Future<void> forceFetchAll() async {
-    gradesData = null;
-    graduationData = null;
-    scheduleData = [];
-
-    await _clearDataCaches();
     await prefetchAll(force: true);
   }
 
@@ -147,130 +127,31 @@ class DataProvider with ChangeNotifier {
     }
   }
 
-  /// 清除所有快取（登出時呼叫）
+  /// 清除所有快取（登出時呼叫）。清空 DB 後 stream 會自動推 null 回來重置欄位。
   Future<void> clearAll() async {
-    gradesData = null;
-    graduationData = null;
-    scheduleData = [];
     gradesFailed = false;
     graduationFailed = false;
     scheduleFailed = false;
     _isPrefetching = false;
-
-    await CourseDetailCache.clearAll();
-    await CalendarCacheService.clearAllCache();
     notifyListeners();
 
-    await _clearDataCaches();
+    await _gradesRepo.clear();
+    await _graduationRepo.clear();
+    await _courseRepo.clear();
+    await CourseDetailCache.clearAll();
+    await CalendarCacheService.clearAllCache();
   }
 
   Future<void> fetchGrades({bool force = false}) async {
     if (isLoadingGrades) return;
-
-    if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
-
-    if (!force && gradesData != null) {
-      final gradesList = gradesData!['grades'] as List?;
-      bool hasValidGPA = false;
-      if (gradesList != null && gradesList.isNotEmpty) {
-        for (var sem in gradesList) {
-          final gpa = sem['summary']?['gpa']?.toString();
-          if (gpa != null && gpa.isNotEmpty && gpa != '-' && gpa != 'N/A') {
-            hasValidGPA = true;
-            break;
-          }
-        }
-      }
-      final cumulative = gradesData!['cumulative'] as Map?;
-      final cumGPA = cumulative?['gpa']?.toString() ?? '';
-      final hasValidCumGPA = cumGPA.isNotEmpty && cumGPA != '-' && cumGPA != 'N/A';
-
-      if (!hasValidGPA || !hasValidCumGPA) {
-        if (kDebugMode) print('DataProvider: Stale/missing GPA data in-memory, forcing background fetch');
-        fetchGrades(force: true);
-      }
-      return;
-    }
-
-    if (gradesData == null) {
-      final cached = await _loadDataCache('cache_grades');
-      if (cached != null) {
-        try {
-          final map = jsonDecode(cached) as Map;
-          final newMap = <String, dynamic>{};
-          map.forEach((key, value) {
-            newMap[key.toString()] = value;
-          });
-          gradesData = newMap;
-          gradesFailed = false;
-          notifyListeners();
-
-          // Auto-refresh in background if the cached data is missing valid GPA or cumulative data
-          final gradesList = newMap['grades'] as List?;
-          bool hasValidGPA = false;
-          if (gradesList != null && gradesList.isNotEmpty) {
-            for (var sem in gradesList) {
-              final gpa = sem['summary']?['gpa']?.toString();
-              if (gpa != null && gpa.isNotEmpty && gpa != '-' && gpa != 'N/A') {
-                hasValidGPA = true;
-                break;
-              }
-            }
-          }
-          final cumulative = newMap['cumulative'] as Map?;
-          final cumGPA = cumulative?['gpa']?.toString() ?? '';
-          final hasValidCumGPA = cumGPA.isNotEmpty && cumGPA != '-' && cumGPA != 'N/A';
-
-          if (!hasValidGPA || !hasValidCumGPA) {
-            if (kDebugMode) print('DataProvider: Stale cache detected (missing valid GPA/cumulative data), auto-refreshing in background');
-            fetchGrades(force: true);
-          }
-        } catch (e) {
-          if (kDebugMode) print('Parse grades cache error: $e');
-        }
-      }
-    }
-
-    // Double check in case cache loading populated it and force is false
-    if (!force && gradesData != null) {
-      // Still refresh if it is missing cumulative and GPA metrics
-      final gradesList = gradesData!['grades'] as List?;
-      bool hasValidGPA = false;
-      if (gradesList != null && gradesList.isNotEmpty) {
-        for (var sem in gradesList) {
-          final gpa = sem['summary']?['gpa']?.toString();
-          if (gpa != null && gpa.isNotEmpty && gpa != '-' && gpa != 'N/A') {
-            hasValidGPA = true;
-            break;
-          }
-        }
-      }
-      final cumulative = gradesData!['cumulative'] as Map?;
-      final cumGPA = cumulative?['gpa']?.toString() ?? '';
-      final hasValidCumGPA = cumGPA.isNotEmpty && cumGPA != '-' && cumGPA != 'N/A';
-
-      if (!hasValidGPA || !hasValidCumGPA) {
-        if (kDebugMode) print('DataProvider: In-memory grades missing valid GPA/cumulative data, loading in background');
-        fetchGrades(force: true);
-      }
-      return;
-    }
-
     isLoadingGrades = true;
     gradesFailed = false;
     notifyListeners();
-
     try {
-      final response = await _api.getGrades();
-      if (response['success'] == true) {
-        gradesData = response;
-        gradesFailed = false;
-        await _saveDataCache('cache_grades', jsonEncode(response));
-      } else {
-        gradesFailed = true;
-      }
+      final ok = await _gradesRepo.refresh(force: force);
+      if (!ok && gradesData == null) gradesFailed = true;
     } catch (_) {
-      gradesFailed = true;
+      if (gradesData == null) gradesFailed = true;
     } finally {
       isLoadingGrades = false;
       notifyListeners();
@@ -279,51 +160,14 @@ class DataProvider with ChangeNotifier {
 
   Future<void> fetchGraduation({bool force = false}) async {
     if (isLoadingGraduation) return;
-
-    if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
-
-    if (!force && graduationData != null) {
-      return;
-    }
-
-    if (graduationData == null) {
-      final cached = await _loadDataCache('cache_graduation');
-      if (cached != null) {
-        try {
-          final map = jsonDecode(cached) as Map;
-          final newMap = <String, dynamic>{};
-          map.forEach((key, value) {
-            newMap[key.toString()] = value;
-          });
-          graduationData = newMap;
-          graduationFailed = false;
-          notifyListeners();
-        } catch (e) {
-          if (kDebugMode) print('Parse graduation cache error: $e');
-        }
-      }
-    }
-
-    // Double check in case cache loading populated it and force is false
-    if (!force && graduationData != null) {
-      return;
-    }
-
     isLoadingGraduation = true;
     graduationFailed = false;
     notifyListeners();
-
     try {
-      final response = await _api.getGraduation();
-      if (response['success'] == true) {
-        graduationData = response;
-        graduationFailed = false;
-        await _saveDataCache('cache_graduation', jsonEncode(response));
-      } else {
-        graduationFailed = true;
-      }
+      final ok = await _graduationRepo.refresh(force: force);
+      if (!ok && graduationData == null) graduationFailed = true;
     } catch (_) {
-      graduationFailed = true;
+      if (graduationData == null) graduationFailed = true;
     } finally {
       isLoadingGraduation = false;
       notifyListeners();
@@ -332,63 +176,25 @@ class DataProvider with ChangeNotifier {
 
   Future<void> fetchSchedule({bool force = false}) async {
     if (isLoadingSchedule) return;
-
-    if (_cacheLoadingFuture != null) await _cacheLoadingFuture;
-
-    if (!force && scheduleData.isNotEmpty) {
-      return;
-    }
-
-    if (scheduleData.isEmpty) {
-      final cached = await _loadDataCache('cache_schedule');
-      if (cached != null) {
-        try {
-          final List<dynamic> raw = jsonDecode(cached);
-          scheduleData = raw.map((e) {
-            final map = e as Map;
-            final newMap = <String, dynamic>{};
-            map.forEach((key, value) {
-              newMap[key.toString()] = value;
-            });
-            return ScheduleEvent.fromJson(newMap);
-          }).toList();
-          scheduleFailed = false;
-          notifyListeners();
-        } catch (e) {
-          if (kDebugMode) print('Parse schedule cache error: $e');
-        }
-      }
-    }
-
-    // Double check in case cache loading populated it and force is false
-    if (!force && scheduleData.isNotEmpty) {
-      return;
-    }
-
     isLoadingSchedule = true;
     scheduleFailed = false;
     notifyListeners();
-
     try {
-      final response = await _api.getSchedule();
-      if (response['status'] == 'success' && response['data'] != null) {
-        final List<dynamic> raw = response['data']['schedule'] ?? [];
-        scheduleData = raw
-            .map(
-              (e) =>
-                  ScheduleEvent.fromJson(Map<String, dynamic>.from(e as Map)),
-            )
-            .toList();
-        scheduleFailed = false;
-        await _saveDataCache('cache_schedule', jsonEncode(raw));
-      } else {
-        scheduleFailed = true;
-      }
+      final ok = await _courseRepo.refresh(force: force);
+      if (!ok && scheduleData.isEmpty) scheduleFailed = true;
     } catch (_) {
-      scheduleFailed = true;
+      if (scheduleData.isEmpty) scheduleFailed = true;
     } finally {
       isLoadingSchedule = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _gradesSub?.cancel();
+    _graduationSub?.cancel();
+    _scheduleSub?.cancel();
+    super.dispose();
   }
 }
