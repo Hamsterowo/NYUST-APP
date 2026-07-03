@@ -1,15 +1,19 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import '../database/database.dart';
 
 /// 行事曆本地快取服務
-/// 使用 SharedPreferences 持久化行事曆 + 假日資料
+/// 使用 Drift (SQLite) 持久化行事曆 + 假日資料
 /// 快取有效期為 30 天
+///
+/// 註：對外方法簽章與過去（SharedPreferences 版本）完全相同，呼叫端無需修改。
+/// 所有 DB 存取都有防護，任何錯誤都會被視為「快取未命中」。
 class CalendarCacheService {
-  static const _dataPrefix = 'calendar_data_';
-  static const _tsPrefix = 'calendar_ts_';
   static const _cacheDuration = Duration(days: 30);
+
+  static AppDatabase get _db => AppDatabase.instance;
 
   static String _getCurrentLanguageCode(String? lang) {
     if (lang != null) {
@@ -30,6 +34,8 @@ class CalendarCacheService {
     return languageCode == 'en' ? 'en' : 'zh-tw';
   }
 
+  static String _key(int year, String langCode) => '${year}_$langCode';
+
   /// 儲存行事曆資料（合併端點的完整回應）
   static Future<void> saveCalendarData(
     int year,
@@ -37,34 +43,39 @@ class CalendarCacheService {
     String? lang,
   }) async {
     final langCode = _getCurrentLanguageCode(lang);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('$_dataPrefix${year}_$langCode', jsonEncode(data));
-    await prefs.setInt(
-      '$_tsPrefix${year}_$langCode',
-      DateTime.now().millisecondsSinceEpoch,
-    );
+    try {
+      await _db.into(_db.calendarCacheTable).insertOnConflictUpdate(
+            CalendarCacheTableCompanion.insert(
+              cacheKey: _key(year, langCode),
+              dataJson: jsonEncode(data),
+              updatedAt: DateTime.now(),
+            ),
+          );
+    } catch (e) {
+      if (kDebugMode) print('CalendarCacheService.save error: $e');
+    }
   }
 
   /// 讀取快取的行事曆資料，若不存在或超過 30 天回傳 null
   static Future<Map<String, dynamic>?> getCalendarData(int year, {String? lang}) async {
     final langCode = _getCurrentLanguageCode(lang);
-    final prefs = await SharedPreferences.getInstance();
-    final ts = prefs.getInt('$_tsPrefix${year}_$langCode');
-    if (ts == null) return null;
-
-    final cachedTime = DateTime.fromMillisecondsSinceEpoch(ts);
-    if (DateTime.now().difference(cachedTime) > _cacheDuration) {
-      await prefs.remove('$_dataPrefix${year}_$langCode');
-      await prefs.remove('$_tsPrefix${year}_$langCode');
-      return null;
-    }
-
-    final raw = prefs.getString('$_dataPrefix${year}_$langCode');
-    if (raw == null) return null;
-
+    final key = _key(year, langCode);
     try {
-      return jsonDecode(raw) as Map<String, dynamic>;
-    } catch (_) {
+      final row = await (_db.select(_db.calendarCacheTable)
+            ..where((t) => t.cacheKey.equals(key)))
+          .getSingleOrNull();
+      if (row == null) return null;
+
+      if (DateTime.now().difference(row.updatedAt) > _cacheDuration) {
+        await (_db.delete(_db.calendarCacheTable)
+              ..where((t) => t.cacheKey.equals(key)))
+            .go();
+        return null;
+      }
+
+      return jsonDecode(row.dataJson) as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) print('CalendarCacheService.get error: $e');
       return null;
     }
   }
@@ -72,12 +83,10 @@ class CalendarCacheService {
   /// 清除所有年份的快取（同時清除 in-flight 追蹤）
   static Future<void> clearAllCache() async {
     _inFlight.clear();
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys();
-    for (final key in keys) {
-      if (key.startsWith(_dataPrefix) || key.startsWith(_tsPrefix)) {
-        await prefs.remove(key);
-      }
+    try {
+      await _db.delete(_db.calendarCacheTable).go();
+    } catch (e) {
+      if (kDebugMode) print('CalendarCacheService.clearAllCache error: $e');
     }
   }
 

@@ -1,16 +1,21 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+import '../database/database.dart';
 
 /// 課程詳細資料的本地快取服務
-/// 使用 SharedPreferences 持久化，快取有效期 7 天
+/// 使用 Drift (SQLite) 持久化，快取有效期 7 天
 /// 同時具備 in-flight 去重，避免同一門課被並行請求多次
+///
+/// 註：對外方法簽章與過去（SharedPreferences 版本）完全相同，呼叫端無需修改。
+/// 所有 DB 存取都有防護，任何錯誤都會被視為「快取未命中」，確保即使資料庫
+/// 不可用（例如 Web 缺少 sqlite3.wasm）App 仍能正常運作。
 class CourseDetailCache {
-  static const _prefix = 'course_detail_';
-  static const _tsPrefix = 'course_detail_ts_';
   static const _cacheDuration = Duration(days: 7);
 
   /// 正在進行中的請求（courseKey → Future），用於去重
   static final Map<String, Future<Map<String, dynamic>?>> _inFlight = {};
+
+  static AppDatabase get _db => AppDatabase.instance;
 
   /// 產生快取 key
   static String _key(String year, String semester, String courseNo) =>
@@ -23,23 +28,22 @@ class CourseDetailCache {
     String courseNo,
   ) async {
     final key = _key(year, semester, courseNo);
-    final prefs = await SharedPreferences.getInstance();
-    final ts = prefs.getInt('$_tsPrefix$key');
-    if (ts == null) return null;
-
-    final cachedTime = DateTime.fromMillisecondsSinceEpoch(ts);
-    if (DateTime.now().difference(cachedTime) > _cacheDuration) {
-      await prefs.remove('$_prefix$key');
-      await prefs.remove('$_tsPrefix$key');
-      return null;
-    }
-
-    final raw = prefs.getString('$_prefix$key');
-    if (raw == null) return null;
-
     try {
-      return jsonDecode(raw) as Map<String, dynamic>;
-    } catch (_) {
+      final row = await (_db.select(_db.courseDetailCacheTable)
+            ..where((t) => t.cacheKey.equals(key)))
+          .getSingleOrNull();
+      if (row == null) return null;
+
+      if (DateTime.now().difference(row.updatedAt) > _cacheDuration) {
+        await (_db.delete(_db.courseDetailCacheTable)
+              ..where((t) => t.cacheKey.equals(key)))
+            .go();
+        return null;
+      }
+
+      return jsonDecode(row.dataJson) as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) print('CourseDetailCache.get error: $e');
       return null;
     }
   }
@@ -52,20 +56,26 @@ class CourseDetailCache {
     Map<String, dynamic> data,
   ) async {
     final key = _key(year, semester, courseNo);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('$_prefix$key', jsonEncode(data));
-    await prefs.setInt('$_tsPrefix$key', DateTime.now().millisecondsSinceEpoch);
+    try {
+      await _db.into(_db.courseDetailCacheTable).insertOnConflictUpdate(
+            CourseDetailCacheTableCompanion.insert(
+              cacheKey: key,
+              dataJson: jsonEncode(data),
+              updatedAt: DateTime.now(),
+            ),
+          );
+    } catch (e) {
+      if (kDebugMode) print('CourseDetailCache.save error: $e');
+    }
   }
 
   /// 清除所有課程詳細快取
   static Future<void> clearAll() async {
     _inFlight.clear();
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys();
-    for (final key in keys) {
-      if (key.startsWith(_prefix) || key.startsWith(_tsPrefix)) {
-        await prefs.remove(key);
-      }
+    try {
+      await _db.delete(_db.courseDetailCacheTable).go();
+    } catch (e) {
+      if (kDebugMode) print('CourseDetailCache.clearAll error: $e');
     }
   }
 
@@ -91,7 +101,6 @@ class CourseDetailCache {
     String courseNo,
     Future<Map<String, dynamic>> Function() fetcher,
   ) async {
-
     final cached = await get(year, semester, courseNo);
     if (cached != null) return cached;
 
