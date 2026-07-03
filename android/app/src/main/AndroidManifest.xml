@@ -6,6 +6,12 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:localeConfig="@xml/locales_config">
+        <!-- Firebase 原生層會透過 FirebaseInitProvider 自動初始化，與 Dart 的
+             USE_FIREBASE flag 無關。這裡預設關閉所有資料收集，只有在 USE_FIREBASE=true
+             時由 FirebaseService.init() 於執行期程式化開啟，確保預設/除錯建置完全不收集資料。 -->
+        <meta-data android:name="firebase_data_collection_default_enabled" android:value="false" />
+        <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
         <activity
             android:name=".MainActivity"
             android:label="@string/launcher_name"

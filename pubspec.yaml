@@ -57,6 +57,9 @@ dependencies:
   image_picker: ^1.1.2
   drift: ^2.34.0
   drift_flutter: ^0.3.0
+  firebase_core: ^4.11.0
+  firebase_analytics: ^12.4.3
+  firebase_crashlytics: ^5.2.4
 
 dev_dependencies:
   flutter_test:

@@ -14,11 +14,15 @@ import 'screens/desktop_screen.dart';
 import 'widgets/splash_wrapper.dart';
 import 'services/background_service.dart';
 import 'services/notification_service.dart';
+import 'services/firebase_service.dart';
 
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化 Firebase（僅在 USE_FIREBASE=true 且平台已設定時，否則為 no-op）。
+  await firebaseService.init();
 
   if (!kIsWeb) {
     // 初始化本地通知服務
