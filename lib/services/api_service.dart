@@ -1,141 +1,69 @@
 import 'dart:io';
-import 'dart:ui' as ui;
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:intl/intl.dart';
-import 'cookie_manager/cookie_manager_api.dart';
+import 'package:image_picker/image_picker.dart';
+import 'api_client.dart';
+import 'auth/nyust_auth_service.dart';
+import 'grades/nyust_grades_service.dart';
+import 'course/nyust_course_service.dart';
+import 'calendar/nyust_calendar_service.dart';
+import 'report/cf_report_service.dart';
 import 'scrapers/sso_scraper.dart';
 import 'scrapers/info_scraper.dart';
-import 'scrapers/schedule_scraper.dart';
-import 'scrapers/grades_scraper.dart';
-import 'scrapers/graduation_scraper.dart';
-import 'scrapers/calendar_scraper.dart';
-import 'package:image_picker/image_picker.dart';
 
+/// 對外的統一入口 facade。
+///
+/// 本身不再包辦 HTTP 細節，而是持有一個 [ApiClient] 與各個 feature Service，
+/// 並將呼叫委派下去，藉此保持既有的對外 API 不變（[AuthProvider] / [DataProvider]
+/// 等呼叫端不需同步修改）。
+///
+/// 註：mock/debug 模式的分支仍暫留在此 facade，將於後續階段（Demo Mode 重構）
+/// 改由 Interface + DI 自動切換 Mock 實作取代。
 class ApiService {
-  late Dio _dio;
-  late SsoScraper _ssoScraper;
-  late InfoScraper _infoScraper;
-  late ScheduleScraper _scheduleScraper;
-  late GradesScraper _gradesScraper;
-  late GraduationScraper _graduationScraper;
-  late CalendarScraper _calendarScraper;
-  final String baseUrl = 'https://cf-api.nyust-plus.com';
-  bool _initStarted = false;
-  bool _isInit = false;
+  final ApiClient _client = ApiClient();
 
-  Dio get dio => _dio;
+  late final NyustAuthService _auth;
+  late final NyustGradesService _grades;
+  late final NyustCourseService _course;
+  late final NyustCalendarService _calendar;
+  late final CfReportService _report;
 
-  static const String _apiSecretKey = String.fromEnvironment(
-    'API_SECRET',
-    defaultValue: '',
-  );
-
-  VoidCallback? onSessionExpired;
   bool isMockMode = false;
 
   ApiService() {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 5),
-        validateStatus: (status) {
-          return status! < 500;
-        },
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Nyust-App-Secret': _apiSecretKey,
-        },
-      ),
-    );
-    _dio.interceptors.add(LanguageInterceptor());
-    _ssoScraper = SsoScraper(_dio);
-    _infoScraper = InfoScraper(_dio);
-    _scheduleScraper = ScheduleScraper(_dio);
-    _gradesScraper = GradesScraper(_dio);
-    _graduationScraper = GraduationScraper(_dio);
-    _calendarScraper = CalendarScraper(_dio);
+    _auth = NyustAuthService(_client);
+    _grades = NyustGradesService(_client);
+    _course = NyustCourseService(_client);
+    _calendar = NyustCalendarService(_client);
+    _report = CfReportService(_client);
   }
 
-  Future<void> init() async {
-    if (_isInit) return;
-    if (_initStarted) {
-      while (!_isInit) {
-        await Future.delayed(Duration(milliseconds: 100));
-      }
-      return;
-    }
-    _initStarted = true;
+  Dio get dio => _client.dio;
+  String get baseUrl => _client.baseUrl;
 
-    try {
-      await setupCookieManager(_dio);
-      _isInit = true;
-    } catch (e) {
-      if (kDebugMode) print('ApiService: Init failed: $e');
-      _initStarted = false;
-      rethrow;
-    }
-  }
+  VoidCallback? get onSessionExpired => _client.onSessionExpired;
+  set onSessionExpired(VoidCallback? cb) => _client.onSessionExpired = cb;
 
-  Future<void> _ensureInit() async {
-    if (!_isInit) {
-      await init();
-    }
-  }
+  Future<void> init() => _client.init();
 
   /// 檢查是否有儲存的學校 Cookies
-  Future<bool> hasSavedCookies() async {
-    final cookieJar = _dio.interceptors
-        .whereType<CookieManager>()
-        .firstOrNull
-        ?.cookieJar;
-    if (cookieJar == null) return false;
-    final cookies = await cookieJar.loadForRequest(Uri.parse('https://webapp.yuntech.edu.tw'));
-    return cookies.isNotEmpty;
-  }
+  Future<bool> hasSavedCookies() => _client.hasSavedCookies();
 
   /// 取得特定網域的 Cookies
-  Future<List<Cookie>> getCookiesForUri(Uri uri) async {
-    final cookieJar = _dio.interceptors
-        .whereType<CookieManager>()
-        .firstOrNull
-        ?.cookieJar;
-    if (cookieJar == null) return [];
-    return await cookieJar.loadForRequest(uri);
-  }
+  Future<List<Cookie>> getCookiesForUri(Uri uri) =>
+      _client.getCookiesForUri(uri);
 
-  Future<Map<String, dynamic>> loginInit() async {
-    await _ensureInit();
-    try {
-      return await _ssoScraper.loginInit();
-    } catch (e) {
-      throw Exception('Failed to init login: $e');
-    }
-  }
+  // ---- Auth ----
+
+  Future<Map<String, dynamic>> loginInit() => _auth.loginInit();
 
   Future<Map<String, dynamic>> login(
     String username,
     String password,
     String captcha,
     String requestVerificationToken,
-  ) async {
-    await _ensureInit();
-    try {
-      final result = await _ssoScraper.login(
-        username: username,
-        password: password,
-        captcha: captcha,
-        verificationToken: requestVerificationToken,
-        rememberMe: true,
-      );
-      return result;
-    } catch (e) {
-      throw Exception('Login failed: $e');
-    }
-  }
+  ) =>
+      _auth.login(username, password, captcha, requestVerificationToken);
 
   Future<Map<String, dynamic>> getUserInfo() async {
     if (isMockMode) {
@@ -149,32 +77,29 @@ class ApiService {
         }
       };
     }
-    await _ensureInit();
-    return _infoScraper.getUserInfo();
+    return _auth.getUserInfo();
   }
 
-  Future<Map<String, dynamic>> getCalendarEvents(String year, {String? lang}) async {
-    await _ensureInit();
-    return _calendarScraper.getCalendarEvents(year, languageCode: lang);
-  }
+  Future<void> logout() => _auth.logout();
 
-  Future<Map<String, dynamic>> getHolidays(int year, {String? lang}) async {
-    await _ensureInit();
-    return _calendarScraper.getHolidays(year, languageCode: lang);
-  }
+  // ---- Calendar ----
+
+  Future<Map<String, dynamic>> getCalendarEvents(String year, {String? lang}) =>
+      _calendar.getCalendarEvents(year, lang: lang);
+
+  Future<Map<String, dynamic>> getHolidays(int year, {String? lang}) =>
+      _calendar.getHolidays(year, lang: lang);
 
   /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
-  Future<Map<String, dynamic>> getCalendarCombined(String year, {String? lang}) async {
-    final events = await getCalendarEvents(year, lang: lang);
-    final holidays = await getHolidays(int.parse(year), lang: lang);
+  Future<Map<String, dynamic>> getCalendarCombined(String year,
+          {String? lang}) =>
+      _calendar.getCalendarCombined(year, lang: lang);
 
-    return {
-      'success': events['success'] == true && holidays['success'] == true,
-      'events': events['events'] ?? [],
-      'holidays': holidays['holidays'] ?? [],
-      'holidayDetails': holidays['holidayDetails'] ?? {},
-    };
-  }
+  /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
+  Future<Map<String, dynamic>> getCalendar(int year, {String? lang}) =>
+      _calendar.getCalendarCombined(year.toString(), lang: lang);
+
+  // ---- Grades ----
 
   Future<Map<String, dynamic>> getGrades() async {
     if (isMockMode) {
@@ -262,8 +187,7 @@ class ApiService {
         }
       };
     }
-    await _ensureInit();
-    return _gradesScraper.getGrades();
+    return _grades.getGrades();
   }
 
   Future<Map<String, dynamic>> getGraduation() async {
@@ -307,129 +231,10 @@ class ApiService {
         }
       };
     }
-    await _ensureInit();
-    return _graduationScraper.getGraduation();
+    return _grades.getGraduation();
   }
 
-  /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
-  Future<Map<String, dynamic>> getCalendar(int year, {String? lang}) async {
-    return getCalendarCombined(year.toString(), lang: lang);
-  }
-
-
-
-  Future<Map<String, dynamic>> getTermsOfService({String? lang}) async {
-    await _ensureInit();
-    try {
-      final response = await _dio.get(
-        '/api/policy/terms',
-        queryParameters: lang != null ? {'lang': lang} : null,
-      );
-      return response.data;
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        return {'status': 'error', 'message': '連線逾時，請稍後再試'};
-      }
-      if (e.type == DioExceptionType.connectionError) {
-        return {'status': 'error', 'message': '無法連線至伺服器，請檢查網路連線'};
-      }
-      return {'status': 'error', 'message': 'API 呼叫失敗: ${e.message}'};
-    } catch (e) {
-      return {'status': 'error', 'message': 'API call failed: $e'};
-    }
-  }
-
-  Future<Map<String, dynamic>> submitBugReport({
-    required String description,
-    String? contact,
-    required String deviceInfo,
-    XFile? imageFile,
-  }) async {
-    await _ensureInit();
-    try {
-      final Map<String, dynamic> data = {
-        'description': description,
-        'contact': contact ?? '',
-        'deviceInfo': deviceInfo,
-      };
-
-      if (imageFile != null) {
-        if (kIsWeb) {
-          final bytes = await imageFile.readAsBytes();
-          data['file'] = MultipartFile.fromBytes(
-            bytes,
-            filename: imageFile.name,
-          );
-        } else {
-          data['file'] = await MultipartFile.fromFile(
-            imageFile.path,
-            filename: imageFile.name,
-          );
-        }
-      }
-
-      final formData = FormData.fromMap(data);
-      final response = await _dio.post('/api/report', data: formData);
-      
-      if (response.statusCode != 200) {
-        return {
-          'status': 'error',
-          'code': 'server_error',
-          'statusCode': response.statusCode,
-          'message': '伺服器回應錯誤 (${response.statusCode})',
-        };
-      }
-
-      if (response.data is Map<String, dynamic>) {
-        return response.data as Map<String, dynamic>;
-      } else if (response.data is String) {
-        try {
-          final decoded = jsonDecode(response.data as String);
-          if (decoded is Map<String, dynamic>) {
-            return decoded;
-          }
-        } catch (_) {}
-      }
-
-      return {
-        'status': 'error',
-        'code': 'format_error',
-        'message': '伺服器回應格式錯誤',
-      };
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        return {
-          'status': 'error',
-          'code': 'timeout',
-          'message': '連線逾時，請稍後再試',
-        };
-      }
-      if (e.type == DioExceptionType.connectionError) {
-        return {
-          'status': 'error',
-          'code': 'connection_error',
-          'message': '無法連線至伺服器，請檢查網路連線',
-        };
-      }
-      return {
-        'status': 'error',
-        'code': 'api_failed',
-        'error': e.message ?? e.toString(),
-        'message': 'API 呼叫失敗: ${e.message}',
-      };
-    } catch (e) {
-      return {
-        'status': 'error',
-        'code': 'api_failed',
-        'error': e.toString(),
-        'message': 'API call failed: $e',
-      };
-    }
-  }
+  // ---- Course ----
 
   Future<Map<String, dynamic>> getSchedule() async {
     if (isMockMode) {
@@ -497,70 +302,40 @@ class ApiService {
         }
       };
     }
-    await _ensureInit();
-    return _scheduleScraper.getSchedule();
+    return _course.getSchedule();
   }
 
   Future<Map<String, dynamic>> getCourseDetail({
     required String year,
     required String semester,
     required String courseNo,
-  }) async {
-    await _ensureInit();
-    return _scheduleScraper.getCourseDetail(
-      year: year,
-      semester: semester,
-      courseNo: courseNo,
-    );
-  }
+  }) =>
+      _course.getCourseDetail(
+        year: year,
+        semester: semester,
+        courseNo: courseNo,
+      );
 
-  Future<void> logout() async {
-    await clearCookies();
-  }
+  // ---- Report / Policy ----
 
-  SsoScraper get ssoScraper => _ssoScraper;
-  InfoScraper get infoScraper => _infoScraper;
-}
+  Future<Map<String, dynamic>> getTermsOfService({String? lang}) =>
+      _report.getTermsOfService(lang: lang);
 
-class LanguageInterceptor extends Interceptor {
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final uri = options.uri;
-    final path = uri.path.toLowerCase();
+  Future<Map<String, dynamic>> submitBugReport({
+    required String description,
+    String? contact,
+    required String deviceInfo,
+    XFile? imageFile,
+  }) =>
+      _report.submitBugReport(
+        description: description,
+        contact: contact,
+        deviceInfo: deviceInfo,
+        imageFile: imageFile,
+      );
 
-    // Only intercept student portal pages (WebNewCAS and eStudent) on webapp.yuntech.edu.tw
-    if (uri.host == 'webapp.yuntech.edu.tw' &&
-        (path.contains('/webnewcas/') || path.contains('/estudent/'))) {
-      String languageCode = 'zh';
-      try {
-        if (Intl.defaultLocale != null && Intl.defaultLocale!.isNotEmpty) {
-          languageCode = Intl.defaultLocale!.split('_').first.split('-').first.toLowerCase();
-        } else {
-          languageCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
-        }
-      } catch (_) {
-        try {
-          languageCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
-        } catch (_) {}
-      }
+  // ---- Scraper 存取（維持既有對外 getter；目前無外部使用者）----
 
-      final langValue = languageCode == 'en' ? 'en' : 'zh-TW';
-
-      String currentPath = options.path;
-      if (!currentPath.contains('lang=')) {
-        if (currentPath.contains('?')) {
-          final lastChar = currentPath.substring(currentPath.length - 1);
-          if (lastChar == '?' || lastChar == '&') {
-            currentPath = '${currentPath}lang=$langValue';
-          } else {
-            currentPath = '$currentPath&lang=$langValue';
-          }
-        } else {
-          currentPath = '$currentPath?lang=$langValue';
-        }
-        options.path = currentPath;
-      }
-    }
-    super.onRequest(options, handler);
-  }
+  SsoScraper get ssoScraper => _auth.ssoScraper;
+  InfoScraper get infoScraper => _auth.infoScraper;
 }
