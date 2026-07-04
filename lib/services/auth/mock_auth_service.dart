@@ -33,10 +33,7 @@ class MockAuthService implements AuthService {
 
   @override
   Future<Map<String, dynamic>> getUserInfo() async {
-    return {
-      'success': true,
-      'user': Map<String, dynamic>.from(mockUser),
-    };
+    return {'success': true, 'user': Map<String, dynamic>.from(mockUser)};
   }
 
   @override

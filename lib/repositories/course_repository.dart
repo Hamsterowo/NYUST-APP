@@ -33,24 +33,24 @@ class CourseRepository {
   Future<void> clear() async {
     await _db.transaction(() async {
       await _db.delete(_db.scheduleCourses).go();
-      await (_db.delete(_db.cacheMeta)
-            ..where((t) => t.datasetKey.equals(_datasetKey)))
-          .go();
+      await (_db.delete(
+        _db.cacheMeta,
+      )..where((t) => t.datasetKey.equals(_datasetKey))).go();
     });
   }
 
   Future<bool> _isStale() async {
-    final meta = await (_db.select(_db.cacheMeta)
-          ..where((t) => t.datasetKey.equals(_datasetKey)))
-        .getSingleOrNull();
+    final meta = await (_db.select(
+      _db.cacheMeta,
+    )..where((t) => t.datasetKey.equals(_datasetKey))).getSingleOrNull();
     if (meta == null) return true;
     return DateTime.now().difference(meta.updatedAt) > _ttl;
   }
 
   Future<Map<String, dynamic>?> _buildMap() async {
-    final rows = await (_db.select(_db.scheduleCourses)
-          ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
-        .get();
+    final rows = await (_db.select(
+      _db.scheduleCourses,
+    )..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).get();
     if (rows.isEmpty) return null;
 
     final schedule = rows.map((c) {
@@ -96,7 +96,9 @@ class CourseRepository {
 
       for (var i = 0; i < courses.length; i++) {
         final c = courses[i] as Map;
-        await _db.into(_db.scheduleCourses).insert(
+        await _db
+            .into(_db.scheduleCourses)
+            .insert(
               ScheduleCoursesCompanion.insert(
                 sortOrder: Value(i),
                 semesterCourseNo: Value(_s(c['semesterCourseNo'])),
@@ -121,7 +123,9 @@ class CourseRepository {
             );
       }
 
-      await _db.into(_db.cacheMeta).insert(
+      await _db
+          .into(_db.cacheMeta)
+          .insert(
             CacheMetaCompanion.insert(
               datasetKey: _datasetKey,
               updatedAt: DateTime.now(),

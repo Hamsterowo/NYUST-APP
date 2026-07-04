@@ -39,8 +39,8 @@ class MockGradesService implements GradesService {
               'score': '85',
               'type': '必修',
               'courseNo': '1003',
-            }
-          ]
+            },
+          ],
         },
         {
           'academic_year': '112',
@@ -74,9 +74,9 @@ class MockGradesService implements GradesService {
               'score': '94',
               'type': '必修',
               'courseNo': '2003',
-            }
-          ]
-        }
+            },
+          ],
+        },
       ],
       'cumulative': {
         'average': '90.90',
@@ -85,7 +85,7 @@ class MockGradesService implements GradesService {
         'gpa': '4.02',
         'attempted_credits': '35',
         'earned_credits': '35',
-      }
+      },
     };
   }
 
@@ -124,10 +124,10 @@ class MockGradesService implements GradesService {
             'dept_required': '10',
             'elective': '34',
             'total': '44',
-          }
+          },
         },
-        'missing_courses_text': 'COE3007工程倫理與產業導論[3]、COE3008系統分析與設計[3]'
-      }
+        'missing_courses_text': 'COE3007工程倫理與產業導論[3]、COE3008系統分析與設計[3]',
+      },
     };
   }
 }

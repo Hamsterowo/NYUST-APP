@@ -62,18 +62,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
       ),
     );
-    
+
     splash.confirm();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     final navProvider = Provider.of<NavigationProvider>(context, listen: true);
     if (navProvider.shouldScrollToNotification) {
       navProvider.clearScrollFlag();
-      
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final targetContext = _notificationKey.currentContext;
         if (targetContext != null) {
@@ -83,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             curve: Curves.easeInOut,
           );
         }
-        
+
         // Trigger standard native splash effect after scroll finishes
         Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted) {
@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           checkGradesTask,
         );
       }
-      
+
       if (mounted) {
         showTopSnackBar(
           context,
@@ -242,7 +242,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   children: [
                                     CircleAvatar(
                                       radius: 40,
-                                      backgroundColor: colorScheme.primaryContainer,
+                                      backgroundColor:
+                                          colorScheme.primaryContainer,
                                       child: Icon(
                                         Icons.person,
                                         size: 40,
@@ -254,35 +255,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Text(
                                             user?["user"]?["name"] ??
                                                 user?["user"]?["姓名"] ??
                                                 "Student",
-                                            style: textTheme.headlineSmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                                            style: textTheme.headlineSmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             user?["user"]?["系(所)別"] ??
                                                 user?["user"]?["department"] ??
                                                 "Unknown",
-                                            style: textTheme.bodyMedium?.copyWith(
-                                              color: Colors.white.withValues(alpha: 0.7),
-                                            ),
+                                            style: textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.7),
+                                                ),
                                           ),
                                           const SizedBox(height: 16),
                                           _buildInfoRow(
                                             Icons.badge_outlined,
-                                            user?["user"]?["學號"] ?? "ID Unknown",
+                                            user?["user"]?["學號"] ??
+                                                "ID Unknown",
                                           ),
                                           const SizedBox(height: 8),
                                           _buildInfoRow(
                                             Icons.school_outlined,
-                                            user?["user"]?["班級"] ?? "No Class Info",
+                                            user?["user"]?["班級"] ??
+                                                "No Class Info",
                                           ),
                                         ],
                                       ),
@@ -385,41 +392,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(
-                                    bottomLeft: kIsWeb ? const Radius.circular(12) : Radius.zero,
-                                    bottomRight: kIsWeb ? const Radius.circular(12) : Radius.zero,
+                                    bottomLeft: kIsWeb
+                                        ? const Radius.circular(12)
+                                        : Radius.zero,
+                                    bottomRight: kIsWeb
+                                        ? const Radius.circular(12)
+                                        : Radius.zero,
                                   ),
                                 ),
                                 onTap: () =>
                                     SettingsUtils.openLanguageSettings(),
                               ),
                               if (!kIsWeb) ...[
-                                 const Divider(height: 1, indent: 56),
-                                 ListTile(
-                                   key: _notificationKey,
-                                   leading: Icon(
-                                     Icons.notifications_active_outlined,
-                                     color: colorScheme.onSurfaceVariant,
-                                   ),
-                                   title: Text(
-                                     AppLocalizations.of(context)
-                                         .settingsGradeNotification,
-                                   ),
-                                   trailing: Transform.scale(
-                                     scale: 0.8, // 縮小 20%
-                                     alignment: Alignment.centerRight, // 靠右對齊
-                                     child: Switch.adaptive(
-                                       value: _gradeNotificationEnabled,
-                                       onChanged: _toggleGradeNotification,
-                                     ),
-                                   ),
-                                   shape: RoundedRectangleBorder(
-                                     borderRadius: BorderRadius.only(
-                                       bottomLeft: kDebugMode ? Radius.zero : const Radius.circular(12),
-                                       bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
-                                     ),
-                                   ),
-                                   onTap: () => _toggleGradeNotification(!_gradeNotificationEnabled),
-                                 ),
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  key: _notificationKey,
+                                  leading: Icon(
+                                    Icons.notifications_active_outlined,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  title: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).settingsGradeNotification,
+                                  ),
+                                  trailing: Transform.scale(
+                                    scale: 0.8, // 縮小 20%
+                                    alignment: Alignment.centerRight, // 靠右對齊
+                                    child: Switch.adaptive(
+                                      value: _gradeNotificationEnabled,
+                                      onChanged: _toggleGradeNotification,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: kDebugMode
+                                          ? Radius.zero
+                                          : const Radius.circular(12),
+                                      bottomRight: kDebugMode
+                                          ? Radius.zero
+                                          : const Radius.circular(12),
+                                    ),
+                                  ),
+                                  onTap: () => _toggleGradeNotification(
+                                    !_gradeNotificationEnabled,
+                                  ),
+                                ),
                               ],
                               if (kDebugMode && !kIsWeb) ...[
                                 const Divider(height: 1, indent: 56),
@@ -429,7 +447,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: Colors.orange,
                                   ),
                                   title: const Text('【開發者】立即觸發一次背景檢查'),
-                                  subtitle: const Text('點擊後將會立刻在背景啟動一次排程任務進行測試'),
+                                  subtitle: const Text(
+                                    '點擊後將會立刻在背景啟動一次排程任務進行測試',
+                                  ),
                                   trailing: const Icon(Icons.play_arrow),
                                   shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
@@ -575,10 +595,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.7)),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: const TextStyle(fontSize: 14, color: Colors.white),
-        ),
+        Text(text, style: const TextStyle(fontSize: 14, color: Colors.white)),
       ],
     );
   }
@@ -599,10 +616,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           value != '無' &&
           value != 'None' &&
           value != 'null') {
-        extraFields.add({
-          'label': field,
-          'value': value,
-        });
+        extraFields.add({'label': field, 'value': value});
       }
     });
 
@@ -611,10 +625,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return [
       const Padding(
         padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: Divider(
-          color: Colors.white24,
-          height: 1,
-        ),
+        child: Divider(color: Colors.white24, height: 1),
       ),
       Wrap(
         spacing: 8.0,
@@ -622,7 +633,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: extraFields.map((field) {
           final label = field['label']!;
           final value = field['value']!;
-          
+
           String displayLabel = label;
           IconData icon;
           if (label == '輔系/雙主修') {
@@ -637,7 +648,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 8.0,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8.0),
@@ -649,18 +663,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  size: 16,
-                  color: Colors.amber[200],
-                ),
+                Icon(icon, size: 16, color: Colors.amber[200]),
                 const SizedBox(width: 8),
                 Text(
                   '$displayLabel: $value',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12.0,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 12.0),
                 ),
               ],
             ),

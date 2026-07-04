@@ -56,18 +56,30 @@ class _LoginFormState extends State<LoginForm> {
     final captcha = _captchaController.text.trim();
 
     if (username.isEmpty) {
-      showTopSnackBar(context, AppLocalizations.of(context).loginUsernamePrompt, type: SnackBarType.warning);
+      showTopSnackBar(
+        context,
+        AppLocalizations.of(context).loginUsernamePrompt,
+        type: SnackBarType.warning,
+      );
       return;
     }
     final isDebug = username == 'debug' || username.toLowerCase() == 'test';
 
     if (!isDebug) {
       if (password.isEmpty) {
-        showTopSnackBar(context, AppLocalizations.of(context).loginPasswordPrompt, type: SnackBarType.warning);
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context).loginPasswordPrompt,
+          type: SnackBarType.warning,
+        );
         return;
       }
       if (captcha.isEmpty) {
-        showTopSnackBar(context, AppLocalizations.of(context).loginCaptchaPrompt, type: SnackBarType.warning);
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context).loginCaptchaPrompt,
+          type: SnackBarType.warning,
+        );
         return;
       }
     }
@@ -83,7 +95,6 @@ class _LoginFormState extends State<LoginForm> {
         _captchaController.clear();
       }
     } else {
-
       TextInput.finishAutofillContext();
     }
   }
@@ -158,7 +169,9 @@ class _LoginFormState extends State<LoginForm> {
                         }
                       },
                       decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context).loginCaptchaLabel,
+                        labelText: AppLocalizations.of(
+                          context,
+                        ).loginCaptchaLabel,
                         border: OutlineInputBorder(),
                         filled: true,
                       ),
@@ -180,7 +193,9 @@ class _LoginFormState extends State<LoginForm> {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () => auth.fetchCaptcha(),
-                    tooltip: AppLocalizations.of(context).loginCaptchaRefreshTooltip,
+                    tooltip: AppLocalizations.of(
+                      context,
+                    ).loginCaptchaRefreshTooltip,
                   ),
                 ],
               ),
@@ -196,7 +211,10 @@ class _LoginFormState extends State<LoginForm> {
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text(AppLocalizations.of(context).loginButton, style: TextStyle(fontSize: 16)),
+                    child: Text(
+                      AppLocalizations.of(context).loginButton,
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
               const SizedBox(height: 16),

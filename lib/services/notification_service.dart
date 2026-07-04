@@ -19,15 +19,16 @@ class NotificationService {
     // iOS initialization settings
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+        );
 
     await _flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
@@ -44,14 +45,16 @@ class NotificationService {
     // Android 13+ (SDK 33+) 請求 POST_NOTIFICATIONS 權限
     final androidResolved = _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-    final bool? androidGranted =
-        await androidResolved?.requestNotificationsPermission();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final bool? androidGranted = await androidResolved
+        ?.requestNotificationsPermission();
 
     // iOS 請求權限
     final iosResolved = _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
+          IOSFlutterLocalNotificationsPlugin
+        >();
     final bool? iosGranted = await iosResolved?.requestPermissions(
       alert: true,
       badge: true,
@@ -70,20 +73,20 @@ class NotificationService {
   }) async {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-      'grade_updates_channel_id',
-      '學期成績更新通知',
-      channelDescription: '當期末/學期成績有更新時發出通知',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker',
-    );
+          'grade_updates_channel_id',
+          '學期成績更新通知',
+          channelDescription: '當期末/學期成績有更新時發出通知',
+          importance: Importance.max,
+          priority: Priority.high,
+          ticker: 'ticker',
+        );
 
     const DarwinNotificationDetails darwinNotificationDetails =
         DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
 
     const NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,

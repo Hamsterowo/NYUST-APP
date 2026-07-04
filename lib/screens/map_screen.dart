@@ -124,7 +124,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           _isLoading = false;
         });
 
-        if (widget.targetRoomCode != null && widget.targetRoomCode!.isNotEmpty) {
+        if (widget.targetRoomCode != null &&
+            widget.targetRoomCode!.isNotEmpty) {
           _handleAutoTargetRoom(widget.targetRoomCode!, buildings);
         }
       }
@@ -165,7 +166,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          final renderBox = _mapKey.currentContext?.findRenderObject() as RenderBox?;
+          final renderBox =
+              _mapKey.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox != null) {
             _zoomToBuilding(bId, renderBox.size);
           }
@@ -283,7 +285,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       ),
     );
 
-
     return Card(
       elevation: 6,
       margin: EdgeInsets.zero,
@@ -349,7 +350,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             if (_queryRoomCode != null) ...[
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: colorScheme.secondary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -357,10 +361,16 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.search_rounded, size: 14, color: colorScheme.secondary),
+                    Icon(
+                      Icons.search_rounded,
+                      size: 14,
+                      color: colorScheme.secondary,
+                    ),
                     const SizedBox(width: 4),
                     Text(
-                      AppLocalizations.of(context).mapQueryRoom(_queryRoomCode ?? ''),
+                      AppLocalizations.of(
+                        context,
+                      ).mapQueryRoom(_queryRoomCode ?? ''),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -440,10 +450,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     icon: const Icon(Icons.layers_outlined, size: 16),
                     label: Text(
                       _queryRoomCode != null
-                          ? AppLocalizations.of(context)
-                              .mapFloorPlanUnavailable(_queryRoomCode!)
-                          : AppLocalizations.of(context)
-                              .mapFloorPlanUnderConstruction,
+                          ? AppLocalizations.of(
+                              context,
+                            ).mapFloorPlanUnavailable(_queryRoomCode!)
+                          : AppLocalizations.of(
+                              context,
+                            ).mapFloorPlanUnderConstruction,
                       style: const TextStyle(fontSize: 13),
                     ),
                     style: FilledButton.styleFrom(

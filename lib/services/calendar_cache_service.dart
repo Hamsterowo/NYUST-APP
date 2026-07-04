@@ -22,13 +22,20 @@ class CalendarCacheService {
     String languageCode = 'zh';
     try {
       if (Intl.defaultLocale != null && Intl.defaultLocale!.isNotEmpty) {
-        languageCode = Intl.defaultLocale!.split('_').first.split('-').first.toLowerCase();
+        languageCode = Intl.defaultLocale!
+            .split('_')
+            .first
+            .split('-')
+            .first
+            .toLowerCase();
       } else {
-        languageCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+        languageCode = ui.PlatformDispatcher.instance.locale.languageCode
+            .toLowerCase();
       }
     } catch (_) {
       try {
-        languageCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+        languageCode = ui.PlatformDispatcher.instance.locale.languageCode
+            .toLowerCase();
       } catch (_) {}
     }
     return languageCode == 'en' ? 'en' : 'zh-tw';
@@ -44,7 +51,9 @@ class CalendarCacheService {
   }) async {
     final langCode = _getCurrentLanguageCode(lang);
     try {
-      await _db.into(_db.calendarCacheTable).insertOnConflictUpdate(
+      await _db
+          .into(_db.calendarCacheTable)
+          .insertOnConflictUpdate(
             CalendarCacheTableCompanion.insert(
               cacheKey: _key(year, langCode),
               dataJson: jsonEncode(data),
@@ -57,19 +66,22 @@ class CalendarCacheService {
   }
 
   /// 讀取快取的行事曆資料，若不存在或超過 30 天回傳 null
-  static Future<Map<String, dynamic>?> getCalendarData(int year, {String? lang}) async {
+  static Future<Map<String, dynamic>?> getCalendarData(
+    int year, {
+    String? lang,
+  }) async {
     final langCode = _getCurrentLanguageCode(lang);
     final key = _key(year, langCode);
     try {
-      final row = await (_db.select(_db.calendarCacheTable)
-            ..where((t) => t.cacheKey.equals(key)))
-          .getSingleOrNull();
+      final row = await (_db.select(
+        _db.calendarCacheTable,
+      )..where((t) => t.cacheKey.equals(key))).getSingleOrNull();
       if (row == null) return null;
 
       if (DateTime.now().difference(row.updatedAt) > _cacheDuration) {
-        await (_db.delete(_db.calendarCacheTable)
-              ..where((t) => t.cacheKey.equals(key)))
-            .go();
+        await (_db.delete(
+          _db.calendarCacheTable,
+        )..where((t) => t.cacheKey.equals(key))).go();
         return null;
       }
 

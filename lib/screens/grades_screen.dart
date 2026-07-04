@@ -56,7 +56,10 @@ class _GradesScreenState extends State<GradesScreen> {
             FilledButton.tonal(
               onPressed: () {
                 context.read<NavigationProvider>().setIndex(4);
-                showTopSnackBar(context, AppLocalizations.of(context).pleaseLoginToViewGrades);
+                showTopSnackBar(
+                  context,
+                  AppLocalizations.of(context).pleaseLoginToViewGrades,
+                );
               },
               child: Text(AppLocalizations.of(context).goToLogin),
             ),
@@ -84,12 +87,16 @@ class _GradesScreenState extends State<GradesScreen> {
               segments: <ButtonSegment<int>>[
                 ButtonSegment<int>(
                   value: 0,
-                  label: Text(AppLocalizations.of(context).gradesSegmentSemester),
+                  label: Text(
+                    AppLocalizations.of(context).gradesSegmentSemester,
+                  ),
                   icon: const Icon(Icons.calendar_view_day),
                 ),
                 ButtonSegment<int>(
                   value: 1,
-                  label: Text(AppLocalizations.of(context).gradesSegmentHistory),
+                  label: Text(
+                    AppLocalizations.of(context).gradesSegmentHistory,
+                  ),
                   icon: const Icon(Icons.history),
                 ),
               ],
@@ -123,7 +130,10 @@ class _GradesScreenState extends State<GradesScreen> {
             tooltip: AppLocalizations.of(context).settingsGradeNotification,
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NavigationProvider>().setIndex(4, scrollToNotification: true);
+              context.read<NavigationProvider>().setIndex(
+                4,
+                scrollToNotification: true,
+              );
             },
           ),
           IconButton(
@@ -134,7 +144,8 @@ class _GradesScreenState extends State<GradesScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AppWebViewScreen(
-                    url: 'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx',
+                    url:
+                        'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx',
                   ),
                 ),
               );
@@ -159,7 +170,10 @@ class _GradesScreenState extends State<GradesScreen> {
               style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            Text(AppLocalizations.of(context).checkNetworkRetry, style: const TextStyle(color: Colors.grey)),
+            Text(
+              AppLocalizations.of(context).checkNetworkRetry,
+              style: const TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () => data.fetchGrades(force: true),
@@ -346,7 +360,8 @@ class _GradesScreenState extends State<GradesScreen> {
                 const SizedBox(width: 8),
                 _buildStatCard(
                   label: AppLocalizations.of(context).gradesGPA,
-                  value: (semester['summary']?['gpa']?.toString().isEmpty ?? true)
+                  value:
+                      (semester['summary']?['gpa']?.toString().isEmpty ?? true)
                       ? "-"
                       : semester['summary']['gpa'].toString(),
                   icon: Icons.grade_outlined,
@@ -400,7 +415,7 @@ class _GradesScreenState extends State<GradesScreen> {
                           : scoreRaw.contains('通過') ||
                                 scoreRaw.toLowerCase().contains('pass'));
                   final effectivePass = isPass;
-                  
+
                   String displayScore = scoreRaw;
                   if (isEmpty) {
                     displayScore = AppLocalizations.of(context).notSpecified;
@@ -409,10 +424,13 @@ class _GradesScreenState extends State<GradesScreen> {
                     if (scoreRaw == '不通過') displayScore = 'Fail';
                   }
 
-                  final cName = (isEnglish && course['name_en'] != null && course['name_en'].toString().trim().isNotEmpty)
+                  final cName =
+                      (isEnglish &&
+                          course['name_en'] != null &&
+                          course['name_en'].toString().trim().isNotEmpty)
                       ? course['name_en']
                       : (course['name'] ?? 'Unknown Course');
-                  
+
                   final typeZh = course['type'] ?? '';
                   String type = typeZh;
                   if (isEnglish) {
@@ -490,7 +508,8 @@ class _GradesScreenState extends State<GradesScreen> {
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: colorScheme.secondaryContainer,
+                                            color:
+                                                colorScheme.secondaryContainer,
                                             borderRadius: BorderRadius.circular(
                                               4,
                                             ),
@@ -507,7 +526,11 @@ class _GradesScreenState extends State<GradesScreen> {
                                         const SizedBox(width: 8),
                                       ],
                                       Text(
-                                        AppLocalizations.of(context).courseCreditsFormat(course["credits"]?.toString() ?? '0'),
+                                        AppLocalizations.of(
+                                          context,
+                                        ).courseCreditsFormat(
+                                          course["credits"]?.toString() ?? '0',
+                                        ),
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: colorScheme.onSurfaceVariant,
@@ -583,15 +606,15 @@ class _GradesScreenState extends State<GradesScreen> {
       final cumRankText = cumRank.isNotEmpty && cumTotal.isNotEmpty
           ? '$cumRank / $cumTotal'
           : cumRank.isNotEmpty
-              ? cumRank
-              : '-';
+          ? cumRank
+          : '-';
       final cumCredits = cumulative['earned_credits']?.toString() ?? '';
       final cumAttempted = cumulative['attempted_credits']?.toString() ?? '';
       final cumCreditsText = cumCredits.isNotEmpty && cumAttempted.isNotEmpty
           ? '$cumCredits/$cumAttempted'
           : cumCredits.isNotEmpty
-              ? cumCredits
-              : '-';
+          ? cumCredits
+          : '-';
 
       cumulativeDashboard = Padding(
         padding: const EdgeInsets.only(bottom: 20),
@@ -733,12 +756,18 @@ class _GradesScreenState extends State<GradesScreen> {
         final apiGPA = semester['summary']?['gpa']?.toString() ?? '';
         final displayGPA = apiGPA.isNotEmpty ? apiGPA : '-';
 
-        final avgText = AppLocalizations.of(context).gradesAverageShort(displayAverage);
+        final avgText = AppLocalizations.of(
+          context,
+        ).gradesAverageShort(displayAverage);
         final gpaText = AppLocalizations.of(context).gradesGPAShort(displayGPA);
         final rankText = AppLocalizations.of(context).gradesRankShort(
-          (semester["summary"]?["rank"]?.toString().isEmpty ?? true) ? "-" : semester["summary"]["rank"]
+          (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
+              ? "-"
+              : semester["summary"]["rank"],
         );
-        final creditsText = AppLocalizations.of(context).gradesCreditsShort(passRate);
+        final creditsText = AppLocalizations.of(
+          context,
+        ).gradesCreditsShort(passRate);
 
         return Card(
           elevation: 0,
@@ -750,9 +779,8 @@ class _GradesScreenState extends State<GradesScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SemesterGradesDetailScreen(
-                    semester: semester,
-                  ),
+                  builder: (context) =>
+                      SemesterGradesDetailScreen(semester: semester),
                 ),
               );
             },
@@ -947,8 +975,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
     final displayAverage = calculatedAverage;
     final displayRank =
         (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
-            ? "-"
-            : semester["summary"]["rank"];
+        ? "-"
+        : semester["summary"]["rank"];
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -1020,11 +1048,12 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                 final scoreRaw = course['score']?.toString() ?? '';
                 final isEmpty = scoreRaw.isEmpty;
                 final score = isEmpty ? null : double.tryParse(scoreRaw);
-                final isPass = !isEmpty &&
+                final isPass =
+                    !isEmpty &&
                     (score != null
                         ? score >= 60
                         : scoreRaw.contains('通過') ||
-                            scoreRaw.toLowerCase().contains('pass'));
+                              scoreRaw.toLowerCase().contains('pass'));
                 final effectivePass = isPass;
 
                 String displayScore = scoreRaw;
@@ -1035,7 +1064,10 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                   if (scoreRaw == '不通過') displayScore = 'Fail';
                 }
 
-                final cName = (isEnglish && course['name_en'] != null && course['name_en'].toString().trim().isNotEmpty)
+                final cName =
+                    (isEnglish &&
+                        course['name_en'] != null &&
+                        course['name_en'].toString().trim().isNotEmpty)
                     ? course['name_en']
                     : (course['name'] ?? 'Unknown Course');
 
@@ -1117,20 +1149,27 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                                         ),
                                         decoration: BoxDecoration(
                                           color: colorScheme.secondaryContainer,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                         ),
                                         child: Text(
                                           type,
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: colorScheme.onSecondaryContainer,
+                                            color: colorScheme
+                                                .onSecondaryContainer,
                                           ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                     ],
                                     Text(
-                                      AppLocalizations.of(context).courseCreditsFormat(course["credits"]?.toString() ?? '0'),
+                                      AppLocalizations.of(
+                                        context,
+                                      ).courseCreditsFormat(
+                                        course["credits"]?.toString() ?? '0',
+                                      ),
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: colorScheme.onSurfaceVariant,
@@ -1151,8 +1190,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                               color: isEmpty
                                   ? colorScheme.surfaceContainerHighest
                                   : effectivePass
-                                      ? Colors.green.withValues(alpha: 0.15)
-                                      : Colors.red.withValues(alpha: 0.15),
+                                  ? Colors.green.withValues(alpha: 0.15)
+                                  : Colors.red.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -1163,8 +1202,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                                 color: isEmpty
                                     ? colorScheme.onSurfaceVariant
                                     : effectivePass
-                                        ? Colors.green[700]
-                                        : Colors.red[700],
+                                    ? Colors.green[700]
+                                    : Colors.red[700],
                               ),
                             ),
                           ),

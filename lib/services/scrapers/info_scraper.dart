@@ -13,16 +13,12 @@ class InfoScraper extends BaseScraper {
   /// 獲取使用者基本資料
   Future<Map<String, dynamic>> getUserInfo() async {
     try {
-      if (kDebugMode) print('InfoScraper: Fetching user info from $infoPageUrl');
+      if (kDebugMode)
+        print('InfoScraper: Fetching user info from $infoPageUrl');
 
       final response = await getWithRedirects(
         infoPageUrl,
-        options: Options(
-          headers: {
-            ...commonHeaders,
-
-          },
-        ),
+        options: Options(headers: {...commonHeaders}),
       );
 
       if (kDebugMode) {
@@ -30,11 +26,17 @@ class InfoScraper extends BaseScraper {
       }
 
       var document = parseHtml(response.data);
-      if (kDebugMode) print('InfoScraper: Page Title: ${document.querySelector('title')?.text.trim()}');
+      if (kDebugMode)
+        print(
+          'InfoScraper: Page Title: ${document.querySelector('title')?.text.trim()}',
+        );
 
       if (response.data.toString().contains('ctl00_showName') == false &&
           response.data.toString().contains('姓名') == false) {
-        if (kDebugMode) print('InfoScraper: Content seems missing, trying fallback to StudInfo.aspx...');
+        if (kDebugMode)
+          print(
+            'InfoScraper: Content seems missing, trying fallback to StudInfo.aspx...',
+          );
         final studInfoRes = await getWithRedirects(
           'https://webapp.yuntech.edu.tw/eStudent/EStud/StudInfo.aspx',
           options: Options(headers: commonHeaders),
@@ -45,7 +47,16 @@ class InfoScraper extends BaseScraper {
       final userInfo = <String, String>{};
 
       final fieldsToExtract = [
-        '入學年制', '學號', '姓名', '輔系/雙主修', '特殊身分', '系(所)別', '班級', '性別', '教育學程', '學程'
+        '入學年制',
+        '學號',
+        '姓名',
+        '輔系/雙主修',
+        '特殊身分',
+        '系(所)別',
+        '班級',
+        '性別',
+        '教育學程',
+        '學程',
       ];
 
       for (var field in fieldsToExtract) {
@@ -66,7 +77,9 @@ class InfoScraper extends BaseScraper {
                 value = nextSib.text.trim();
               } else {
                 dom.Element? parentCell = el.parent;
-                while (parentCell != null && parentCell.localName != 'td' && parentCell.localName != 'th') {
+                while (parentCell != null &&
+                    parentCell.localName != 'td' &&
+                    parentCell.localName != 'th') {
                   parentCell = parentCell.parent;
                 }
                 if (parentCell != null) {
@@ -88,20 +101,27 @@ class InfoScraper extends BaseScraper {
       userInfo['姓名'] = userInfo['姓名'] ?? '';
 
       if (userInfo['姓名']!.isEmpty) {
-        userInfo['姓名'] = document.querySelector('#ctl00_showName')?.text.trim() ??
-                         document.querySelector('#ctl00_showUser')?.text.trim() ??
-                         document.querySelector('span[id*="showName"]')?.text.trim() ??
-                         '';
+        userInfo['姓名'] =
+            document.querySelector('#ctl00_showName')?.text.trim() ??
+            document.querySelector('#ctl00_showUser')?.text.trim() ??
+            document.querySelector('span[id*="showName"]')?.text.trim() ??
+            '';
       }
 
       userInfo['name'] = userInfo['姓名']!;
       userInfo['department'] = userInfo['系(所)別'] ?? '';
 
       if (userInfo['name']!.isEmpty) {
-        final allTexts = document.querySelectorAll('span, td, div').map((e) => e.text.trim()).toList();
+        final allTexts = document
+            .querySelectorAll('span, td, div')
+            .map((e) => e.text.trim())
+            .toList();
         for (var t in allTexts) {
           if (t.contains('歡迎') && t.contains('同學')) {
-            userInfo['name'] = t.replaceAll('歡迎', '').replaceAll('同學', '').trim();
+            userInfo['name'] = t
+                .replaceAll('歡迎', '')
+                .replaceAll('同學', '')
+                .trim();
             userInfo['姓名'] = userInfo['name']!;
             break;
           }
@@ -112,17 +132,12 @@ class InfoScraper extends BaseScraper {
         print('InfoScraper: CRITICAL - All name extraction strategies failed.');
       }
 
-      if (kDebugMode) print('InfoScraper: Final Extracted info for ${userInfo['name']}');
+      if (kDebugMode)
+        print('InfoScraper: Final Extracted info for ${userInfo['name']}');
 
-      return {
-        'success': true,
-        'user': userInfo,
-      };
+      return {'success': true, 'user': userInfo};
     } catch (e) {
-      return {
-        'success': false,
-        'message': '獲取個人資訊失敗: $e',
-      };
+      return {'success': false, 'message': '獲取個人資訊失敗: $e'};
     }
   }
 }

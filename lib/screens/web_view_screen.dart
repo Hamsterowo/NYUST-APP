@@ -58,9 +58,11 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
             }
           },
           onWebResourceError: (WebResourceError error) {
-            debugPrint("WebView Error: code=${error.errorCode}, description=${error.description}, type=${error.errorType}, url=${error.url}, isForMainFrame=${error.isForMainFrame}");
+            debugPrint(
+              "WebView Error: code=${error.errorCode}, description=${error.description}, type=${error.errorType}, url=${error.url}, isForMainFrame=${error.isForMainFrame}",
+            );
             if (error.description.contains("net::ERR_ABORTED")) return;
-            
+
             // Only trigger error screen if the error is for the main page frame
             if (error.isForMainFrame ?? true) {
               if (mounted) {
@@ -158,7 +160,9 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(AppLocalizations.of(context).webViewLinkCopied),
+                        content: Text(
+                          AppLocalizations.of(context).webViewLinkCopied,
+                        ),
                         behavior: SnackBarBehavior.floating,
                         duration: const Duration(seconds: 2),
                       ),
@@ -201,7 +205,9 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
                     value: _progress / 100.0,
                     minHeight: 2.0,
                     backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.primary,
+                    ),
                   ),
                 )
               : null,
@@ -214,9 +220,16 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: colorScheme.error,
+                    ),
                     const SizedBox(height: 16),
-                    Text(AppLocalizations.of(context).webViewLoadFailed, style: const TextStyle(fontSize: 18)),
+                    Text(
+                      AppLocalizations.of(context).webViewLoadFailed,
+                      style: const TextStyle(fontSize: 18),
+                    ),
                     const SizedBox(height: 16),
                     FilledButton.tonal(
                       onPressed: () {

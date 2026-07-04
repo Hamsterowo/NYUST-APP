@@ -100,11 +100,7 @@ class CfReportService implements ReportService {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout) {
-        return {
-          'status': 'error',
-          'code': 'timeout',
-          'message': '連線逾時，請稍後再試',
-        };
+        return {'status': 'error', 'code': 'timeout', 'message': '連線逾時，請稍後再試'};
       }
       if (e.type == DioExceptionType.connectionError) {
         return {

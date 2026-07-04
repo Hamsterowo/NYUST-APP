@@ -82,8 +82,9 @@ class ApiClient {
         .firstOrNull
         ?.cookieJar;
     if (cookieJar == null) return false;
-    final cookies = await cookieJar
-        .loadForRequest(Uri.parse('https://webapp.yuntech.edu.tw'));
+    final cookies = await cookieJar.loadForRequest(
+      Uri.parse('https://webapp.yuntech.edu.tw'),
+    );
     return cookies.isNotEmpty;
   }
 
@@ -115,16 +116,20 @@ class LanguageInterceptor extends Interceptor {
       String languageCode = 'zh';
       try {
         if (Intl.defaultLocale != null && Intl.defaultLocale!.isNotEmpty) {
-          languageCode =
-              Intl.defaultLocale!.split('_').first.split('-').first.toLowerCase();
+          languageCode = Intl.defaultLocale!
+              .split('_')
+              .first
+              .split('-')
+              .first
+              .toLowerCase();
         } else {
-          languageCode =
-              ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+          languageCode = ui.PlatformDispatcher.instance.locale.languageCode
+              .toLowerCase();
         }
       } catch (_) {
         try {
-          languageCode =
-              ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+          languageCode = ui.PlatformDispatcher.instance.locale.languageCode
+              .toLowerCase();
         } catch (_) {}
       }
 

@@ -93,7 +93,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
 
     try {
       final deviceInfo = await _getDeviceInfo();
-      
+
       final result = await auth.api.submitBugReport(
         description: description,
         contact: _contactController.text.trim(),
@@ -104,7 +104,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
       if (mounted) {
         if (result['status'] == 'success') {
           Navigator.pop(context); // Go back to settings page
-          
+
           final caseId = result['caseId'] ?? 'unknown';
           _showSuccessDialog(caseId);
         } else {
@@ -130,11 +130,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
               errorMessage = result['message'] ?? l10n.reportSubmitError;
               break;
           }
-          showTopSnackBar(
-            context,
-            errorMessage,
-            type: SnackBarType.error,
-          );
+          showTopSnackBar(context, errorMessage, type: SnackBarType.error);
         }
       }
     } catch (e) {
@@ -161,7 +157,11 @@ class _BugReportScreenState extends State<BugReportScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.teal, size: 28),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Colors.teal,
+              size: 28,
+            ),
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context).reportIssueTitle),
           ],
@@ -230,7 +230,10 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -296,10 +299,17 @@ class _BugReportScreenState extends State<BugReportScreen> {
               onTap: _copyEmail,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
+                ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 16, color: colorScheme.outline),
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: colorScheme.outline,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

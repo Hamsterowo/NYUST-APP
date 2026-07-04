@@ -17,7 +17,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> _saveUserCache(Map<String, dynamic> info) async {
-    await _secureStorage.write(key: _cachedUserInfoKey, value: jsonEncode(info));
+    await _secureStorage.write(
+      key: _cachedUserInfoKey,
+      value: jsonEncode(info),
+    );
   }
 
   Future<void> _clearUserCache() async {
@@ -95,7 +98,8 @@ class AuthProvider with ChangeNotifier {
     try {
       final info = await _apiService.getUserInfo();
 
-      final bool hasValidUser = info['user'] != null &&
+      final bool hasValidUser =
+          info['user'] != null &&
           info['user']['name'] != null &&
           info['user']['name'].toString().trim().isNotEmpty;
 
@@ -108,7 +112,6 @@ class AuthProvider with ChangeNotifier {
       } else if (info['status'] == 'session_expired' ||
           info['success'] == false ||
           (info['success'] == true && !hasValidUser)) {
-
         _user = null;
         await _clearUserCache();
         await _apiService.logout();
@@ -147,7 +150,6 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-
       await _apiService.logout();
       await _apiService.init();
 
@@ -166,17 +168,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> login(
-    String username,
-    String password,
-    String captcha,
-  ) async {
+  Future<bool> login(String username, String password, String captcha) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-
       if (username == 'debug' || username.toLowerCase() == 'test') {
         _apiService.isMockMode = true;
         _user = {
@@ -208,7 +205,6 @@ class AuthProvider with ChangeNotifier {
       );
 
       if (result['success'] == true) {
-
         final info = await _apiService.getUserInfo();
         _user = info;
         _user?['username'] = username;

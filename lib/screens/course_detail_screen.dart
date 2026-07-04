@@ -42,7 +42,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   Future<void> _fetchDetail() async {
     try {
-
       final response = await CourseDetailCache.getOrFetch(
         widget.year,
         widget.semester,
@@ -63,14 +62,18 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         });
       } else {
         setState(() {
-          _errorMessage = response?['message'] ?? AppLocalizations.of(context).loadCalendarFailed;
+          _errorMessage =
+              response?['message'] ??
+              AppLocalizations.of(context).loadCalendarFailed;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = AppLocalizations.of(context).loadErrorPrefix(e.toString());
+        _errorMessage = AppLocalizations.of(
+          context,
+        ).loadErrorPrefix(e.toString());
         _isLoading = false;
       });
     }
@@ -87,7 +90,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       return '必修 (Required)';
     } else if (type == '選修' || type.toLowerCase() == 'elective') {
       return '選修 (Elective)';
-    } else if (type == '通識' || type.toLowerCase() == 'general education' || type.toLowerCase().contains('general')) {
+    } else if (type == '通識' ||
+        type.toLowerCase() == 'general education' ||
+        type.toLowerCase().contains('general')) {
       return '通識 (General Education)';
     }
     return type;
@@ -122,8 +127,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     try {
       final jsonString = await rootBundle.loadString('assets/map_data.json');
       final List<dynamic> jsonList = json.decode(jsonString);
-      final buildings =
-          jsonList.map((item) => MapBuilding.fromJson(item)).toList();
+      final buildings = jsonList
+          .map((item) => MapBuilding.fromJson(item))
+          .toList();
 
       if (!mounted) return;
 
@@ -153,10 +159,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MapScreen(
-              embed: false,
-              targetRoomCode: roomCode,
-            ),
+            builder: (context) =>
+                MapScreen(embed: false, targetRoomCode: roomCode),
           ),
         );
       } else {
@@ -168,7 +172,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showTopSnackBar(context, AppLocalizations.of(context).courseLoadMapDataFailed(e.toString()), isError: true);
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context).courseLoadMapDataFailed(e.toString()),
+          isError: true,
+        );
       }
     }
   }
@@ -197,11 +205,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               const Divider(height: 1),
               ...roomCodes.map((room) {
                 return ListTile(
-                  leading: Icon(
-                    Icons.map_outlined,
-                    color: colorScheme.primary,
+                  leading: Icon(Icons.map_outlined, color: colorScheme.primary),
+                  title: Text(
+                    AppLocalizations.of(context).courseGoToRoomLocation(room),
                   ),
-                  title: Text(AppLocalizations.of(context).courseGoToRoomLocation(room)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.pop(context);
@@ -232,7 +239,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => AppWebViewScreen(
-                    url: 'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
+                    url:
+                        'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
                   ),
                 ),
               );
@@ -405,19 +413,31 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
           children: [
-            _buildInfoRow(AppLocalizations.of(context).courseInstructor, detail.teacher),
+            _buildInfoRow(
+              AppLocalizations.of(context).courseInstructor,
+              detail.teacher,
+            ),
             if (detail.teacherEmailAndTel != null &&
                 detail.teacherEmailAndTel!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow(AppLocalizations.of(context).courseContactInfo, detail.teacherEmailAndTel!),
+              _buildInfoRow(
+                AppLocalizations.of(context).courseContactInfo,
+                detail.teacherEmailAndTel!,
+              ),
             ],
             if (detail.deptCourseNo != null &&
                 detail.deptCourseNo!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow(AppLocalizations.of(context).courseCurriculumNo, detail.deptCourseNo!),
+              _buildInfoRow(
+                AppLocalizations.of(context).courseCurriculumNo,
+                detail.deptCourseNo!,
+              ),
             ],
             const Divider(height: 8),
-            _buildInfoRow(AppLocalizations.of(context).courseCredits, detail.credits),
+            _buildInfoRow(
+              AppLocalizations.of(context).courseCredits,
+              detail.credits,
+            ),
             const Divider(height: 8),
             _buildInfoRow(
               AppLocalizations.of(context).courseScheduleClassroom,
@@ -442,18 +462,30 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             if (detail.courseClass != null &&
                 detail.courseClass!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow(AppLocalizations.of(context).courseClass, detail.courseClass!),
+              _buildInfoRow(
+                AppLocalizations.of(context).courseClass,
+                detail.courseClass!,
+              ),
             ],
             const Divider(height: 8),
-            _buildInfoRow(AppLocalizations.of(context).courseRequiredElective, _annotateRequiredType(detail.requiredType)),
+            _buildInfoRow(
+              AppLocalizations.of(context).courseRequiredElective,
+              _annotateRequiredType(detail.requiredType),
+            ),
             if (detail.courseType != null && detail.courseType!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow(AppLocalizations.of(context).courseType, detail.courseType!),
+              _buildInfoRow(
+                AppLocalizations.of(context).courseType,
+                detail.courseType!,
+              ),
             ],
             if (detail.courseRemark != null &&
                 detail.courseRemark!.isNotEmpty) ...[
               const Divider(height: 8),
-              _buildInfoRow(AppLocalizations.of(context).courseRemark, detail.courseRemark!),
+              _buildInfoRow(
+                AppLocalizations.of(context).courseRemark,
+                detail.courseRemark!,
+              ),
             ],
           ],
         ),

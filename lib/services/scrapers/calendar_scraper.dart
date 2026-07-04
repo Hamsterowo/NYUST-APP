@@ -9,7 +9,10 @@ class CalendarScraper extends BaseScraper {
   CalendarScraper(super.dio);
 
   /// 獲取特定年份的行事曆事件
-  Future<Map<String, dynamic>> getCalendarEvents(String year, {String? languageCode}) async {
+  Future<Map<String, dynamic>> getCalendarEvents(
+    String year, {
+    String? languageCode,
+  }) async {
     try {
       String langValue = 'zh-tw';
       if (languageCode != null) {
@@ -18,26 +21,33 @@ class CalendarScraper extends BaseScraper {
         String detectedCode = 'zh';
         try {
           if (Intl.defaultLocale != null && Intl.defaultLocale!.isNotEmpty) {
-            detectedCode = Intl.defaultLocale!.split('_').first.split('-').first.toLowerCase();
+            detectedCode = Intl.defaultLocale!
+                .split('_')
+                .first
+                .split('-')
+                .first
+                .toLowerCase();
           } else {
-            detectedCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+            detectedCode = ui.PlatformDispatcher.instance.locale.languageCode
+                .toLowerCase();
           }
         } catch (_) {
           try {
-            detectedCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+            detectedCode = ui.PlatformDispatcher.instance.locale.languageCode
+                .toLowerCase();
           } catch (_) {}
         }
         langValue = detectedCode == 'en' ? 'en' : 'zh-tw';
       }
 
-      final calendarUrl = 'https://events.yuntech.edu.tw/?&y=$year&view=YunTech&lang=$langValue';
-      if (kDebugMode) print('CalendarScraper: Fetching events from $calendarUrl');
+      final calendarUrl =
+          'https://events.yuntech.edu.tw/?&y=$year&view=YunTech&lang=$langValue';
+      if (kDebugMode)
+        print('CalendarScraper: Fetching events from $calendarUrl');
 
       final response = await dio.get(
         calendarUrl,
-        options: Options(
-          headers: commonHeaders,
-        ),
+        options: Options(headers: commonHeaders),
       );
 
       final document = parseHtml(response.data);
@@ -61,37 +71,50 @@ class CalendarScraper extends BaseScraper {
 
             final htmlStr = element.innerHtml.toLowerCase();
             final styleStr = (element.attributes['style'] ?? '').toLowerCase();
-            final isImportant = htmlStr.contains('ff0000') || styleStr.contains('ff0000');
+            final isImportant =
+                htmlStr.contains('ff0000') || styleStr.contains('ff0000');
 
-            if (eventYear != null && eventMonth != null && eventDay != null && name.isNotEmpty) {
-
+            if (eventYear != null &&
+                eventMonth != null &&
+                eventDay != null &&
+                name.isNotEmpty) {
               Iterable<String> eventNames;
               if (langValue == 'en') {
-                final tempNames = name.split('；').map((n) => n.trim()).where((n) => n.isNotEmpty);
+                final tempNames = name
+                    .split('；')
+                    .map((n) => n.trim())
+                    .where((n) => n.isNotEmpty);
                 final List<String> splitNames = [];
                 final commaRegex = RegExp(r', \s*(?=[A-Z\u4e00-\u9fa5])');
                 for (var tempName in tempNames) {
-                  splitNames.addAll(tempName.split(commaRegex).map((n) => n.trim()).where((n) => n.isNotEmpty));
+                  splitNames.addAll(
+                    tempName
+                        .split(commaRegex)
+                        .map((n) => n.trim())
+                        .where((n) => n.isNotEmpty),
+                  );
                 }
                 eventNames = splitNames;
               } else {
-                eventNames = name.split('；').map((n) => n.trim()).where((n) => n.isNotEmpty);
+                eventNames = name
+                    .split('；')
+                    .map((n) => n.trim())
+                    .where((n) => n.isNotEmpty);
               }
 
               int index = 0;
               for (var singleName in eventNames) {
                 events.add({
                   'id': '$eventId-${index++}',
-                  'date': '$eventYear-${eventMonth.padLeft(2, '0')}-${eventDay.padLeft(2, '0')}',
+                  'date':
+                      '$eventYear-${eventMonth.padLeft(2, '0')}-${eventDay.padLeft(2, '0')}',
                   'name': singleName,
                   'link': uri.toString(),
-                  'isImportant': isImportant
+                  'isImportant': isImportant,
                 });
               }
             }
-          } catch (e) {
-
-          }
+          } catch (e) {}
         }
       }
 
@@ -99,18 +122,18 @@ class CalendarScraper extends BaseScraper {
         'success': true,
         'year': year,
         'count': events.length,
-        'events': events
+        'events': events,
       };
     } catch (e) {
-      return {
-        'success': false,
-        'message': '獲取行事曆失敗: $e',
-      };
+      return {'success': false, 'message': '獲取行事曆失敗: $e'};
     }
   }
 
   /// 獲取特定年份的假日 (包含國定假日與寒暑假)
-  Future<Map<String, dynamic>> getHolidays(int year, {String? languageCode}) async {
+  Future<Map<String, dynamic>> getHolidays(
+    int year, {
+    String? languageCode,
+  }) async {
     try {
       if (kDebugMode) print('CalendarScraper: Fetching holidays for $year');
 
@@ -125,20 +148,24 @@ class CalendarScraper extends BaseScraper {
             if (item['isHoliday'] == true) {
               final String dateStr = item['date'].toString();
               if (dateStr.length == 8) {
-                nationalHolidays.add('${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}');
+                nationalHolidays.add(
+                  '${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}',
+                );
               }
             }
           }
         }
       } catch (e) {
-        if (kDebugMode) print('CalendarScraper: Failed to fetch national holidays: $e');
+        if (kDebugMode)
+          print('CalendarScraper: Failed to fetch national holidays: $e');
       }
 
       final winterHolidays = <String>[];
       final summerHolidays = <String>[];
 
       try {
-        final calendarUrl = 'https://events.yuntech.edu.tw/?&y=$year&view=YunTech&lang=zh-tw';
+        final calendarUrl =
+            'https://events.yuntech.edu.tw/?&y=$year&view=YunTech&lang=zh-tw';
         final response = await dio.get(calendarUrl);
         final document = parseHtml(response.data);
 
@@ -158,7 +185,8 @@ class CalendarScraper extends BaseScraper {
             final evDay = uri.queryParameters['d'];
 
             if (evYear != null && evMonth != null && evDay != null) {
-              final dateStr = '$evYear-${evMonth.padLeft(2, '0')}-${evDay.padLeft(2, '0')}';
+              final dateStr =
+                  '$evYear-${evMonth.padLeft(2, '0')}-${evDay.padLeft(2, '0')}';
               final eventNames = name.split('；');
               for (var n in eventNames) {
                 if (n.contains('寒假開始')) winterStart = dateStr;
@@ -177,10 +205,15 @@ class CalendarScraper extends BaseScraper {
           summerHolidays.addAll(_getDatesInRange(summerStart, summerEnd));
         }
       } catch (e) {
-        if (kDebugMode) print('CalendarScraper: Failed to fetch school vacations: $e');
+        if (kDebugMode)
+          print('CalendarScraper: Failed to fetch school vacations: $e');
       }
 
-      final allHolidaysSet = <String>{...nationalHolidays, ...winterHolidays, ...summerHolidays};
+      final allHolidaysSet = <String>{
+        ...nationalHolidays,
+        ...winterHolidays,
+        ...summerHolidays,
+      };
       final finalHolidays = allHolidaysSet.toList()..sort();
 
       final holidayDetails = <String, String>{};
@@ -188,10 +221,12 @@ class CalendarScraper extends BaseScraper {
         holidayDetails[d] = 'national';
       }
       for (var d in winterHolidays) {
-        if (!holidayDetails.containsKey(d)) holidayDetails[d] = 'winter_vacation';
+        if (!holidayDetails.containsKey(d))
+          holidayDetails[d] = 'winter_vacation';
       }
       for (var d in summerHolidays) {
-        if (!holidayDetails.containsKey(d)) holidayDetails[d] = 'summer_vacation';
+        if (!holidayDetails.containsKey(d))
+          holidayDetails[d] = 'summer_vacation';
       }
 
       return {
@@ -199,13 +234,10 @@ class CalendarScraper extends BaseScraper {
         'year': year,
         'count': finalHolidays.length,
         'holidays': finalHolidays,
-        'holidayDetails': holidayDetails
+        'holidayDetails': holidayDetails,
       };
     } catch (e) {
-      return {
-        'success': false,
-        'message': '獲取假日資訊失敗: $e',
-      };
+      return {'success': false, 'message': '獲取假日資訊失敗: $e'};
     }
   }
 

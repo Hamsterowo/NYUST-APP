@@ -5,8 +5,10 @@ import 'calendar_service.dart';
 /// 事件日期會依傳入的年份動態產生，讓 Demo 模式在任何年份看起來都合理。
 class MockCalendarService implements CalendarService {
   @override
-  Future<Map<String, dynamic>> getCalendarEvents(String year,
-      {String? lang}) async {
+  Future<Map<String, dynamic>> getCalendarEvents(
+    String year, {
+    String? lang,
+  }) async {
     final events = [
       {
         'id': 'mock-1-0',
@@ -46,16 +48,15 @@ class MockCalendarService implements CalendarService {
       'year': year,
       'count': holidays.length,
       'holidays': holidays,
-      'holidayDetails': {
-        '$year-10-10': 'national',
-        '$year-01-01': 'national',
-      },
+      'holidayDetails': {'$year-10-10': 'national', '$year-01-01': 'national'},
     };
   }
 
   @override
-  Future<Map<String, dynamic>> getCalendarCombined(String year,
-      {String? lang}) async {
+  Future<Map<String, dynamic>> getCalendarCombined(
+    String year, {
+    String? lang,
+  }) async {
     final events = await getCalendarEvents(year, lang: lang);
     final holidays = await getHolidays(int.parse(year), lang: lang);
     return {

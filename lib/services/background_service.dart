@@ -18,15 +18,17 @@ void callbackDispatcher() {
 
     if (taskName == checkGradesTask) {
       try {
-        if (kDebugMode) print('BackgroundService: Started grades checking task...');
-        
+        if (kDebugMode)
+          print('BackgroundService: Started grades checking task...');
+
         final apiService = ApiService();
         await apiService.init();
 
         // 檢查是否有儲存的 cookies
         final hasCookies = await apiService.hasSavedCookies();
         if (!hasCookies) {
-          if (kDebugMode) print('BackgroundService: No saved cookies. Exiting.');
+          if (kDebugMode)
+            print('BackgroundService: No saved cookies. Exiting.');
           return true;
         }
 
@@ -48,36 +50,50 @@ void callbackDispatcher() {
 
         // 如果 Session 逾期，或者抓取失敗
         if (result['success'] != true) {
-          final isExpired = result['isExpired'] == true || 
-                            result['message']?.toString().contains('Session expired') == true;
+          final isExpired =
+              result['isExpired'] == true ||
+              result['message']?.toString().contains('Session expired') == true;
           if (isExpired) {
             // 登入已過期：根據使用者最新要求，靜默處理，不發通知直接結束
-            if (kDebugMode) print('BackgroundService: Session expired. Exiting silently.');
+            if (kDebugMode)
+              print('BackgroundService: Session expired. Exiting silently.');
             return true;
           }
-          if (kDebugMode) print('BackgroundService: Failed to fetch grades: ${result['message']}');
+          if (kDebugMode)
+            print(
+              'BackgroundService: Failed to fetch grades: ${result['message']}',
+            );
           return false; // 回傳 false 使 Workmanager 依原則重試
         }
 
         // 抓取成功，比對新舊成績
         const secureStorage = FlutterSecureStorage();
         final cachedGradesStr = await secureStorage.read(key: 'cache_grades');
-        
+
         if (cachedGradesStr != null) {
           final Map<String, dynamic> oldData = jsonDecode(cachedGradesStr);
-          
+
           // 取得系統當前語系，由於是在 Isolate 中，我們可以用 Platform.localeName 來判斷
           final String locale = Platform.localeName;
           final bool isEnglish = locale.toLowerCase().startsWith('en');
 
-          final changes = GradesComparator.compare(oldData, result, isEnglish: isEnglish);
+          final changes = GradesComparator.compare(
+            oldData,
+            result,
+            isEnglish: isEnglish,
+          );
 
           if (changes.isNotEmpty) {
-            if (kDebugMode) print('BackgroundService: Found ${changes.length} changes. Sending notification.');
+            if (kDebugMode)
+              print(
+                'BackgroundService: Found ${changes.length} changes. Sending notification.',
+              );
             final notificationService = NotificationService();
             await notificationService.init();
 
-            final String title = isEnglish ? '🎓 Grade Update Notification' : '🎓 成績更新通知';
+            final String title = isEnglish
+                ? '🎓 Grade Update Notification'
+                : '🎓 成績更新通知';
             final String body = changes.join('\n');
 
             await notificationService.showNotification(
@@ -88,14 +104,24 @@ void callbackDispatcher() {
             );
 
             // 更新本地快取成績資料，確保下次不會重複發送相同通知
-            await secureStorage.write(key: 'cache_grades', value: jsonEncode(result));
+            await secureStorage.write(
+              key: 'cache_grades',
+              value: jsonEncode(result),
+            );
           } else {
-            if (kDebugMode) print('BackgroundService: No grades changes found.');
+            if (kDebugMode)
+              print('BackgroundService: No grades changes found.');
           }
         } else {
           // 如果原本就沒有快取（例如使用者剛登入但尚未建立快取），先將當前結果存入
-          if (kDebugMode) print('BackgroundService: No initial cache found, saving current grades.');
-          await secureStorage.write(key: 'cache_grades', value: jsonEncode(result));
+          if (kDebugMode)
+            print(
+              'BackgroundService: No initial cache found, saving current grades.',
+            );
+          await secureStorage.write(
+            key: 'cache_grades',
+            value: jsonEncode(result),
+          );
         }
       } catch (e) {
         if (kDebugMode) print('BackgroundService error: $e');

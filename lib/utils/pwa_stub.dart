@@ -1,4 +1,3 @@
-
 bool isPwaInstallDismissed() => false;
 bool isIos() => false;
 bool isPwaPromptAvailable() => false;

@@ -93,7 +93,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
 
     try {
       final deviceInfo = await _getDeviceInfo();
-      
+
       final result = await auth.api.submitBugReport(
         description: description,
         contact: _contactController.text.trim(),
@@ -104,7 +104,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
       if (mounted) {
         if (result['status'] == 'success') {
           Navigator.pop(context); // Close report dialog
-          
+
           final caseId = result['caseId'] ?? 'unknown';
           _showSuccessDialog(caseId);
         } else {
@@ -130,11 +130,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
               errorMessage = result['message'] ?? l10n.reportSubmitError;
               break;
           }
-          showTopSnackBar(
-            context,
-            errorMessage,
-            type: SnackBarType.error,
-          );
+          showTopSnackBar(context, errorMessage, type: SnackBarType.error);
         }
       }
     } catch (e) {
@@ -161,7 +157,11 @@ class _BugReportDialogState extends State<BugReportDialog> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.teal, size: 28),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Colors.teal,
+              size: 28,
+            ),
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context).reportIssueTitle),
           ],
@@ -212,8 +212,8 @@ class _BugReportDialogState extends State<BugReportDialog> {
                   Text(
                     l10n.reportIssueTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -223,7 +223,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Description TextField
               TextField(
                 controller: _descriptionController,
@@ -247,7 +247,10 @@ class _BugReportDialogState extends State<BugReportDialog> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -301,7 +304,10 @@ class _BugReportDialogState extends State<BugReportDialog> {
                       ),
                       IconButton(
                         onPressed: _removeImage,
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
                       ),
                     ],
                   ),
@@ -313,10 +319,17 @@ class _BugReportDialogState extends State<BugReportDialog> {
                 onTap: _copyEmail,
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8.0,
+                    horizontal: 4.0,
+                  ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: colorScheme.outline),
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: colorScheme.outline,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(

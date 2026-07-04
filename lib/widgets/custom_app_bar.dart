@@ -36,10 +36,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: Theme.of(context).primaryColor,
-            width: 4.0,
-          ),
+          top: BorderSide(color: Theme.of(context).primaryColor, width: 4.0),
         ),
       ),
       child: AppBar(
@@ -60,9 +57,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 2.0),
               ),
             )
           else if (widget.onRefresh != null)

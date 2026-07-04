@@ -35,10 +35,14 @@ class TermsOfServiceScreen extends StatefulWidget {
                 child: Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.2),
                       width: 1.5,
                     ),
                     boxShadow: [
@@ -76,7 +80,8 @@ class TermsOfServiceScreen extends StatefulWidget {
                           Expanded(
                             child: Text(
                               AppLocalizations.of(context).termsUpdateTitle,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0.5,
                                   ),
@@ -89,9 +94,9 @@ class TermsOfServiceScreen extends StatefulWidget {
                         AppLocalizations.of(context).termsUpdateAlert,
                         textAlign: TextAlign.start,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              height: 1.5,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.5,
+                        ),
                       ),
                       const SizedBox(height: 28),
                       Container(
@@ -102,7 +107,9 @@ class TermsOfServiceScreen extends StatefulWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.3),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -170,7 +177,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   Future<Map<String, dynamic>> _fetchTerms() async {
     try {
       final lang = Localizations.localeOf(context).languageCode;
-      final res = await context.read<AuthProvider>().api.getTermsOfService(lang: lang);
+      final res = await context.read<AuthProvider>().api.getTermsOfService(
+        lang: lang,
+      );
       if (res['status'] == 'success') {
         setState(() {
           _lastUpdated = res['data']?['lastUpdated'] ?? '';
@@ -206,7 +215,6 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-
                           SystemNavigator.pop();
                         },
                         style: OutlinedButton.styleFrom(
@@ -214,7 +222,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                           side: BorderSide(color: colorScheme.error),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: Text(AppLocalizations.of(context).termsRejectAndExit),
+                        child: Text(
+                          AppLocalizations.of(context).termsRejectAndExit,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -294,7 +304,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   const SizedBox(height: 32),
                   Center(
                     child: Text(
-                      AppLocalizations.of(context).termsLastUpdated(lastUpdated),
+                      AppLocalizations.of(
+                        context,
+                      ).termsLastUpdated(lastUpdated),
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.outline,
                       ),

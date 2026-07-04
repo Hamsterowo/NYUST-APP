@@ -47,9 +47,12 @@ class ApiService {
     String password,
     String captcha,
     String requestVerificationToken,
-  ) =>
-      _factory.authService
-          .login(username, password, captcha, requestVerificationToken);
+  ) => _factory.authService.login(
+    username,
+    password,
+    captcha,
+    requestVerificationToken,
+  );
 
   Future<Map<String, dynamic>> getUserInfo() =>
       _factory.authService.getUserInfo();
@@ -65,9 +68,10 @@ class ApiService {
       _factory.calendarService.getHolidays(year, lang: lang);
 
   /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
-  Future<Map<String, dynamic>> getCalendarCombined(String year,
-          {String? lang}) =>
-      _factory.calendarService.getCalendarCombined(year, lang: lang);
+  Future<Map<String, dynamic>> getCalendarCombined(
+    String year, {
+    String? lang,
+  }) => _factory.calendarService.getCalendarCombined(year, lang: lang);
 
   /// 同時呼叫行事曆事件 + 假日兩個端點，合併回傳
   Future<Map<String, dynamic>> getCalendar(int year, {String? lang}) =>
@@ -75,7 +79,8 @@ class ApiService {
 
   // ---- Grades ----
 
-  Future<Map<String, dynamic>> getGrades() => _factory.gradesService.getGrades();
+  Future<Map<String, dynamic>> getGrades() =>
+      _factory.gradesService.getGrades();
 
   Future<Map<String, dynamic>> getGraduation() =>
       _factory.gradesService.getGraduation();
@@ -89,12 +94,11 @@ class ApiService {
     required String year,
     required String semester,
     required String courseNo,
-  }) =>
-      _factory.courseService.getCourseDetail(
-        year: year,
-        semester: semester,
-        courseNo: courseNo,
-      );
+  }) => _factory.courseService.getCourseDetail(
+    year: year,
+    semester: semester,
+    courseNo: courseNo,
+  );
 
   // ---- Report / Policy ----
 
@@ -106,13 +110,12 @@ class ApiService {
     String? contact,
     required String deviceInfo,
     XFile? imageFile,
-  }) =>
-      _factory.reportService.submitBugReport(
-        description: description,
-        contact: contact,
-        deviceInfo: deviceInfo,
-        imageFile: imageFile,
-      );
+  }) => _factory.reportService.submitBugReport(
+    description: description,
+    contact: contact,
+    deviceInfo: deviceInfo,
+    imageFile: imageFile,
+  );
 
   // ---- Scraper 存取（維持既有對外 getter；目前無外部使用者）----
 

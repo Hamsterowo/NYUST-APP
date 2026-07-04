@@ -45,9 +45,9 @@ class GradesRepository {
       await _db.delete(_db.gradesCourses).go();
       await _db.delete(_db.gradesSemesters).go();
       await _db.delete(_db.gradesCumulative).go();
-      await (_db.delete(_db.cacheMeta)
-            ..where((t) => t.datasetKey.equals(_datasetKey)))
-          .go();
+      await (_db.delete(
+        _db.cacheMeta,
+      )..where((t) => t.datasetKey.equals(_datasetKey))).go();
     });
     try {
       await _secureStorage.delete(key: 'cache_grades');
@@ -55,47 +55,52 @@ class GradesRepository {
   }
 
   Future<bool> _isStale() async {
-    final meta = await (_db.select(_db.cacheMeta)
-          ..where((t) => t.datasetKey.equals(_datasetKey)))
-        .getSingleOrNull();
+    final meta = await (_db.select(
+      _db.cacheMeta,
+    )..where((t) => t.datasetKey.equals(_datasetKey))).getSingleOrNull();
     if (meta == null) return true;
     return DateTime.now().difference(meta.updatedAt) > _ttl;
   }
 
   Future<Map<String, dynamic>?> _buildMap() async {
-    final sems = await (_db.select(_db.gradesSemesters)
-          ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
-        .get();
-    final cumRow = await (_db.select(_db.gradesCumulative)
-          ..where((t) => t.id.equals(0)))
-        .getSingleOrNull();
+    final sems = await (_db.select(
+      _db.gradesSemesters,
+    )..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).get();
+    final cumRow = await (_db.select(
+      _db.gradesCumulative,
+    )..where((t) => t.id.equals(0))).getSingleOrNull();
 
     if (sems.isEmpty && cumRow == null) return null;
 
     final grades = <Map<String, dynamic>>[];
     for (final s in sems) {
-      final courseRows = await (_db.select(_db.gradesCourses)
-            ..where((t) =>
-                t.academicYear.equals(s.academicYear) &
-                t.semester.equals(s.semester))
-            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
-          .get();
+      final courseRows =
+          await (_db.select(_db.gradesCourses)
+                ..where(
+                  (t) =>
+                      t.academicYear.equals(s.academicYear) &
+                      t.semester.equals(s.semester),
+                )
+                ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+              .get();
 
       grades.add({
         'academic_year': s.academicYear,
         'semester': s.semester,
         'semester_title': s.semesterTitle,
         'courses': courseRows
-            .map((c) => {
-                  'code': c.code,
-                  'courseNo': c.courseNo,
-                  'name': c.name,
-                  'name_en': c.nameEn,
-                  'type': c.type,
-                  'credits': c.credits,
-                  'score': c.score,
-                  'syllabusUrl': c.syllabusUrl,
-                })
+            .map(
+              (c) => {
+                'code': c.code,
+                'courseNo': c.courseNo,
+                'name': c.name,
+                'name_en': c.nameEn,
+                'type': c.type,
+                'credits': c.credits,
+                'score': c.score,
+                'syllabusUrl': c.syllabusUrl,
+              },
+            )
             .toList(),
         'summary': {
           'average_score': s.averageScore,
@@ -138,7 +143,9 @@ class GradesRepository {
         final sem = _toInt(g['semester']);
         final summary = (g['summary'] as Map?) ?? const {};
 
-        await _db.into(_db.gradesSemesters).insert(
+        await _db
+            .into(_db.gradesSemesters)
+            .insert(
               GradesSemestersCompanion.insert(
                 academicYear: ay,
                 semester: sem,
@@ -157,7 +164,9 @@ class GradesRepository {
         final courses = (g['courses'] as List?) ?? const [];
         for (var j = 0; j < courses.length; j++) {
           final c = courses[j] as Map;
-          await _db.into(_db.gradesCourses).insert(
+          await _db
+              .into(_db.gradesCourses)
+              .insert(
                 GradesCoursesCompanion.insert(
                   academicYear: ay,
                   semester: sem,
@@ -176,7 +185,9 @@ class GradesRepository {
       }
 
       if (cumulative is Map) {
-        await _db.into(_db.gradesCumulative).insert(
+        await _db
+            .into(_db.gradesCumulative)
+            .insert(
               GradesCumulativeCompanion.insert(
                 id: const Value(0),
                 attemptedCredits: Value(_s(cumulative['attempted_credits'])),
@@ -190,7 +201,9 @@ class GradesRepository {
             );
       }
 
-      await _db.into(_db.cacheMeta).insert(
+      await _db
+          .into(_db.cacheMeta)
+          .insert(
             CacheMetaCompanion.insert(
               datasetKey: _datasetKey,
               updatedAt: DateTime.now(),

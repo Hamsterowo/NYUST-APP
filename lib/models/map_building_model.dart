@@ -17,8 +17,16 @@ class MapBuilding {
     return MapBuilding(
       id: json['id'] as String,
       name: json['name'] as String,
-      aliases: (json['aliases'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      keyLocations: (json['keyLocations'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      aliases:
+          (json['aliases'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      keyLocations:
+          (json['keyLocations'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       description: json['description'] as String? ?? '',
     );
   }

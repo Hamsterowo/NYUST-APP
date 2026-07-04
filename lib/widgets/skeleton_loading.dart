@@ -135,7 +135,6 @@ class ScheduleSkeletonGrid extends StatelessWidget {
         ),
         child: Column(
           children: [
-
             Container(
               height: 40.0,
               decoration: BoxDecoration(
@@ -192,7 +191,6 @@ class GraduationSkeletonView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Card(
             elevation: 2,
             shadowColor: Colors.transparent,
@@ -284,7 +282,6 @@ class CalendarSkeletonView extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -336,7 +333,10 @@ class CalendarSkeletonView extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: calendarCard,
           ),
           if (isExpanded) const SizedBox(height: 8),

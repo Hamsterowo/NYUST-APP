@@ -24,19 +24,23 @@ class GradesScraper extends BaseScraper {
         options: Options(
           headers: {
             ...commonHeaders,
-            'Referer': 'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Course/',
+            'Referer':
+                'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Course/',
           },
         ),
       );
 
       final document = parseHtml(response.data);
-      if (kDebugMode) print('GradesScraper: Page Title: ${document.querySelector('title')?.text.trim()}');
+      if (kDebugMode)
+        print(
+          'GradesScraper: Page Title: ${document.querySelector('title')?.text.trim()}',
+        );
 
       if (response.data.toString().contains('Login.aspx')) {
         return {
           'success': false,
           'message': 'Session expired',
-          'isExpired': true
+          'isExpired': true,
         };
       }
 
@@ -49,34 +53,60 @@ class GradesScraper extends BaseScraper {
         if (kDebugMode) print('GradesScraper: Fetching StudScoreRank.aspx...');
         final rankResponse = await getWithRedirects(
           'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScoreRank.aspx',
-          options: Options(
-            headers: {
-              ...commonHeaders,
-              'Referer': gradesUrl,
-            },
-          ),
+          options: Options(headers: {...commonHeaders, 'Referer': gradesUrl}),
         );
 
         if (rankResponse.data.toString().contains('Login.aspx')) {
-          if (kDebugMode) print('GradesScraper: StudScoreRank.aspx returned login page (session expired)!');
+          if (kDebugMode)
+            print(
+              'GradesScraper: StudScoreRank.aspx returned login page (session expired)!',
+            );
         } else {
           final rankDoc = parseHtml(rankResponse.data);
-          if (kDebugMode) print('GradesScraper: StudScoreRank.aspx fetched successfully. Parsing...');
-          final rankGridView = rankDoc.querySelector('#ctl00_MainContent_StudScore_GridView');
+          if (kDebugMode)
+            print(
+              'GradesScraper: StudScoreRank.aspx fetched successfully. Parsing...',
+            );
+          final rankGridView = rankDoc.querySelector(
+            '#ctl00_MainContent_StudScore_GridView',
+          );
           if (rankGridView != null) {
-            final rows = rankGridView.querySelectorAll('tr.GridView_Row, tr.GridView_AlternatingRow');
+            final rows = rankGridView.querySelectorAll(
+              'tr.GridView_Row, tr.GridView_AlternatingRow',
+            );
             for (var row in rows) {
               final cells = row.querySelectorAll('td');
               if (cells.length >= 11) {
                 final yearText = cells[0].text.trim();
                 final semText = cells[1].text.trim();
-                final conduct = cells[4].text.trim().replaceAll('&nbsp;', '').trim();
-                final attempted = cells[5].text.trim().replaceAll('&nbsp;', '').trim();
-                final earned = cells[6].text.trim().replaceAll('&nbsp;', '').trim();
-                final avgText = cells[7].text.trim().replaceAll('&nbsp;', '').trim();
-                final rankText = cells[8].text.trim().replaceAll('&nbsp;', '').trim();
-                final totalText = cells[9].text.trim().replaceAll('&nbsp;', '').trim();
-                final gpaText = cells[10].text.trim().replaceAll('&nbsp;', '').trim();
+                final conduct = cells[4].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
+                final attempted = cells[5].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
+                final earned = cells[6].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
+                final avgText = cells[7].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
+                final rankText = cells[8].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
+                final totalText = cells[9].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
+                final gpaText = cells[10].text
+                    .trim()
+                    .replaceAll('&nbsp;', '')
+                    .trim();
 
                 final key = '$yearText-$semText';
                 semesterRankData[key] = {
@@ -93,15 +123,50 @@ class GradesScraper extends BaseScraper {
           }
 
           // Parse Cumulative Table
-          final totalTable = rankDoc.querySelector('#ctl00_MainContent_TotalScore_Table');
+          final totalTable = rankDoc.querySelector(
+            '#ctl00_MainContent_TotalScore_Table',
+          );
           if (totalTable != null) {
-            if (kDebugMode) print('GradesScraper: Total table found. Parsing cumulative stats...');
-            final sCredits = totalTable.querySelector('#ctl00_MainContent_Total_SCredits')?.text.trim() ?? '';
-            final rCredits = totalTable.querySelector('#ctl00_MainContent_Total_RCredits')?.text.trim() ?? '';
-            final avg = totalTable.querySelector('#ctl00_MainContent_Total_Avg')?.text.trim() ?? '';
-            final rank = totalTable.querySelector('#ctl00_MainContent_Total_Rank')?.text.trim() ?? '';
-            final totalStudents = totalTable.querySelector('#ctl00_MainContent_Total_StudNum')?.text.trim() ?? '';
-            final gpa = totalTable.querySelector('#ctl00_MainContent_Total_GPA')?.text.trim() ?? '';
+            if (kDebugMode)
+              print(
+                'GradesScraper: Total table found. Parsing cumulative stats...',
+              );
+            final sCredits =
+                totalTable
+                    .querySelector('#ctl00_MainContent_Total_SCredits')
+                    ?.text
+                    .trim() ??
+                '';
+            final rCredits =
+                totalTable
+                    .querySelector('#ctl00_MainContent_Total_RCredits')
+                    ?.text
+                    .trim() ??
+                '';
+            final avg =
+                totalTable
+                    .querySelector('#ctl00_MainContent_Total_Avg')
+                    ?.text
+                    .trim() ??
+                '';
+            final rank =
+                totalTable
+                    .querySelector('#ctl00_MainContent_Total_Rank')
+                    ?.text
+                    .trim() ??
+                '';
+            final totalStudents =
+                totalTable
+                    .querySelector('#ctl00_MainContent_Total_StudNum')
+                    ?.text
+                    .trim() ??
+                '';
+            final gpa =
+                totalTable
+                    .querySelector('#ctl00_MainContent_Total_GPA')
+                    ?.text
+                    .trim() ??
+                '';
 
             cumulativeData['attempted_credits'] = sCredits;
             cumulativeData['earned_credits'] = rCredits;
@@ -109,13 +174,17 @@ class GradesScraper extends BaseScraper {
             cumulativeData['rank'] = rank;
             cumulativeData['total_students'] = totalStudents;
             cumulativeData['gpa'] = gpa;
-            if (kDebugMode) print('GradesScraper: Cumulative GPA: $gpa, average: $avg, rank: $rank/$totalStudents');
+            if (kDebugMode)
+              print(
+                'GradesScraper: Cumulative GPA: $gpa, average: $avg, rank: $rank/$totalStudents',
+              );
           } else {
             if (kDebugMode) print('GradesScraper: Total table not found!');
           }
         }
       } catch (e) {
-        if (kDebugMode) print('GradesScraper: Error fetching or parsing rank data: $e');
+        if (kDebugMode)
+          print('GradesScraper: Error fetching or parsing rank data: $e');
       }
 
       final semesterBlocks = document.querySelectorAll('.col-lg-6.col-md-12');
@@ -137,25 +206,34 @@ class GradesScraper extends BaseScraper {
 
         final List<Map<String, dynamic>> courses = [];
 
-        final rows = block.querySelectorAll('tr.DataGrid_Item, tr.DataGrid_AlternatingItem');
+        final rows = block.querySelectorAll(
+          'tr.DataGrid_Item, tr.DataGrid_AlternatingItem',
+        );
 
         for (var row in rows) {
-          final code = row.querySelector('span[id*="_Dept_Cour_No"]')?.text.trim() ?? '';
+          final code =
+              row.querySelector('span[id*="_Dept_Cour_No"]')?.text.trim() ?? '';
           final courseAnchor = row.querySelector('a[id*="_cour_cname"]');
 
           if (code.isNotEmpty && courseAnchor != null) {
             final nameZh = courseAnchor.text.trim();
-            final nameEn = row.querySelector('span[id*="_cour_ename"]')?.text.trim() ?? '';
-            final type = row.querySelector('span[id*="_maj_op"]')?.text.trim() ?? '';
-            final credits = row.querySelector('span[id*="_credits"]')?.text.trim() ?? '';
-            final score = row.querySelector('span[id*="_Score"]')?.text.trim() ?? '';
+            final nameEn =
+                row.querySelector('span[id*="_cour_ename"]')?.text.trim() ?? '';
+            final type =
+                row.querySelector('span[id*="_maj_op"]')?.text.trim() ?? '';
+            final credits =
+                row.querySelector('span[id*="_credits"]')?.text.trim() ?? '';
+            final score =
+                row.querySelector('span[id*="_Score"]')?.text.trim() ?? '';
 
             String syllabusUrl = '';
             String courseNo = '';
             final relativeHref = courseAnchor.attributes['href'];
             if (relativeHref != null && relativeHref.isNotEmpty) {
-              syllabusUrl = relativeHref.replaceFirst(RegExp(r'^(\.\.\/)+'),
-                  'https://webapp.yuntech.edu.tw/WebNewCAS/');
+              syllabusUrl = relativeHref.replaceFirst(
+                RegExp(r'^(\.\.\/)+'),
+                'https://webapp.yuntech.edu.tw/WebNewCAS/',
+              );
               final parts = relativeHref.split('&');
               if (parts.length >= 4) {
                 courseNo = parts.last;
@@ -170,7 +248,7 @@ class GradesScraper extends BaseScraper {
               'type': type,
               'credits': credits,
               'score': score,
-              'syllabusUrl': syllabusUrl
+              'syllabusUrl': syllabusUrl,
             });
           }
         }
@@ -186,19 +264,23 @@ class GradesScraper extends BaseScraper {
             'courses': courses,
             'summary': {
               'average_score': rankInfo?['average'] ?? '',
-              'rank': rankInfo != null && rankInfo['rank'] != null && rankInfo['rank'].toString().isNotEmpty
+              'rank':
+                  rankInfo != null &&
+                      rankInfo['rank'] != null &&
+                      rankInfo['rank'].toString().isNotEmpty
                   ? '${rankInfo['rank']} / ${rankInfo['total_students']}'
                   : '',
               'gpa': rankInfo?['gpa'] ?? '',
               'conduct': rankInfo?['conduct'] ?? '',
               'attempted_credits': rankInfo?['attempted_credits'] ?? '',
               'earned_credits': rankInfo?['earned_credits'] ?? '',
-            }
+            },
           });
         }
       }
 
-      if (kDebugMode) print('GradesScraper: Found ${gradesData.length} semesters');
+      if (kDebugMode)
+        print('GradesScraper: Found ${gradesData.length} semesters');
 
       return {
         'success': true,
@@ -206,10 +288,7 @@ class GradesScraper extends BaseScraper {
         'cumulative': cumulativeData.isNotEmpty ? cumulativeData : null,
       };
     } catch (e) {
-      return {
-        'success': false,
-        'message': '抓取成績失敗: $e',
-      };
+      return {'success': false, 'message': '抓取成績失敗: $e'};
     }
   }
 }

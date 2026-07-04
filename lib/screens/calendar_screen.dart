@@ -508,7 +508,9 @@ class CalendarScreenState extends State<CalendarScreen> {
                           children: [
                             const SizedBox(width: 8),
                             Text(
-                              DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(_focusedDay),
+                              DateFormat.yMMMM(
+                                Localizations.localeOf(context).toString(),
+                              ).format(_focusedDay),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -518,12 +520,16 @@ class CalendarScreenState extends State<CalendarScreen> {
                             if (widget.embed) ...[
                               IconButton(
                                 icon: const Icon(Icons.info_outline, size: 20),
-                                tooltip: AppLocalizations.of(context).legendTooltip,
+                                tooltip: AppLocalizations.of(
+                                  context,
+                                ).legendTooltip,
                                 onPressed: _showLegendDialog,
                               ),
                               IconButton(
                                 icon: const Icon(Icons.today, size: 20),
-                                tooltip: AppLocalizations.of(context).backToTodayTooltip,
+                                tooltip: AppLocalizations.of(
+                                  context,
+                                ).backToTodayTooltip,
                                 onPressed: () {
                                   final now = DateTime.now();
                                   setState(() {
@@ -741,7 +747,11 @@ class CalendarScreenState extends State<CalendarScreen> {
                               color: Colors.red,
                             ),
                             const SizedBox(height: 16),
-                            Text(AppLocalizations.of(context).loadErrorPrefix(_errorMessage!)),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).loadErrorPrefix(_errorMessage!),
+                            ),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () => _fetchYearIfNeeded(_currentYear),
@@ -782,7 +792,11 @@ class CalendarScreenState extends State<CalendarScreen> {
                                       ),
                                       child: Text(
                                         _selectedDay != null
-                                            ? DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(_selectedDay!)
+                                            ? DateFormat.yMMMMd(
+                                                Localizations.localeOf(
+                                                  context,
+                                                ).toString(),
+                                              ).format(_selectedDay!)
                                             : '',
                                         style: TextStyle(
                                           fontSize: 16,
@@ -799,7 +813,10 @@ class CalendarScreenState extends State<CalendarScreen> {
 
                           if (selectedEvents.isEmpty) {
                             return Padding(
-                              padding: const EdgeInsets.only(left: 48.0, top: 16.0),
+                              padding: const EdgeInsets.only(
+                                left: 48.0,
+                                top: 16.0,
+                              ),
                               child: Text(
                                 AppLocalizations.of(context).noEventsToday,
                                 style: const TextStyle(color: Colors.grey),

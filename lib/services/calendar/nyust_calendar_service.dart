@@ -12,8 +12,10 @@ class NyustCalendarService implements CalendarService {
   }
 
   @override
-  Future<Map<String, dynamic>> getCalendarEvents(String year,
-      {String? lang}) async {
+  Future<Map<String, dynamic>> getCalendarEvents(
+    String year, {
+    String? lang,
+  }) async {
     await _client.ensureInit();
     return _calendarScraper.getCalendarEvents(year, languageCode: lang);
   }
@@ -25,8 +27,10 @@ class NyustCalendarService implements CalendarService {
   }
 
   @override
-  Future<Map<String, dynamic>> getCalendarCombined(String year,
-      {String? lang}) async {
+  Future<Map<String, dynamic>> getCalendarCombined(
+    String year, {
+    String? lang,
+  }) async {
     final events = await getCalendarEvents(year, lang: lang);
     final holidays = await getHolidays(int.parse(year), lang: lang);
 

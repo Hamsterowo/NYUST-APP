@@ -48,9 +48,7 @@ Future<void> setupCookieManager(Dio dio) async {
     }
   } catch (_) {}
 
-  _globalCookieJar = PersistCookieJar(
-    storage: SecureCookieStorage(),
-  );
+  _globalCookieJar = PersistCookieJar(storage: SecureCookieStorage());
   dio.interceptors.add(CookieManager(_globalCookieJar));
 }
 

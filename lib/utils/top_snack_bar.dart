@@ -27,11 +27,7 @@ void showTopSnackBar(
   final resolvedType = isError ? SnackBarType.error : type;
 
   _snackBarQueue.add(
-    _SnackBarItem(
-      message: message,
-      type: resolvedType,
-      context: context,
-    ),
+    _SnackBarItem(message: message, type: resolvedType, context: context),
   );
 
   // 避免佇列無限增長，若大於 2 個等待項目則丟棄最舊的
@@ -159,21 +155,13 @@ class _TopSnackBarState extends State<_TopSnackBar>
   }
 
   (IconData, Color, Color) _typeStyle(ColorScheme cs) => switch (widget.type) {
-    SnackBarType.error => (
-      Icons.error_rounded,
-      cs.error,
-      cs.onError,
-    ),
+    SnackBarType.error => (Icons.error_rounded, cs.error, cs.onError),
     SnackBarType.warning => (
       Icons.warning_amber_rounded,
       Colors.orange.shade800,
       Colors.white,
     ),
-    SnackBarType.info => (
-      Icons.info_rounded,
-      cs.secondary,
-      cs.onSecondary,
-    ),
+    SnackBarType.info => (Icons.info_rounded, cs.secondary, cs.onSecondary),
     SnackBarType.success => (
       Icons.check_circle_rounded,
       cs.primary,

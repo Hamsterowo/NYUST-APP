@@ -43,7 +43,6 @@ class MapParserService {
       try {
         path = parseSvgPathData(dAttr);
       } catch (e) {
-
         continue;
       }
 
@@ -53,21 +52,26 @@ class MapParserService {
       Color? fillColor = _parseColor(fillStr);
       Color? strokeColor = _parseColor(strokeStr);
 
-      results.add(SvgPathData(
-        id: id,
-        path: path,
-        fillColor: fillColor,
-        strokeColor: strokeColor,
-        strokeWidth: 1.0,
-        isBuilding: isBuilding,
-      ));
+      results.add(
+        SvgPathData(
+          id: id,
+          path: path,
+          fillColor: fillColor,
+          strokeColor: strokeColor,
+          strokeWidth: 1.0,
+          isBuilding: isBuilding,
+        ),
+      );
     }
 
     return results;
   }
 
   /// 向上遞迴尋找屬性（支援從 `<g>` 繼承 fill, stroke, id 等）
-  static String? _getEffectiveAttribute(dom.Element element, String attributeName) {
+  static String? _getEffectiveAttribute(
+    dom.Element element,
+    String attributeName,
+  ) {
     dom.Element? current = element;
     while (current != null) {
       final value = current.attributes[attributeName];

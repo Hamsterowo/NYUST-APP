@@ -20,7 +20,7 @@ class MockCourseService implements CourseService {
             'teacher': '張教授',
             'remark': '',
             'times': ['C', 'D'],
-            'weekday': '1'
+            'weekday': '1',
           },
           {
             'semesterCourseNo': '11210002',
@@ -34,7 +34,7 @@ class MockCourseService implements CourseService {
             'teacher': '李教授',
             'remark': '',
             'times': ['E', 'F'],
-            'weekday': '2'
+            'weekday': '2',
           },
           {
             'semesterCourseNo': '11210003',
@@ -48,7 +48,7 @@ class MockCourseService implements CourseService {
             'teacher': '王教授',
             'remark': '',
             'times': ['A', 'B'],
-            'weekday': '3'
+            'weekday': '3',
           },
           {
             'semesterCourseNo': '11210004',
@@ -62,10 +62,10 @@ class MockCourseService implements CourseService {
             'teacher': '陳教授',
             'remark': '',
             'times': ['G', 'H'],
-            'weekday': '4'
-          }
-        ]
-      }
+            'weekday': '4',
+          },
+        ],
+      },
     };
   }
 
@@ -83,7 +83,7 @@ class MockCourseService implements CourseService {
         'credits': '3',
         'teacher': '示範教授',
         'description': '這是 Demo 模式的課程詳情範例。',
-      }
+      },
     };
   }
 }

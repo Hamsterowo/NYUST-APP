@@ -34,22 +34,22 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-        },
-        onUpgrade: (m, from, to) async {
-          // v1 (Stage 3A) → v2 (Stage 3B): 新增正規化的學術資料表。
-          if (from < 2) {
-            await m.createTable(cacheMeta);
-            await m.createTable(gradesSemesters);
-            await m.createTable(gradesCourses);
-            await m.createTable(gradesCumulative);
-            await m.createTable(scheduleCourses);
-            await m.createTable(graduationInfo);
-            await m.createTable(graduationCredits);
-          }
-        },
-      );
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      // v1 (Stage 3A) → v2 (Stage 3B): 新增正規化的學術資料表。
+      if (from < 2) {
+        await m.createTable(cacheMeta);
+        await m.createTable(gradesSemesters);
+        await m.createTable(gradesCourses);
+        await m.createTable(gradesCumulative);
+        await m.createTable(scheduleCourses);
+        await m.createTable(graduationInfo);
+        await m.createTable(graduationCredits);
+      }
+    },
+  );
 
   /// 全 App 共用的單例。各快取服務與 Repository 透過此存取資料庫。
   static AppDatabase? _instance;

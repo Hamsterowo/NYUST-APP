@@ -82,9 +82,9 @@ class _SplashWrapperState extends State<SplashWrapper>
       shouldShow = true;
     } else {
       try {
-        final terms = await auth.api.getTermsOfService(lang: lang).timeout(
-          const Duration(seconds: 3),
-        );
+        final terms = await auth.api
+            .getTermsOfService(lang: lang)
+            .timeout(const Duration(seconds: 3));
         if (terms['status'] == 'success') {
           final lastUpdated = terms['data']?['lastUpdated'] ?? '';
           if (lastUpdated != lastAcceptedDate) {

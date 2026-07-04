@@ -120,9 +120,7 @@ class InfoScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const GraduationScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const GraduationScreen()),
                   );
                 },
               ),

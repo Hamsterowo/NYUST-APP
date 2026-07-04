@@ -22,7 +22,6 @@ abstract class BaseScraper {
     const int maxRedirects = 10;
 
     while (redirectCount < maxRedirects) {
-
       final response = await dio.get(
         currentUrl,
         options: (options ?? Options(headers: commonHeaders)).copyWith(
@@ -39,16 +38,20 @@ abstract class BaseScraper {
               ? nextUrl
               : '${uri.scheme}://${uri.host}${nextUrl.startsWith('/') ? '' : '/'}$nextUrl';
 
-          if (kDebugMode) print('BaseScraper: Detected HTTP 302 redirect to $nextUri');
+          if (kDebugMode)
+            print('BaseScraper: Detected HTTP 302 redirect to $nextUri');
           currentUrl = nextUri;
           redirectCount++;
           continue;
         }
       }
 
-      if (response.data is String && response.data.toString().contains('var redirectUrl')) {
+      if (response.data is String &&
+          response.data.toString().contains('var redirectUrl')) {
         final text = response.data.toString();
-        final match = RegExp(r"var\s+redirectUrl\s*=\s*'([^']+)'").firstMatch(text);
+        final match = RegExp(
+          r"var\s+redirectUrl\s*=\s*'([^']+)'",
+        ).firstMatch(text);
 
         if (match != null && match.group(1) != null) {
           final nextUrl = match.group(1)!;
@@ -57,7 +60,8 @@ abstract class BaseScraper {
               ? nextUrl
               : '${uri.scheme}://${uri.host}${nextUrl.startsWith('/') ? '' : '/'}$nextUrl';
 
-          if (kDebugMode) print('BaseScraper: Detected JS redirect to $nextUri');
+          if (kDebugMode)
+            print('BaseScraper: Detected JS redirect to $nextUri');
           currentUrl = nextUri;
           redirectCount++;
           continue;
@@ -71,12 +75,12 @@ abstract class BaseScraper {
 
   /// 模擬瀏覽器的 User-Agent，確保不會被學校伺服器阻擋
   Map<String, String> get commonHeaders => {
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept':
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-      };
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept':
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+  };
 
   /// 輔助方法：安全地獲取元素文字
   String getText(dom.Element? element) {

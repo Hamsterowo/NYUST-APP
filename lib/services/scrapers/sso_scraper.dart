@@ -15,25 +15,26 @@ class SsoScraper extends BaseScraper {
   /// 初始化登入：獲取 VerificationToken 與驗證碼圖片
   Future<Map<String, dynamic>> loginInit() async {
     try {
-
-      if (kDebugMode) print('SsoScraper: Fetching login page from $loginPageUrl');
+      if (kDebugMode)
+        print('SsoScraper: Fetching login page from $loginPageUrl');
       final response = await dio.get(
         loginPageUrl,
         options: Options(
           headers: {
             ...commonHeaders,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept':
+                'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Upgrade-Insecure-Requests': '1',
             'Cache-Control': 'max-age=0',
           },
         ),
       );
 
-
       final document = parseHtml(response.data);
 
-      final tokenElement =
-          document.querySelector('input[name="__RequestVerificationToken"]');
+      final tokenElement = document.querySelector(
+        'input[name="__RequestVerificationToken"]',
+      );
       final token = getAttribute(tokenElement, 'value');
 
       if (token.isEmpty) {
@@ -44,10 +45,7 @@ class SsoScraper extends BaseScraper {
       final captchaRes = await dio.get(
         captchaUrl,
         options: Options(
-          headers: {
-            ...commonHeaders,
-            'Referer': loginPageUrl,
-          },
+          headers: {...commonHeaders, 'Referer': loginPageUrl},
           responseType: ResponseType.bytes,
         ),
       );
@@ -56,10 +54,8 @@ class SsoScraper extends BaseScraper {
       String base64Image = '';
 
       if (contentType.contains('image/')) {
-
         base64Image = base64Encode(captchaRes.data);
       } else {
-
         base64Image = utf8.decode(captchaRes.data);
       }
 
@@ -70,10 +66,7 @@ class SsoScraper extends BaseScraper {
       };
     } catch (e) {
       if (kDebugMode) print('SsoScraper Error: $e');
-      return {
-        'success': false,
-        'message': '登入初始化失敗: $e',
-      };
+      return {'success': false, 'message': '登入初始化失敗: $e'};
     }
   }
 
@@ -86,7 +79,6 @@ class SsoScraper extends BaseScraper {
     bool rememberMe = true,
   }) async {
     try {
-
       final formData = {
         '__RequestVerificationToken': verificationToken,
         'pLoginName': username,
@@ -113,7 +105,8 @@ class SsoScraper extends BaseScraper {
 
       if (response.statusCode == 302 || response.statusCode == 301) {
         final location = response.headers.value('location');
-        if (kDebugMode) print('SsoScraper: Login successful, redirecting to $location');
+        if (kDebugMode)
+          print('SsoScraper: Login successful, redirecting to $location');
 
         if (location != null) {
           final redirectUrl = location.startsWith('http')
@@ -122,43 +115,35 @@ class SsoScraper extends BaseScraper {
 
           await dio.get(
             redirectUrl,
-            options: Options(
-              headers: commonHeaders,
-              followRedirects: true,
-            )
+            options: Options(headers: commonHeaders, followRedirects: true),
           );
         }
 
-        return {
-          'success': true,
-          'message': '登入成功',
-        };
+        return {'success': true, 'message': '登入成功'};
       }
 
       final document = parseHtml(response.data);
       String errorMsg = '登入失敗，請檢查帳號密碼與驗證碼';
 
-      final validationSum =
-          document.querySelector('.validation-summary-errors')?.text.trim();
+      final validationSum = document
+          .querySelector('.validation-summary-errors')
+          ?.text
+          .trim();
       if (validationSum != null && validationSum.isNotEmpty) {
         errorMsg = validationSum;
       }
 
-      final fieldError =
-          document.querySelector('.field-validation-error')?.text.trim();
+      final fieldError = document
+          .querySelector('.field-validation-error')
+          ?.text
+          .trim();
       if (fieldError != null && fieldError.isNotEmpty) {
         errorMsg += ' ($fieldError)';
       }
 
-      return {
-        'success': false,
-        'message': errorMsg,
-      };
+      return {'success': false, 'message': errorMsg};
     } catch (e) {
-      return {
-        'success': false,
-        'message': '登入請求發生錯誤: $e',
-      };
+      return {'success': false, 'message': '登入請求發生錯誤: $e'};
     }
   }
 }

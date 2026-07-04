@@ -16,7 +16,8 @@ import 'services/background_service.dart';
 import 'services/notification_service.dart';
 import 'services/firebase_service.dart';
 
-final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> globalNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,9 +32,7 @@ Future<void> main() async {
     await notificationService.init();
 
     // 初始化背景排程 Workmanager
-    await Workmanager().initialize(
-      callbackDispatcher,
-    );
+    await Workmanager().initialize(callbackDispatcher);
   }
 
   runApp(
@@ -71,10 +70,7 @@ class MyApp extends StatelessWidget {
       GlobalCupertinoLocalizations.delegate,
     ];
 
-    const supportedLocales = [
-      Locale('zh'),
-      Locale('en'),
-    ];
+    const supportedLocales = [Locale('zh'), Locale('en')];
 
     if (isDesktopWeb) {
       return MaterialApp(

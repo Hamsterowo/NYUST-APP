@@ -56,9 +56,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
       shouldShow = true;
     } else {
       try {
-        final terms = await auth.api.getTermsOfService(lang: lang).timeout(
-          const Duration(seconds: 3),
-        );
+        final terms = await auth.api
+            .getTermsOfService(lang: lang)
+            .timeout(const Duration(seconds: 3));
         if (terms['status'] == 'success') {
           final lastUpdated = terms['data']?['lastUpdated'] ?? '';
           if (lastUpdated != lastAcceptedDate) {
@@ -958,8 +958,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
             }
           }
 
-          final isEnglish = Localizations.localeOf(context).languageCode == 'en';
-          final displayName = (isEnglish && c.nameEn != null && c.nameEn!.trim().isNotEmpty)
+          final isEnglish =
+              Localizations.localeOf(context).languageCode == 'en';
+          final displayName =
+              (isEnglish && c.nameEn != null && c.nameEn!.trim().isNotEmpty)
               ? c.nameEn!
               : c.name;
 

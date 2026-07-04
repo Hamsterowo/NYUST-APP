@@ -29,15 +29,15 @@ class CourseDetailCache {
   ) async {
     final key = _key(year, semester, courseNo);
     try {
-      final row = await (_db.select(_db.courseDetailCacheTable)
-            ..where((t) => t.cacheKey.equals(key)))
-          .getSingleOrNull();
+      final row = await (_db.select(
+        _db.courseDetailCacheTable,
+      )..where((t) => t.cacheKey.equals(key))).getSingleOrNull();
       if (row == null) return null;
 
       if (DateTime.now().difference(row.updatedAt) > _cacheDuration) {
-        await (_db.delete(_db.courseDetailCacheTable)
-              ..where((t) => t.cacheKey.equals(key)))
-            .go();
+        await (_db.delete(
+          _db.courseDetailCacheTable,
+        )..where((t) => t.cacheKey.equals(key))).go();
         return null;
       }
 
@@ -57,7 +57,9 @@ class CourseDetailCache {
   ) async {
     final key = _key(year, semester, courseNo);
     try {
-      await _db.into(_db.courseDetailCacheTable).insertOnConflictUpdate(
+      await _db
+          .into(_db.courseDetailCacheTable)
+          .insertOnConflictUpdate(
             CourseDetailCacheTableCompanion.insert(
               cacheKey: key,
               dataJson: jsonEncode(data),

@@ -11,7 +11,6 @@ class DesktopScreen extends StatelessWidget {
     final auth = context.read<AuthProvider>();
 
     if (!auth.isInitialized) {
-
       void listener() {
         if (auth.isInitialized) {
           auth.removeListener(listener);
@@ -34,8 +33,7 @@ class DesktopScreen extends StatelessWidget {
   void _navigateByAuthState(BuildContext context, AuthProvider auth) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) =>
-            auth.isLoggedIn ? const HomeScreen() : LoginScreen(),
+        builder: (_) => auth.isLoggedIn ? const HomeScreen() : LoginScreen(),
       ),
     );
   }

@@ -151,7 +151,8 @@ class GraduationInfo extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();
   TextColumn get totalCredits => text().withDefault(const Constant(''))();
   TextColumn get englishThreshold => text().withDefault(const Constant(''))();
-  TextColumn get internshipThreshold => text().withDefault(const Constant(''))();
+  TextColumn get internshipThreshold =>
+      text().withDefault(const Constant(''))();
   TextColumn get missingCoursesText => text().withDefault(const Constant(''))();
 
   @override

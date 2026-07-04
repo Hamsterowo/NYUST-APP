@@ -13,7 +13,8 @@ class ScheduleScraper extends BaseScraper {
   /// 獲取學生課表資料
   Future<Map<String, dynamic>> getSchedule() async {
     try {
-      if (kDebugMode) print('ScheduleScraper: Fetching schedule from $scheduleUrl');
+      if (kDebugMode)
+        print('ScheduleScraper: Fetching schedule from $scheduleUrl');
 
       final response = await getWithRedirects(
         scheduleUrl,
@@ -26,14 +27,17 @@ class ScheduleScraper extends BaseScraper {
       );
 
       final document = parseHtml(response.data);
-      if (kDebugMode) print('ScheduleScraper: Page Title: ${document.querySelector('title')?.text.trim()}');
+      if (kDebugMode)
+        print(
+          'ScheduleScraper: Page Title: ${document.querySelector('title')?.text.trim()}',
+        );
 
       if (response.data.toString().contains('Login.aspx') ||
           document.querySelector('form[action="./Login/Login.aspx"]') != null) {
         return {
           'status': 'error',
           'message': 'Session expired, please login again',
-          'isExpired': true
+          'isExpired': true,
         };
       }
 
@@ -50,7 +54,6 @@ class ScheduleScraper extends BaseScraper {
         }
 
         if (row != null && name.isNotEmpty) {
-
           String syllabusUrl = '';
           String year = '';
           String semester = '';
@@ -58,8 +61,10 @@ class ScheduleScraper extends BaseScraper {
           final relativeHref = anchor.attributes['href'];
 
           if (relativeHref != null && relativeHref.isNotEmpty) {
-            syllabusUrl = relativeHref.replaceFirst(RegExp(r'^(\.\.\/)+'),
-                'https://webapp.yuntech.edu.tw/WebNewCAS/');
+            syllabusUrl = relativeHref.replaceFirst(
+              RegExp(r'^(\.\.\/)+'),
+              'https://webapp.yuntech.edu.tw/WebNewCAS/',
+            );
 
             final parts = relativeHref.split('&');
             if (parts.length >= 4) {
@@ -81,7 +86,7 @@ class ScheduleScraper extends BaseScraper {
 
           String remark = '';
           final remarkElements = row.querySelectorAll(
-            'span[id*="_comm"], span[id*="_CourRemark_00"], span[id*="_Remark_00_01"], span[id*="_remark_00_02"]'
+            'span[id*="_comm"], span[id*="_CourRemark_00"], span[id*="_Remark_00_01"], span[id*="_remark_00_02"]',
           );
           for (var rEl in remarkElements) {
             final rText = rEl.text.trim();
@@ -128,7 +133,7 @@ class ScheduleScraper extends BaseScraper {
             'syllabusUrl': syllabusUrl,
             'year': year,
             'semester': semester,
-            'courseNo': courseNo
+            'courseNo': courseNo,
           });
         }
       }
@@ -137,15 +142,10 @@ class ScheduleScraper extends BaseScraper {
 
       return {
         'status': 'success',
-        'data': {
-          'schedule': courses
-        }
+        'data': {'schedule': courses},
       };
     } catch (e) {
-      return {
-        'status': 'error',
-        'message': '抓取課表失敗: $e',
-      };
+      return {'status': 'error', 'message': '抓取課表失敗: $e'};
     }
   }
 
@@ -156,24 +156,21 @@ class ScheduleScraper extends BaseScraper {
     required String courseNo,
   }) async {
     try {
-
       final detailUrl =
           'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&$year&$semester&$courseNo';
 
-      if (kDebugMode) print('ScheduleScraper: Fetching course detail from $detailUrl');
+      if (kDebugMode)
+        print('ScheduleScraper: Fetching course detail from $detailUrl');
 
       final response = await getWithRedirects(
         detailUrl,
-        options: Options(
-          headers: {
-            ...commonHeaders,
-          },
-        ),
+        options: Options(headers: {...commonHeaders}),
       );
 
       final document = parseHtml(response.data);
 
-      String text(String selector) => document.querySelector(selector)?.text.trim() ?? '';
+      String text(String selector) =>
+          document.querySelector(selector)?.text.trim() ?? '';
 
       final Map<String, dynamic> courseDetail = {
         'courseName': text('#ctl00_MainContent_Cour_cname_fLabel').isNotEmpty
@@ -209,14 +206,19 @@ class ScheduleScraper extends BaseScraper {
         'courseClass': text('#ctl00_MainContent_CourClassLabel').isNotEmpty
             ? text('#ctl00_MainContent_CourClassLabel')
             : text('span[id*="CourClassLabel"]'),
-        'teacherEmailAndTel': text('#ctl00_MainContent_Teacher_emailAndTel').isNotEmpty
+        'teacherEmailAndTel':
+            text('#ctl00_MainContent_Teacher_emailAndTel').isNotEmpty
             ? text('#ctl00_MainContent_Teacher_emailAndTel')
             : text('span[id*="Teacher_emailAndTel"]'),
-        'courseRemark': ('${text('#ctl00_MainContent_CourRemarkLabel')} ${text('#ctl00_MainContent_Remark')}').trim(),
-        'syllabus': []
+        'courseRemark':
+            ('${text('#ctl00_MainContent_CourRemarkLabel')} ${text('#ctl00_MainContent_Remark')}')
+                .trim(),
+        'syllabus': [],
       };
 
-      final syllabusRows = document.querySelectorAll('#ctl00_MainContent_TabContainer1_TabPanel2_GridView2 tr');
+      final syllabusRows = document.querySelectorAll(
+        '#ctl00_MainContent_TabContainer1_TabPanel2_GridView2 tr',
+      );
       for (var i = 1; i < syllabusRows.length; i++) {
         final tds = syllabusRows[i].querySelectorAll('td');
         if (tds.length >= 4) {
@@ -224,20 +226,14 @@ class ScheduleScraper extends BaseScraper {
             'week': tds[0].text.trim(),
             'content': tds[1].text.trim(),
             'method': tds[2].text.trim(),
-            'remark': tds[3].text.trim()
+            'remark': tds[3].text.trim(),
           });
         }
       }
 
-      return {
-        'status': 'success',
-        'data': courseDetail
-      };
+      return {'status': 'success', 'data': courseDetail};
     } catch (e) {
-      return {
-        'status': 'error',
-        'message': '獲取課程詳情失敗: $e',
-      };
+      return {'status': 'error', 'message': '獲取課程詳情失敗: $e'};
     }
   }
 

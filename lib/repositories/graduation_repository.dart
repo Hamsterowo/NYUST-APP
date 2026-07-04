@@ -33,24 +33,24 @@ class GraduationRepository {
     await _db.transaction(() async {
       await _db.delete(_db.graduationCredits).go();
       await _db.delete(_db.graduationInfo).go();
-      await (_db.delete(_db.cacheMeta)
-            ..where((t) => t.datasetKey.equals(_datasetKey)))
-          .go();
+      await (_db.delete(
+        _db.cacheMeta,
+      )..where((t) => t.datasetKey.equals(_datasetKey))).go();
     });
   }
 
   Future<bool> _isStale() async {
-    final meta = await (_db.select(_db.cacheMeta)
-          ..where((t) => t.datasetKey.equals(_datasetKey)))
-        .getSingleOrNull();
+    final meta = await (_db.select(
+      _db.cacheMeta,
+    )..where((t) => t.datasetKey.equals(_datasetKey))).getSingleOrNull();
     if (meta == null) return true;
     return DateTime.now().difference(meta.updatedAt) > _ttl;
   }
 
   Future<Map<String, dynamic>?> _buildMap() async {
-    final info = await (_db.select(_db.graduationInfo)
-          ..where((t) => t.id.equals(0)))
-        .getSingleOrNull();
+    final info = await (_db.select(
+      _db.graduationInfo,
+    )..where((t) => t.id.equals(0))).getSingleOrNull();
     if (info == null) return null;
 
     final creditRows = await _db.select(_db.graduationCredits).get();
@@ -80,7 +80,9 @@ class GraduationRepository {
       await _db.delete(_db.graduationCredits).go();
       await _db.delete(_db.graduationInfo).go();
 
-      await _db.into(_db.graduationInfo).insert(
+      await _db
+          .into(_db.graduationInfo)
+          .insert(
             GraduationInfoCompanion.insert(
               id: const Value(0),
               totalCredits: Value(_s(info['total_credits'])),
@@ -95,7 +97,9 @@ class GraduationRepository {
         final categories = groupEntry.value;
         if (categories is Map) {
           for (final catEntry in categories.entries) {
-            await _db.into(_db.graduationCredits).insert(
+            await _db
+                .into(_db.graduationCredits)
+                .insert(
                   GraduationCreditsCompanion.insert(
                     groupName: groupEntry.key.toString(),
                     category: catEntry.key.toString(),
@@ -107,7 +111,9 @@ class GraduationRepository {
         }
       }
 
-      await _db.into(_db.cacheMeta).insert(
+      await _db
+          .into(_db.cacheMeta)
+          .insert(
             CacheMetaCompanion.insert(
               datasetKey: _datasetKey,
               updatedAt: DateTime.now(),

@@ -26,7 +26,12 @@ class CampusMapPainter extends CustomPainter {
     required this.transformationController,
     required this.labelOpacityAnimation,
     required this.buildings,
-  }) : super(repaint: Listenable.merge([transformationController, labelOpacityAnimation]));
+  }) : super(
+         repaint: Listenable.merge([
+           transformationController,
+           labelOpacityAnimation,
+         ]),
+       );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,15 +42,21 @@ class CampusMapPainter extends CustomPainter {
     double scale = scaleX < scaleY ? scaleX : scaleY;
     scale *= 0.95;
 
-    double offsetX = (size.width - totalBounds.width * scale) / 2 - totalBounds.left * scale;
-    double offsetY = (size.height - totalBounds.height * scale) / 2 - totalBounds.top * scale;
+    double offsetX =
+        (size.width - totalBounds.width * scale) / 2 - totalBounds.left * scale;
+    double offsetY =
+        (size.height - totalBounds.height * scale) / 2 -
+        totalBounds.top * scale;
 
     canvas.save();
     canvas.translate(offsetX, offsetY);
     canvas.scale(scale);
 
     final bgRect = totalBounds.inflate(100.0);
-    final bgRRect = RRect.fromRectAndRadius(bgRect, const Radius.circular(32.0));
+    final bgRRect = RRect.fromRectAndRadius(
+      bgRect,
+      const Radius.circular(32.0),
+    );
 
     final bgPaint = Paint()
       ..style = PaintingStyle.fill
@@ -89,14 +100,17 @@ class CampusMapPainter extends CustomPainter {
 
     final double labelOpacity = labelOpacityAnimation.value;
 
-    if (labelOpacity > 0.05 || selectedId != null || previouslySelectedId != null) {
+    if (labelOpacity > 0.05 ||
+        selectedId != null ||
+        previouslySelectedId != null) {
       final textPainter = TextPainter(textDirection: TextDirection.ltr);
       final Set<String> drawnIds = {};
 
       for (var data in paths) {
         if (data.id.isEmpty || drawnIds.contains(data.id)) continue;
 
-        final isSelectedBuilding = (selectedId != null && data.id == selectedId) ||
+        final isSelectedBuilding =
+            (selectedId != null && data.id == selectedId) ||
             (previouslySelectedId != null && data.id == previouslySelectedId);
         final double itemOpacity = isSelectedBuilding ? 1.0 : labelOpacity;
 
@@ -117,13 +131,11 @@ class CampusMapPainter extends CustomPainter {
             ),
           );
           if (building.name.isNotEmpty) {
-
             labelText = building.aliases.isNotEmpty
                 ? building.aliases.first
                 : building.name.substring(0, math.min(4, building.name.length));
           }
         } else if (isBlock) {
-
           if (data.id == 'block-A') labelText = '活動中心區';
           if (data.id == 'block-management') labelText = '管理學院';
           if (data.id == 'block-engineering') labelText = '工程學院';
@@ -146,10 +158,7 @@ class CampusMapPainter extends CustomPainter {
 
           textPainter.text = TextSpan(
             text: labelText,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
           );
           textPainter.layout();
           final textOffset = Offset(
@@ -199,7 +208,8 @@ class CampusMapPainter extends CustomPainter {
         oldDelegate.themePrimaryColor != themePrimaryColor ||
         oldDelegate.themePrimaryContainerColor != themePrimaryContainerColor ||
         oldDelegate.baseBackgroundColor != baseBackgroundColor ||
-        oldDelegate.labelOpacityAnimation.value != labelOpacityAnimation.value ||
+        oldDelegate.labelOpacityAnimation.value !=
+            labelOpacityAnimation.value ||
         oldDelegate.buildings != buildings;
   }
 }

@@ -12,31 +12,42 @@ class GraduationScraper extends BaseScraper {
   /// 獲取畢業審核資料
   Future<Map<String, dynamic>> getGraduation() async {
     try {
-      if (kDebugMode) print('GraduationScraper: Fetching graduation info from $graduationUrl');
+      if (kDebugMode)
+        print(
+          'GraduationScraper: Fetching graduation info from $graduationUrl',
+        );
 
       final response = await getWithRedirects(
         graduationUrl,
         options: Options(
           headers: {
             ...commonHeaders,
-            'Referer': 'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx',
+            'Referer':
+                'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx',
           },
         ),
       );
 
       final document = parseHtml(response.data);
-      if (kDebugMode) print('GraduationScraper: Page Title: ${document.querySelector('title')?.text.trim()}');
+      if (kDebugMode)
+        print(
+          'GraduationScraper: Page Title: ${document.querySelector('title')?.text.trim()}',
+        );
 
       if (response.data.toString().contains('Login.aspx')) {
         return {
           'success': false,
           'message': 'Session expired',
-          'isExpired': true
+          'isExpired': true,
         };
       }
 
       String getTextSafely(String id) {
-        return document.querySelector('#ctl00_MainContent_oStudGradInfo_$id')?.text.trim() ?? '';
+        return document
+                .querySelector('#ctl00_MainContent_oStudGradInfo_$id')
+                ?.text
+                .trim() ??
+            '';
       }
 
       final data = {
@@ -51,7 +62,7 @@ class GraduationScraper extends BaseScraper {
             'general': getTextSafely('Grd_Com'),
             'dept_required': getTextSafely('Grd_MOpt'),
             'elective': getTextSafely('Grd_OSpe'),
-            'total': getTextSafely('Grd_Total')
+            'total': getTextSafely('Grd_Total'),
           },
           'earned': {
             'pe': getTextSafely('Get_MP'),
@@ -63,7 +74,7 @@ class GraduationScraper extends BaseScraper {
             'elective': getTextSafely('Get_O1'),
             'elective_offset': getTextSafely('Get_O2'),
             'elective_outer': getTextSafely('Get_EOSpe'),
-            'total': getTextSafely('Get_Total')
+            'total': getTextSafely('Get_Total'),
           },
           'not_received': {
             'pe': getTextSafely('NS_MP'),
@@ -73,7 +84,7 @@ class GraduationScraper extends BaseScraper {
             'dept_required': getTextSafely('NS_MOpt'),
             'elective': getTextSafely('NS_OSpe'),
             'elective_outer': getTextSafely('NS_EOSpe'),
-            'total': getTextSafely('NS_Total')
+            'total': getTextSafely('NS_Total'),
           },
           'missing': {
             'pe': getTextSafely('WithOut_MP'),
@@ -82,23 +93,18 @@ class GraduationScraper extends BaseScraper {
             'general': getTextSafely('WithOut_Com'),
             'dept_required': getTextSafely('WithOut_MOpt'),
             'elective': getTextSafely('WithOut_OSpe'),
-            'total': getTextSafely('WithOut_Total')
-          }
+            'total': getTextSafely('WithOut_Total'),
+          },
         },
-        'missing_courses_text': getTextSafely('NotExistsFlowChart')
+        'missing_courses_text': getTextSafely('NotExistsFlowChart'),
       };
 
-      if (kDebugMode) print('GraduationScraper: Successfully extracted graduation info');
+      if (kDebugMode)
+        print('GraduationScraper: Successfully extracted graduation info');
 
-      return {
-        'success': true,
-        'graduation_info': data,
-      };
+      return {'success': true, 'graduation_info': data};
     } catch (e) {
-      return {
-        'success': false,
-        'message': '抓取畢業審核失敗: $e',
-      };
+      return {'success': false, 'message': '抓取畢業審核失敗: $e'};
     }
   }
 }

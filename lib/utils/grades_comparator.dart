@@ -49,7 +49,9 @@ class GradesComparator {
               final nameZh = course['name']?.toString() ?? '';
               final nameEn = course['name_en']?.toString() ?? '';
               final score = course['score']?.toString() ?? '';
-              final displayName = isEnglish && nameEn.isNotEmpty ? nameEn : nameZh;
+              final displayName = isEnglish && nameEn.isNotEmpty
+                  ? nameEn
+                  : nameZh;
               if (displayName.isNotEmpty && score.isNotEmpty) {
                 if (isEnglish) {
                   changes.add('$displayName: $score');
@@ -86,7 +88,9 @@ class GradesComparator {
             final nameZh = newCourse['name']?.toString() ?? '';
             final nameEn = newCourse['name_en']?.toString() ?? '';
             final newScore = newCourse['score']?.toString() ?? '';
-            final displayName = isEnglish && nameEn.isNotEmpty ? nameEn : nameZh;
+            final displayName = isEnglish && nameEn.isNotEmpty
+                ? nameEn
+                : nameZh;
 
             final oldCourse = oldCoursesMap[code];
             if (oldCourse == null) {
