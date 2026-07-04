@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
+import '../providers/providers.dart';
 import '../models/schedule_event.dart';
 import '../models/calendar_event.dart';
 import '../services/calendar_cache_service.dart';
@@ -13,14 +14,14 @@ import '../utils/top_snack_bar.dart';
 import 'course_detail_screen.dart';
 import 'terms_of_service_screen.dart';
 
-class OverviewScreen extends StatefulWidget {
+class OverviewScreen extends ConsumerStatefulWidget {
   const OverviewScreen({super.key});
 
   @override
-  State<OverviewScreen> createState() => _OverviewScreenState();
+  ConsumerState<OverviewScreen> createState() => _OverviewScreenState();
 }
 
-class _OverviewScreenState extends State<OverviewScreen> {
+class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   List<CalendarEvent>? _todayEvents;
   List<CalendarEvent>? _allEvents;
   List<String>? _holidays;
@@ -46,7 +47,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Future<void> _checkTermsAgreement() async {
     final lang = Localizations.localeOf(context).languageCode;
-    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final auth = ref.read(authProvider);
     final prefs = await SharedPreferences.getInstance();
     final lastAcceptedDate = prefs.getString('accepted_terms_date') ?? '';
     Map<String, dynamic>? initialTerms;
@@ -101,7 +102,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Future<void> _fetchTodayCalendar() async {
     try {
       final now = DateTime.now();
-      final api = Provider.of<AuthProvider>(context, listen: false).api;
+      final api = ref.read(authProvider).api;
       final lang = _currentLanguageCode ?? 'zh';
 
       final response = await CalendarCacheService.getOrFetch(
@@ -599,8 +600,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
       appBar: CustomAppBar(title: AppLocalizations.of(context).navOverview),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: Consumer2<AuthProvider, DataProvider>(
-          builder: (context, auth, data, child) {
+        child: Builder(
+          builder: (context) {
+            final auth = ref.watch(authProvider);
+            final data = ref.watch(dataProvider);
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16.0),

@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 
-class AppWebViewScreen extends StatefulWidget {
+class AppWebViewScreen extends ConsumerStatefulWidget {
   final String url;
   final bool injectCookies;
 
@@ -18,10 +18,10 @@ class AppWebViewScreen extends StatefulWidget {
   });
 
   @override
-  State<AppWebViewScreen> createState() => _AppWebViewScreenState();
+  ConsumerState<AppWebViewScreen> createState() => _AppWebViewScreenState();
 }
 
-class _AppWebViewScreenState extends State<AppWebViewScreen> {
+class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
   late final WebViewController _controller;
   int _progress = 0;
   bool _isLoading = true;
@@ -90,7 +90,7 @@ class _AppWebViewScreenState extends State<AppWebViewScreen> {
 
   Future<void> _injectCookies() async {
     try {
-      final auth = context.read<AuthProvider>();
+      final auth = ref.read(authProvider);
       final uri = Uri.parse(widget.url);
       final cookies = await auth.api.getCookiesForUri(uri);
 

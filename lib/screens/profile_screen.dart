@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
@@ -17,16 +17,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import '../services/notification_service.dart';
 import '../services/background_service.dart';
-import '../providers/navigation_provider.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _versionStr = '';
   bool _gradeNotificationEnabled = false;
   final GlobalKey _notificationKey = GlobalKey();
@@ -66,32 +65,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     splash.confirm();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void _scrollToNotificationSetting() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final targetContext = _notificationKey.currentContext;
+      if (targetContext != null) {
+        Scrollable.ensureVisible(
+          targetContext,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+        );
+      }
 
-    final navProvider = Provider.of<NavigationProvider>(context, listen: true);
-    if (navProvider.shouldScrollToNotification) {
-      navProvider.clearScrollFlag();
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final targetContext = _notificationKey.currentContext;
-        if (targetContext != null) {
-          Scrollable.ensureVisible(
-            targetContext,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-          );
+      // Trigger standard native splash effect after scroll finishes
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _triggerNativeSplash();
         }
-
-        // Trigger standard native splash effect after scroll finishes
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) {
-            _triggerNativeSplash();
-          }
-        });
       });
-    }
+    });
   }
 
   Future<void> _loadNotificationSettings() async {
@@ -183,7 +174,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    // 從成績頁的通知鈕跳來時，捲動到「成績通知」設定並播放 splash 效果。
+    ref.listen<bool>(scrollToNotificationProvider, (prev, next) {
+      if (next) {
+        ref.read(scrollToNotificationProvider.notifier).state = false;
+        _scrollToNotificationSetting();
+      }
+    });
+
+    final auth = ref.watch(authProvider);
     final user = auth.user;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;

@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/navigation_provider.dart';
-import '../providers/data_provider.dart';
+import '../providers/providers.dart';
 import 'overview_screen.dart';
 import 'schedule_screen.dart';
 import 'info_screen.dart';
@@ -11,14 +10,14 @@ import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = [
     const OverviewScreen(),
     const ScheduleScreen(),
@@ -119,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Expanded(
       child: InkWell(
         onTap: () {
-          context.read<NavigationProvider>().setIndex(index);
+          ref.read(navIndexProvider.notifier).state = index;
         },
         borderRadius: BorderRadius.circular(24),
         splashColor: splashFillColor,
@@ -177,18 +176,17 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<DataProvider>().forceFetchAll();
+        ref.read(dataProvider).forceFetchAll();
       });
     }
     _lastLocale = newLocale;
 
-    final navigation = context.watch<NavigationProvider>();
-    int currentIndex = navigation.currentIndex;
+    int currentIndex = ref.watch(navIndexProvider);
 
     if (currentIndex >= _screens.length) {
       currentIndex = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<NavigationProvider>().setIndex(0);
+        ref.read(navIndexProvider.notifier).state = 0;
       });
     }
 

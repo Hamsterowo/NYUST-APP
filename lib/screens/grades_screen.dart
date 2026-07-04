@@ -1,32 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
-import '../providers/navigation_provider.dart';
+import '../providers/providers.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
 import 'course_detail_screen.dart';
 import 'web_view_screen.dart';
 
-class GradesScreen extends StatefulWidget {
+class GradesScreen extends ConsumerStatefulWidget {
   final bool embed;
   const GradesScreen({super.key, this.embed = false});
 
   @override
-  State<GradesScreen> createState() => _GradesScreenState();
+  ConsumerState<GradesScreen> createState() => _GradesScreenState();
 }
 
-class _GradesScreenState extends State<GradesScreen> {
+class _GradesScreenState extends ConsumerState<GradesScreen> {
   int _selectedSegment = 0;
 
   final Map<String, bool> _expandedStates = {};
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final data = context.watch<DataProvider>();
+    final auth = ref.watch(authProvider);
+    final data = ref.watch(dataProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (!auth.isInitialized) {
@@ -55,7 +54,7 @@ class _GradesScreenState extends State<GradesScreen> {
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () {
-                context.read<NavigationProvider>().setIndex(4);
+                ref.read(navIndexProvider.notifier).state = 4;
                 showTopSnackBar(
                   context,
                   AppLocalizations.of(context).pleaseLoginToViewGrades,
@@ -130,10 +129,8 @@ class _GradesScreenState extends State<GradesScreen> {
             tooltip: AppLocalizations.of(context).settingsGradeNotification,
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NavigationProvider>().setIndex(
-                4,
-                scrollToNotification: true,
-              );
+              ref.read(navIndexProvider.notifier).state = 4;
+              ref.read(scrollToNotificationProvider.notifier).state = true;
             },
           ),
           IconButton(

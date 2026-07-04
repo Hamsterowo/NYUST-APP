@@ -1,11 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/providers.dart';
 import '../l10n/app_localizations.dart';
 
-class TermsOfServiceScreen extends StatefulWidget {
+class TermsOfServiceScreen extends ConsumerStatefulWidget {
   final bool showAgreementButtons;
   final Map<String, dynamic>? initialTerms;
 
@@ -146,10 +146,11 @@ class TermsOfServiceScreen extends StatefulWidget {
   }
 
   @override
-  State<TermsOfServiceScreen> createState() => _TermsOfServiceScreenState();
+  ConsumerState<TermsOfServiceScreen> createState() =>
+      _TermsOfServiceScreenState();
 }
 
-class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
+class _TermsOfServiceScreenState extends ConsumerState<TermsOfServiceScreen> {
   late Future<Map<String, dynamic>> _termsFuture;
   String _lastUpdated = '';
 
@@ -177,9 +178,10 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   Future<Map<String, dynamic>> _fetchTerms() async {
     try {
       final lang = Localizations.localeOf(context).languageCode;
-      final res = await context.read<AuthProvider>().api.getTermsOfService(
-        lang: lang,
-      );
+      final res = await ref
+          .read(authProvider)
+          .api
+          .getTermsOfService(lang: lang);
       if (res['status'] == 'success') {
         setState(() {
           _lastUpdated = res['data']?['lastUpdated'] ?? '';

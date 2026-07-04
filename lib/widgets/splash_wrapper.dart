@@ -1,21 +1,21 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
-import '../providers/navigation_provider.dart';
+import '../providers/providers.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/terms_of_service_screen.dart';
 
-class SplashWrapper extends StatefulWidget {
+class SplashWrapper extends ConsumerStatefulWidget {
   const SplashWrapper({super.key});
 
   @override
-  State<SplashWrapper> createState() => _SplashWrapperState();
+  ConsumerState<SplashWrapper> createState() => _SplashWrapperState();
 }
 
-class _SplashWrapperState extends State<SplashWrapper>
+class _SplashWrapperState extends ConsumerState<SplashWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -121,7 +121,7 @@ class _SplashWrapperState extends State<SplashWrapper>
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = ref.watch(authProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (_wasLoggedIn == true && !auth.isLoggedIn) {
@@ -134,7 +134,7 @@ class _SplashWrapperState extends State<SplashWrapper>
         if (mounted) {
           Navigator.of(context).popUntil((route) => route.isFirst);
           try {
-            context.read<NavigationProvider>().setIndex(0);
+            ref.read(navIndexProvider.notifier).state = 0;
           } catch (_) {}
         }
       });

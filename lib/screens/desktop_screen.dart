@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
-class DesktopScreen extends StatelessWidget {
+class DesktopScreen extends ConsumerWidget {
   const DesktopScreen({super.key});
 
-  void _continueToApp(BuildContext context) {
-    final auth = context.read<AuthProvider>();
+  void _continueToApp(BuildContext context, WidgetRef ref) {
+    final auth = ref.read(authProvider);
 
     if (!auth.isInitialized) {
       void listener() {
@@ -39,7 +40,7 @@ class DesktopScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Center(
         child: Padding(
@@ -76,7 +77,7 @@ class DesktopScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48),
                 FilledButton.icon(
-                  onPressed: () => _continueToApp(context),
+                  onPressed: () => _continueToApp(context, ref),
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text('繼續前往'),
                   style: FilledButton.styleFrom(

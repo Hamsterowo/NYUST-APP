@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../router/app_router.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -8,8 +8,6 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
-  static GlobalKey<NavigatorState>? navigatorKey;
 
   Future<void> init() async {
     // Android initialization settings - uses ic_launcher or similar app icon
@@ -103,8 +101,9 @@ class NotificationService {
   }
 
   void _navigateToGrades() {
-    if (navigatorKey != null && navigatorKey!.currentState != null) {
-      navigatorKey!.currentState!.pushNamed('/grades');
+    // 透過 go_router 導航（背景通知點擊為 App 外部進入點）。
+    if (rootNavigatorKey.currentState != null) {
+      appRouter.push('/grades');
     }
   }
 }

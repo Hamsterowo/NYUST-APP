@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 import '../utils/top_snack_bar.dart';
 
-class BugReportDialog extends StatefulWidget {
+class BugReportDialog extends ConsumerStatefulWidget {
   const BugReportDialog({super.key});
 
   @override
-  State<BugReportDialog> createState() => _BugReportDialogState();
+  ConsumerState<BugReportDialog> createState() => _BugReportDialogState();
 }
 
-class _BugReportDialogState extends State<BugReportDialog> {
+class _BugReportDialogState extends ConsumerState<BugReportDialog> {
   final _descriptionController = TextEditingController();
   final _contactController = TextEditingController();
   XFile? _selectedImage;
@@ -86,7 +86,7 @@ class _BugReportDialogState extends State<BugReportDialog> {
       return;
     }
 
-    final auth = context.read<AuthProvider>();
+    final auth = ref.read(authProvider);
     setState(() {
       _isSubmitting = true;
     });

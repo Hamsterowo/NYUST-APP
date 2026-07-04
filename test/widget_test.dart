@@ -6,31 +6,13 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yun_tool/main.dart';
-import 'package:yun_tool/providers/auth_provider.dart';
-import 'package:yun_tool/providers/data_provider.dart';
-import 'package:yun_tool/providers/navigation_provider.dart';
 
 void main() {
   testWidgets('App boot smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame, wrapping with required providers.
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
-            create: (ctx) => DataProvider(
-              Provider.of<AuthProvider>(ctx, listen: false).api,
-              Provider.of<AuthProvider>(ctx, listen: false),
-            ),
-            update: (ctx, auth, prev) => prev!,
-          ),
-          ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        ],
-        child: const MyApp(),
-      ),
-    );
+    // Stage 5：DI 改用 Riverpod，App 以 ProviderScope 包裹。
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
 
     // Verify that the app builds and mounts elements without throwing errors.
     expect(find.byType(MyApp), findsOneWidget);

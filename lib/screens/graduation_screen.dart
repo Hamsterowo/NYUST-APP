@@ -5,14 +5,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
 import '../models/schedule_event.dart';
-import '../providers/navigation_provider.dart';
+import '../providers/providers.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
@@ -20,7 +19,7 @@ import 'course_detail_screen.dart';
 import 'map_screen.dart';
 import 'web_view_screen.dart';
 
-class GraduationContent extends StatelessWidget {
+class GraduationContent extends ConsumerWidget {
   const GraduationContent({super.key});
 
   String _formatCreditsText(BuildContext context, String? rawText) {
@@ -33,8 +32,8 @@ class GraduationContent extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final data = context.watch<DataProvider>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final data = ref.watch(dataProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (data.graduationFailed && data.graduationData == null) {
@@ -478,15 +477,15 @@ class GraduationContent extends StatelessWidget {
   }
 }
 
-class ScheduleScreen extends StatefulWidget {
+class ScheduleScreen extends ConsumerStatefulWidget {
   final bool embed;
   const ScheduleScreen({super.key, this.embed = false});
 
   @override
-  State<ScheduleScreen> createState() => _ScheduleScreenState();
+  ConsumerState<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen> {
+class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   bool _isMapMode = false;
   final GlobalKey _repaintKey = GlobalKey();
 
@@ -634,7 +633,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = ref.watch(authProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (!auth.isInitialized) {
@@ -663,7 +662,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: () {
-                context.read<NavigationProvider>().setIndex(4);
+                ref.read(navIndexProvider.notifier).state = 4;
                 showTopSnackBar(
                   context,
                   AppLocalizations.of(context).pleaseLoginToViewSchedule,
@@ -685,7 +684,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       );
     }
 
-    final data = context.watch<DataProvider>();
+    final data = ref.watch(dataProvider);
     final bodyContent = _buildBody(data);
 
     if (widget.embed) {
@@ -1364,12 +1363,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 }
 
-class GraduationScreen extends StatelessWidget {
+class GraduationScreen extends ConsumerWidget {
   const GraduationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final data = context.watch<DataProvider>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final data = ref.watch(dataProvider);
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).infoGradTitle,
