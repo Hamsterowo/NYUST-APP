@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "156322885996",
+    "project_id": "nyust-app",
+    "storage_bucket": "nyust-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156322885996:android:156f148ea5070088d54349",
+        "android_client_info": {
+          "package_name": "tw.hamster.yuntool"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuBSKUMhRVVI9Y4dV1CfIiOMyGbbQXvI4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
