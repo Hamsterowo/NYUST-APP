@@ -1,0 +1,29 @@
+name: Analyze
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.1
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 目前有既有的 info 級 lint，先以 --no-fatal-infos 讓 CI 只擋 error/warning。
+      # 之後把 info 清乾淨後可移除此旗標，改為嚴格檢查。
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
