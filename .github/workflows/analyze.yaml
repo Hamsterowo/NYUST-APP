@@ -15,24 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.41.1
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-project
 
-      - name: Cache pub packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-          restore-keys: pub-${{ runner.os }}-
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Verify generated files are up-to-date
+        run: |
+          dart run build_runner build
+          flutter gen-l10n
+          git diff --exit-code
 
       # 目前有既有的 info 級 lint，先以 --no-fatal-infos 讓 CI 只擋 error/warning。
-      # 之後把 info 清乾淨後可移除此旗標，改為嚴格檢查。
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 

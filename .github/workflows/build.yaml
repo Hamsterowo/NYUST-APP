@@ -1,14 +1,17 @@
-name: Build APK
+name: Build & Release APK
 
 on:
+  # 只在「刻意」時建置：推 v* tag（發 Release）或手動觸發（只出 artifact）。
   push:
-    branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
-# 同一分支有新 push 時，取消還在跑的舊 build，不浪費資源。
 concurrency:
-  group: build-apk-${{ github.ref }}
+  group: build-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: write # 建立 GitHub Release 需要
 
 jobs:
   build-apk:
@@ -16,31 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.41.1
-          channel: stable
-          cache: true
-
-      # 快取 pub 套件與 Gradle 依賴，第 2 次之後的 build 會快很多。
-      - name: Cache pub packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-          restore-keys: pub-${{ runner.os }}-
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
-          restore-keys: gradle-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: flutter pub get
+      - uses: ./.github/actions/setup-project
 
       # 從 secrets 還原 upload keystore 與 key.properties，讓 release build
       # 用正式（上傳）金鑰簽章。這兩個檔案都在 .gitignore，不會進版控。
@@ -71,3 +50,11 @@ jobs:
           name: app-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
+
+      # 推 tag 時，順便建立 GitHub Release 並附上 APK（永久下載連結）。
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+          generate_release_notes: true

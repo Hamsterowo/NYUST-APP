@@ -1,0 +1,31 @@
+name: Setup project
+description: Set up Flutter with pub and Gradle caches, then run pub get.
+
+runs:
+  using: composite
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 3.41.1
+        channel: stable
+        cache: true
+
+    - name: Cache pub packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.pub-cache
+        key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+        restore-keys: pub-${{ runner.os }}-
+
+    - name: Cache Gradle
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+        restore-keys: gradle-${{ runner.os }}-
+
+    - name: Install dependencies
+      shell: bash
+      run: flutter pub get

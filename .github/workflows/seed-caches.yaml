@@ -1,0 +1,19 @@
+name: Seed Caches
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # 每週日 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-project
+
+      # 跑一次 debug build 把 Gradle / Android SDK 快取暖起來，
+      # 之後 analyze / build 就能吃到熱快取、跑得更快。
+      - name: Warm Gradle and Android SDK caches
+        run: flutter build apk --debug
