@@ -82,6 +82,7 @@ test/
 
 # Local-only planning notes (kept out of version control)
 implementation_plan.md
+todo.md
 
 # Android signing secrets — NEVER commit
 **/android/key.properties
