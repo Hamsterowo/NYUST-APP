@@ -314,163 +314,171 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Card(
                           elevation: 0,
                           color: colorScheme.surfaceContainerHighest,
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: Icon(
-                                  Icons.privacy_tip_outlined,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                title: Text(
-                                  AppLocalizations.of(context).privacyPolicy,
-                                ),
-                                trailing: Icon(
-                                  Icons.open_in_new,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    topRight: Radius.circular(12),
+                          child: ListTileTheme(
+                            data: const ListTileThemeData(
+                              visualDensity: VisualDensity(vertical: -3),
+                              minVerticalPadding: 4,
+                            ),
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.privacy_tip_outlined,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
-                                ),
-                                onTap: () {
-                                  final isEnglish =
-                                      Localizations.localeOf(
-                                        context,
-                                      ).languageCode ==
-                                      'en';
-                                  final url = isEnglish
-                                      ? 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=en'
-                                      : 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=zh-TW';
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AppWebViewScreen(
-                                        url: url,
-                                        injectCookies: false,
+                                  title: Text(
+                                    AppLocalizations.of(context).privacyPolicy,
+                                  ),
+                                  trailing: Icon(
+                                    Icons.open_in_new,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    final isEnglish =
+                                        Localizations.localeOf(
+                                          context,
+                                        ).languageCode ==
+                                        'en';
+                                    final url = isEnglish
+                                        ? 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=en'
+                                        : 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=zh-TW';
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AppWebViewScreen(
+                                          url: url,
+                                          injectCookies: false,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const Divider(height: 1, indent: 56),
-                              ListTile(
-                                leading: Icon(
-                                  Icons.description_outlined,
-                                  color: colorScheme.onSurfaceVariant,
+                                    );
+                                  },
                                 ),
-                                title: Text(
-                                  AppLocalizations.of(context).termsOfService,
-                                ),
-                                trailing: Icon(
-                                  Icons.chevron_right,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const TermsOfServiceScreen(),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const Divider(height: 1, indent: 56),
-                              ListTile(
-                                leading: Icon(
-                                  Icons.language,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                title: Text(
-                                  AppLocalizations.of(context).languageSetting,
-                                ),
-                                trailing: Icon(
-                                  Icons.chevron_right,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: kIsWeb
-                                        ? const Radius.circular(12)
-                                        : Radius.zero,
-                                    bottomRight: kIsWeb
-                                        ? const Radius.circular(12)
-                                        : Radius.zero,
-                                  ),
-                                ),
-                                onTap: () =>
-                                    SettingsUtils.openLanguageSettings(),
-                              ),
-                              if (!kIsWeb) ...[
                                 const Divider(height: 1, indent: 56),
                                 ListTile(
-                                  key: _notificationKey,
                                   leading: Icon(
-                                    Icons.notifications_active_outlined,
+                                    Icons.description_outlined,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  title: Text(
+                                    AppLocalizations.of(context).termsOfService,
+                                  ),
+                                  trailing: Icon(
+                                    Icons.chevron_right,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const TermsOfServiceScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.language,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
                                   title: Text(
                                     AppLocalizations.of(
                                       context,
-                                    ).settingsGradeNotification,
+                                    ).languageSetting,
                                   ),
-                                  trailing: Transform.scale(
-                                    scale: 0.8, // 縮小 20%
-                                    alignment: Alignment.centerRight, // 靠右對齊
-                                    child: Switch.adaptive(
-                                      value: _gradeNotificationEnabled,
-                                      onChanged: _toggleGradeNotification,
-                                    ),
+                                  trailing: Icon(
+                                    Icons.chevron_right,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
-                                      bottomLeft: kDebugMode
-                                          ? Radius.zero
-                                          : const Radius.circular(12),
-                                      bottomRight: kDebugMode
-                                          ? Radius.zero
-                                          : const Radius.circular(12),
+                                      bottomLeft: kIsWeb
+                                          ? const Radius.circular(12)
+                                          : Radius.zero,
+                                      bottomRight: kIsWeb
+                                          ? const Radius.circular(12)
+                                          : Radius.zero,
                                     ),
                                   ),
-                                  onTap: () => _toggleGradeNotification(
-                                    !_gradeNotificationEnabled,
-                                  ),
+                                  onTap: () =>
+                                      SettingsUtils.openLanguageSettings(),
                                 ),
-                              ],
-                              if (kDebugMode && !kIsWeb) ...[
-                                const Divider(height: 1, indent: 56),
-                                ListTile(
-                                  leading: const Icon(
-                                    Icons.bug_report_outlined,
-                                    color: Colors.orange,
-                                  ),
-                                  title: const Text('【開發者】立即觸發一次背景檢查'),
-                                  subtitle: const Text(
-                                    '點擊後將會立刻在背景啟動一次排程任務進行測試',
-                                  ),
-                                  trailing: const Icon(Icons.play_arrow),
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(12),
-                                      bottomRight: Radius.circular(12),
+                                if (!kIsWeb) ...[
+                                  const Divider(height: 1, indent: 56),
+                                  ListTile(
+                                    key: _notificationKey,
+                                    leading: Icon(
+                                      Icons.notifications_active_outlined,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    title: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).settingsGradeNotification,
+                                    ),
+                                    trailing: Transform.scale(
+                                      scale: 0.8, // 縮小 20%
+                                      alignment: Alignment.centerRight, // 靠右對齊
+                                      child: Switch.adaptive(
+                                        value: _gradeNotificationEnabled,
+                                        onChanged: _toggleGradeNotification,
+                                      ),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: kDebugMode
+                                            ? Radius.zero
+                                            : const Radius.circular(12),
+                                        bottomRight: kDebugMode
+                                            ? Radius.zero
+                                            : const Radius.circular(12),
+                                      ),
+                                    ),
+                                    onTap: () => _toggleGradeNotification(
+                                      !_gradeNotificationEnabled,
                                     ),
                                   ),
-                                  onTap: () async {
-                                    await Workmanager().registerOneOffTask(
-                                      "manual_oneoff_${DateTime.now().millisecondsSinceEpoch}",
-                                      checkGradesTask,
-                                    );
-                                    if (!context.mounted) return;
-                                    showTopSnackBar(
-                                      context,
-                                      '已註冊立即執行的背景任務，請查看通知！',
-                                      type: SnackBarType.info,
-                                    );
-                                  },
-                                ),
+                                ],
+                                if (kDebugMode && !kIsWeb) ...[
+                                  const Divider(height: 1, indent: 56),
+                                  ListTile(
+                                    leading: const Icon(
+                                      Icons.bug_report_outlined,
+                                      color: Colors.orange,
+                                    ),
+                                    title: const Text('【開發者】立即觸發一次背景檢查'),
+                                    subtitle: const Text(
+                                      '點擊後將會立刻在背景啟動一次排程任務進行測試',
+                                    ),
+                                    trailing: const Icon(Icons.play_arrow),
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(12),
+                                        bottomRight: Radius.circular(12),
+                                      ),
+                                    ),
+                                    onTap: () async {
+                                      await Workmanager().registerOneOffTask(
+                                        "manual_oneoff_${DateTime.now().millisecondsSinceEpoch}",
+                                        checkGradesTask,
+                                      );
+                                      if (!context.mounted) return;
+                                      showTopSnackBar(
+                                        context,
+                                        '已註冊立即執行的背景任務，請查看通知！',
+                                        type: SnackBarType.info,
+                                      );
+                                    },
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ],
