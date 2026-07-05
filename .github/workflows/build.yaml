@@ -51,10 +51,13 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      # 推 tag 時，順便建立 GitHub Release 並附上 APK（永久下載連結）。
-      - name: Create GitHub Release
+      # 推 tag 時，建立「草稿」GitHub Release 並附上 APK（永久下載連結）。
+      # draft: true → 自動預填變更說明並附好 APK，但先不公開；
+      # 你可在 Releases 頁面補寫「這版改了什麼」後再手動按 Publish。
+      - name: Create GitHub Release (draft)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           generate_release_notes: true
+          draft: true
