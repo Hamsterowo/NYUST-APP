@@ -10,7 +10,7 @@ import '../utils/pwa_interop.dart';
 import '../utils/settings_utils.dart';
 import 'terms_of_service_screen.dart';
 import 'web_view_screen.dart';
-import 'bug_report_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,10 +56,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       textDirection: textDirection,
       containedInkWell: true,
       rectCallback: () => Offset.zero & renderBox.size,
-      borderRadius: BorderRadius.only(
-        bottomLeft: kDebugMode ? Radius.zero : const Radius.circular(12),
-        bottomRight: kDebugMode ? Radius.zero : const Radius.circular(12),
-      ),
+      borderRadius: BorderRadius.zero,
     );
 
     splash.confirm();
@@ -165,11 +162,78 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  void _showReportDialog(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const BugReportScreen()),
+  void _showReportOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    AppLocalizations.of(sheetContext).reportChannelTitle,
+                    style: Theme.of(sheetContext).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.email_outlined),
+                title: Text(AppLocalizations.of(sheetContext).reportViaEmail),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _sendReportEmail();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.forum_outlined),
+                title: Text(AppLocalizations.of(sheetContext).reportViaDiscord),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _openDiscord();
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  Future<void> _sendReportEmail() async {
+    final l10n = AppLocalizations.of(context);
+    final platform = kIsWeb ? 'Web' : defaultTargetPlatform.name;
+    final version = _versionStr.isNotEmpty ? _versionStr : '-';
+    final uri = Uri.parse(
+      'mailto:support@hamster.tw'
+      '?subject=${Uri.encodeComponent(l10n.reportEmailSubject)}'
+      '&body=${Uri.encodeComponent(l10n.reportEmailBody(version, platform))}',
+    );
+    if (!await launchUrl(uri) && mounted) {
+      showTopSnackBar(
+        context,
+        l10n.reportLaunchError,
+        type: SnackBarType.warning,
+      );
+    }
+  }
+
+  Future<void> _openDiscord() async {
+    final uri = Uri.parse('https://discord.gg/jdaKepXgP2');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
+        mounted) {
+      showTopSnackBar(
+        context,
+        AppLocalizations.of(context).reportLaunchError,
+        type: SnackBarType.warning,
+      );
+    }
   }
 
   @override
@@ -396,16 +460,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     Icons.chevron_right,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: kIsWeb
-                                          ? const Radius.circular(12)
-                                          : Radius.zero,
-                                      bottomRight: kIsWeb
-                                          ? const Radius.circular(12)
-                                          : Radius.zero,
-                                    ),
-                                  ),
                                   onTap: () =>
                                       SettingsUtils.openLanguageSettings(),
                                 ),
@@ -430,16 +484,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         onChanged: _toggleGradeNotification,
                                       ),
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: kDebugMode
-                                            ? Radius.zero
-                                            : const Radius.circular(12),
-                                        bottomRight: kDebugMode
-                                            ? Radius.zero
-                                            : const Radius.circular(12),
-                                      ),
-                                    ),
                                     onTap: () => _toggleGradeNotification(
                                       !_gradeNotificationEnabled,
                                     ),
@@ -457,12 +501,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       '點擊後將會立刻在背景啟動一次排程任務進行測試',
                                     ),
                                     trailing: const Icon(Icons.play_arrow),
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(12),
-                                        bottomRight: Radius.circular(12),
-                                      ),
-                                    ),
                                     onTap: () async {
                                       await Workmanager().registerOneOffTask(
                                         "manual_oneoff_${DateTime.now().millisecondsSinceEpoch}",
@@ -477,6 +515,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     },
                                   ),
                                 ],
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.bug_report_outlined,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  title: Text(
+                                    AppLocalizations.of(context).reportIssue,
+                                  ),
+                                  trailing: Icon(
+                                    Icons.chevron_right,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  onTap: () => _showReportOptions(context),
+                                ),
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.logout,
+                                    color: colorScheme.error,
+                                  ),
+                                  title: Text(
+                                    AppLocalizations.of(context).logout,
+                                    style: TextStyle(color: colorScheme.error),
+                                  ),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  onTap: () => auth.logout(),
+                                ),
                               ],
                             ),
                           ),
@@ -521,61 +592,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             const SizedBox(height: 12),
                           ],
 
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: () => _showReportDialog(context),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Colors.grey.shade200,
-                                foregroundColor: Colors.black87,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.bug_report_outlined,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    AppLocalizations.of(context).reportIssue,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: () => auth.logout(),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: colorScheme.error,
-                                foregroundColor: colorScheme.onError,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.logout, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(AppLocalizations.of(context).logout),
-                                ],
-                              ),
-                            ),
-                          ),
                           const SizedBox(height: 16),
                           if (_versionStr.isNotEmpty)
                             Text(

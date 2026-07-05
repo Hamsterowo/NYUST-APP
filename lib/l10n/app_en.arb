@@ -16,6 +16,22 @@
   "continueLabel": "Continue",
   "logout": "Logout",
   "reportIssue": "Report an Issue",
+  "reportChannelTitle": "Choose how to report",
+  "reportViaEmail": "Report via Email",
+  "reportViaDiscord": "Report via Discord community",
+  "reportEmailSubject": "[YunTool] Issue Report",
+  "reportEmailBody": "Please describe the issue here:\n\n\n------\nApp version: {version}\nPlatform: {platform}",
+  "@reportEmailBody": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "reportLaunchError": "Could not open. Please try again.",
   "installApp": "Install APP",
   "notPromoted": "Don't show again",
   "ok": "OK",

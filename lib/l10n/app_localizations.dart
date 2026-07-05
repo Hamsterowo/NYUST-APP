@@ -194,6 +194,42 @@ abstract class AppLocalizations {
   /// **'回報問題'**
   String get reportIssue;
 
+  /// No description provided for @reportChannelTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'選擇回報方式'**
+  String get reportChannelTitle;
+
+  /// No description provided for @reportViaEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'以 Email 回報'**
+  String get reportViaEmail;
+
+  /// No description provided for @reportViaDiscord.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入 Discord 社群回報'**
+  String get reportViaDiscord;
+
+  /// No description provided for @reportEmailSubject.
+  ///
+  /// In zh, this message translates to:
+  /// **'【雲科工具箱】問題回報'**
+  String get reportEmailSubject;
+
+  /// No description provided for @reportEmailBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'請在此描述您遇到的問題：\n\n\n------\nApp 版本：{version}\n平台：{platform}'**
+  String reportEmailBody(String version, String platform);
+
+  /// No description provided for @reportLaunchError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法開啟，請稍後再試'**
+  String get reportLaunchError;
+
   /// No description provided for @installApp.
   ///
   /// In zh, this message translates to:

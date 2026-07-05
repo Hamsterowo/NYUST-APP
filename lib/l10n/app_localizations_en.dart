@@ -58,6 +58,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportIssue => 'Report an Issue';
 
   @override
+  String get reportChannelTitle => 'Choose how to report';
+
+  @override
+  String get reportViaEmail => 'Report via Email';
+
+  @override
+  String get reportViaDiscord => 'Report via Discord community';
+
+  @override
+  String get reportEmailSubject => '[YunTool] Issue Report';
+
+  @override
+  String reportEmailBody(String version, String platform) {
+    return 'Please describe the issue here:\n\n\n------\nApp version: $version\nPlatform: $platform';
+  }
+
+  @override
+  String get reportLaunchError => 'Could not open. Please try again.';
+
+  @override
   String get installApp => 'Install APP';
 
   @override

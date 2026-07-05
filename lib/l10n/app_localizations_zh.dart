@@ -57,6 +57,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportIssue => '回報問題';
 
   @override
+  String get reportChannelTitle => '選擇回報方式';
+
+  @override
+  String get reportViaEmail => '以 Email 回報';
+
+  @override
+  String get reportViaDiscord => '加入 Discord 社群回報';
+
+  @override
+  String get reportEmailSubject => '【雲科工具箱】問題回報';
+
+  @override
+  String reportEmailBody(String version, String platform) {
+    return '請在此描述您遇到的問題：\n\n\n------\nApp 版本：$version\n平台：$platform';
+  }
+
+  @override
+  String get reportLaunchError => '無法開啟，請稍後再試';
+
+  @override
   String get installApp => '安裝 APP';
 
   @override

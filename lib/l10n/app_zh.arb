@@ -16,6 +16,22 @@
   "continueLabel": "繼續",
   "logout": "登出",
   "reportIssue": "回報問題",
+  "reportChannelTitle": "選擇回報方式",
+  "reportViaEmail": "以 Email 回報",
+  "reportViaDiscord": "加入 Discord 社群回報",
+  "reportEmailSubject": "【雲科工具箱】問題回報",
+  "reportEmailBody": "請在此描述您遇到的問題：\n\n\n------\nApp 版本：{version}\n平台：{platform}",
+  "@reportEmailBody": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "reportLaunchError": "無法開啟，請稍後再試",
   "installApp": "安裝 APP",
   "notPromoted": "不再提示",
   "ok": "好的",
