@@ -278,7 +278,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     if (!nowZero.isBefore(winterStartZero) && nowZero.isBefore(sem2StartZero)) {
       start = winterStartZero;
       end = sem2StartZero;
-      labelKey = 'start';
+      labelKey = 'winter';
       isVacation = true;
     } else if (!nowZero.isBefore(sem2StartZero) &&
         nowZero.isBefore(summerStartZero)) {
@@ -290,7 +290,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         nowZero.isBefore(sem1StartZero)) {
       start = summerStartZero;
       end = sem1StartZero;
-      labelKey = 'start';
+      labelKey = 'summer';
       isVacation = true;
     } else if (!nowZero.isBefore(sem1StartZero)) {
       start = sem1StartZero;
@@ -436,9 +436,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
 
     final String labelKey = data['labelKey'] ?? '';
     String label = '';
-    if (labelKey == 'start') {
-      label = AppLocalizations.of(context).vacationLabelStart;
-    } else if (labelKey == 'winter') {
+    if (labelKey == 'winter') {
       label = AppLocalizations.of(context).vacationLabelWinter;
     } else if (labelKey == 'summer') {
       label = AppLocalizations.of(context).vacationLabelSummer;
@@ -449,7 +447,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         ? const Color(0xFFEA580C)
         : const Color(0xFF0284C7);
 
+    // progress 為「已度過」比例。上課學期累積（0→100），放假期間反向消耗（100→0）。
     final double progress = data['progress'] ?? 0.0;
+    final double barValue = isVacation ? (1.0 - progress) : progress;
 
     return GestureDetector(
       onTap: () => _showVacationInfoDialog(context),
@@ -523,7 +523,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: progress,
+                  value: barValue,
                   backgroundColor: Colors.white.withValues(alpha: 0.2),
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   minHeight: 8,
@@ -534,9 +534,13 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    ).vacationElapsed((progress * 100).toStringAsFixed(0)),
+                    isVacation
+                        ? AppLocalizations.of(context).vacationConsumed(
+                            (progress * 100).toStringAsFixed(0),
+                          )
+                        : AppLocalizations.of(context).vacationElapsed(
+                            (progress * 100).toStringAsFixed(0),
+                          ),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.white70,

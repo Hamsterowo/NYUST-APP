@@ -260,12 +260,6 @@ abstract class AppLocalizations {
   /// **'將 雲科工具箱 安裝到您的裝置，不用開啟瀏覽器即可直接操作。'**
   String get installDescAndroid;
 
-  /// No description provided for @vacationLabelStart.
-  ///
-  /// In zh, this message translates to:
-  /// **'開學'**
-  String get vacationLabelStart;
-
   /// No description provided for @vacationLabelWinter.
   ///
   /// In zh, this message translates to:
@@ -302,6 +296,12 @@ abstract class AppLocalizations {
   /// **'已度過 {percentage}%'**
   String vacationElapsed(String percentage);
 
+  /// No description provided for @vacationConsumed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已消耗 {percentage}%'**
+  String vacationConsumed(String percentage);
+
   /// No description provided for @vacationInfoTitle.
   ///
   /// In zh, this message translates to:
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @vacationInfoContent.
   ///
   /// In zh, this message translates to:
-  /// **'這是一張倒數放假及開學日子的功能小卡。\n\n如何計算：\n1. 假期起點提前：若放假日前有連續假日（週末或國定假日），假期起點會提前至假期的第一天。\n2. 倒數與進度：倒數顯示今日到目標日期的實際天數，進度條則顯示目前已經的度過的比例。'**
+  /// **'這是一張倒數放假及開學日子的功能小卡。\n\n如何計算：\n1. 假期起點提前：若放假日前有連續假日（週末或國定假日），假期起點會提前至假期的第一天。\n2. 倒數與進度：倒數顯示今日到目標日期的實際天數。上課期間進度條會逐漸累積（越接近放假越滿）；放假期間則反向消耗（越接近開學越空），底部改顯示假期已消耗的比例。'**
   String get vacationInfoContent;
 
   /// No description provided for @todayClassesTitle.

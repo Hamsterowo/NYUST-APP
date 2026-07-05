@@ -95,9 +95,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Install YunTool to your device to run directly without opening a browser.';
 
   @override
-  String get vacationLabelStart => 'Semester Starts';
-
-  @override
   String get vacationLabelWinter => 'Winter Vacation';
 
   @override
@@ -118,11 +115,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String vacationConsumed(String percentage) {
+    return '$percentage% used';
+  }
+
+  @override
   String get vacationInfoTitle => 'About Holiday Countdown Card';
 
   @override
   String get vacationInfoContent =>
-      'This card displays the countdown to the start of vacation or the new semester.\n\nHow it is calculated:\n1. Early Holiday Start: If vacation start is preceded by consecutive holidays (weekends or national holidays), the start date shifts to the first holiday day.\n2. Countdown & Progress: Shows remaining days to the target date, and the progress bar shows the elapsed percentage.';
+      'This card displays the countdown to the start of vacation or the new semester.\n\nHow it is calculated:\n1. Early Holiday Start: If vacation start is preceded by consecutive holidays (weekends or national holidays), the start date shifts to the first holiday day.\n2. Countdown & Progress: Shows remaining days to the target date. During the semester the bar fills up as vacation approaches; during vacation it depletes as the new semester approaches, and the bottom label shows how much of the break has been used.';
 
   @override
   String get todayClassesTitle => 'Today\'s Classes';
