@@ -132,6 +132,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noClassesToday => '今日無課程！';
 
   @override
+  String get todayHolidayNote => '今日為放假日';
+
+  @override
   String get upcomingEventsTitle => '近期校園行事曆';
 
   @override

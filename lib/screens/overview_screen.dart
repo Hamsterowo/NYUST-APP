@@ -693,6 +693,46 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     );
   }
 
+  /// 「今日課程」標題；若今天是行事曆上的假日，於標題右側附註一個小標籤。
+  Widget _buildTodayClassesHeader(BuildContext context) {
+    final title = Text(
+      AppLocalizations.of(context).todayClassesTitle,
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    );
+
+    final now = DateTime.now();
+    final todayStr =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    final isTodayHoliday = _holidays?.contains(todayStr) ?? false;
+
+    if (!isTodayHoliday) return title;
+
+    const holidayColor = Color(0xFFEA580C);
+    return Row(
+      children: [
+        Flexible(child: title),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: holidayColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            AppLocalizations.of(context).todayHolidayNote,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: holidayColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTodayClassesSection(
     BuildContext context,
     AuthProvider auth,
@@ -703,12 +743,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context).todayClassesTitle,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
+          _buildTodayClassesHeader(context),
           const SizedBox(height: 16),
           Card(
             elevation: 0,
@@ -741,12 +776,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context).todayClassesTitle,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
+          _buildTodayClassesHeader(context),
           const SizedBox(height: 16),
           for (int i = 0; i < 2; i++)
             Padding(
@@ -816,12 +846,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context).todayClassesTitle,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
+          _buildTodayClassesHeader(context),
           const SizedBox(height: 16),
           Card(
             elevation: 0,
@@ -926,12 +951,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).todayClassesTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+        _buildTodayClassesHeader(context),
         const SizedBox(height: 16),
         ...todayClasses.map((c) {
           String classState = 'future';

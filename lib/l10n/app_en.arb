@@ -54,6 +54,7 @@
   "todayClassesTitle": "Today's Classes",
   "notLoggedInMessage": "You are not logged in. Please log in first.",
   "noClassesToday": "No classes today!",
+  "todayHolidayNote": "Day off today",
   "upcomingEventsTitle": "Upcoming Campus Events",
   "noUpcomingEvents": "No upcoming campus events scheduled.",
   "noCourseDetail": "Detailed syllabus is not available for this course.",

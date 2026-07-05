@@ -332,6 +332,12 @@ abstract class AppLocalizations {
   /// **'今日無課程！'**
   String get noClassesToday;
 
+  /// No description provided for @todayHolidayNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日為放假日'**
+  String get todayHolidayNote;
+
   /// No description provided for @upcomingEventsTitle.
   ///
   /// In zh, this message translates to:

@@ -137,6 +137,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noClassesToday => 'No classes today!';
 
   @override
+  String get todayHolidayNote => 'Day off today';
+
+  @override
   String get upcomingEventsTitle => 'Upcoming Campus Events';
 
   @override
