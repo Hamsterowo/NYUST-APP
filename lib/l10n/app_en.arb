@@ -57,6 +57,16 @@
   "todayHolidayNote": "Day off today",
   "upcomingEventsTitle": "Upcoming Campus Events",
   "noUpcomingEvents": "No upcoming campus events scheduled.",
+  "eventToday": "Today",
+  "eventTomorrow": "Tomorrow",
+  "eventInDays": "In {days} days",
+  "@eventInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "noCourseDetail": "Detailed syllabus is not available for this course.",
   "notSpecified": "No Data",
   "classPeriods": "Period {periods}",

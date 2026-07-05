@@ -13,6 +13,7 @@ import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'course_detail_screen.dart';
 import 'terms_of_service_screen.dart';
+import 'web_view_screen.dart';
 
 class OverviewScreen extends ConsumerStatefulWidget {
   const OverviewScreen({super.key});
@@ -22,7 +23,7 @@ class OverviewScreen extends ConsumerStatefulWidget {
 }
 
 class _OverviewScreenState extends ConsumerState<OverviewScreen> {
-  List<CalendarEvent>? _todayEvents;
+  List<CalendarEvent>? _upcomingEvents;
   List<CalendarEvent>? _allEvents;
   List<String>? _holidays;
   bool _isLoadingCalendar = true;
@@ -124,18 +125,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         setState(() {
           _allEvents = events;
           _holidays = holidays;
-          final upcomingEvents = events
+          _upcomingEvents = events
               .where((e) => e.date.compareTo(todayStr) >= 0)
               .toList();
-          final todaysEvents = upcomingEvents
-              .where((e) => e.date == todayStr)
-              .toList();
-
-          if (todaysEvents.length >= 4) {
-            _todayEvents = todaysEvents;
-          } else {
-            _todayEvents = upcomingEvents.take(4).toList();
-          }
           _isLoadingCalendar = false;
         });
       } else {
@@ -144,7 +136,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
             _allEvents = [];
             _holidays = [];
             _isLoadingCalendar = false;
-            _todayEvents = [];
+            _upcomingEvents = [];
           });
         }
       }
@@ -154,7 +146,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           _allEvents = [];
           _holidays = [];
           _isLoadingCalendar = false;
-          _todayEvents = [];
+          _upcomingEvents = [];
         });
       }
     }
@@ -590,7 +582,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     if (_lastLocale != null && _lastLocale != newLocale) {
       _isLoadingCalendar = true;
       _allEvents = null;
-      _todayEvents = null;
+      _upcomingEvents = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _fetchTodayCalendar();
       });
@@ -652,44 +644,181 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           ),
           child:
               (_isLoadingCalendar &&
-                  (_todayEvents == null || _todayEvents!.isEmpty))
+                  (_upcomingEvents == null || _upcomingEvents!.isEmpty))
               ? _buildCalendarSkeleton()
-              : (_todayEvents == null || _todayEvents!.isEmpty) &&
+              : (_upcomingEvents == null || _upcomingEvents!.isEmpty) &&
                     !_isLoadingCalendar
               ? Text(
                   AppLocalizations.of(context).noUpcomingEvents,
                   style: const TextStyle(color: Colors.grey),
                 )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _todayEvents!.map((e) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            e.isImportant ? '⭐ ' : '📌 ',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          Expanded(
-                            child: Text(
-                              '${e.date}  ${e.name}',
-                              style: TextStyle(
-                                height: 1.5,
-                                fontWeight: e.isImportant
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                        ],
+              : ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 260),
+                  child: Scrollbar(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: _upcomingEvents!.length,
+                      itemBuilder: (context, i) => _buildCalendarEventRow(
+                        _upcomingEvents![i],
+                        colorScheme,
+                        isFirst: i == 0,
+                        isLast: i == _upcomingEvents!.length - 1,
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ),
                 ),
         ),
       ],
+    );
+  }
+
+  /// 近期行事曆的時間軸單列：左側日期、中間圓點連接線、右側事件名。
+  /// 有連結的事件整列可點擊，用 WebView 開啟。
+  Widget _buildCalendarEventRow(
+    CalendarEvent e,
+    ColorScheme colorScheme, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    final hasLink = e.link.isNotEmpty;
+    final date = e.getDateTime();
+    final dateStr =
+        '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+
+    final Color dotColor = e.isImportant
+        ? const Color(0xFFEA580C)
+        : colorScheme.primary;
+    final Color lineColor = colorScheme.outlineVariant;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final eventDay = DateTime(date.year, date.month, date.day);
+    final diffDays = eventDay.difference(today).inDays;
+    final l10n = AppLocalizations.of(context);
+    final String relativeStr = diffDays <= 0
+        ? l10n.eventToday
+        : diffDays == 1
+        ? l10n.eventTomorrow
+        : l10n.eventInDays(diffDays);
+    final bool isSoon = diffDays <= 1;
+
+    final row = IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 日期
+          SizedBox(
+            width: 44,
+            child: Center(
+              child: Text(
+                dateStr,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurfaceVariant,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ),
+          // 時間軸：上連接線、圓點、下連接線
+          SizedBox(
+            width: 24,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isFirst ? Colors.transparent : lineColor,
+                  ),
+                ),
+                Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: e.isImportant ? dotColor : colorScheme.surface,
+                    border: Border.all(color: dotColor, width: 2),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isLast ? Colors.transparent : lineColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 事件名稱與相對時間
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            if (e.isImportant)
+                              const Text('⭐ ', style: TextStyle(fontSize: 14)),
+                            Expanded(
+                              child: Text(
+                                e.name,
+                                style: TextStyle(
+                                  height: 1.3,
+                                  fontWeight: e.isImportant
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          relativeStr,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSoon
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: isSoon
+                                ? dotColor
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (hasLink)
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!hasLink) return row;
+
+    return InkWell(onTap: () => _openEventLink(e.link), child: row);
+  }
+
+  void _openEventLink(String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AppWebViewScreen(url: url, injectCookies: false),
+      ),
     );
   }
 

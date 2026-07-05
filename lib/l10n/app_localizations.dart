@@ -350,6 +350,24 @@ abstract class AppLocalizations {
   /// **'近期無任何校園行事曆事項安排。'**
   String get noUpcomingEvents;
 
+  /// No description provided for @eventToday.
+  ///
+  /// In zh, this message translates to:
+  /// **'今天'**
+  String get eventToday;
+
+  /// No description provided for @eventTomorrow.
+  ///
+  /// In zh, this message translates to:
+  /// **'明天'**
+  String get eventTomorrow;
+
+  /// No description provided for @eventInDays.
+  ///
+  /// In zh, this message translates to:
+  /// **'還有 {days} 天'**
+  String eventInDays(int days);
+
   /// No description provided for @noCourseDetail.
   ///
   /// In zh, this message translates to:

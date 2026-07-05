@@ -146,6 +146,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noUpcomingEvents => 'No upcoming campus events scheduled.';
 
   @override
+  String get eventToday => 'Today';
+
+  @override
+  String get eventTomorrow => 'Tomorrow';
+
+  @override
+  String eventInDays(int days) {
+    return 'In $days days';
+  }
+
+  @override
   String get noCourseDetail =>
       'Detailed syllabus is not available for this course.';
 

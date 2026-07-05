@@ -141,6 +141,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noUpcomingEvents => '近期無任何校園行事曆事項安排。';
 
   @override
+  String get eventToday => '今天';
+
+  @override
+  String get eventTomorrow => '明天';
+
+  @override
+  String eventInDays(int days) {
+    return '還有 $days 天';
+  }
+
+  @override
   String get noCourseDetail => '這門課沒有提供詳細課綱';
 
   @override
