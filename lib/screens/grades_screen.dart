@@ -150,7 +150,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
           ),
         ],
       ),
-      body: bodyContent,
+      // 預留底部系統導覽列（三鍵/手勢）高度，避免內容被系統列遮擋。
+      body: SafeArea(top: false, child: bodyContent),
     );
   }
 
@@ -983,7 +984,13 @@ class SemesterGradesDetailScreen extends StatelessWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        // 底部加上系統導覽列高度，避免最後一列被系統列遮擋。
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          16 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
         children: [
           // 數據儀表板橫列
           // 數據儀表板橫列 (一排四個)

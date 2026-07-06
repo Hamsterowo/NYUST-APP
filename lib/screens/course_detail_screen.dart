@@ -248,7 +248,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           ),
         ],
       ),
-      body: _buildBody(),
+      // 預留底部系統導覽列（三鍵/手勢）高度，避免內容被系統列遮擋。
+      body: SafeArea(top: false, child: _buildBody()),
     );
   }
 

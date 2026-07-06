@@ -1392,7 +1392,8 @@ class GraduationScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: const GraduationContent(),
+      // 預留底部系統導覽列（三鍵/手勢）高度，避免內容被系統列遮擋。
+      body: const SafeArea(top: false, child: GraduationContent()),
     );
   }
 }
