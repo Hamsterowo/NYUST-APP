@@ -37,11 +37,8 @@ jobs:
           EOF
 
       - name: Build release APK
-        env:
-          API_SECRET: ${{ secrets.API_SECRET }}
         run: |
           flutter build apk --release \
-            --dart-define=API_SECRET="$API_SECRET" \
             --dart-define=USE_FIREBASE=true
 
       - name: Upload APK artifact

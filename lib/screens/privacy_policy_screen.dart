@@ -1,25 +1,24 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/providers.dart';
+import '../data/privacy_policy.dart';
 import '../l10n/app_localizations.dart';
 
-class TermsOfServiceScreen extends ConsumerStatefulWidget {
+/// 本地隱私權政策頁面（完全內嵌、無需連網）。
+///
+/// 當 [showAgreementButtons] 為 true 時作為首次啟動的同意閘門：底部顯示
+/// 「拒絕並退出」「同意」，同意後回傳目前政策的版本鍵（[PrivacyPolicy.lastUpdated]）。
+class PrivacyPolicyScreen extends StatelessWidget {
   final bool showAgreementButtons;
-  final Map<String, dynamic>? initialTerms;
 
-  const TermsOfServiceScreen({
-    super.key,
-    this.showAgreementButtons = false,
-    this.initialTerms,
-  });
+  const PrivacyPolicyScreen({super.key, this.showAgreementButtons = false});
 
+  /// 政策更新時、於重新同意前顯示的提示彈窗。
   static Future<void> showUpdateAlert(BuildContext context) async {
     await showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      barrierLabel: 'TermsUpdate',
+      barrierLabel: 'PrivacyPolicyUpdate',
       barrierColor: Colors.black.withValues(alpha: 0.5),
       transitionDuration: Duration.zero,
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
@@ -146,69 +145,22 @@ class TermsOfServiceScreen extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<TermsOfServiceScreen> createState() =>
-      _TermsOfServiceScreenState();
-}
-
-class _TermsOfServiceScreenState extends ConsumerState<TermsOfServiceScreen> {
-  late Future<Map<String, dynamic>> _termsFuture;
-  String _lastUpdated = '';
-
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      _isInitialized = true;
-      if (widget.initialTerms != null) {
-        _termsFuture = Future.value(widget.initialTerms!);
-        _lastUpdated = widget.initialTerms!['data']?['lastUpdated'] ?? '';
-      } else {
-        _termsFuture = _fetchTerms();
-      }
-    }
-  }
-
-  Future<Map<String, dynamic>> _fetchTerms() async {
-    try {
-      final lang = Localizations.localeOf(context).languageCode;
-      final res = await ref
-          .read(authProvider)
-          .api
-          .getTermsOfService(lang: lang);
-      if (res['status'] == 'success') {
-        setState(() {
-          _lastUpdated = res['data']?['lastUpdated'] ?? '';
-        });
-      }
-      return res;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final lang = Localizations.localeOf(context).languageCode;
+    final policy = privacyPolicyFor(lang);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLocalizations.of(context).termsOfService,
+          AppLocalizations.of(context).appPrivacyPolicy,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         scrolledUnderElevation: 0,
-
-        automaticallyImplyLeading: !widget.showAgreementButtons,
+        automaticallyImplyLeading: !showAgreementButtons,
       ),
-      bottomNavigationBar: widget.showAgreementButtons
+      bottomNavigationBar: showAgreementButtons
           ? SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
@@ -216,9 +168,7 @@ class _TermsOfServiceScreenState extends ConsumerState<TermsOfServiceScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () {
-                          SystemNavigator.pop();
-                        },
+                        onPressed: () => SystemNavigator.pop(),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: colorScheme.error,
                           side: BorderSide(color: colorScheme.error),
@@ -232,11 +182,8 @@ class _TermsOfServiceScreenState extends ConsumerState<TermsOfServiceScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: FilledButton(
-                        onPressed: _lastUpdated.isNotEmpty
-                            ? () {
-                                Navigator.pop(context, _lastUpdated);
-                              }
-                            : null,
+                        onPressed: () =>
+                            Navigator.pop(context, policy.lastUpdated),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -248,78 +195,29 @@ class _TermsOfServiceScreenState extends ConsumerState<TermsOfServiceScreen> {
               ),
             )
           : null,
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _termsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError ||
-              !snapshot.hasData ||
-              snapshot.data?['status'] != 'success') {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: colorScheme.error),
-                  const SizedBox(height: 16),
-                  Text(
-                    '${AppLocalizations.of(context).termsLoadFailed}\n${snapshot.error ?? snapshot.data?['message'] ?? ""}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: colorScheme.error),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.tonal(
-                    onPressed: () {
-                      setState(() {
-                        _termsFuture = _fetchTerms();
-                      });
-                    },
-                    child: Text(AppLocalizations.of(context).refresh),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final block in policy.blocks)
+              block.isHeader
+                  ? _buildSectionTitle(block.text, context)
+                  : _buildParagraph(block.text, context),
+            const SizedBox(height: 32),
+            Center(
+              child: Text(
+                AppLocalizations.of(
+                  context,
+                ).termsLastUpdated(policy.lastUpdated),
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.outline,
+                ),
               ),
-            );
-          }
-
-          final policyData = snapshot.data!['data'];
-          final List<dynamic> blocks = policyData['blocks'] ?? [];
-          final String lastUpdated = policyData['lastUpdated'] ?? '';
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...blocks.map((block) {
-                  if (block['type'] == 'header') {
-                    return _buildSectionTitle(block['text'], context);
-                  } else {
-                    return _buildParagraph(block['text'], context);
-                  }
-                }),
-                if (lastUpdated.isNotEmpty) ...[
-                  const SizedBox(height: 32),
-                  Center(
-                    child: Text(
-                      AppLocalizations.of(
-                        context,
-                      ).termsLastUpdated(lastUpdated),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
-        },
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

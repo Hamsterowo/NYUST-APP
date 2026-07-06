@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:image_picker/image_picker.dart';
 import 'api_client.dart';
 import 'demo_mode.dart';
 import 'scrapers/sso_scraper.dart';
@@ -19,7 +18,6 @@ class ApiService {
   ApiService();
 
   Dio get dio => _client.dio;
-  String get baseUrl => _client.baseUrl;
 
   VoidCallback? get onSessionExpired => _client.onSessionExpired;
   set onSessionExpired(VoidCallback? cb) => _client.onSessionExpired = cb;
@@ -98,23 +96,6 @@ class ApiService {
     year: year,
     semester: semester,
     courseNo: courseNo,
-  );
-
-  // ---- Report / Policy ----
-
-  Future<Map<String, dynamic>> getTermsOfService({String? lang}) =>
-      _factory.reportService.getTermsOfService(lang: lang);
-
-  Future<Map<String, dynamic>> submitBugReport({
-    required String description,
-    String? contact,
-    required String deviceInfo,
-    XFile? imageFile,
-  }) => _factory.reportService.submitBugReport(
-    description: description,
-    contact: contact,
-    deviceInfo: deviceInfo,
-    imageFile: imageFile,
   );
 
   // ---- Scraper 存取（維持既有對外 getter；目前無外部使用者）----

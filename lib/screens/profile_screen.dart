@@ -8,8 +8,7 @@ import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
 import '../utils/pwa_interop.dart';
 import '../utils/settings_utils.dart';
-import 'terms_of_service_screen.dart';
-import 'web_view_screen.dart';
+import 'privacy_policy_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
@@ -391,10 +390,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     color: colorScheme.onSurfaceVariant,
                                   ),
                                   title: Text(
-                                    AppLocalizations.of(context).privacyPolicy,
+                                    AppLocalizations.of(
+                                      context,
+                                    ).appPrivacyPolicy,
                                   ),
                                   trailing: Icon(
-                                    Icons.open_in_new,
+                                    Icons.chevron_right,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
                                   shape: const RoundedRectangleBorder(
@@ -404,43 +405,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                   ),
                                   onTap: () {
-                                    final isEnglish =
-                                        Localizations.localeOf(
-                                          context,
-                                        ).languageCode ==
-                                        'en';
-                                    final url = isEnglish
-                                        ? 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=en'
-                                        : 'https://webapp.yuntech.edu.tw/yuntechsso/Policy/PrivacyPolicy?lang=zh-TW';
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AppWebViewScreen(
-                                          url: url,
-                                          injectCookies: false,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const Divider(height: 1, indent: 56),
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.description_outlined,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  title: Text(
-                                    AppLocalizations.of(context).termsOfService,
-                                  ),
-                                  trailing: Icon(
-                                    Icons.chevron_right,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  onTap: () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) =>
-                                            const TermsOfServiceScreen(),
+                                            const PrivacyPolicyScreen(),
                                       ),
                                     );
                                   },

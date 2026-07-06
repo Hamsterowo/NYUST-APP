@@ -11,12 +11,10 @@ import 'cookie_manager/cookie_manager_api.dart' as cookie_mgr;
 /// 集中管理整個 App 唯一的 [Dio] instance、Cookie 管理與 [LanguageInterceptor]。
 /// 各個 feature Service 都透過此類別發送請求，不再各自建立 Dio。
 ///
-/// 兩種請求風格共用同一個 Dio：相對路徑（例如 `/api/report`）會打到 [baseUrl]
-/// （App 自己的後端），而 scrapers 會對 `webapp.yuntech.edu.tw` 發出**絕對** URL
-/// 繞過 [baseUrl]。
+/// 所有請求皆為對外部網站（主要為 `webapp.yuntech.edu.tw`）的**絕對** URL；
+/// App 本身沒有任何自架後端。
 class ApiClient {
   late final Dio dio;
-  final String baseUrl = 'https://cf-api.nyust-plus.com';
 
   bool _initStarted = false;
   bool _isInit = false;
@@ -24,24 +22,15 @@ class ApiClient {
   /// Session 過期時的回呼（保留給上層設定）。
   VoidCallback? onSessionExpired;
 
-  static const String _apiSecretKey = String.fromEnvironment(
-    'API_SECRET',
-    defaultValue: '',
-  );
-
   ApiClient() {
     dio = Dio(
       BaseOptions(
-        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5),
         validateStatus: (status) {
           return status! < 500;
         },
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Nyust-App-Secret': _apiSecretKey,
-        },
+        headers: {'Content-Type': 'application/json'},
       ),
     );
     dio.interceptors.add(LanguageInterceptor());

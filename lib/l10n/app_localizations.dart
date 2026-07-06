@@ -164,6 +164,12 @@ abstract class AppLocalizations {
   /// **'雲科工具箱 使用者條款'**
   String get termsOfService;
 
+  /// No description provided for @appPrivacyPolicy.
+  ///
+  /// In zh, this message translates to:
+  /// **'雲科工具箱 隱私權政策'**
+  String get appPrivacyPolicy;
+
   /// No description provided for @termsUpdateTitle.
   ///
   /// In zh, this message translates to:
@@ -173,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsUpdateAlert.
   ///
   /// In zh, this message translates to:
-  /// **'條款已更新請同意後再繼續使用'**
+  /// **'隱私權政策已更新，請同意後再繼續使用'**
   String get termsUpdateAlert;
 
   /// No description provided for @continueLabel.

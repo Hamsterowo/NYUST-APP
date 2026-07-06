@@ -42,10 +42,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get termsOfService => '雲科工具箱 使用者條款';
 
   @override
+  String get appPrivacyPolicy => '雲科工具箱 隱私權政策';
+
+  @override
   String get termsUpdateTitle => '提示';
 
   @override
-  String get termsUpdateAlert => '條款已更新請同意後再繼續使用';
+  String get termsUpdateAlert => '隱私權政策已更新，請同意後再繼續使用';
 
   @override
   String get continueLabel => '繼續';

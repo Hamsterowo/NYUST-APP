@@ -42,11 +42,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsOfService => 'YunTool Terms of Service';
 
   @override
+  String get appPrivacyPolicy => 'YunTool Privacy Policy';
+
+  @override
   String get termsUpdateTitle => 'Notice';
 
   @override
   String get termsUpdateAlert =>
-      'The terms of service have been updated. Please agree to them before continuing.';
+      'The privacy policy has been updated. Please agree to it before continuing.';
 
   @override
   String get continueLabel => 'Continue';

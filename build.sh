@@ -7,4 +7,4 @@ export PATH="$PATH:`pwd`/flutter/bin"
 
 # 檢查版本並開始編譯網頁
 flutter --version
-flutter build web --dart-define=API_SECRET=$API_SECRET
+flutter build web

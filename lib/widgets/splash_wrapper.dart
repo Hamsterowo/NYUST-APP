@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../providers/providers.dart';
+import '../data/privacy_policy.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
-import '../screens/terms_of_service_screen.dart';
+import '../screens/privacy_policy_screen.dart';
 
 class SplashWrapper extends ConsumerStatefulWidget {
   const SplashWrapper({super.key});
@@ -53,7 +54,7 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
     _isLogout = false;
 
     if (!isLogout) {
-      await _checkTermsAgreement(auth);
+      await _checkTermsAgreement();
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
@@ -70,52 +71,27 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
     _controller.forward();
   }
 
-  Future<void> _checkTermsAgreement(AuthProvider auth) async {
-    final lang = Localizations.localeOf(context).languageCode;
+  Future<void> _checkTermsAgreement() async {
     final prefs = await SharedPreferences.getInstance();
     final lastAcceptedDate = prefs.getString('accepted_terms_date') ?? '';
 
-    Map<String, dynamic>? initialTerms;
-    bool shouldShow = false;
+    // 本地政策版本比對：未同意過、或政策版本已更新時，顯示同意閘門。
+    if (lastAcceptedDate == kPrivacyPolicyVersion || !mounted) return;
 
-    if (lastAcceptedDate.isEmpty) {
-      shouldShow = true;
-    } else {
-      try {
-        final terms = await auth.api
-            .getTermsOfService(lang: lang)
-            .timeout(const Duration(seconds: 3));
-        if (terms['status'] == 'success') {
-          final lastUpdated = terms['data']?['lastUpdated'] ?? '';
-          if (lastUpdated != lastAcceptedDate) {
-            shouldShow = true;
-            initialTerms = terms;
-          }
-        }
-      } catch (_) {
-        shouldShow = false;
-      }
+    if (lastAcceptedDate.isNotEmpty) {
+      await PrivacyPolicyScreen.showUpdateAlert(context);
     }
 
-    if (shouldShow && mounted) {
-      if (lastAcceptedDate.isNotEmpty) {
-        await TermsOfServiceScreen.showUpdateAlert(context);
-      }
+    if (!mounted) return;
 
-      if (!mounted) return;
-
-      final agreedDate = await Navigator.push<String>(
-        context,
-        MaterialPageRoute(
-          builder: (_) => TermsOfServiceScreen(
-            showAgreementButtons: true,
-            initialTerms: initialTerms,
-          ),
-        ),
-      );
-      if (agreedDate != null && agreedDate.isNotEmpty) {
-        await prefs.setString('accepted_terms_date', agreedDate);
-      }
+    final agreedDate = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PrivacyPolicyScreen(showAgreementButtons: true),
+      ),
+    );
+    if (agreedDate != null && agreedDate.isNotEmpty) {
+      await prefs.setString('accepted_terms_date', agreedDate);
     }
   }
 

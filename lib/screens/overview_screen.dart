@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
@@ -12,7 +11,6 @@ import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'course_detail_screen.dart';
-import 'terms_of_service_screen.dart';
 import 'web_view_screen.dart';
 
 class OverviewScreen extends ConsumerStatefulWidget {
@@ -41,59 +39,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _fetchTodayCalendar();
-        _checkTermsAgreement();
       }
     });
-  }
-
-  Future<void> _checkTermsAgreement() async {
-    final lang = Localizations.localeOf(context).languageCode;
-    final auth = ref.read(authProvider);
-    final prefs = await SharedPreferences.getInstance();
-    final lastAcceptedDate = prefs.getString('accepted_terms_date') ?? '';
-    Map<String, dynamic>? initialTerms;
-    bool shouldShow = false;
-
-    if (lastAcceptedDate.isEmpty) {
-      shouldShow = true;
-    } else {
-      try {
-        final terms = await auth.api
-            .getTermsOfService(lang: lang)
-            .timeout(const Duration(seconds: 3));
-        if (terms['status'] == 'success') {
-          final lastUpdated = terms['data']?['lastUpdated'] ?? '';
-          if (lastUpdated != lastAcceptedDate) {
-            shouldShow = true;
-            initialTerms = terms;
-          }
-        }
-      } catch (_) {
-        shouldShow = false;
-      }
-    }
-
-    if (shouldShow && mounted) {
-      if (lastAcceptedDate.isNotEmpty) {
-        await TermsOfServiceScreen.showUpdateAlert(context);
-      }
-
-      if (!mounted) return;
-
-      final agreedDate = await Navigator.push<String>(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TermsOfServiceScreen(
-            showAgreementButtons: true,
-            initialTerms: initialTerms,
-          ),
-        ),
-      );
-
-      if (agreedDate != null && agreedDate.isNotEmpty) {
-        await prefs.setString('accepted_terms_date', agreedDate);
-      }
-    }
   }
 
   Future<void> _handleRefresh() async {
