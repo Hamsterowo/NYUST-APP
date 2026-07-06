@@ -1,6 +1,5 @@
 {
   "@@locale": "zh",
-  "appName": "雲科工具箱",
   "settingsTitle": "設定",
   "navOverview": "總覽",
   "navSchedule": "課表",
@@ -8,9 +7,6 @@
   "navCalendar": "行事曆",
   "navSettings": "設定",
   "languageSetting": "語言設定",
-  "languageSettingSub": "至系統設定修改 App 語言",
-  "privacyPolicy": "YunTech 單一入口隱私權政策",
-  "termsOfService": "雲科工具箱 使用者條款",
   "appPrivacyPolicy": "雲科工具箱 隱私權政策",
   "termsUpdateTitle": "提示",
   "termsUpdateAlert": "隱私權政策已更新，請同意後再繼續使用",
@@ -40,7 +36,6 @@
   "install": "安裝",
   "profileDisclaimer": "※ 此頁面僅供參考，無法作為在學證明等正式用途",
   "installError": "目前無法安裝：您可能已安裝，或瀏覽器不支援此功能",
-  "featureNotFinished": "此功能尚未完成",
   "installTitle": "安裝 雲科工具箱 APP",
   "installDescIos": "將 雲科工具箱 捷徑安裝到您的裝置：\n\n1️⃣  點擊底部「分享」圖示 ⧧\n2️⃣  往下捲動，選擇「加入主畫面」\n3️⃣  點擊「加入」",
   "installDescAndroid": "將 雲科工具箱 安裝到您的裝置，不用開啟瀏覽器即可直接操作。",
@@ -97,7 +92,6 @@
 
   "loginToUseAllFeatures": "登入使用所有功能",
   "goToLogin": "前往登入",
-  "loginTitle": "登入 雲科工具箱",
   "loginUsernamePrompt": "請輸入學號",
   "loginPasswordPrompt": "請輸入密碼",
   "loginCaptchaPrompt": "請輸入驗證碼",
@@ -214,10 +208,6 @@
   "gradesRank": "班級排名",
   "gradesEarnedCredits": "實得學分",
   "gradesGPA": "GPA",
-  "gradesCumulativeAverage": "累計平均成績",
-  "gradesCumulativeGPA": "累計 GPA",
-  "gradesCumulativeRank": "累計排名",
-  "gradesCumulativeEarnedCredits": "累計學分",
   "gradesCumulativeSummary": "歷年累計成績",
   "gradesGPAShort": "GPA: {gpa}",
   "@gradesGPAShort": {
@@ -288,7 +278,6 @@
   "courseNoData": "無資料",
   "courseNone": "無",
   "courseOpenInBrowser": "在瀏覽器開啟",
-  "courseOpenWebpageFailed": "無法開啟網頁",
   "courseSelectRoomLocation": "選擇上課教室定位",
   "courseGoToRoomLocation": "前往 {room} 定位",
   "@courseGoToRoomLocation": {
@@ -375,10 +364,6 @@
   "settingsGradeNotification": "成績更新通知",
   "settingsGradeNotificationSub": "背景每 30 分鐘檢查一次成績",
   "notificationPermissionDenied": "無法開啟通知：請前往系統設定啟用通知權限",
-  "gradeNotificationTitle": "成績更新通知",
-  "gradeNotificationNewCourse": "新增學期科目：{courseName}，成績為 {score} 分",
-  "gradeNotificationScoreChanged": "【{courseName}】成績已更新：{oldScore} -> {newScore} 分",
-  "gradeNotificationRankChanged": "學期排名更新為：{rank}",
   "termsAgree": "同意",
   "termsRejectAndExit": "拒絕並退出程式",
   "termsLastUpdated": "最後更新日期：{date}",
@@ -389,60 +374,6 @@
       }
     }
   },
-  "termsLoadFailed": "無法載入使用者條款",
-  "refresh": "重新整理",
-  "reportIssueTitle": "回報問題",
-  "reportDescriptionPrompt": "請詳細描述您遇到的問題...",
-  "reportContactPrompt": "聯絡資訊 (選填)",
-  "reportEmailOrContactUs": "您也可以直接發送電子郵件至 {email} 聯絡我們",
-  "@reportEmailOrContactUs": {
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSubmitSuccess": "回報成功！\n您的案件編號為：{caseId}",
-  "@reportSubmitSuccess": {
-    "placeholders": {
-      "caseId": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSend": "傳送",
-  "reportEmptyDescriptionWarning": "請填寫問題描述",
-  "reportAddImage": "加入圖片",
-  "reportRemoveImage": "移除圖片",
-  "reportCopiedEmail": "已複製客服信箱至剪貼簿",
-  "reportImagePickError": "無法選取圖片: {error}",
-  "@reportImagePickError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSubmitError": "發送失敗，請稍後再試",
-  "reportSendError": "傳送失敗: {error}",
-  "@reportSendError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "errorTimeout": "連線逾時，請稍後再試",
-  "errorConnection": "無法連線至伺服器，請檢查網路連線",
-  "errorServer": "伺服器回應錯誤",
-  "errorFormat": "伺服器回應格式錯誤",
-  "errorApiCallFailed": "API 呼叫失敗: {error}",
-  "@errorApiCallFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  }
+  "refresh": "重新整理"
 }
 

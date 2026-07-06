@@ -9,9 +9,6 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appName => '雲科工具箱';
-
-  @override
   String get settingsTitle => '設定';
 
   @override
@@ -31,15 +28,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get languageSetting => '語言設定';
-
-  @override
-  String get languageSettingSub => '至系統設定修改 App 語言';
-
-  @override
-  String get privacyPolicy => 'YunTech 單一入口隱私權政策';
-
-  @override
-  String get termsOfService => '雲科工具箱 使用者條款';
 
   @override
   String get appPrivacyPolicy => '雲科工具箱 隱私權政策';
@@ -99,9 +87,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get installError => '目前無法安裝：您可能已安裝，或瀏覽器不支援此功能';
-
-  @override
-  String get featureNotFinished => '此功能尚未完成';
 
   @override
   String get installTitle => '安裝 雲科工具箱 APP';
@@ -190,9 +175,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get goToLogin => '前往登入';
-
-  @override
-  String get loginTitle => '登入 雲科工具箱';
 
   @override
   String get loginUsernamePrompt => '請輸入學號';
@@ -414,18 +396,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gradesGPA => 'GPA';
 
   @override
-  String get gradesCumulativeAverage => '累計平均成績';
-
-  @override
-  String get gradesCumulativeGPA => '累計 GPA';
-
-  @override
-  String get gradesCumulativeRank => '累計排名';
-
-  @override
-  String get gradesCumulativeEarnedCredits => '累計學分';
-
-  @override
   String get gradesCumulativeSummary => '歷年累計成績';
 
   @override
@@ -511,9 +481,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get courseOpenInBrowser => '在瀏覽器開啟';
-
-  @override
-  String get courseOpenWebpageFailed => '無法開啟網頁';
 
   @override
   String get courseSelectRoomLocation => '選擇上課教室定位';
@@ -657,28 +624,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationPermissionDenied => '無法開啟通知：請前往系統設定啟用通知權限';
 
   @override
-  String get gradeNotificationTitle => '成績更新通知';
-
-  @override
-  String gradeNotificationNewCourse(Object courseName, Object score) {
-    return '新增學期科目：$courseName，成績為 $score 分';
-  }
-
-  @override
-  String gradeNotificationScoreChanged(
-    Object courseName,
-    Object newScore,
-    Object oldScore,
-  ) {
-    return '【$courseName】成績已更新：$oldScore -> $newScore 分';
-  }
-
-  @override
-  String gradeNotificationRankChanged(Object rank) {
-    return '學期排名更新為：$rank';
-  }
-
-  @override
   String get termsAgree => '同意';
 
   @override
@@ -690,72 +635,5 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get termsLoadFailed => '無法載入使用者條款';
-
-  @override
   String get refresh => '重新整理';
-
-  @override
-  String get reportIssueTitle => '回報問題';
-
-  @override
-  String get reportDescriptionPrompt => '請詳細描述您遇到的問題...';
-
-  @override
-  String get reportContactPrompt => '聯絡資訊 (選填)';
-
-  @override
-  String reportEmailOrContactUs(String email) {
-    return '您也可以直接發送電子郵件至 $email 聯絡我們';
-  }
-
-  @override
-  String reportSubmitSuccess(String caseId) {
-    return '回報成功！\n您的案件編號為：$caseId';
-  }
-
-  @override
-  String get reportSend => '傳送';
-
-  @override
-  String get reportEmptyDescriptionWarning => '請填寫問題描述';
-
-  @override
-  String get reportAddImage => '加入圖片';
-
-  @override
-  String get reportRemoveImage => '移除圖片';
-
-  @override
-  String get reportCopiedEmail => '已複製客服信箱至剪貼簿';
-
-  @override
-  String reportImagePickError(String error) {
-    return '無法選取圖片: $error';
-  }
-
-  @override
-  String get reportSubmitError => '發送失敗，請稍後再試';
-
-  @override
-  String reportSendError(String error) {
-    return '傳送失敗: $error';
-  }
-
-  @override
-  String get errorTimeout => '連線逾時，請稍後再試';
-
-  @override
-  String get errorConnection => '無法連線至伺服器，請檢查網路連線';
-
-  @override
-  String get errorServer => '伺服器回應錯誤';
-
-  @override
-  String get errorFormat => '伺服器回應格式錯誤';
-
-  @override
-  String errorApiCallFailed(String error) {
-    return 'API 呼叫失敗: $error';
-  }
 }

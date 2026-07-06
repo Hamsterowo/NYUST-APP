@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  "appName": "YunTool",
   "settingsTitle": "Settings",
   "navOverview": "Overview",
   "navSchedule": "Schedule",
@@ -8,9 +7,6 @@
   "navCalendar": "Calendar",
   "navSettings": "Settings",
   "languageSetting": "Language Settings",
-  "languageSettingSub": "Change App language in system settings",
-  "privacyPolicy": "YunTech Portal Privacy Policy",
-  "termsOfService": "YunTool Terms of Service",
   "appPrivacyPolicy": "YunTool Privacy Policy",
   "termsUpdateTitle": "Notice",
   "termsUpdateAlert": "The privacy policy has been updated. Please agree to it before continuing.",
@@ -40,7 +36,6 @@
   "install": "Install",
   "profileDisclaimer": "※ This page is for reference only and cannot be used as an official proof of enrollment.",
   "installError": "Currently unable to install: You might have installed it already, or your browser does not support this feature.",
-  "featureNotFinished": "This feature is not finished yet.",
   "installTitle": "Install YunTool APP",
   "installDescIos": "Install YunTool shortcut to your device:\n\n1️⃣ Tap the \"Share\" icon at the bottom ⧧\n2️⃣ Scroll down and select \"Add to Home Screen\"\n3️⃣ Tap \"Add\"",
   "installDescAndroid": "Install YunTool to your device to run directly without opening a browser.",
@@ -97,7 +92,6 @@
 
   "loginToUseAllFeatures": "Log in to use all features",
   "goToLogin": "Go to Login",
-  "loginTitle": "Login to YunTool",
   "loginUsernamePrompt": "Please enter student ID",
   "loginPasswordPrompt": "Please enter password",
   "loginCaptchaPrompt": "Please enter captcha",
@@ -214,10 +208,6 @@
   "gradesRank": "Class Rank",
   "gradesEarnedCredits": "Earned Credits",
   "gradesGPA": "GPA",
-  "gradesCumulativeAverage": "Cum. Average",
-  "gradesCumulativeGPA": "Cum. GPA",
-  "gradesCumulativeRank": "Cum. Rank",
-  "gradesCumulativeEarnedCredits": "Cum. Credits",
   "gradesCumulativeSummary": "Cumulative Academic Summary",
   "gradesGPAShort": "GPA: {gpa}",
   "@gradesGPAShort": {
@@ -288,7 +278,6 @@
   "courseNoData": "No Data",
   "courseNone": "None",
   "courseOpenInBrowser": "Open in Browser",
-  "courseOpenWebpageFailed": "Failed to open webpage",
   "courseSelectRoomLocation": "Select Classroom Map Location",
   "courseGoToRoomLocation": "Go to {room} Location",
   "@courseGoToRoomLocation": {
@@ -375,10 +364,6 @@
   "settingsGradeNotification": "Grade Update Notification",
   "settingsGradeNotificationSub": "Check grades in background every 30 mins",
   "notificationPermissionDenied": "Cannot enable notifications: Please grant notification permission in system settings",
-  "gradeNotificationTitle": "Grade Update Notification",
-  "gradeNotificationNewCourse": "New course: {courseName}, Grade: {score}",
-  "gradeNotificationScoreChanged": "[{courseName}] Grade updated: {oldScore} -> {newScore}",
-  "gradeNotificationRankChanged": "Semester rank updated to: {rank}",
   "termsAgree": "Agree",
   "termsRejectAndExit": "Decline & Exit",
   "termsLastUpdated": "Last updated: {date}",
@@ -389,60 +374,6 @@
       }
     }
   },
-  "termsLoadFailed": "Failed to load terms of service",
-  "refresh": "Refresh",
-  "reportIssueTitle": "Report an Issue",
-  "reportDescriptionPrompt": "Please describe your issue in detail...",
-  "reportContactPrompt": "Contact Info (Optional)",
-  "reportEmailOrContactUs": "You can also contact us at {email}",
-  "@reportEmailOrContactUs": {
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSubmitSuccess": "Submitted successfully!\nYour case number is: {caseId}",
-  "@reportSubmitSuccess": {
-    "placeholders": {
-      "caseId": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSend": "Send",
-  "reportEmptyDescriptionWarning": "Please fill in the description",
-  "reportAddImage": "Add Image",
-  "reportRemoveImage": "Remove Image",
-  "reportCopiedEmail": "Copied support email to clipboard",
-  "reportImagePickError": "Failed to pick image: {error}",
-  "@reportImagePickError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSubmitError": "Failed to send, please try again later",
-  "reportSendError": "Failed to send: {error}",
-  "@reportSendError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "errorTimeout": "Connection timed out, please try again later",
-  "errorConnection": "Cannot connect to server, please check your network connection",
-  "errorServer": "Server responded with an error",
-  "errorFormat": "Server response format is invalid",
-  "errorApiCallFailed": "API call failed: {error}",
-  "@errorApiCallFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  }
+  "refresh": "Refresh"
 }
 

@@ -9,9 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'YunTool';
-
-  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -31,15 +28,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSetting => 'Language Settings';
-
-  @override
-  String get languageSettingSub => 'Change App language in system settings';
-
-  @override
-  String get privacyPolicy => 'YunTech Portal Privacy Policy';
-
-  @override
-  String get termsOfService => 'YunTool Terms of Service';
 
   @override
   String get appPrivacyPolicy => 'YunTool Privacy Policy';
@@ -102,9 +90,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get installError =>
       'Currently unable to install: You might have installed it already, or your browser does not support this feature.';
-
-  @override
-  String get featureNotFinished => 'This feature is not finished yet.';
 
   @override
   String get installTitle => 'Install YunTool APP';
@@ -196,9 +181,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToLogin => 'Go to Login';
-
-  @override
-  String get loginTitle => 'Login to YunTool';
 
   @override
   String get loginUsernamePrompt => 'Please enter student ID';
@@ -426,18 +408,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gradesGPA => 'GPA';
 
   @override
-  String get gradesCumulativeAverage => 'Cum. Average';
-
-  @override
-  String get gradesCumulativeGPA => 'Cum. GPA';
-
-  @override
-  String get gradesCumulativeRank => 'Cum. Rank';
-
-  @override
-  String get gradesCumulativeEarnedCredits => 'Cum. Credits';
-
-  @override
   String get gradesCumulativeSummary => 'Cumulative Academic Summary';
 
   @override
@@ -523,9 +493,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courseOpenInBrowser => 'Open in Browser';
-
-  @override
-  String get courseOpenWebpageFailed => 'Failed to open webpage';
 
   @override
   String get courseSelectRoomLocation => 'Select Classroom Map Location';
@@ -674,28 +641,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cannot enable notifications: Please grant notification permission in system settings';
 
   @override
-  String get gradeNotificationTitle => 'Grade Update Notification';
-
-  @override
-  String gradeNotificationNewCourse(Object courseName, Object score) {
-    return 'New course: $courseName, Grade: $score';
-  }
-
-  @override
-  String gradeNotificationScoreChanged(
-    Object courseName,
-    Object newScore,
-    Object oldScore,
-  ) {
-    return '[$courseName] Grade updated: $oldScore -> $newScore';
-  }
-
-  @override
-  String gradeNotificationRankChanged(Object rank) {
-    return 'Semester rank updated to: $rank';
-  }
-
-  @override
   String get termsAgree => 'Agree';
 
   @override
@@ -707,74 +652,5 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get termsLoadFailed => 'Failed to load terms of service';
-
-  @override
   String get refresh => 'Refresh';
-
-  @override
-  String get reportIssueTitle => 'Report an Issue';
-
-  @override
-  String get reportDescriptionPrompt =>
-      'Please describe your issue in detail...';
-
-  @override
-  String get reportContactPrompt => 'Contact Info (Optional)';
-
-  @override
-  String reportEmailOrContactUs(String email) {
-    return 'You can also contact us at $email';
-  }
-
-  @override
-  String reportSubmitSuccess(String caseId) {
-    return 'Submitted successfully!\nYour case number is: $caseId';
-  }
-
-  @override
-  String get reportSend => 'Send';
-
-  @override
-  String get reportEmptyDescriptionWarning => 'Please fill in the description';
-
-  @override
-  String get reportAddImage => 'Add Image';
-
-  @override
-  String get reportRemoveImage => 'Remove Image';
-
-  @override
-  String get reportCopiedEmail => 'Copied support email to clipboard';
-
-  @override
-  String reportImagePickError(String error) {
-    return 'Failed to pick image: $error';
-  }
-
-  @override
-  String get reportSubmitError => 'Failed to send, please try again later';
-
-  @override
-  String reportSendError(String error) {
-    return 'Failed to send: $error';
-  }
-
-  @override
-  String get errorTimeout => 'Connection timed out, please try again later';
-
-  @override
-  String get errorConnection =>
-      'Cannot connect to server, please check your network connection';
-
-  @override
-  String get errorServer => 'Server responded with an error';
-
-  @override
-  String get errorFormat => 'Server response format is invalid';
-
-  @override
-  String errorApiCallFailed(String error) {
-    return 'API call failed: $error';
-  }
 }

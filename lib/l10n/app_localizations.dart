@@ -98,12 +98,6 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
-  /// No description provided for @appName.
-  ///
-  /// In zh, this message translates to:
-  /// **'雲科工具箱'**
-  String get appName;
-
   /// No description provided for @settingsTitle.
   ///
   /// In zh, this message translates to:
@@ -145,24 +139,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'語言設定'**
   String get languageSetting;
-
-  /// No description provided for @languageSettingSub.
-  ///
-  /// In zh, this message translates to:
-  /// **'至系統設定修改 App 語言'**
-  String get languageSettingSub;
-
-  /// No description provided for @privacyPolicy.
-  ///
-  /// In zh, this message translates to:
-  /// **'YunTech 單一入口隱私權政策'**
-  String get privacyPolicy;
-
-  /// No description provided for @termsOfService.
-  ///
-  /// In zh, this message translates to:
-  /// **'雲科工具箱 使用者條款'**
-  String get termsOfService;
 
   /// No description provided for @appPrivacyPolicy.
   ///
@@ -277,12 +253,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'目前無法安裝：您可能已安裝，或瀏覽器不支援此功能'**
   String get installError;
-
-  /// No description provided for @featureNotFinished.
-  ///
-  /// In zh, this message translates to:
-  /// **'此功能尚未完成'**
-  String get featureNotFinished;
 
   /// No description provided for @installTitle.
   ///
@@ -439,12 +409,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'前往登入'**
   String get goToLogin;
-
-  /// No description provided for @loginTitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'登入 雲科工具箱'**
-  String get loginTitle;
 
   /// No description provided for @loginUsernamePrompt.
   ///
@@ -860,30 +824,6 @@ abstract class AppLocalizations {
   /// **'GPA'**
   String get gradesGPA;
 
-  /// No description provided for @gradesCumulativeAverage.
-  ///
-  /// In zh, this message translates to:
-  /// **'累計平均成績'**
-  String get gradesCumulativeAverage;
-
-  /// No description provided for @gradesCumulativeGPA.
-  ///
-  /// In zh, this message translates to:
-  /// **'累計 GPA'**
-  String get gradesCumulativeGPA;
-
-  /// No description provided for @gradesCumulativeRank.
-  ///
-  /// In zh, this message translates to:
-  /// **'累計排名'**
-  String get gradesCumulativeRank;
-
-  /// No description provided for @gradesCumulativeEarnedCredits.
-  ///
-  /// In zh, this message translates to:
-  /// **'累計學分'**
-  String get gradesCumulativeEarnedCredits;
-
   /// No description provided for @gradesCumulativeSummary.
   ///
   /// In zh, this message translates to:
@@ -1033,12 +973,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'在瀏覽器開啟'**
   String get courseOpenInBrowser;
-
-  /// No description provided for @courseOpenWebpageFailed.
-  ///
-  /// In zh, this message translates to:
-  /// **'無法開啟網頁'**
-  String get courseOpenWebpageFailed;
 
   /// No description provided for @courseSelectRoomLocation.
   ///
@@ -1298,34 +1232,6 @@ abstract class AppLocalizations {
   /// **'無法開啟通知：請前往系統設定啟用通知權限'**
   String get notificationPermissionDenied;
 
-  /// No description provided for @gradeNotificationTitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'成績更新通知'**
-  String get gradeNotificationTitle;
-
-  /// No description provided for @gradeNotificationNewCourse.
-  ///
-  /// In zh, this message translates to:
-  /// **'新增學期科目：{courseName}，成績為 {score} 分'**
-  String gradeNotificationNewCourse(Object courseName, Object score);
-
-  /// No description provided for @gradeNotificationScoreChanged.
-  ///
-  /// In zh, this message translates to:
-  /// **'【{courseName}】成績已更新：{oldScore} -> {newScore} 分'**
-  String gradeNotificationScoreChanged(
-    Object courseName,
-    Object newScore,
-    Object oldScore,
-  );
-
-  /// No description provided for @gradeNotificationRankChanged.
-  ///
-  /// In zh, this message translates to:
-  /// **'學期排名更新為：{rank}'**
-  String gradeNotificationRankChanged(Object rank);
-
   /// No description provided for @termsAgree.
   ///
   /// In zh, this message translates to:
@@ -1344,125 +1250,11 @@ abstract class AppLocalizations {
   /// **'最後更新日期：{date}'**
   String termsLastUpdated(String date);
 
-  /// No description provided for @termsLoadFailed.
-  ///
-  /// In zh, this message translates to:
-  /// **'無法載入使用者條款'**
-  String get termsLoadFailed;
-
   /// No description provided for @refresh.
   ///
   /// In zh, this message translates to:
   /// **'重新整理'**
   String get refresh;
-
-  /// No description provided for @reportIssueTitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'回報問題'**
-  String get reportIssueTitle;
-
-  /// No description provided for @reportDescriptionPrompt.
-  ///
-  /// In zh, this message translates to:
-  /// **'請詳細描述您遇到的問題...'**
-  String get reportDescriptionPrompt;
-
-  /// No description provided for @reportContactPrompt.
-  ///
-  /// In zh, this message translates to:
-  /// **'聯絡資訊 (選填)'**
-  String get reportContactPrompt;
-
-  /// No description provided for @reportEmailOrContactUs.
-  ///
-  /// In zh, this message translates to:
-  /// **'您也可以直接發送電子郵件至 {email} 聯絡我們'**
-  String reportEmailOrContactUs(String email);
-
-  /// No description provided for @reportSubmitSuccess.
-  ///
-  /// In zh, this message translates to:
-  /// **'回報成功！\n您的案件編號為：{caseId}'**
-  String reportSubmitSuccess(String caseId);
-
-  /// No description provided for @reportSend.
-  ///
-  /// In zh, this message translates to:
-  /// **'傳送'**
-  String get reportSend;
-
-  /// No description provided for @reportEmptyDescriptionWarning.
-  ///
-  /// In zh, this message translates to:
-  /// **'請填寫問題描述'**
-  String get reportEmptyDescriptionWarning;
-
-  /// No description provided for @reportAddImage.
-  ///
-  /// In zh, this message translates to:
-  /// **'加入圖片'**
-  String get reportAddImage;
-
-  /// No description provided for @reportRemoveImage.
-  ///
-  /// In zh, this message translates to:
-  /// **'移除圖片'**
-  String get reportRemoveImage;
-
-  /// No description provided for @reportCopiedEmail.
-  ///
-  /// In zh, this message translates to:
-  /// **'已複製客服信箱至剪貼簿'**
-  String get reportCopiedEmail;
-
-  /// No description provided for @reportImagePickError.
-  ///
-  /// In zh, this message translates to:
-  /// **'無法選取圖片: {error}'**
-  String reportImagePickError(String error);
-
-  /// No description provided for @reportSubmitError.
-  ///
-  /// In zh, this message translates to:
-  /// **'發送失敗，請稍後再試'**
-  String get reportSubmitError;
-
-  /// No description provided for @reportSendError.
-  ///
-  /// In zh, this message translates to:
-  /// **'傳送失敗: {error}'**
-  String reportSendError(String error);
-
-  /// No description provided for @errorTimeout.
-  ///
-  /// In zh, this message translates to:
-  /// **'連線逾時，請稍後再試'**
-  String get errorTimeout;
-
-  /// No description provided for @errorConnection.
-  ///
-  /// In zh, this message translates to:
-  /// **'無法連線至伺服器，請檢查網路連線'**
-  String get errorConnection;
-
-  /// No description provided for @errorServer.
-  ///
-  /// In zh, this message translates to:
-  /// **'伺服器回應錯誤'**
-  String get errorServer;
-
-  /// No description provided for @errorFormat.
-  ///
-  /// In zh, this message translates to:
-  /// **'伺服器回應格式錯誤'**
-  String get errorFormat;
-
-  /// No description provided for @errorApiCallFailed.
-  ///
-  /// In zh, this message translates to:
-  /// **'API 呼叫失敗: {error}'**
-  String errorApiCallFailed(String error);
 }
 
 class _AppLocalizationsDelegate

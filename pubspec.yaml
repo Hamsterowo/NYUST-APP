@@ -53,7 +53,6 @@ dependencies:
   webview_flutter: ^4.14.0
   workmanager: ^0.9.0+3
   flutter_local_notifications: ^22.0.1
-  image_picker: ^1.1.2
   drift: ^2.34.0
   drift_flutter: ^0.3.0
   firebase_core: ^4.11.0
