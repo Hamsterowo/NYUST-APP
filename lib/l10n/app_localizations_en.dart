@@ -605,14 +605,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'No detailed description available for this building.';
 
   @override
-  String get mapExternalNav => 'External Navigation';
-
-  @override
-  String get mapFloorPlanUnderConstruction => 'Floor Plan Under Construction';
+  String get mapFloorPlanUnderConstruction => 'Coming Soon';
 
   @override
   String mapFloorPlanUnavailable(String room) {
-    return '$room Floor Plan Unavailable';
+    return '$room: No Plan';
   }
 
   @override

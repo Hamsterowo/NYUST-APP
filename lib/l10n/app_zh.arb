@@ -346,7 +346,6 @@
     }
   },
   "mapNoDescription": "暫無此建築物之詳細介紹。",
-  "mapExternalNav": "外部地圖導航",
   "mapFloorPlanUnderConstruction": "平面圖建置中",
   "mapFloorPlanUnavailable": "{room} 平面圖不可用",
   "@mapFloorPlanUnavailable": {

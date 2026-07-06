@@ -346,9 +346,8 @@
     }
   },
   "mapNoDescription": "No detailed description available for this building.",
-  "mapExternalNav": "External Navigation",
-  "mapFloorPlanUnderConstruction": "Floor Plan Under Construction",
-  "mapFloorPlanUnavailable": "{room} Floor Plan Unavailable",
+  "mapFloorPlanUnderConstruction": "Coming Soon",
+  "mapFloorPlanUnavailable": "{room}: No Plan",
   "@mapFloorPlanUnavailable": {
     "placeholders": {
       "room": {

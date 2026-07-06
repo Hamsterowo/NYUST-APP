@@ -1166,12 +1166,6 @@ abstract class AppLocalizations {
   /// **'暫無此建築物之詳細介紹。'**
   String get mapNoDescription;
 
-  /// No description provided for @mapExternalNav.
-  ///
-  /// In zh, this message translates to:
-  /// **'外部地圖導航'**
-  String get mapExternalNav;
-
   /// No description provided for @mapFloorPlanUnderConstruction.
   ///
   /// In zh, this message translates to:

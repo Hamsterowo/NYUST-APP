@@ -426,49 +426,32 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 16),
 
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.navigation_outlined, size: 16),
-                    label: Text(
-                      AppLocalizations.of(context).mapExternalNav,
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {},
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.layers_outlined, size: 16),
+                label: Text(
+                  _queryRoomCode != null
+                      ? AppLocalizations.of(
+                          context,
+                        ).mapFloorPlanUnavailable(_queryRoomCode!)
+                      : AppLocalizations.of(
+                          context,
+                        ).mapFloorPlanUnderConstruction,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13),
+                ),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  backgroundColor: Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    icon: const Icon(Icons.layers_outlined, size: 16),
-                    label: Text(
-                      _queryRoomCode != null
-                          ? AppLocalizations.of(
-                              context,
-                            ).mapFloorPlanUnavailable(_queryRoomCode!)
-                          : AppLocalizations.of(
-                              context,
-                            ).mapFloorPlanUnderConstruction,
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      backgroundColor: Colors.grey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: null,
-                  ),
-                ),
-              ],
+                onPressed: null,
+              ),
             ),
           ],
         ),
