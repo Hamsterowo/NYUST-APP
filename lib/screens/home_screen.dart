@@ -9,6 +9,7 @@ import 'info_screen.dart';
 import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
+import '../services/update_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +18,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   final List<Widget> _screens = [
     const OverviewScreen(),
     const ScheduleScreen(),
@@ -29,10 +31,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowInstallDialog();
+      // 進到主畫面後檢查 Play 是否有新版（非 Android/非 Play 來源會靜默略過）。
+      UpdateService.checkForUpdate(context);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 回到前景時，補檢查是否有「已下載但未安裝」的更新（處理使用者下載中/
+    // 下載完成後關閉 app 的情況）。
+    if (state == AppLifecycleState.resumed && mounted) {
+      UpdateService.resumeCheck(context);
+    }
   }
 
   void _maybeShowInstallDialog() {

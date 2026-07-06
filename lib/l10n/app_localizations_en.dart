@@ -613,6 +613,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateReadyTitle => 'Update Ready';
+
+  @override
+  String get updateReadyBody =>
+      'The new version has been downloaded. Restart to finish installing.';
+
+  @override
+  String get updateRestart => 'Restart';
+
+  @override
   String get webViewOpenInBrowser => 'Open in External Browser';
 
   @override

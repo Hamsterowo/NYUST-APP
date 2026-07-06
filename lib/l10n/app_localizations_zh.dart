@@ -597,6 +597,18 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get updateLater => '稍後';
+
+  @override
+  String get updateReadyTitle => '更新已就緒';
+
+  @override
+  String get updateReadyBody => '新版本已下載完成，重新啟動即可完成安裝。';
+
+  @override
+  String get updateRestart => '重新啟動';
+
+  @override
   String get webViewOpenInBrowser => '用外部瀏覽器開啟';
 
   @override

@@ -1178,6 +1178,30 @@ abstract class AppLocalizations {
   /// **'{room} 平面圖不可用'**
   String mapFloorPlanUnavailable(String room);
 
+  /// No description provided for @updateLater.
+  ///
+  /// In zh, this message translates to:
+  /// **'稍後'**
+  String get updateLater;
+
+  /// No description provided for @updateReadyTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'更新已就緒'**
+  String get updateReadyTitle;
+
+  /// No description provided for @updateReadyBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'新版本已下載完成，重新啟動即可完成安裝。'**
+  String get updateReadyBody;
+
+  /// No description provided for @updateRestart.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新啟動'**
+  String get updateRestart;
+
   /// No description provided for @webViewOpenInBrowser.
   ///
   /// In zh, this message translates to:

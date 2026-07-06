@@ -355,6 +355,10 @@
       }
     }
   },
+  "updateLater": "Later",
+  "updateReadyTitle": "Update Ready",
+  "updateReadyBody": "The new version has been downloaded. Restart to finish installing.",
+  "updateRestart": "Restart",
   "webViewOpenInBrowser": "Open in External Browser",
   "webViewCopyLink": "Copy Link",
   "webViewLinkCopied": "Link copied to clipboard",
