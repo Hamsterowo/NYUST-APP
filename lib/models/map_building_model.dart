@@ -41,10 +41,27 @@ class MapBuilding {
     };
   }
 
+  /// 大樓短代碼樣式（2~3 個純英文字母，如 AI、EB、ASP）
+  static final RegExp _codeLike = RegExp(r'^[a-z]{2,3}$');
+
   /// 檢查搜尋關鍵字是否匹配該建築物名稱或別名
   bool matches(String query) {
     final cleanQuery = query.trim().toLowerCase();
     if (cleanQuery.isEmpty) return false;
+
+    // 短英文代碼（如 AI、EM、MB）改用精確比對，避免子字串誤中
+    // 內嵌英文的別名（例：「前瞻AI暨…實驗室」「EMBA教室」）。
+    if (_codeLike.hasMatch(cleanQuery)) {
+      if (id.replaceAll('building-', '').toLowerCase() == cleanQuery) {
+        return true;
+      }
+      for (var alias in aliases) {
+        if (alias.toLowerCase() == cleanQuery) return true;
+      }
+      return false;
+    }
+
+    // 其餘（中文、較長字串）維持子字串比對
     if (name.toLowerCase().contains(cleanQuery)) return true;
     for (var alias in aliases) {
       if (alias.toLowerCase().contains(cleanQuery)) return true;
