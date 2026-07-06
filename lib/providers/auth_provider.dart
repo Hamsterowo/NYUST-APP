@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_service.dart';
+import '../services/mock/mock_data.dart';
 
 class AuthProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -65,7 +66,7 @@ class AuthProvider with ChangeNotifier {
       final cachedStr = await _loadUserCache();
       if (cachedStr != null) {
         final cachedUser = jsonDecode(cachedStr);
-        if (cachedUser['user']?['id'] == 'D11012345') {
+        if (cachedUser['user']?['id'] == MockData.demoId) {
           _apiService.isMockMode = true;
           _user = cachedUser;
           _isInitialized = true;
@@ -86,7 +87,7 @@ class AuthProvider with ChangeNotifier {
       if (cachedStr != null) {
         final cachedUser = jsonDecode(cachedStr);
         _user = cachedUser;
-        if (cachedUser['user']?['id'] == 'D11012345') {
+        if (cachedUser['user']?['id'] == MockData.demoId) {
           _apiService.isMockMode = true;
         }
         isAlreadyLoggedIn = true;
@@ -174,16 +175,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      if (username == 'debug' || username.toLowerCase() == 'test') {
+      if (MockData.isDemoAccount(username)) {
         _apiService.isMockMode = true;
         _user = {
           'success': true,
-          'user': {
-            'name': '開發除錯員',
-            'id': 'D11012345',
-            'dept': '資訊工程學系',
-            'class': '資工三甲',
-          },
+          'user': Map<String, dynamic>.from(MockData.user),
           'username': username,
         };
         await _saveUserCache(_user!);

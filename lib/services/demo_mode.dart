@@ -12,12 +12,12 @@ import 'calendar/calendar_service.dart';
 import 'calendar/nyust_calendar_service.dart';
 import 'calendar/mock_calendar_service.dart';
 
-/// 根據 demo / 除錯模式狀態，回傳正確的 Service 實作。
+/// 根據 demo 模式狀態，回傳正確的 Service 實作。
 ///
 /// 這是消除散落各處 `if (isMockMode)` 判斷的核心：呼叫端一律透過此 factory
 /// 取得 Service，由 [isDemoMode] 這個唯一開關決定回傳 Mock 還是真實實作。
 ///
-/// - `debug` / `test` 帳號登入 → [isDemoMode] = true → 回傳 Mock 實作
+/// - `demo` 帳號登入 → [isDemoMode] = true → 回傳 Mock 實作
 /// - 一般帳號 → 回傳 Nyust*（真實爬蟲）實作
 class ServiceFactory {
   final ApiClient client;
