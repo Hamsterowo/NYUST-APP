@@ -1,67 +1,105 @@
 # 🎓 YunTool 雲科工具箱
 
-[![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev/)
-[![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
+<p align="center">
+  <img src="assets/icon/icon.png" alt="YunTool Logo" width="120" height="120" style="border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);"/>
+</p>
 
-> **A Better Yuntech App** - 為雲科大同學打造的第三方校務系統 App，提供更流暢、直觀的使用體驗。
+<p align="center">
+  <a href="https://github.com/Hamsterowo/NYUST-APP/actions"><img src="https://github.com/Hamsterowo/NYUST-APP/actions/workflows/analyze.yaml/badge.svg" alt="Analyze Status"/></a>
+  <a href="https://github.com/Hamsterowo/NYUST-APP/actions"><img src="https://github.com/Hamsterowo/NYUST-APP/actions/workflows/build.yaml/badge.svg" alt="Build Status"/></a>
+  <img src="https://img.shields.io/badge/Flutter-%3E%3D%203.11.0-02569B?logo=flutter&logoColor=white" alt="Flutter Version"/>
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-blue" alt="Supported Platforms"/>
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
+</p>
 
-## ✨ 特色功能
+---
 
-- 📅 **智慧課表**：直觀的週課表視圖，點擊課程即可查看教室位置與詳細資訊。
-- 📊 **成績查詢**：整合各學期成績，支援歷年成績清單與平均 GPA 查看。
-- 🎓 **畢業審核**：視覺化呈現畢業學分進度，快速掌握還缺哪些課程。
-- 🗓️ **學校行事曆**：整合學校官方重要日程，支援日曆視圖。
-- 🔍 **校園總覽**：彙整個人常用資訊，一進 App 就能看到最重要的資訊。
-- 💻 **多平台支援**：完美適配手機端 (Android/iOS) 與電腦網頁端。
+**雲科工具箱/YunTool** 是一款雲科大學生使用的手機應用程式，提供在手機上更好的單一入口操作介面。本專案為第三方獨立開發，與國立雲林科技大學沒有任何關係。
 
-## 🛠️ 技術棧
+---
 
-- **Framework**: [Flutter](https://flutter.dev/) (Channel Stable)
-- **State Management**: [Provider](https://pub.dev/packages/provider)
-- **Networking**: [Dio](https://pub.dev/packages/dio) with [Cookie Manager](https://pub.dev/packages/dio_cookie_manager)
-- **Design System**: Material 3 with [JFOpenHuninn](https://github.com/justfont/open-huninn-font) (粉圓體)
-- **Data Storage**: [Shared Preferences](https://pub.dev/packages/shared_preferences)
+## ✨ 特色
 
-## 🚀 快速開始
+*   📅 **課表瀏覽**：快速瀏覽當前課表，可以查看上課位置以及課程詳細資訊等內容。
+*   📊 **成績追蹤**：提供歷年學期成績與排名，快速掌握學期進度。
+*   🎓 **畢業學分**：抓取畢業學分頁面，了解畢業所需學分。
+*   🗓️ **學校行事曆**：整合學校重要日程與台灣法定假日，快速瀏覽下個假期以及重要資訊。
+*   🔔 **成績更新背景通知 (Background Sync)**：
+    *   在背景定期向學校伺服器比對最新成績。
+    *   在手機本機上比對，若有新成績公佈即觸發**純本地通知**，不經過任何第三方推播伺服器，速度極快且隱私安全。
+*   🔒 **隱私防護等級**：
+    *   **無後端伺服器**：所有校務資料及個人基本資訊僅儲存於使用者手機本機。
+    *   **密碼不落地**：密碼僅存在於登入當下的記憶體中。驗證後取得的登入憑證 (Cookie) 以 AES 加密方式儲存於裝置的**安全儲存區 (Secure Storage)**。
 
-### 環境需求
-- Flutter SDK (建議 ^3.11.0)
-- Android Studio / VS Code (安裝 Dart & Flutter 擴充功能)
+---
 
-### 安裝與執行
+## 🛠️ 技術棧與架構設計
+
+本專案遵循現代 Flutter 架構，採 **Repository 模式** 進行資料流控制：`網頁爬蟲 (Scraper) / API ➡️ Drift 本地資料庫 ➡️ Repository Stream ➡️ UI`。
+
+*   **UI / State**: [Flutter Riverpod](https://pub.dev/packages/flutter_riverpod) / [Provider](https://pub.dev/packages/provider)
+*   **Database**: [Drift](https://pub.dev/packages/drift) (基於 SQLite 的反應式 ORM 資料庫)
+*   **Networking**: [Dio](https://pub.dev/packages/dio) + [Cookie Jar](https://pub.dev/packages/cookie_jar)
+*   **Scheduler**: [Workmanager](https://pub.dev/packages/workmanager)
+*   **Notifications**: [Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications)
+*   **Analytics**: Firebase Core & Analytics & Crashlytics
+
+---
+
+## 🚀 快速開始 (Getting Started)
+
+### 本地開發環境
+- Flutter SDK (>= 3.11.0)
+- Android Studio / VS Code (需安裝 Flutter & Dart 擴充功能)
+
+### 執行步驟
 1. 複製此專案：
    ```bash
    git clone https://github.com/Hamsterowo/NYUST-APP.git
    ```
-2. 安裝套件：
+2. 安裝套件相依性：
    ```bash
    flutter pub get
    ```
-3. 啟動 App：
+3. 產生本地資料庫與 JSON 解析代碼（Drift / Build Runner）：
+   ```bash
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+4. 啟動應用程式（建議以 `--profile` 或 `--release` 測試效能）：
    ```bash
    flutter run
    ```
 
-## 📦 打包發布
+---
 
-為了保護程式碼邏輯，發布正式版本時建議使用以下混淆指令進行打包：
+## ⚙️ Google Play 商店上架與測試帳號
 
-### Android (APK)
-```bash
-flutter build apk --obfuscate --split-debug-info=build/app/outputs/symbols
-```
+為了方便商店審核團隊 (Google Play Reviewers) 或開發測試者在沒有真實雲科大 SSO 學生帳號的情況下體驗 App，我們提供了**單一來源 Demo 模式**：
 
-### 參數說明：
-- `--obfuscate`: 啟動程式碼混淆，隱藏變數名稱與邏輯。
-- `--split-debug-info`: 指定偵錯資訊存儲路徑（用於還原混淆後的錯誤紀錄）。
+*   **測試帳號 (Username)**: `demo`
+*   **測試密碼 (Password)**: *（任意填寫即可）*
+*   **驗證碼 (CAPTCHA)**: *（任意填寫即可）*
 
-## 📜 免責聲明 (Disclaimer)
-
-本專案為開發者獨立開發的第三方應用程式，並非由 **國立雲林科技大學 (NYUST)** 官方開發或維護。本 App 透過模擬登錄方式獲取資料，所有使用者帳號密碼僅用於與校方伺服器驗證，開發者不會收集、儲存或洩漏使用者的個人隱私資訊。
-
-## 🤝 貢獻與反饋
-
-如果你有任何建議或發現 Bug，歡迎提交 [Issue](https://github.com/Hamsterowo/NYUST-APP/issues) 或 Pull Request。
+> 💡 **Demo 模式特點**：使用該帳號登入後，App 會啟用 `MockData`，提供橫跨 3 個學年、5 個學期的完整虛擬成績、課表、畢業門檻以及行事曆資料，所有學分數與圖表皆完美契合，可供深度審核。
 
 ---
-Made by [Hamster](https://github.com/Hamsterowo)
+
+## 📦 打包發布 (Production Build)
+
+發布版本時請進行打包（以 Android App Bundle 為例，上架 Play 商店專用）：
+
+### Android App Bundle (AAB - 上架專用)
+```bash
+flutter build appbundle --release --dart-define=USE_FIREBASE=true
+```
+
+### 參數說明
+*   `--dart-define=USE_FIREBASE=true`：注入變數，啟用 Firebase 統計與當機回報功能。
+
+---
+
+## 📜 法律聲明與授權 (License)
+
+*   **免責聲明**：本應用程式為第三方開源專案，與國立雲林科技大學官方單位無任何隸屬或合作關係。使用者輸入的帳號密碼僅直接與學校伺服器進行通信。
+*   **授權條款**：本專案採用 **[MIT License](LICENSE)** 授權開源。歡迎雲科大同學與開發者一同參與開發與貢獻！
+
