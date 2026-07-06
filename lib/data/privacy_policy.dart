@@ -1,7 +1,7 @@
-/// 本地隱私權政策：直接讀取打包進 assets 的 `PRIVACY.zh-TW.md` / `PRIVACY.en.md`。
+/// 本地隱私權政策：直接讀取打包進 assets 的 `docs/PRIVACY.zh-TW.md` / `docs/PRIVACY.en.md`。
 ///
-/// repo 根目錄的這兩份 Markdown 即為**唯一來源**——GitHub 頁面對外展示、
-/// App 內同意閘門與政策頁皆渲染同一份內容。修改政策時：
+/// `docs/` 目錄同時作為 GitHub Pages 根目錄——網頁版與 App 內皆渲染同一份 Markdown，
+/// 真正做到單一來源。修改政策時：
 /// 1. 中英兩份 `.md` 同步修改；
 /// 2. 內容有實質變更時，將兩份 front matter 的 `version:` 更新為當天日期
 ///    （此為與語系無關的同意版本鍵，變更會觸發使用者重新同意）。
@@ -49,7 +49,7 @@ class PrivacyPolicy {
 }
 
 String _assetFor(String languageCode) =>
-    languageCode == 'en' ? 'PRIVACY.en.md' : 'PRIVACY.zh-TW.md';
+    languageCode == 'en' ? 'docs/PRIVACY.en.md' : 'docs/PRIVACY.zh-TW.md';
 
 /// 依語系載入並解析隱私權政策。
 Future<PrivacyPolicy> loadPrivacyPolicy(String languageCode) async {

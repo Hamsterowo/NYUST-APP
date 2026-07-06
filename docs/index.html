@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>隱私權政策 · 雲科工具箱 / Privacy Policy · YunTool</title>
+  <meta name="description" content="雲科工具箱（YunTool）隱私權政策 — 說明本應用程式如何蒐集、處理及保護您的個人資料。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg-card: #1a1d27;
+      --border: rgba(255,255,255,0.07);
+      --accent: #6c63ff;
+      --accent-glow: rgba(108,99,255,0.25);
+      --accent-2: #00d2ff;
+      --text-primary: #f0f0f5;
+      --text-secondary: #9395a5;
+      --text-muted: #5a5c6e;
+      --tag-bg: rgba(108,99,255,0.15);
+      --tag-border: rgba(108,99,255,0.35);
+      --radius: 16px;
+      --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', 'Noto Sans TC', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.75;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(108,99,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0,210,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Layout */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 1;
+      padding: 48px 24px 0;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .header-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .app-brand { display: flex; align-items: center; gap: 14px; }
+    .app-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 8px 24px var(--accent-glow);
+      flex-shrink: 0;
+    }
+    .app-name { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+    .app-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Lang toggle */
+    .lang-toggle {
+      display: flex; gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .lang-btn {
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      padding: 6px 14px; border: none; border-radius: 7px;
+      cursor: pointer; transition: all 0.2s ease;
+      color: var(--text-secondary); background: transparent;
+    }
+    .lang-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
+    .lang-btn:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.06); }
+
+    /* Hero */
+    .hero {
+      margin-top: 40px;
+      padding: 36px;
+      background: linear-gradient(135deg, rgba(108,99,255,0.12) 0%, rgba(0,210,255,0.06) 100%);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: var(--radius);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -30px; right: -30px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(108,99,255,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.3; }
+    .hero-subtitle { font-size: 15px; color: var(--text-secondary); margin-top: 8px; }
+    .meta-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .badge {
+      font-size: 12px; font-weight: 500;
+      padding: 4px 12px; border-radius: 20px;
+      background: var(--tag-bg); border: 1px solid var(--tag-border); color: #a5a1ff;
+    }
+
+    /* Loading / error */
+    #loading, #error {
+      margin-top: 32px; padding: 48px 24px;
+      text-align: center; color: var(--text-muted);
+      font-size: 15px;
+    }
+    #error { color: #ff7b7b; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid rgba(108,99,255,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Content area */
+    #content { margin-top: 0; }
+
+    /* Section card (generated by JS) */
+    .section-card {
+      margin-top: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp 0.35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .section-num {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .section-title-text { font-size: 16px; font-weight: 600; }
+    .section-body {
+      padding: 20px 24px;
+      font-size: 15px; color: var(--text-secondary);
+    }
+    .section-body p { margin-bottom: 10px; }
+    .section-body p:last-child { margin-bottom: 0; }
+
+    /* Subheader */
+    .sub-block {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .sub-title { font-size: 13px; font-weight: 600; color: #a5a1ff; margin-bottom: 6px; }
+
+    /* Highlight / info */
+    .hi-box {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 14px;
+      background: rgba(0,210,255,0.07);
+      border: 1px solid rgba(0,210,255,0.2);
+      border-radius: var(--radius-sm);
+      margin-top: 10px;
+      font-size: 14px; color: #7ee8fa;
+    }
+    .info-box {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 14px;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: var(--radius-sm);
+      margin-top: 10px;
+      font-size: 14px; color: #b8b4ff;
+    }
+
+    /* Inline bold / link */
+    strong { color: var(--text-primary); font-weight: 600; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Bullet */
+    .bullet-item { padding-left: 18px; position: relative; margin-bottom: 6px; font-size: 14px; }
+    .bullet-item::before { content: '•'; position: absolute; left: 4px; color: var(--accent); }
+
+    /* Footer */
+    footer {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: 40px auto 0; padding: 24px;
+      border-top: 1px solid var(--border);
+      text-align: center; color: var(--text-muted); font-size: 13px;
+    }
+    footer a { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .hero-title { font-size: 22px; }
+      .section-body { padding: 14px 16px; }
+      .section-header { padding: 14px 16px; }
+      .hero { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="app-brand">
+      <div class="app-icon">🛠️</div>
+      <div>
+        <div class="app-name" id="app-name-display">雲科工具箱</div>
+        <div class="app-subtitle">tw.hamster.yuntool</div>
+      </div>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-zh" onclick="setLang('zh')">中文</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- Hero (placeholders, filled after parse) -->
+  <div class="hero" id="hero">
+    <div class="hero-title" id="hero-title">隱私權政策</div>
+    <div class="hero-subtitle" id="hero-subtitle">雲科工具箱是第三方獨立開發的應用程式，與國立雲林科技大學官方單位無任何關係。</div>
+    <div class="meta-badges" id="hero-badges">
+      <span class="badge" id="badge-ver">載入中…</span>
+      <span class="badge">Android</span>
+    </div>
+  </div>
+
+  <div id="loading"><div class="spinner"></div>載入中…</div>
+  <div id="error" style="display:none">無法載入隱私權政策，請重新整理。</div>
+  <div id="content" style="display:none"></div>
+</div>
+
+<footer id="footer">
+  <span id="footer-text">© 2026 雲科工具箱開發團隊 · <a href="https://github.com/Hamsterowo/NYUST-APP" target="_blank" rel="noopener">GitHub</a> · 本應用程式與國立雲林科技大學無關</span>
+</footer>
+
+<script>
+  // ── State ──────────────────────────────────────────────
+  let currentLang = localStorage.getItem('yuntool-lang') || 'zh';
+  let cache = {};          // { zh: parsed, en: parsed }
+  let sectionCounter = 0;
+
+  // ── Markdown parser (front matter + structure) ─────────
+  function parseFrontMatter(raw) {
+    const lines = raw.split('\n');
+    const fm = {};
+    if (!lines.length || lines[0].trim() !== '---') return { fm, body: raw };
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].trim() === '---') {
+        return { fm, body: lines.slice(i + 1).join('\n') };
+      }
+      const sep = lines[i].indexOf(':');
+      if (sep > 0) {
+        fm[lines[i].slice(0, sep).trim()] = lines[i].slice(sep + 1).trim();
+      }
+    }
+    return { fm, body: raw };
+  }
+
+  function parseInline(text) {
+    // **bold**, [text](url)
+    return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+               .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+
+  function parseMd(raw) {
+    const { fm, body } = parseFrontMatter(raw);
+    const lines = body.split('\n');
+    const sections = [];   // { h2, subheaders:[], paragraphs:[], bullets:[] }
+    let cur = null;
+    let curSub = null;
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      if (line.startsWith('# ')) continue;   // page title — skip
+
+      if (line.startsWith('## ')) {
+        cur = { h2: line.slice(3), items: [] };
+        curSub = null;
+        sections.push(cur);
+      } else if (line.startsWith('### ')) {
+        if (!cur) { cur = { h2: '', items: [] }; sections.push(cur); }
+        curSub = { sub: line.slice(4), items: [] };
+        cur.items.push(curSub);
+      } else if (line.startsWith('- ')) {
+        const item = { type: 'bullet', text: line.slice(2) };
+        (curSub ? curSub.items : (cur ? cur.items : [])).push(item);
+      } else {
+        const item = { type: 'para', text: line };
+        (curSub ? curSub.items : (cur ? cur.items : [])).push(item);
+      }
+    }
+    return { fm, sections };
+  }
+
+  // ── Render helpers ─────────────────────────────────────
+  function renderItems(items, container) {
+    for (const item of items) {
+      if (item.sub !== undefined) {
+        // subheader block
+        const sub = document.createElement('div');
+        sub.className = 'sub-block';
+        const t = document.createElement('div');
+        t.className = 'sub-title';
+        t.textContent = item.sub;
+        sub.appendChild(t);
+        renderItems(item.items, sub);
+        container.appendChild(sub);
+      } else if (item.type === 'bullet') {
+        const b = document.createElement('div');
+        b.className = 'bullet-item';
+        b.innerHTML = parseInline(item.text);
+        container.appendChild(b);
+      } else {
+        const p = document.createElement('p');
+        p.innerHTML = parseInline(item.text);
+        container.appendChild(p);
+      }
+    }
+  }
+
+  function renderSections(parsed) {
+    const content = document.getElementById('content');
+    content.innerHTML = '';
+    sectionCounter = 0;
+
+    for (const sec of parsed.sections) {
+      sectionCounter++;
+      const card = document.createElement('div');
+      card.className = 'section-card';
+      card.style.animationDelay = `${(sectionCounter - 1) * 0.04}s`;
+
+      const hdr = document.createElement('div');
+      hdr.className = 'section-header';
+
+      const num = document.createElement('div');
+      num.className = 'section-num';
+      num.textContent = sectionCounter;
+
+      const title = document.createElement('div');
+      title.className = 'section-title-text';
+      title.textContent = sec.h2;
+
+      hdr.appendChild(num);
+      hdr.appendChild(title);
+      card.appendChild(hdr);
+
+      const body = document.createElement('div');
+      body.className = 'section-body';
+      renderItems(sec.items, body);
+      card.appendChild(body);
+
+      content.appendChild(card);
+    }
+  }
+
+  function updateHero(parsed, lang) {
+    const fm = parsed.fm;
+    document.getElementById('badge-ver').textContent =
+      (lang === 'zh' ? '最後更新：' : 'Last Updated: ') + (fm.lastUpdated || fm.version || '');
+
+    if (lang === 'en') {
+      document.getElementById('hero-title').textContent = 'Privacy Policy';
+      document.getElementById('hero-subtitle').textContent =
+        'YunTool is an independently developed third-party app with no affiliation to National Yunlin University of Science and Technology.';
+      document.getElementById('app-name-display').textContent = 'YunTool';
+      document.getElementById('footer-text').innerHTML =
+        '© 2026 YunTool Developers · <a href="https://github.com/Hamsterowo/NYUST-APP" target="_blank" rel="noopener">GitHub</a> · Not affiliated with National Yunlin University of Science and Technology';
+      document.title = 'Privacy Policy · YunTool';
+    } else {
+      document.getElementById('hero-title').textContent = '隱私權政策';
+      document.getElementById('hero-subtitle').textContent =
+        '雲科工具箱是第三方獨立開發的應用程式，與國立雲林科技大學官方單位無任何關係。';
+      document.getElementById('app-name-display').textContent = '雲科工具箱';
+      document.getElementById('footer-text').innerHTML =
+        '© 2026 雲科工具箱開發團隊 · <a href="https://github.com/Hamsterowo/NYUST-APP" target="_blank" rel="noopener">GitHub</a> · 本應用程式與國立雲林科技大學無關';
+      document.title = '隱私權政策 · 雲科工具箱';
+    }
+    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-TW');
+  }
+
+  // ── Fetch + render ─────────────────────────────────────
+  async function loadAndRender(lang) {
+    if (cache[lang]) {
+      updateHero(cache[lang], lang);
+      renderSections(cache[lang]);
+      return;
+    }
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('content').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+
+    const file = lang === 'en' ? 'PRIVACY.en.md' : 'PRIVACY.zh-TW.md';
+    try {
+      const res = await fetch(file);
+      if (!res.ok) throw new Error(res.status);
+      const raw = await res.text();
+      const parsed = parseMd(raw);
+      cache[lang] = parsed;
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+      updateHero(parsed, lang);
+      renderSections(parsed);
+    } catch (e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      console.error('Failed to load privacy policy:', e);
+    }
+  }
+
+  // ── Language switch ────────────────────────────────────
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('yuntool-lang', lang);
+    document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    loadAndRender(lang);
+  }
+
+  // ── Init ───────────────────────────────────────────────
+  (function init() {
+    const saved = localStorage.getItem('yuntool-lang') || 'zh';
+    currentLang = saved;
+    document.getElementById('btn-zh').classList.toggle('active', saved === 'zh');
+    document.getElementById('btn-en').classList.toggle('active', saved === 'en');
+    loadAndRender(saved);
+  })();
+</script>
+</body>
+</html>
