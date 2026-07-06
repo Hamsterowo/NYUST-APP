@@ -101,6 +101,7 @@ jobs:
           packageName: tw.hamster.yuntool
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           tracks: internal
+          status: draft
           releaseName: ${{ steps.meta.outputs.release_name }}
           whatsNewDirectory: build/play-whatsnew
 
