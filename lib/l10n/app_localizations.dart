@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewPolicyOnGithub.
   ///
   /// In zh, this message translates to:
-  /// **'在 GitHub 上查看'**
+  /// **'在瀏覽器查看'**
   String get viewPolicyOnGithub;
 
   /// No description provided for @termsUpdateTitle.

@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appPrivacyPolicy => 'YunTool Privacy Policy';
 
   @override
-  String get viewPolicyOnGithub => 'View on GitHub';
+  String get viewPolicyOnGithub => 'View in Browser';
 
   @override
   String get termsUpdateTitle => 'Notice';
