@@ -379,7 +379,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           color: colorScheme.surfaceContainerHighest,
                           child: ListTileTheme(
                             data: const ListTileThemeData(
-                              visualDensity: VisualDensity(vertical: -3),
+                              visualDensity: VisualDensity(vertical: -2),
                               minVerticalPadding: 4,
                             ),
                             child: Column(
