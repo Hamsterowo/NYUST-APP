@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 需要完整歷史與 tag，才能算出上一版 tag 與 compare 連結
 
       - uses: ./.github/actions/setup-project
 
@@ -61,6 +63,35 @@ jobs:
           generate_release_notes: true
           draft: true
 
+      # 從 pubspec.yaml 讀出版本，組出 Play 的版本名稱與更新說明（what's new）。
+      # 版本名稱格式為「versionCode (versionName)」，例如 0.4.4+30 → 「30 (0.4.4)」。
+      # 更新說明會附上這版的最新 commit 與對上一版 tag 的 compare 編輯日誌。
+      - name: Prepare Play release metadata
+        id: meta
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VERSION_LINE=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          VERSION_NAME=${VERSION_LINE%%+*}
+          VERSION_CODE=${VERSION_LINE##*+}
+          echo "release_name=${VERSION_CODE} (${VERSION_NAME})" >> "$GITHUB_OUTPUT"
+
+          CURRENT_TAG=${GITHUB_REF_NAME}
+          PREV_TAG=$(git describe --tags --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || echo "")
+
+          SHA=$(git rev-parse --short HEAD)
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          SUBJECT=$(git log -1 --pretty=format:'%s')
+
+          # Play 的 what's new 每個語言上限 500 字，且只吃純文字。
+          NOTES="最新 commit：${SHA} ${SUBJECT} — ${AUTHOR}"
+          if [ -n "$PREV_TAG" ]; then
+            NOTES="${NOTES}"$'\n'"編輯日誌：${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${CURRENT_TAG}"
+          fi
+
+          mkdir -p build/play-whatsnew
+          printf '%s' "$NOTES" > build/play-whatsnew/whatsnew-zh-TW
+          printf '%s' "$NOTES" > build/play-whatsnew/whatsnew-en-US
+
       # 當推 v* 標籤時，自動發布至 Google Play Console (內部測試軌道)
       - name: Upload to Google Play (Internal Testing)
         if: startsWith(github.ref, 'refs/tags/')
@@ -70,4 +101,6 @@ jobs:
           packageName: tw.hamster.yuntool
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           tracks: internal
+          releaseName: ${{ steps.meta.outputs.release_name }}
+          whatsNewDirectory: build/play-whatsnew
 
