@@ -8,7 +8,7 @@
   <a href="https://github.com/Hamsterowo/NYUST-APP/actions"><img src="https://github.com/Hamsterowo/NYUST-APP/actions/workflows/analyze.yaml/badge.svg" alt="Analyze Status"/></a>
   <a href="https://github.com/Hamsterowo/NYUST-APP/actions"><img src="https://github.com/Hamsterowo/NYUST-APP/actions/workflows/build.yaml/badge.svg" alt="Build Status"/></a>
   <img src="https://img.shields.io/badge/Flutter-%3E%3D%203.11.0-02569B?logo=flutter&logoColor=white" alt="Flutter Version"/>
-  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-blue" alt="Supported Platforms"/>
+  <img src="https://img.shields.io/badge/Platform-Android-blue" alt="Supported Platforms"/>
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
 </p>
 
