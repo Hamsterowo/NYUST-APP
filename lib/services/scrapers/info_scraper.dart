@@ -142,7 +142,8 @@ class InfoScraper extends BaseScraper {
         return {
           'success': false,
           'status': 'session_expired',
-          'message': 'No authenticated user info found (likely session expired)',
+          'message':
+              'No authenticated user info found (likely session expired)',
         };
       }
 

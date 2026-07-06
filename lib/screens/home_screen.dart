@@ -205,64 +205,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             _OfflineBanner(visible: !isOnline, colorScheme: colorScheme),
             Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          height: 66,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-              ),
-            ],
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-              width: 1.0,
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth = constraints.maxWidth / navItems.length;
-              // The sliding "pill" background behind the selected tab.
-              const pillHInset = 10.0;
-              const pillVInset = 8.0;
-              return Stack(
-                children: [
-                  AnimatedPositioned(
-                    duration: const Duration(milliseconds: 320),
-                    curve: Curves.easeOutCubic,
-                    top: pillVInset,
-                    bottom: pillVInset,
-                    left: currentIndex * itemWidth + pillHInset,
-                    width: itemWidth - pillHInset * 2,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: colorScheme.onSurface.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var i = 0; i < navItems.length; i++)
-                        _buildNavItem(
-                          context: context,
-                          index: i,
-                          activeIcon: navItems[i].active,
-                          inactiveIcon: navItems[i].inactive,
-                          label: labels[i],
-                          currentIndex: currentIndex,
-                          colorScheme: colorScheme,
-                        ),
-                    ],
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              height: 66,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.92,
+                ),
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
                   ),
                 ],
-              );
-            },
-          ),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+                  width: 1.0,
+                ),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = constraints.maxWidth / navItems.length;
+                  // The sliding "pill" background behind the selected tab.
+                  const pillHInset = 10.0;
+                  const pillVInset = 8.0;
+                  return Stack(
+                    children: [
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeOutCubic,
+                        top: pillVInset,
+                        bottom: pillVInset,
+                        left: currentIndex * itemWidth + pillHInset,
+                        width: itemWidth - pillHInset * 2,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: colorScheme.onSurface.withValues(
+                              alpha: 0.10,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var i = 0; i < navItems.length; i++)
+                            _buildNavItem(
+                              context: context,
+                              index: i,
+                              activeIcon: navItems[i].active,
+                              inactiveIcon: navItems[i].inactive,
+                              label: labels[i],
+                              currentIndex: currentIndex,
+                              colorScheme: colorScheme,
+                            ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),
