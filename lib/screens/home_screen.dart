@@ -178,6 +178,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    // StreamProvider 尚未回報前預設為線上，避免啟動瞬間閃現離線橫幅。
+    final isOnline = ref.watch(isOnlineProvider).value ?? true;
 
     const navItems = <_NavItemData>[
       _NavItemData(Icons.dashboard, Icons.dashboard_outlined),
@@ -198,7 +200,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: IndexedStack(index: currentIndex, children: _screens),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _OfflineBanner(visible: !isOnline, colorScheme: colorScheme),
+            Container(
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           height: 66,
           decoration: BoxDecoration(
@@ -257,6 +263,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             },
           ),
+            ),
+          ],
         ),
       ),
     );
@@ -267,4 +275,59 @@ class _NavItemData {
   final IconData active;
   final IconData inactive;
   const _NavItemData(this.active, this.inactive);
+}
+
+/// 浮動導覽列上方的離線提示條。線上時佔零高度（以動畫收合）。
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner({required this.visible, required this.colorScheme});
+
+  final bool visible;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      child: visible
+          ? Container(
+              width: double.infinity,
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.92,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.cloud_off_rounded,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      AppLocalizations.of(context).offlineBanner,
+                      style: TextStyle(
+                        fontFamily: 'JFOpenHuninn',
+                        fontSize: 12,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : const SizedBox(width: double.infinity),
+    );
+  }
 }

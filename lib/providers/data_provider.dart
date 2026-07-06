@@ -5,6 +5,7 @@ import '../repositories/grades_repository.dart';
 import '../repositories/graduation_repository.dart';
 import '../repositories/course_repository.dart';
 import '../services/api_service.dart';
+import '../services/connectivity_service.dart';
 import '../services/course_detail_cache.dart';
 import '../services/calendar_cache_service.dart';
 import '../models/schedule_event.dart';
@@ -26,6 +27,10 @@ class DataProvider with ChangeNotifier {
   StreamSubscription<Map<String, dynamic>?>? _gradesSub;
   StreamSubscription<Map<String, dynamic>?>? _graduationSub;
   StreamSubscription<Map<String, dynamic>?>? _scheduleSub;
+  StreamSubscription<bool>? _connSub;
+
+  /// 追蹤上一個已知的連線狀態,只在「離線→上線」的瞬間觸發重抓。
+  bool _wasOnline = true;
 
   bool _isCacheLoaded = false;
   bool get isCacheLoaded => _isCacheLoaded;
@@ -92,6 +97,20 @@ class DataProvider with ChangeNotifier {
     }
     _auth.onLoginSuccess = () => prefetchAll();
     _auth.onLogoutCallback = () => clearAll();
+    _watchConnectivity();
+  }
+
+  /// 監聽連線狀態:從「離線」恢復到「上線」時,若已登入就重新抓取一次。
+  /// 這也會順帶重新驗證 session(prefetchAll → fetchUserInfo),
+  /// 若期間 session 真的過期,會在此時被登出。
+  void _watchConnectivity() {
+    _connSub = ConnectivityService.instance.onStatusChange.listen((online) {
+      final cameBackOnline = online && !_wasOnline;
+      _wasOnline = online;
+      if (cameBackOnline && _auth.isLoggedIn && !_isPrefetching) {
+        prefetchAll();
+      }
+    });
   }
 
   /// 登入後呼叫，預先載入全部資料（逐一執行避免 CookieJar 競爭）。
@@ -121,6 +140,10 @@ class DataProvider with ChangeNotifier {
       final response = await _api.getUserInfo();
       if (response['success'] == true) {
         _auth.updateUserInfo(response);
+      } else if (response['status'] == 'session_expired') {
+        // 線上但伺服器確認未登入 → session 過期,主動登出。
+        // (離線會回 network_error,不會走到這裡,快取與登入狀態得以保留。)
+        await _auth.handleSessionExpired();
       }
     } catch (e) {
       if (kDebugMode) print('DataProvider: fetchUserInfo error: $e');
@@ -195,6 +218,7 @@ class DataProvider with ChangeNotifier {
     _gradesSub?.cancel();
     _graduationSub?.cancel();
     _scheduleSub?.cancel();
+    _connSub?.cancel();
     super.dispose();
   }
 }

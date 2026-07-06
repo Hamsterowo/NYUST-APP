@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 處理個人資訊爬取的類別
@@ -135,9 +136,27 @@ class InfoScraper extends BaseScraper {
       if (kDebugMode)
         print('InfoScraper: Final Extracted info for ${userInfo['name']}');
 
+      // 連得到伺服器、但抓不到姓名 → 多半是 session 過期被導向登入頁。
+      // 明確標記 session_expired，讓上層可以「主動」登出，而非靠推斷。
+      if (userInfo['name']!.isEmpty) {
+        return {
+          'success': false,
+          'status': 'session_expired',
+          'message': 'No authenticated user info found (likely session expired)',
+        };
+      }
+
       return {'success': true, 'user': userInfo};
     } catch (e) {
-      return {'success': false, 'message': '獲取個人資訊失敗: $e'};
+      // 區分「離線 / 連不上」與其他錯誤：離線絕不能被當成登出。
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': '網路連線失敗: $e',
+        };
+      }
+      return {'success': false, 'status': 'error', 'message': '獲取個人資訊失敗: $e'};
     }
   }
 }

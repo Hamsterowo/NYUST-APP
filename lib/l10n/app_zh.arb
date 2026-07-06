@@ -110,6 +110,8 @@
   "loadScheduleFailed": "無法載入課表",
   "checkNetworkRetry": "請確認網路連線後重試",
   "retry": "重試",
+  "offlineBanner": "離線模式・顯示的是先前的快取資料",
+  "loginNoNetwork": "無法連線，請檢查網路後再試",
   "noScheduleData": "目前沒有任何課表資料",
   "weekdayHeader": "星期{day}",
   "@weekdayHeader": {

@@ -91,6 +91,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       if (mounted) {
         final errorMsg = auth.error == 'loginFailed'
             ? AppLocalizations.of(context).loginFailed
+            : auth.error == 'loginNoNetwork'
+            ? AppLocalizations.of(context).loginNoNetwork
             : auth.error!;
         showTopSnackBar(context, errorMsg, isError: true);
         _captchaController.clear();

@@ -239,6 +239,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get offlineBanner => 'Offline — showing previously cached data';
+
+  @override
+  String get loginNoNetwork =>
+      'No internet connection. Please check your network and try again.';
+
+  @override
   String get noScheduleData => 'No schedule data available';
 
   @override

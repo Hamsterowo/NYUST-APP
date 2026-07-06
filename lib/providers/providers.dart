@@ -1,7 +1,9 @@
 // Riverpod 3.x：ChangeNotifierProvider / StateProvider 已移到 legacy。
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'auth_provider.dart';
 import 'data_provider.dart';
+import '../services/connectivity_service.dart';
 
 /// Stage 5：DI 由 `provider` 套件全面改吃 Riverpod。
 ///
@@ -27,3 +29,10 @@ final navIndexProvider = StateProvider<int>((ref) => 0);
 
 /// 進入設定分頁後是否要捲動到「成績通知」設定（取代 NavigationProvider 的旗標）。
 final scrollToNotificationProvider = StateProvider<bool>((ref) => false);
+
+/// 目前是否在線上（`true` = 有網路介面）。用於離線橫幅等 UX。
+///
+/// 初值先給 `true`，避免 App 一啟動、串流尚未回報前就閃現離線橫幅。
+final isOnlineProvider = StreamProvider<bool>((ref) {
+  return ConnectivityService.instance.onStatusChange;
+});

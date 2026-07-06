@@ -231,6 +231,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get retry => '重試';
 
   @override
+  String get offlineBanner => '離線模式・顯示的是先前的快取資料';
+
+  @override
+  String get loginNoNetwork => '無法連線，請檢查網路後再試';
+
+  @override
   String get noScheduleData => '目前沒有任何課表資料';
 
   @override

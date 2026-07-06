@@ -518,6 +518,18 @@ abstract class AppLocalizations {
   /// **'重試'**
   String get retry;
 
+  /// No description provided for @offlineBanner.
+  ///
+  /// In zh, this message translates to:
+  /// **'離線模式・顯示的是先前的快取資料'**
+  String get offlineBanner;
+
+  /// No description provided for @loginNoNetwork.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法連線，請檢查網路後再試'**
+  String get loginNoNetwork;
+
   /// No description provided for @noScheduleData.
   ///
   /// In zh, this message translates to:
