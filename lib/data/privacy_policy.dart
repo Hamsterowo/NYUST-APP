@@ -12,12 +12,15 @@ import 'package:flutter/services.dart' show rootBundle;
 /// 內容區塊類型。
 enum PolicyBlockType { header, subheader, bullet, paragraph }
 
-/// 行內文字片段（支援 `**粗體**`）。
+/// 行內文字片段（支援 `**粗體**` 與 `[文字](連結)`）。
+///
+/// 當 [url] 非 null 時，此片段為可點擊的連結。
 class PolicySpan {
   final String text;
   final bool bold;
+  final String? url;
 
-  const PolicySpan(this.text, {this.bold = false});
+  const PolicySpan(this.text, {this.bold = false, this.url});
 }
 
 /// 單一內容區塊。
@@ -123,19 +126,25 @@ PrivacyPolicy _parseMarkdown(String raw) {
   );
 }
 
-/// 解析行內語法：`**粗體**`、`[文字](連結)` → 「文字（連結）」。
-List<PolicySpan> _parseInline(String text) {
-  // Markdown 連結攤平為「文字 (連結)」。
-  final linked = text.replaceAllMapped(
-    RegExp(r'\[([^\]]+)\]\(([^)]+)\)'),
-    (m) => '${m[1]} (${m[2]})',
-  );
+/// 行內語法解析：`**粗體**` → 粗體片段；`[文字](連結)` → 可點擊連結片段。
+final _inlinePattern = RegExp(r'\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)');
 
+List<PolicySpan> _parseInline(String text) {
   final spans = <PolicySpan>[];
-  var bold = false;
-  for (final part in linked.split('**')) {
-    if (part.isNotEmpty) spans.add(PolicySpan(part, bold: bold));
-    bold = !bold;
+  var last = 0;
+  for (final m in _inlinePattern.allMatches(text)) {
+    if (m.start > last) {
+      spans.add(PolicySpan(text.substring(last, m.start)));
+    }
+    if (m.group(1) != null) {
+      spans.add(PolicySpan(m.group(1)!, bold: true));
+    } else {
+      spans.add(PolicySpan(m.group(2)!, url: m.group(3)));
+    }
+    last = m.end;
+  }
+  if (last < text.length) {
+    spans.add(PolicySpan(text.substring(last)));
   }
   return spans;
 }

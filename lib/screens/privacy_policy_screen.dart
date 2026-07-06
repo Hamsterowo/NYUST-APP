@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../data/privacy_policy.dart';
 import '../l10n/app_localizations.dart';
 
@@ -153,6 +155,28 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   PrivacyPolicy? _policy;
   String? _loadedLang;
 
+  /// 連結片段的手勢辨識器；每次 build 重建，於 dispose 一併釋放。
+  final List<TapGestureRecognizer> _linkRecognizers = [];
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  void _disposeRecognizers() {
+    for (final r in _linkRecognizers) {
+      r.dispose();
+    }
+    _linkRecognizers.clear();
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -171,6 +195,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    // 上一幀的連結辨識器已不再被引用，於重建時釋放後重新建立。
+    _disposeRecognizers();
 
     return Scaffold(
       appBar: AppBar(
@@ -314,19 +341,37 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   }
 
   Widget _buildRichText(List<PolicySpan> spans, BuildContext context) {
+    final linkColor = Theme.of(context).colorScheme.primary;
     return Text.rich(
       TextSpan(
         style: _paragraphStyle(context),
         children: [
           for (final span in spans)
-            TextSpan(
-              text: span.text,
-              style: span.bold
-                  ? const TextStyle(fontWeight: FontWeight.w700)
-                  : null,
-            ),
+            if (span.url != null)
+              TextSpan(
+                text: span.text,
+                style: TextStyle(
+                  color: linkColor,
+                  decoration: TextDecoration.underline,
+                  decorationColor: linkColor,
+                ),
+                recognizer: _recognizerFor(span.url!),
+              )
+            else
+              TextSpan(
+                text: span.text,
+                style: span.bold
+                    ? const TextStyle(fontWeight: FontWeight.w700)
+                    : null,
+              ),
         ],
       ),
     );
+  }
+
+  TapGestureRecognizer _recognizerFor(String url) {
+    final recognizer = TapGestureRecognizer()..onTap = () => _openUrl(url);
+    _linkRecognizers.add(recognizer);
+    return recognizer;
   }
 }
