@@ -81,7 +81,11 @@ const PrivacyPolicy _privacyPolicyZh = PrivacyPolicy(
     PolicyBlock.header('四、與第三方共用個人資料之政策'),
     PolicyBlock.paragraph(
       '本應用程式絕不會提供、交換、出租或出售任何您的個人資料給其他個人、團體、私人企業或公務機關。'
-      '本應用程式目前未整合 Firebase Analytics、Crashlytics 或其他第三方分析／推播服務。',
+      '本應用程式的正式發行版本（Android）整合了 Google Firebase Analytics（匿名使用統計）'
+      '與 Crashlytics（當機回報），用於了解功能使用狀況與診斷程式錯誤；這些服務會收集匿名的'
+      '使用事件、裝置型號、作業系統版本與當機堆疊等技術資訊，不包含您的學號、密碼、成績等'
+      '個人或學業資料，相關資料由 Google 依其隱私權政策處理。除此之外，'
+      '本應用程式未整合其他第三方分析或推播服務。',
     ),
     PolicyBlock.header('五、對外連結'),
     PolicyBlock.paragraph(
@@ -183,9 +187,14 @@ const PrivacyPolicy _privacyPolicyEn = PrivacyPolicy(
     PolicyBlock.header('4. Sharing Personal Data With Third Parties'),
     PolicyBlock.paragraph(
       'The app will never provide, exchange, rent, or sell any of your personal data '
-      'to any individual, group, private enterprise, or government agency. The app '
-      'currently integrates no Firebase Analytics, Crashlytics, or other third-party '
-      'analytics/push services.',
+      'to any individual, group, private enterprise, or government agency. Official '
+      'release builds (Android) integrate Google Firebase Analytics (anonymous usage '
+      'statistics) and Crashlytics (crash reporting) to understand feature usage and '
+      'diagnose errors; these services collect anonymous technical information such '
+      'as usage events, device model, OS version, and crash stack traces — never '
+      'your student ID, password, grades, or other personal/academic data. That '
+      'data is processed by Google under its own privacy policy. Beyond this, the '
+      'app integrates no other third-party analytics or push services.',
     ),
     PolicyBlock.header('5. External Links'),
     PolicyBlock.paragraph(
