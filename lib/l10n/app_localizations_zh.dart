@@ -33,6 +33,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appPrivacyPolicy => '雲科工具箱 隱私權政策';
 
   @override
+  String get viewPolicyOnGithub => '在 GitHub 上查看完整政策';
+
+  @override
   String get termsUpdateTitle => '提示';
 
   @override

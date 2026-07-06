@@ -177,6 +177,14 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
+  /// 依目前語系回傳 GitHub 上對應語言的政策頁網址。
+  String _githubPolicyUrl(BuildContext context) {
+    final file = Localizations.localeOf(context).languageCode == 'en'
+        ? 'PRIVACY.en.md'
+        : 'PRIVACY.zh-TW.md';
+    return 'https://github.com/Hamsterowo/NYUST-APP/blob/main/$file';
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -212,32 +220,48 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
           ? SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                child: Row(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => SystemNavigator.pop(),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colorScheme.error,
-                          side: BorderSide(color: colorScheme.error),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).termsRejectAndExit,
-                        ),
+                    TextButton.icon(
+                      onPressed: () => _openUrl(_githubPolicyUrl(context)),
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: Text(
+                        AppLocalizations.of(context).viewPolicyOnGithub,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: _policy == null
-                            ? null
-                            : () => Navigator.pop(context, _policy!.version),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => SystemNavigator.pop(),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: colorScheme.error,
+                              side: BorderSide(color: colorScheme.error),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context).termsRejectAndExit,
+                            ),
+                          ),
                         ),
-                        child: Text(AppLocalizations.of(context).termsAgree),
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: _policy == null
+                                ? null
+                                : () =>
+                                      Navigator.pop(context, _policy!.version),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context).termsAgree,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

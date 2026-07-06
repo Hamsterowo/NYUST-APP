@@ -146,6 +146,12 @@ abstract class AppLocalizations {
   /// **'雲科工具箱 隱私權政策'**
   String get appPrivacyPolicy;
 
+  /// No description provided for @viewPolicyOnGithub.
+  ///
+  /// In zh, this message translates to:
+  /// **'在 GitHub 上查看完整政策'**
+  String get viewPolicyOnGithub;
+
   /// No description provided for @termsUpdateTitle.
   ///
   /// In zh, this message translates to:
