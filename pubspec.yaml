@@ -94,6 +94,8 @@ flutter:
     - assets/icon/
     - assets/map.svg
     - assets/map_data.json
+    - PRIVACY.zh-TW.md
+    - PRIVACY.en.md
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -76,7 +76,8 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
     final lastAcceptedDate = prefs.getString('accepted_terms_date') ?? '';
 
     // 本地政策版本比對：未同意過、或政策版本已更新時，顯示同意閘門。
-    if (lastAcceptedDate == kPrivacyPolicyVersion || !mounted) return;
+    final currentVersion = await loadPrivacyPolicyVersion();
+    if (lastAcceptedDate == currentVersion || !mounted) return;
 
     if (lastAcceptedDate.isNotEmpty) {
       await PrivacyPolicyScreen.showUpdateAlert(context);

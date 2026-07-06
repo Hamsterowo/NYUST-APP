@@ -4,11 +4,11 @@ import 'package:flutter/services.dart';
 import '../data/privacy_policy.dart';
 import '../l10n/app_localizations.dart';
 
-/// 本地隱私權政策頁面（完全內嵌、無需連網）。
+/// 本地隱私權政策頁面：渲染打包進 assets 的 `PRIVACY.*.md`（無需連網）。
 ///
 /// 當 [showAgreementButtons] 為 true 時作為首次啟動的同意閘門：底部顯示
-/// 「拒絕並退出」「同意」，同意後回傳目前政策的版本鍵（[PrivacyPolicy.lastUpdated]）。
-class PrivacyPolicyScreen extends StatelessWidget {
+/// 「拒絕並退出」「同意」，同意後回傳目前政策的版本鍵（[PrivacyPolicy.version]）。
+class PrivacyPolicyScreen extends StatefulWidget {
   final bool showAgreementButtons;
 
   const PrivacyPolicyScreen({super.key, this.showAgreementButtons = false});
@@ -145,11 +145,32 @@ class PrivacyPolicyScreen extends StatelessWidget {
   }
 
   @override
+  State<PrivacyPolicyScreen> createState() => _PrivacyPolicyScreenState();
+}
+
+class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
+  late Future<PrivacyPolicy> _policyFuture;
+  PrivacyPolicy? _policy;
+  String? _loadedLang;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final lang = Localizations.localeOf(context).languageCode;
+    if (_loadedLang != lang) {
+      _loadedLang = lang;
+      _policy = null;
+      _policyFuture = loadPrivacyPolicy(lang)
+        ..then((p) {
+          if (mounted) setState(() => _policy = p);
+        });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final lang = Localizations.localeOf(context).languageCode;
-    final policy = privacyPolicyFor(lang);
 
     return Scaffold(
       appBar: AppBar(
@@ -158,9 +179,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         scrolledUnderElevation: 0,
-        automaticallyImplyLeading: !showAgreementButtons,
+        automaticallyImplyLeading: !widget.showAgreementButtons,
       ),
-      bottomNavigationBar: showAgreementButtons
+      bottomNavigationBar: widget.showAgreementButtons
           ? SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
@@ -182,8 +203,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: FilledButton(
-                        onPressed: () =>
-                            Navigator.pop(context, policy.lastUpdated),
+                        onPressed: _policy == null
+                            ? null
+                            : () => Navigator.pop(context, _policy!.version),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -195,53 +217,115 @@ class PrivacyPolicyScreen extends StatelessWidget {
               ),
             )
           : null,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final block in policy.blocks)
-              block.isHeader
-                  ? _buildSectionTitle(block.text, context)
-                  : _buildParagraph(block.text, context),
-            const SizedBox(height: 32),
-            Center(
-              child: Text(
-                AppLocalizations.of(
-                  context,
-                ).termsLastUpdated(policy.lastUpdated),
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.outline,
-                ),
+      body: FutureBuilder<PrivacyPolicy>(
+        future: _policyFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+              child: Icon(
+                Icons.error_outline,
+                size: 48,
+                color: colorScheme.error,
               ),
+            );
+          }
+
+          final policy = snapshot.data!;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
             ),
-            const SizedBox(height: 32),
-          ],
-        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final block in policy.blocks) _buildBlock(block, context),
+                const SizedBox(height: 32),
+                Center(
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).termsLastUpdated(policy.lastUpdated),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.outline,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 12),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
+  Widget _buildBlock(PolicyBlock block, BuildContext context) {
+    switch (block.type) {
+      case PolicyBlockType.header:
+        return Padding(
+          padding: const EdgeInsets.only(top: 24, bottom: 12),
+          child: Text(
+            block.spans.map((s) => s.text).join(),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        );
+      case PolicyBlockType.subheader:
+        return Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          child: Text(
+            block.spans.map((s) => s.text).join(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        );
+      case PolicyBlockType.bullet:
+        return Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('•  ', style: _paragraphStyle(context)),
+              Expanded(child: _buildRichText(block.spans, context)),
+            ],
+          ),
+        );
+      case PolicyBlockType.paragraph:
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _buildRichText(block.spans, context),
+        );
+    }
+  }
+
+  TextStyle? _paragraphStyle(BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium?.copyWith(
+      height: 1.8,
+      fontSize: 15,
+      color: Theme.of(context).colorScheme.onSurface,
     );
   }
 
-  Widget _buildParagraph(String text, BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        height: 1.8,
-        fontSize: 15,
-        color: Theme.of(context).colorScheme.onSurface,
+  Widget _buildRichText(List<PolicySpan> spans, BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        style: _paragraphStyle(context),
+        children: [
+          for (final span in spans)
+            TextSpan(
+              text: span.text,
+              style: span.bold
+                  ? const TextStyle(fontWeight: FontWeight.w700)
+                  : null,
+            ),
+        ],
       ),
     );
   }
