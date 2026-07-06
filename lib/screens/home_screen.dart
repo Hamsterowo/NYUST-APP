@@ -108,50 +108,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required ColorScheme colorScheme,
   }) {
     final isSelected = index == currentIndex;
-    final activeColor = const Color.fromARGB(255, 45, 177, 163);
+    final activeColor = const Color(0xFF14B8A6);
     final inactiveColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final splashFillColor = isDark
-        ? const Color(0xFF1E293B)
-        : const Color(0xFFF0FDFA);
 
     return Expanded(
-      child: InkWell(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           ref.read(navIndexProvider.notifier).state = index;
         },
-        borderRadius: BorderRadius.circular(24),
-        splashColor: splashFillColor,
-        hoverColor: splashFillColor,
-        focusColor: splashFillColor,
-        highlightColor: Colors.transparent,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                child: AnimatedScale(
-                  scale: isSelected ? 1.15 : 1.0,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  child: Icon(
-                    isSelected ? activeIcon : inactiveIcon,
-                    color: isSelected ? activeColor : inactiveColor,
-                    size: 24,
-                  ),
+              AnimatedScale(
+                scale: isSelected ? 1.15 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                child: Icon(
+                  isSelected ? activeIcon : inactiveIcon,
+                  color: isSelected ? activeColor : inactiveColor,
+                  size: 24,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(
                   fontFamily: 'JFOpenHuninn',
                   fontSize: 10,
+                  height: 1.0,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? activeColor : inactiveColor,
                 ),
@@ -192,6 +179,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final colorScheme = Theme.of(context).colorScheme;
 
+    const navItems = <_NavItemData>[
+      _NavItemData(Icons.dashboard, Icons.dashboard_outlined),
+      _NavItemData(Icons.table_chart, Icons.table_chart_outlined),
+      _NavItemData(Icons.info, Icons.info_outline),
+      _NavItemData(Icons.calendar_month, Icons.calendar_month_outlined),
+      _NavItemData(Icons.settings, Icons.settings_outlined),
+    ];
+    final labels = [
+      AppLocalizations.of(context).navOverview,
+      AppLocalizations.of(context).navSchedule,
+      AppLocalizations.of(context).navInfo,
+      AppLocalizations.of(context).navCalendar,
+      AppLocalizations.of(context).navSettings,
+    ];
+
     return Scaffold(
       body: IndexedStack(index: currentIndex, children: _screens),
       bottomNavigationBar: SafeArea(
@@ -214,59 +216,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               width: 1.0,
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildNavItem(
-                context: context,
-                index: 0,
-                activeIcon: Icons.dashboard,
-                inactiveIcon: Icons.dashboard_outlined,
-                label: AppLocalizations.of(context).navOverview,
-                currentIndex: currentIndex,
-                colorScheme: colorScheme,
-              ),
-              _buildNavItem(
-                context: context,
-                index: 1,
-                activeIcon: Icons.table_chart,
-                inactiveIcon: Icons.table_chart_outlined,
-                label: AppLocalizations.of(context).navSchedule,
-                currentIndex: currentIndex,
-                colorScheme: colorScheme,
-              ),
-              _buildNavItem(
-                context: context,
-                index: 2,
-                activeIcon: Icons.info,
-                inactiveIcon: Icons.info_outline,
-                label: AppLocalizations.of(context).navInfo,
-                currentIndex: currentIndex,
-                colorScheme: colorScheme,
-              ),
-              _buildNavItem(
-                context: context,
-                index: 3,
-                activeIcon: Icons.calendar_month,
-                inactiveIcon: Icons.calendar_month_outlined,
-                label: AppLocalizations.of(context).navCalendar,
-                currentIndex: currentIndex,
-                colorScheme: colorScheme,
-              ),
-              _buildNavItem(
-                context: context,
-                index: 4,
-                activeIcon: Icons.settings,
-                inactiveIcon: Icons.settings_outlined,
-                label: AppLocalizations.of(context).navSettings,
-                currentIndex: currentIndex,
-                colorScheme: colorScheme,
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = constraints.maxWidth / navItems.length;
+              // The sliding "pill" background behind the selected tab.
+              const pillHInset = 10.0;
+              const pillVInset = 8.0;
+              return Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.easeOutCubic,
+                    top: pillVInset,
+                    bottom: pillVInset,
+                    left: currentIndex * itemWidth + pillHInset,
+                    width: itemWidth - pillHInset * 2,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colorScheme.onSurface.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < navItems.length; i++)
+                        _buildNavItem(
+                          context: context,
+                          index: i,
+                          activeIcon: navItems[i].active,
+                          inactiveIcon: navItems[i].inactive,
+                          label: labels[i],
+                          currentIndex: currentIndex,
+                          colorScheme: colorScheme,
+                        ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
+}
+
+class _NavItemData {
+  final IconData active;
+  final IconData inactive;
+  const _NavItemData(this.active, this.inactive);
 }
