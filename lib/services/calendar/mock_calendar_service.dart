@@ -9,8 +9,7 @@ class MockCalendarService implements CalendarService {
   Future<Map<String, dynamic>> getCalendarEvents(
     String year, {
     String? lang,
-  }) async =>
-      MockData.calendarEvents(year, lang: lang);
+  }) async => MockData.calendarEvents(year, lang: lang);
 
   @override
   Future<Map<String, dynamic>> getHolidays(int year, {String? lang}) async =>
@@ -20,6 +19,5 @@ class MockCalendarService implements CalendarService {
   Future<Map<String, dynamic>> getCalendarCombined(
     String year, {
     String? lang,
-  }) async =>
-      MockData.calendarCombined(year, lang: lang);
+  }) async => MockData.calendarCombined(year, lang: lang);
 }
