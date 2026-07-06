@@ -36,16 +36,18 @@ jobs:
           storeFile=upload-keystore.jks
           EOF
 
-      - name: Build release APK
+      - name: Build release APK & AAB
         run: |
-          flutter build apk --release \
-            --dart-define=USE_FIREBASE=true
+          flutter build apk --release --dart-define=USE_FIREBASE=true
+          flutter build appbundle --release --dart-define=USE_FIREBASE=true
 
-      - name: Upload APK artifact
+      - name: Upload APK & AAB artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-release-bundles
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       # 推 tag 時，建立「草稿」GitHub Release 並附上 APK（永久下載連結）。
@@ -58,3 +60,14 @@ jobs:
           files: build/app/outputs/flutter-apk/app-release.apk
           generate_release_notes: true
           draft: true
+
+      # 當推 v* 標籤時，自動發布至 Google Play Console (內部測試軌道)
+      - name: Upload to Google Play (Internal Testing)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: r0adrunner/upload-google-play@v1
+        with:
+          serviceAccountJsonRaw: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: tw.hamster.yuntool
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+
