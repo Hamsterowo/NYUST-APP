@@ -6,7 +6,7 @@
 library;
 
 /// 隱私權政策版本鍵（與顯示語系無關，用於同意狀態比對）。
-const String kPrivacyPolicyVersion = '2026-07-05';
+const String kPrivacyPolicyVersion = '2026-07-06';
 
 /// 單一內容區塊：標題或段落。
 class PolicyBlock {
@@ -48,13 +48,16 @@ const PrivacyPolicy _privacyPolicyZh = PrivacyPolicy(
       '（一）雲科大帳號密碼\n'
       '您的學號與密碼僅用於代您向雲科大官方系統（單一入口服務網）進行身分驗證：密碼僅存在於'
       '登入當下的記憶體中，不會寫入裝置本機儲存空間，也不會保存於任何伺服器；帳號密碼僅直接'
-      '傳送至雲科大官方伺服器（webapp.yuntech.edu.tw）進行驗證，絕不會傳送至任何第三方。',
+      '傳送至雲科大官方伺服器（webapp.yuntech.edu.tw）進行驗證，絕不會傳送至任何第三方。'
+      '登入成功後，雲科大核發的登入憑證（Cookie）會以加密方式儲存於裝置的安全儲存區'
+      '（Secure Storage），供自動登入與背景成績檢查使用；登出即會清除。',
     ),
     PolicyBlock.paragraph(
       '（二）學業與個人資料\n'
       '通過身分驗證後，本應用程式會從雲科大系統取得您的課表、成績、畢業學分及個人基本資料等'
-      '學業相關資訊。這些資料會以加密方式快取於您裝置本機的安全儲存區（Secure Storage），'
-      '用以減少重複的網路請求，不會被傳送至裝置以外的任何地方。',
+      '學業相關資訊，並僅快取於您的裝置本機以減少重複的網路請求：課表、成績、畢業審核等'
+      '學術資料存於本機資料庫，個人基本資料與成績比對快照則以加密方式存於安全儲存區'
+      '（Secure Storage）。這些資料不會被傳送至裝置以外的任何地方。',
     ),
     PolicyBlock.paragraph(
       '（三）成績更新背景通知\n'
@@ -74,9 +77,10 @@ const PrivacyPolicy _privacyPolicyZh = PrivacyPolicy(
     ),
     PolicyBlock.header('三、資料之保護'),
     PolicyBlock.paragraph(
-      '您的帳號密碼、學業紀錄、偏好設定皆僅儲存於您的裝置本機，帳號密碼且從不落地儲存。'
-      '本應用程式沒有任何由開發團隊營運的後端伺服器，不蒐集、不儲存、不傳輸您的任何個人或學業資料。'
-      '您可以隨時透過清除應用程式資料或解除安裝，刪除裝置上儲存的所有資料。',
+      '您的學業紀錄、個人基本資料、登入憑證與偏好設定皆僅儲存於您的裝置本機，'
+      '密碼從不落地儲存。本應用程式沒有任何由開發團隊營運的後端伺服器，'
+      '不蒐集、不儲存、不傳輸您的任何個人或學業資料。'
+      '您可以隨時透過登出、清除應用程式資料或解除安裝，刪除裝置上儲存的所有資料。',
     ),
     PolicyBlock.header('四、與第三方共用個人資料之政策'),
     PolicyBlock.paragraph(
@@ -146,14 +150,20 @@ const PrivacyPolicy _privacyPolicyEn = PrivacyPolicy(
       'YunTech\'s official system (the SSO portal) on your behalf. The password '
       'exists only in memory during login; it is never written to device storage or '
       'saved on any server. Credentials are sent directly and only to YunTech\'s '
-      'official server (webapp.yuntech.edu.tw), never to any third party.',
+      'official server (webapp.yuntech.edu.tw), never to any third party. After a '
+      'successful login, the session credential (cookie) issued by YunTech is '
+      'stored encrypted in your device\'s secure storage for automatic login and '
+      'background grade checks, and is cleared when you log out.',
     ),
     PolicyBlock.paragraph(
       '(b) Academic and personal data\n'
       'After authentication, the app retrieves academic information such as your '
       'timetable, grades, graduation credits, and basic profile from YunTech\'s '
-      'system. This data is cached, encrypted, in your device\'s secure storage to '
-      'reduce repeated network requests, and is never sent anywhere off your device.',
+      'system, and caches it only on your device to reduce repeated network '
+      'requests: academic data (timetable, grades, graduation audit) is kept in a '
+      'local database, while your basic profile and the grade-comparison snapshot '
+      'are stored encrypted in secure storage. None of this data is ever sent '
+      'anywhere off your device.',
     ),
     PolicyBlock.paragraph(
       '(c) Background grade-update notifications\n'
@@ -178,11 +188,12 @@ const PrivacyPolicy _privacyPolicyEn = PrivacyPolicy(
     ),
     PolicyBlock.header('3. Data Protection'),
     PolicyBlock.paragraph(
-      'Your credentials, academic records, and preferences are stored only on your '
-      'device, and your password is never persisted. The app has no developer-'
-      'operated backend server and does not collect, store, or transmit any of your '
-      'personal or academic data. You can delete everything stored on your device at '
-      'any time by clearing the app\'s data or uninstalling it.',
+      'Your academic records, basic profile, session credential, and preferences '
+      'are stored only on your device, and your password is never persisted. The '
+      'app has no developer-operated backend server and does not collect, store, '
+      'or transmit any of your personal or academic data. You can delete '
+      'everything stored on your device at any time by logging out, clearing the '
+      'app\'s data, or uninstalling it.',
     ),
     PolicyBlock.header('4. Sharing Personal Data With Third Parties'),
     PolicyBlock.paragraph(
