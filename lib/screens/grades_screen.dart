@@ -5,6 +5,7 @@ import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/grade_notification_sheet.dart';
 import '../widgets/shimmer_box.dart';
 import 'course_detail_screen.dart';
 import 'web_view_screen.dart';
@@ -127,11 +128,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
           IconButton(
             icon: const Icon(Icons.notifications_active_outlined),
             tooltip: AppLocalizations.of(context).settingsGradeNotification,
-            onPressed: () {
-              Navigator.of(context).pop();
-              ref.read(navIndexProvider.notifier).state = 4;
-              ref.read(scrollToNotificationProvider.notifier).state = true;
-            },
+            // 就地開啟成績通知開關面板，不離開成績頁（修正返回鍵回不到成績頁）。
+            onPressed: () => showGradeNotificationSheet(context),
           ),
           IconButton(
             icon: const Icon(Icons.open_in_new),

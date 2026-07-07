@@ -27,9 +27,6 @@ final dataProvider = ChangeNotifierProvider<DataProvider>((ref) {
 /// 底部分頁索引（取代 NavigationProvider）。
 final navIndexProvider = StateProvider<int>((ref) => 0);
 
-/// 進入設定分頁後是否要捲動到「成績通知」設定（取代 NavigationProvider 的旗標）。
-final scrollToNotificationProvider = StateProvider<bool>((ref) => false);
-
 /// 目前是否在線上（`true` = 有網路介面）。用於離線橫幅等 UX。
 ///
 /// 初值先給 `true`，避免 App 一啟動、串流尚未回報前就閃現離線橫幅。

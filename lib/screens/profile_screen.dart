@@ -12,10 +12,9 @@ import 'privacy_policy_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
-import '../services/notification_service.dart';
 import '../services/background_service.dart';
+import '../services/grade_notification_service.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -27,7 +26,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _versionStr = '';
   bool _gradeNotificationEnabled = false;
-  final GlobalKey _notificationKey = GlobalKey();
 
   @override
   void initState() {
@@ -36,107 +34,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _loadNotificationSettings();
   }
 
-  void _triggerNativeSplash() {
-    final context = _notificationKey.currentContext;
-    if (context == null) return;
-
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-
-    final inkController = Material.of(context);
-    final splashColor = Theme.of(context).splashColor;
-    final textDirection = Directionality.of(context);
-
-    final splash = InkRipple.splashFactory.create(
-      controller: inkController,
-      referenceBox: renderBox,
-      position: Offset(renderBox.size.width / 2, renderBox.size.height / 2),
-      color: splashColor,
-      textDirection: textDirection,
-      containedInkWell: true,
-      rectCallback: () => Offset.zero & renderBox.size,
-      borderRadius: BorderRadius.zero,
-    );
-
-    splash.confirm();
-  }
-
-  void _scrollToNotificationSetting() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final targetContext = _notificationKey.currentContext;
-      if (targetContext != null) {
-        Scrollable.ensureVisible(
-          targetContext,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-        );
-      }
-
-      // Trigger standard native splash effect after scroll finishes
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          _triggerNativeSplash();
-        }
-      });
-    });
-  }
-
   Future<void> _loadNotificationSettings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _gradeNotificationEnabled =
-            prefs.getBool('grade_notification_enabled') ?? false;
-      });
-    } catch (_) {}
+    final enabled = await GradeNotificationService.isEnabled();
+    if (mounted) {
+      setState(() => _gradeNotificationEnabled = enabled);
+    }
   }
 
   void _toggleGradeNotification(bool enabled) async {
-    if (enabled) {
-      final hasPermission = await NotificationService().requestPermissions();
-      if (!hasPermission) {
-        if (mounted) {
-          showTopSnackBar(
-            context,
-            AppLocalizations.of(context).notificationPermissionDenied,
-            type: SnackBarType.warning,
-          );
-        }
-        return;
-      }
-
-      await Workmanager().registerPeriodicTask(
-        "1",
-        checkGradesTask,
-        frequency: const Duration(minutes: 30),
-        existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
-      );
-      if (kDebugMode) {
-        await Workmanager().registerOneOffTask(
-          "test_oneoff_${DateTime.now().millisecondsSinceEpoch}",
-          checkGradesTask,
+    final result = await GradeNotificationService.setEnabled(enabled);
+    if (!mounted) return;
+    switch (result) {
+      case GradeNotificationResult.permissionDenied:
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context).notificationPermissionDenied,
+          type: SnackBarType.warning,
         );
-      }
-
-      if (mounted) {
+        return;
+      case GradeNotificationResult.enabled:
         showTopSnackBar(
           context,
           AppLocalizations.of(context).settingsGradeNotificationSub,
           type: SnackBarType.success,
         );
-      }
-    } else {
-      await Workmanager().cancelByUniqueName("1");
+      case GradeNotificationResult.disabled:
+        break;
     }
-
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('grade_notification_enabled', enabled);
-    } catch (_) {}
-
-    setState(() {
-      _gradeNotificationEnabled = enabled;
-    });
+    setState(() => _gradeNotificationEnabled = enabled);
   }
 
   Future<void> _loadVersion() async {
@@ -237,14 +162,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 從成績頁的通知鈕跳來時，捲動到「成績通知」設定並播放 splash 效果。
-    ref.listen<bool>(scrollToNotificationProvider, (prev, next) {
-      if (next) {
-        ref.read(scrollToNotificationProvider.notifier).state = false;
-        _scrollToNotificationSetting();
-      }
-    });
-
     final auth = ref.watch(authProvider);
     final user = auth.user;
     final colorScheme = Theme.of(context).colorScheme;
@@ -434,7 +351,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 if (!kIsWeb) ...[
                                   const Divider(height: 1, indent: 56),
                                   ListTile(
-                                    key: _notificationKey,
                                     leading: Icon(
                                       Icons.notifications_active_outlined,
                                       color: colorScheme.onSurfaceVariant,
