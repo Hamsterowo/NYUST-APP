@@ -158,7 +158,11 @@ class CampusMapPainter extends CustomPainter {
 
           textPainter.text = TextSpan(
             text: labelText,
-            style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontFamily: 'JFOpenHuninn',
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+            ),
           );
           textPainter.layout();
           final textOffset = Offset(
@@ -169,6 +173,7 @@ class CampusMapPainter extends CustomPainter {
           textPainter.text = TextSpan(
             text: labelText,
             style: TextStyle(
+              fontFamily: 'JFOpenHuninn',
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
               foreground: Paint()
@@ -186,6 +191,7 @@ class CampusMapPainter extends CustomPainter {
             text: labelText,
             style: TextStyle(
               color: textColor,
+              fontFamily: 'JFOpenHuninn',
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
             ),
