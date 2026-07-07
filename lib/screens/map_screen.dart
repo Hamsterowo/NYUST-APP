@@ -661,6 +661,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               right: 24,
               child: FloatingActionButton.small(
                 heroTag: 'reset_zoom',
+                tooltip: AppLocalizations.of(context).mapResetView,
                 onPressed: () {
                   _animateToMatrix(Matrix4.identity());
                   _updateSelection(null);
@@ -669,7 +670,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     _searchResults = [];
                   });
                 },
-                child: const Icon(Icons.zoom_out_map),
+                child: const Icon(Icons.restart_alt),
               ),
             ),
             AnimatedPositioned(

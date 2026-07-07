@@ -589,6 +589,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mapNoDescription => '暫無此建築物之詳細介紹。';
 
   @override
+  String get mapResetView => '重置地圖檢視';
+
+  @override
   String get mapFloorPlanUnderConstruction => '平面圖建置中';
 
   @override

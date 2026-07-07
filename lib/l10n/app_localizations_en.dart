@@ -605,6 +605,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'No detailed description available for this building.';
 
   @override
+  String get mapResetView => 'Reset map view';
+
+  @override
   String get mapFloorPlanUnderConstruction => 'Coming Soon';
 
   @override

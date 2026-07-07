@@ -346,6 +346,7 @@
     }
   },
   "mapNoDescription": "No detailed description available for this building.",
+  "mapResetView": "Reset map view",
   "mapFloorPlanUnderConstruction": "Coming Soon",
   "mapFloorPlanUnavailable": "{room}: No Plan",
   "@mapFloorPlanUnavailable": {

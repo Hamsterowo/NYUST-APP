@@ -1166,6 +1166,12 @@ abstract class AppLocalizations {
   /// **'暫無此建築物之詳細介紹。'**
   String get mapNoDescription;
 
+  /// No description provided for @mapResetView.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置地圖檢視'**
+  String get mapResetView;
+
   /// No description provided for @mapFloorPlanUnderConstruction.
   ///
   /// In zh, this message translates to:
