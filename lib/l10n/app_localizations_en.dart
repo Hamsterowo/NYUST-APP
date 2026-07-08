@@ -213,7 +213,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginButton => 'Login';
 
   @override
-  String get loginFailed => 'Invalid username, password, or captcha';
+  String get loginFailed => 'Invalid username or password';
 
   @override
   String get pleaseLoginToViewSchedule =>

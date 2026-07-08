@@ -239,6 +239,56 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// 透過 App 端點（`/Token`）登入，免驗證碼。
+  Future<bool> loginViaApp(String username, String password) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Demo 帳號走 mock，與舊流程一致。
+      if (MockData.isDemoAccount(username)) {
+        _apiService.isMockMode = true;
+        _user = {
+          'success': true,
+          'user': Map<String, dynamic>.from(MockData.user),
+          'username': username,
+        };
+        await _saveUserCache(_user!);
+        _isLoading = false;
+        notifyListeners();
+        onLoginSuccess?.call();
+        return true;
+      }
+
+      final result = await _apiService.loginViaAppApi(username, password);
+
+      if (result['success'] == true) {
+        final info = await _apiService.getUserInfo();
+        _user = info;
+        _user?['username'] = username;
+
+        await _saveUserCache(_user!);
+
+        notifyListeners();
+        onLoginSuccess?.call();
+        return true;
+      } else {
+        _error = 'loginFailed';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      final offline = !await ConnectivityService.instance.checkOnline();
+      _error = offline ? 'loginNoNetwork' : 'loginFailed';
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     _apiService.isMockMode = false;
     await _apiService.logout();

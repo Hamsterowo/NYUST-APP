@@ -102,7 +102,7 @@
   "loginCaptchaLabel": "驗證碼",
   "loginCaptchaRefreshTooltip": "重新整理驗證碼",
   "loginButton": "登入",
-  "loginFailed": "帳密或驗證碼錯誤",
+  "loginFailed": "帳號或密碼錯誤",
   "pleaseLoginToViewSchedule": "請在此登入以查看課表",
   "mapModeEnabled": "已開啟地圖定位模式，點擊課程直接前往地圖",
   "mapModeDisabled": "已關閉地圖定位模式",

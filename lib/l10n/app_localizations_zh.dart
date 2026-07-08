@@ -207,7 +207,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginButton => '登入';
 
   @override
-  String get loginFailed => '帳密或驗證碼錯誤';
+  String get loginFailed => '帳號或密碼錯誤';
 
   @override
   String get pleaseLoginToViewSchedule => '請在此登入以查看課表';

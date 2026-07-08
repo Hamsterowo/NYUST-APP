@@ -102,7 +102,7 @@
   "loginCaptchaLabel": "Captcha",
   "loginCaptchaRefreshTooltip": "Refresh Captcha",
   "loginButton": "Login",
-  "loginFailed": "Invalid username, password, or captcha",
+  "loginFailed": "Invalid username or password",
   "pleaseLoginToViewSchedule": "Please log in here to view your schedule.",
   "mapModeEnabled": "Map positioning mode enabled. Tap a course to view on map.",
   "mapModeDisabled": "Map positioning mode disabled",
