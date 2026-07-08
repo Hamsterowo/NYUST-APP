@@ -52,6 +52,12 @@ class ApiService {
     requestVerificationToken,
   );
 
+  /// 透過雲科 App 端點登入（免驗證碼）。與 [login] 並存。
+  Future<Map<String, dynamic>> loginViaAppApi(
+    String username,
+    String password,
+  ) => _factory.authService.loginViaAppApi(username, password);
+
   Future<Map<String, dynamic>> getUserInfo() =>
       _factory.authService.getUserInfo();
 

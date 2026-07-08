@@ -24,6 +24,18 @@ class MockAuthService implements AuthService {
   }
 
   @override
+  Future<Map<String, dynamic>> loginViaAppApi(
+    String username,
+    String password,
+  ) async {
+    return {
+      'success': true,
+      'accessToken': 'mock-access-token',
+      'userType': 'S',
+    };
+  }
+
+  @override
   Future<Map<String, dynamic>> getUserInfo() async {
     return {'success': true, 'user': Map<String, dynamic>.from(MockData.user)};
   }
