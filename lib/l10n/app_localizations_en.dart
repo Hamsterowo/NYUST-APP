@@ -346,6 +346,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yunReportRetry => 'Retry';
 
   @override
+  String get yunReportNoteDisplay =>
+      'For on-screen verification only. If you have any questions, please contact the Registration Section of the Office of Academic Affairs.';
+
+  @override
+  String get yunReportNotePaper =>
+      'For a paper copy, please apply through the Registration Section of the Office of Academic Affairs. Do not print this document yourself.';
+
+  @override
   String get calendarTitle => 'Calendar';
 
   @override

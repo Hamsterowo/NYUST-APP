@@ -698,6 +698,18 @@ abstract class AppLocalizations {
   /// **'重試'**
   String get yunReportRetry;
 
+  /// No description provided for @yunReportNoteDisplay.
+  ///
+  /// In zh, this message translates to:
+  /// **'僅提供顯示證明使用，如有疑問請洽教務處註冊組。'**
+  String get yunReportNoteDisplay;
+
+  /// No description provided for @yunReportNotePaper.
+  ///
+  /// In zh, this message translates to:
+  /// **'如需紙本，請向教務處註冊組提出申請，勿擅自列印。'**
+  String get yunReportNotePaper;
+
   /// No description provided for @calendarTitle.
   ///
   /// In zh, this message translates to:

@@ -179,6 +179,8 @@
   "infoYunReportDesc": "檢視本學期在學證明",
   "yunReportUnavailable": "無法取得在學證明，請先完成註冊，或稍後再試。",
   "yunReportRetry": "重試",
+  "yunReportNoteDisplay": "僅提供顯示證明使用，如有疑問請洽教務處註冊組。",
+  "yunReportNotePaper": "如需紙本，請向教務處註冊組提出申請，勿擅自列印。",
 
   "calendarTitle": "行事曆",
   "legendTitle": "行事曆圖示說明",

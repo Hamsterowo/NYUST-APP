@@ -331,6 +331,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get yunReportRetry => '重試';
 
   @override
+  String get yunReportNoteDisplay => '僅提供顯示證明使用，如有疑問請洽教務處註冊組。';
+
+  @override
+  String get yunReportNotePaper => '如需紙本，請向教務處註冊組提出申請，勿擅自列印。';
+
+  @override
   String get calendarTitle => '行事曆';
 
   @override

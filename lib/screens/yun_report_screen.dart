@@ -96,6 +96,63 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
         ),
       );
     }
-    return PdfViewPinch(controller: _controller!);
+    return Column(
+      children: [
+        Expanded(child: PdfViewPinch(controller: _controller!)),
+        _buildNote(l),
+      ],
+    );
+  }
+
+  Widget _buildNote(AppLocalizations l) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        border: Border(
+          top: BorderSide(color: colorScheme.outlineVariant, width: 1),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              size: 16,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.yunReportNoteDisplay,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.4,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l.yunReportNotePaper,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.4,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
