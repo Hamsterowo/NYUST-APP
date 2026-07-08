@@ -35,9 +35,7 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
     if (widget.injectCookies) {
       await _injectCookies(controller);
     }
-    await controller.loadUrl(
-      urlRequest: URLRequest(url: WebUri(widget.url)),
-    );
+    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(widget.url)));
   }
 
   Future<void> _injectCookies(InAppWebViewController controller) async {
@@ -174,9 +172,7 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
           children: [
             if (!_hasError)
               InAppWebView(
-                initialSettings: InAppWebViewSettings(
-                  javaScriptEnabled: true,
-                ),
+                initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
                 onWebViewCreated: (controller) {
                   _controller = controller;
                   _loadInitial(controller);
