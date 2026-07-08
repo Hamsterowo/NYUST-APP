@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'auth_provider.dart';
 import 'data_provider.dart';
 import '../services/connectivity_service.dart';
+import '../services/grade_notification_service.dart';
 
 /// Stage 5：DI 由 `provider` 套件全面改吃 Riverpod。
 ///
@@ -26,6 +27,32 @@ final dataProvider = ChangeNotifierProvider<DataProvider>((ref) {
 
 /// 底部分頁索引（取代 NavigationProvider）。
 final navIndexProvider = StateProvider<int>((ref) => 0);
+
+/// 成績通知（背景檢查）是否啟用。設定分頁與成績頁的就地開關面板共用此狀態，
+/// 任一處切換後另一處會即時同步（不需重開 App）。
+final gradeNotificationEnabledProvider =
+    NotifierProvider<GradeNotificationEnabledNotifier, bool>(
+      GradeNotificationEnabledNotifier.new,
+    );
+
+class GradeNotificationEnabledNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    _load();
+    return false; // 載入前預設關閉；讀到偏好設定後再更新。
+  }
+
+  Future<void> _load() async {
+    state = await GradeNotificationService.isEnabled();
+  }
+
+  /// 切換啟用狀態；回傳結果供 UI 顯示提示（例如權限被拒）。
+  Future<GradeNotificationResult> setEnabled(bool value) async {
+    final result = await GradeNotificationService.setEnabled(value);
+    state = result == GradeNotificationResult.permissionDenied ? false : value;
+    return result;
+  }
+}
 
 /// 目前是否在線上（`true` = 有網路介面）。用於離線橫幅等 UX。
 ///

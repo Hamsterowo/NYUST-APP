@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
+import '../providers/providers.dart';
 import '../services/grade_notification_service.dart';
 import '../utils/top_snack_bar.dart';
 
 /// 就地開關「成績更新通知」的底部面板（供成績頁右上角鈴鐺使用），
 /// 讓使用者不必離開成績頁、也不會產生返回鍵無法回上頁的問題。
+///
+/// 狀態透過 [gradeNotificationEnabledProvider] 共享，與設定分頁即時同步。
 Future<void> showGradeNotificationSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
@@ -14,41 +18,14 @@ Future<void> showGradeNotificationSheet(BuildContext context) {
   );
 }
 
-class _GradeNotificationSheet extends StatefulWidget {
+class _GradeNotificationSheet extends ConsumerWidget {
   const _GradeNotificationSheet();
 
-  @override
-  State<_GradeNotificationSheet> createState() =>
-      _GradeNotificationSheetState();
-}
-
-class _GradeNotificationSheetState extends State<_GradeNotificationSheet> {
-  bool? _enabled; // null = 載入中
-  bool _busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final value = await GradeNotificationService.isEnabled();
-    if (mounted) setState(() => _enabled = value);
-  }
-
-  Future<void> _toggle(bool value) async {
-    if (_busy) return;
-    setState(() => _busy = true);
-    final result = await GradeNotificationService.setEnabled(value);
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _enabled = result == GradeNotificationResult.permissionDenied
-          ? false
-          : value;
-    });
-    if (result == GradeNotificationResult.permissionDenied) {
+  Future<void> _toggle(BuildContext context, WidgetRef ref, bool value) async {
+    final result = await ref
+        .read(gradeNotificationEnabledProvider.notifier)
+        .setEnabled(value);
+    if (result == GradeNotificationResult.permissionDenied && context.mounted) {
       showTopSnackBar(
         context,
         AppLocalizations.of(context).notificationPermissionDenied,
@@ -58,9 +35,10 @@ class _GradeNotificationSheetState extends State<_GradeNotificationSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final enabled = ref.watch(gradeNotificationEnabledProvider);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
@@ -83,14 +61,10 @@ class _GradeNotificationSheetState extends State<_GradeNotificationSheet> {
                     ),
                   ),
                 ),
-                if (_enabled == null || _busy)
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else
-                  Switch.adaptive(value: _enabled!, onChanged: _toggle),
+                Switch.adaptive(
+                  value: enabled,
+                  onChanged: (value) => _toggle(context, ref, value),
+                ),
               ],
             ),
             const SizedBox(height: 8),

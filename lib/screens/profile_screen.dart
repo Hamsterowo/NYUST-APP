@@ -25,24 +25,17 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _versionStr = '';
-  bool _gradeNotificationEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
-    _loadNotificationSettings();
-  }
-
-  Future<void> _loadNotificationSettings() async {
-    final enabled = await GradeNotificationService.isEnabled();
-    if (mounted) {
-      setState(() => _gradeNotificationEnabled = enabled);
-    }
   }
 
   void _toggleGradeNotification(bool enabled) async {
-    final result = await GradeNotificationService.setEnabled(enabled);
+    final result = await ref
+        .read(gradeNotificationEnabledProvider.notifier)
+        .setEnabled(enabled);
     if (!mounted) return;
     switch (result) {
       case GradeNotificationResult.permissionDenied:
@@ -51,7 +44,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           AppLocalizations.of(context).notificationPermissionDenied,
           type: SnackBarType.warning,
         );
-        return;
       case GradeNotificationResult.enabled:
         showTopSnackBar(
           context,
@@ -61,7 +53,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       case GradeNotificationResult.disabled:
         break;
     }
-    setState(() => _gradeNotificationEnabled = enabled);
   }
 
   Future<void> _loadVersion() async {
@@ -166,6 +157,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = auth.user;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final gradeNotifEnabled = ref.watch(gradeNotificationEnabledProvider);
 
     if (!auth.isInitialized) {
       return Scaffold(
@@ -364,12 +356,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       scale: 0.8, // 縮小 20%
                                       alignment: Alignment.centerRight, // 靠右對齊
                                       child: Switch.adaptive(
-                                        value: _gradeNotificationEnabled,
+                                        value: gradeNotifEnabled,
                                         onChanged: _toggleGradeNotification,
                                       ),
                                     ),
                                     onTap: () => _toggleGradeNotification(
-                                      !_gradeNotificationEnabled,
+                                      !gradeNotifEnabled,
                                     ),
                                   ),
                                 ],
