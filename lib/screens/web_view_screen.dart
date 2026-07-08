@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
 
@@ -22,87 +22,41 @@ class AppWebViewScreen extends ConsumerStatefulWidget {
 }
 
 class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
-  late final WebViewController _controller;
+  InAppWebViewController? _controller;
   int _progress = 0;
   bool _isLoading = true;
   bool _hasError = false;
 
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            if (mounted) {
-              setState(() {
-                _progress = progress;
-              });
-            }
-          },
-          onPageStarted: (String url) {
-            if (mounted) {
-              setState(() {
-                _isLoading = true;
-                _hasError = false;
-              });
-            }
-          },
-          onPageFinished: (String url) {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-              });
-            }
-          },
-          onWebResourceError: (WebResourceError error) {
-            debugPrint(
-              "WebView Error: code=${error.errorCode}, description=${error.description}, type=${error.errorType}, url=${error.url}, isForMainFrame=${error.isForMainFrame}",
-            );
-            if (error.description.contains("net::ERR_ABORTED")) return;
-
-            // Only trigger error screen if the error is for the main page frame
-            if (error.isForMainFrame ?? true) {
-              if (mounted) {
-                setState(() {
-                  _hasError = true;
-                  _isLoading = false;
-                });
-              }
-            }
-          },
-        ),
-      );
-
-    _initWebView();
-  }
-
-  Future<void> _initWebView() async {
+  /// Injects the app's session cookies into the WebView before loading, then
+  /// kicks off the initial page load. Cookies are set via the global
+  /// [CookieManager] so this must complete before the first request is made,
+  /// otherwise the portal page would render logged-out.
+  Future<void> _loadInitial(InAppWebViewController controller) async {
     if (widget.injectCookies) {
-      await _injectCookies();
+      await _injectCookies(controller);
     }
-    if (mounted) {
-      _controller.loadRequest(Uri.parse(widget.url));
-    }
+    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(widget.url)));
   }
 
-  Future<void> _injectCookies() async {
+  Future<void> _injectCookies(InAppWebViewController controller) async {
     try {
       final auth = ref.read(authProvider);
       final uri = Uri.parse(widget.url);
       final cookies = await auth.api.getCookiesForUri(uri);
 
-      final cookieManager = WebViewCookieManager();
-      for (var cookie in cookies) {
+      final cookieManager = CookieManager.instance();
+      for (final cookie in cookies) {
         await cookieManager.setCookie(
-          WebViewCookie(
-            name: cookie.name,
-            value: cookie.value,
-            domain: cookie.domain ?? uri.host,
-            path: cookie.path ?? '/',
-          ),
+          url: WebUri.uri(uri),
+          name: cookie.name,
+          value: cookie.value,
+          domain: cookie.domain,
+          path: cookie.path ?? '/',
+          isSecure: cookie.secure,
+          isHttpOnly: cookie.httpOnly,
+          expiresDate: cookie.expires?.millisecondsSinceEpoch,
+          // Needed so cookies land in the shared store on older iOS (< 11).
+          webViewController: controller,
         );
       }
     } catch (e) {
@@ -118,8 +72,9 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
       canPop: false,
       onPopInvoked: (didPop) async {
         if (didPop) return;
-        if (await _controller.canGoBack()) {
-          await _controller.goBack();
+        final controller = _controller;
+        if (controller != null && await controller.canGoBack()) {
+          await controller.goBack();
         } else {
           if (context.mounted) {
             Navigator.of(context).pop();
@@ -132,8 +87,9 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
-              if (await _controller.canGoBack()) {
-                await _controller.goBack();
+              final controller = _controller;
+              if (controller != null && await controller.canGoBack()) {
+                await controller.goBack();
               } else {
                 Navigator.of(context).pop();
               }
@@ -142,12 +98,12 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () => _controller.reload(),
+              onPressed: () => _controller?.reload(),
             ),
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               onSelected: (value) async {
-                final currentUrl = await _controller.currentUrl();
+                final currentUrl = (await _controller?.getUrl())?.toString();
                 if (currentUrl == null || currentUrl.isEmpty) return;
 
                 if (value == 'open_in_browser') {
@@ -214,7 +170,54 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
         ),
         body: Stack(
           children: [
-            if (!_hasError) WebViewWidget(controller: _controller),
+            if (!_hasError)
+              InAppWebView(
+                initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
+                onWebViewCreated: (controller) {
+                  _controller = controller;
+                  _loadInitial(controller);
+                },
+                onProgressChanged: (controller, progress) {
+                  if (mounted) {
+                    setState(() {
+                      _progress = progress;
+                    });
+                  }
+                },
+                onLoadStart: (controller, url) {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = true;
+                      _hasError = false;
+                    });
+                  }
+                },
+                onLoadStop: (controller, url) {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                },
+                onReceivedError: (controller, request, error) {
+                  debugPrint(
+                    "WebView Error: type=${error.type}, description=${error.description}, url=${request.url}, isForMainFrame=${request.isForMainFrame}",
+                  );
+                  // Ignore aborted loads (e.g. redirects / user navigation).
+                  if (error.type == WebResourceErrorType.CANCELLED) return;
+                  if (error.description.contains("net::ERR_ABORTED")) return;
+
+                  // Only trigger error screen if the error is for the main page frame
+                  if (request.isForMainFrame ?? true) {
+                    if (mounted) {
+                      setState(() {
+                        _hasError = true;
+                        _isLoading = false;
+                      });
+                    }
+                  }
+                },
+              ),
             if (_hasError)
               Center(
                 child: Column(
@@ -237,7 +240,12 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
                           _hasError = false;
                           _isLoading = true;
                         });
-                        _controller.reload();
+                        final controller = _controller;
+                        if (controller != null) {
+                          controller.loadUrl(
+                            urlRequest: URLRequest(url: WebUri(widget.url)),
+                          );
+                        }
                       },
                       child: Text(AppLocalizations.of(context).webViewRefresh),
                     ),
