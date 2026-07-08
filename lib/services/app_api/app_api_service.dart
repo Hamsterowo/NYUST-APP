@@ -115,8 +115,9 @@ class AppApiService {
   }
 
   Map<String, String> _commonHeaders(String userId) => {
-    'X-User-App-Platform':
-        defaultTargetPlatform == TargetPlatform.iOS ? 'iOS' : 'Android',
+    'X-User-App-Platform': defaultTargetPlatform == TargetPlatform.iOS
+        ? 'iOS'
+        : 'Android',
     'X-User-App-Version-Name': _appVersion,
     'X-User-Nonce': YuntechAppCrypto.buildNonce(
       userId: userId,
