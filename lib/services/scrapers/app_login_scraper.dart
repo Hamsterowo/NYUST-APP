@@ -49,8 +49,9 @@ class AppLoginScraper extends BaseScraper {
           contentType: Headers.formUrlEncodedContentType,
           responseType: ResponseType.json,
           headers: {
-            'X-User-App-Platform':
-                defaultTargetPlatform == TargetPlatform.iOS ? 'iOS' : 'Android',
+            'X-User-App-Platform': defaultTargetPlatform == TargetPlatform.iOS
+                ? 'iOS'
+                : 'Android',
             'X-User-App-Version-Name': appVersion,
             'X-User-Nonce': nonce,
             'Accept': 'application/json',

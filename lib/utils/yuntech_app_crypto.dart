@@ -38,27 +38,26 @@ class YuntechAppCrypto {
     required String appVersion,
     DateTime? now,
   }) {
-    final ts =
-        (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch ~/ 1000;
-    final plain =
-        'appid=$_appId&userid=$userId&ts=$ts&version=$appVersion';
+    final ts = (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch ~/ 1000;
+    final plain = 'appid=$_appId&userid=$userId&ts=$ts&version=$appVersion';
 
     final derived = _pbkdf2(_aesKey, _aesSalt, 1000, 32);
     final key = Uint8List.sublistView(derived, 0, 16);
     final iv = Uint8List.sublistView(derived, 16, 32);
 
-    final cipher = PaddedBlockCipherImpl(
-      PKCS7Padding(),
-      CBCBlockCipher(AESEngine()),
-    )..init(
-      true,
-      PaddedBlockCipherParameters<CipherParameters, CipherParameters>(
-        ParametersWithIV<KeyParameter>(KeyParameter(key), iv),
-        null,
-      ),
-    );
+    final cipher =
+        PaddedBlockCipherImpl(PKCS7Padding(), CBCBlockCipher(AESEngine()))
+          ..init(
+            true,
+            PaddedBlockCipherParameters<CipherParameters, CipherParameters>(
+              ParametersWithIV<KeyParameter>(KeyParameter(key), iv),
+              null,
+            ),
+          );
 
-    return base64.encode(cipher.process(Uint8List.fromList(utf8.encode(plain))));
+    return base64.encode(
+      cipher.process(Uint8List.fromList(utf8.encode(plain))),
+    );
   }
 
   static Uint8List _pbkdf2(
