@@ -11,12 +11,6 @@ abstract interface class AuthService {
     String verificationToken,
   );
 
-  /// 透過雲科 App 端點（`MobileAppService/Token`）登入，**不需驗證碼**。
-  ///
-  /// 成功時回傳含 `accessToken` 的 map；此登入同時會取得 `.YunTechSSO` cookie，
-  /// 故登入後既有的網頁爬蟲仍可運作。與 [login] 並存，不取代之。
-  Future<Map<String, dynamic>> loginViaAppApi(String username, String password);
-
   /// 取得目前登入使用者的資訊。
   Future<Map<String, dynamic>> getUserInfo();
 

@@ -213,7 +213,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginButton => 'Login';
 
   @override
-  String get loginFailed => 'Invalid username or password';
+  String get loginFailed => 'Invalid username, password, or captcha';
 
   @override
   String get pleaseLoginToViewSchedule =>
@@ -330,6 +330,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get infoMapDesc =>
       'View the campus map with search functionality to quickly find buildings.';
+
+  @override
+  String get infoYunReportTitle => 'Enrollment Certificate';
+
+  @override
+  String get infoYunReportDesc =>
+      'View this semester\'s enrollment certificate.';
+
+  @override
+  String get yunReportUnavailable =>
+      'Couldn\'t load the enrollment certificate. Make sure your registration is complete, or try again later.';
+
+  @override
+  String get yunReportRetry => 'Retry';
 
   @override
   String get calendarTitle => 'Calendar';

@@ -38,7 +38,10 @@ class YuntechAppCrypto {
     required String appVersion,
     DateTime? now,
   }) {
-    final ts = (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch ~/ 1000;
+    // Match the official app's `TimeSpan.TotalSeconds` — a *fractional* seconds
+    // double (e.g. 1783544220.187), not an integer. The /api nonce filter is
+    // stricter than the /Token endpoint about this.
+    final ts = (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch / 1000.0;
     final plain = 'appid=$_appId&userid=$userId&ts=$ts&version=$appVersion';
 
     final derived = _pbkdf2(_aesKey, _aesSalt, 1000, 32);

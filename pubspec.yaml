@@ -63,6 +63,7 @@ dependencies:
   connectivity_plus: ^6.1.0
   in_app_update: ^4.2.3
   pointycastle: ^3.9.1
+  pdfx: ^2.9.2
 
 dev_dependencies:
   flutter_test:

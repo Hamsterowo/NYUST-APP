@@ -674,6 +674,30 @@ abstract class AppLocalizations {
   /// **'查看校園地圖，提供搜尋功能快速查看系館位置'**
   String get infoMapDesc;
 
+  /// No description provided for @infoYunReportTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在學證明'**
+  String get infoYunReportTitle;
+
+  /// No description provided for @infoYunReportDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'檢視本學期在學證明'**
+  String get infoYunReportDesc;
+
+  /// No description provided for @yunReportUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法取得在學證明，請先完成註冊，或稍後再試。'**
+  String get yunReportUnavailable;
+
+  /// No description provided for @yunReportRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重試'**
+  String get yunReportRetry;
+
   /// No description provided for @calendarTitle.
   ///
   /// In zh, this message translates to:

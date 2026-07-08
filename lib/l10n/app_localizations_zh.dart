@@ -207,7 +207,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginButton => '登入';
 
   @override
-  String get loginFailed => '帳號或密碼錯誤';
+  String get loginFailed => '帳密或驗證碼錯誤';
 
   @override
   String get pleaseLoginToViewSchedule => '請在此登入以查看課表';
@@ -317,6 +317,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get infoMapDesc => '查看校園地圖，提供搜尋功能快速查看系館位置';
+
+  @override
+  String get infoYunReportTitle => '在學證明';
+
+  @override
+  String get infoYunReportDesc => '檢視本學期在學證明';
+
+  @override
+  String get yunReportUnavailable => '無法取得在學證明，請先完成註冊，或稍後再試。';
+
+  @override
+  String get yunReportRetry => '重試';
 
   @override
   String get calendarTitle => '行事曆';

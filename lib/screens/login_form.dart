@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../providers/providers.dart';
 import '../utils/top_snack_bar.dart';
+import 'dart:convert';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../l10n/app_localizations.dart';
 
@@ -18,6 +19,7 @@ class LoginForm extends ConsumerStatefulWidget {
 class _LoginFormState extends ConsumerState<LoginForm> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _captchaController = TextEditingController();
   final _passwordFocusNode = FocusNode();
 
   String _versionStr = '';
@@ -26,6 +28,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authProvider).fetchCaptcha();
       _loadVersion();
     });
   }
@@ -43,6 +46,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _captchaController.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
   }
@@ -50,6 +54,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   Future<void> _submit(AuthProvider auth) async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text;
+    final captcha = _captchaController.text.trim();
 
     if (username.isEmpty) {
       showTopSnackBar(
@@ -70,9 +75,17 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         );
         return;
       }
+      if (captcha.isEmpty) {
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context).loginCaptchaPrompt,
+          type: SnackBarType.warning,
+        );
+        return;
+      }
     }
 
-    await auth.loginViaApp(username, password);
+    await auth.login(username, password, captcha);
 
     if (auth.error != null) {
       if (mounted) {
@@ -82,6 +95,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             ? AppLocalizations.of(context).loginNoNetwork
             : auth.error!;
         showTopSnackBar(context, errorMsg, isError: true);
+        _captchaController.clear();
       }
     } else {
       TextInput.finishAutofillContext();
@@ -138,6 +152,55 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   filled: true,
                 ),
                 obscureText: true,
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _captchaController,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (value) {
+                        if (value != value.toUpperCase()) {
+                          _captchaController.value = _captchaController.value
+                              .copyWith(
+                                text: value.toUpperCase(),
+                                selection: TextSelection.collapsed(
+                                  offset: value.length,
+                                ),
+                              );
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(
+                          context,
+                        ).loginCaptchaLabel,
+                        border: OutlineInputBorder(),
+                        filled: true,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  if (auth.captchaUrl != null)
+                    Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Image.memory(
+                        base64Decode(auth.captchaUrl!.split(',').last),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  IconButton(
+                    icon: Icon(Icons.refresh),
+                    onPressed: () => auth.fetchCaptcha(),
+                    tooltip: AppLocalizations.of(
+                      context,
+                    ).loginCaptchaRefreshTooltip,
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 
