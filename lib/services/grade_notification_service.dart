@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -46,10 +48,13 @@ class GradeNotificationService {
       final hasPermission = await NotificationService().requestPermissions();
       if (!hasPermission) return GradeNotificationResult.permissionDenied;
 
+      // 隨機化首次執行時間（0~30 分鐘內），讓不同使用者的 30 分鐘檢查週期
+      // 錯開，避免同一時段大量請求打到校方伺服器而被擋。
       await Workmanager().registerPeriodicTask(
         _taskUniqueName,
         checkGradesTask,
         frequency: const Duration(minutes: 30),
+        initialDelay: Duration(seconds: Random().nextInt(30 * 60)),
         existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
       );
       if (kDebugMode) {
