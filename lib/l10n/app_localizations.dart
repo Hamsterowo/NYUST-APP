@@ -722,6 +722,12 @@ abstract class AppLocalizations {
   /// **'供下列功能使用，密碼以雜湊形式儲存於本機中，未勾選不影響其他功能使用。'**
   String get loginRememberPasswordHint;
 
+  /// No description provided for @loginRememberPasswordWarning.
+  ///
+  /// In zh, this message translates to:
+  /// **'如未記住密碼，當憑證失效時，會無法自動登入。'**
+  String get loginRememberPasswordWarning;
+
   /// No description provided for @loginRememberPasswordScope.
   ///
   /// In zh, this message translates to:
@@ -751,6 +757,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'取消'**
   String get appAuthCancel;
+
+  /// No description provided for @appAuthWrongPassword.
+  ///
+  /// In zh, this message translates to:
+  /// **'密碼錯誤，請重新輸入。'**
+  String get appAuthWrongPassword;
 
   /// No description provided for @credentialTitle.
   ///

@@ -147,7 +147,17 @@ class _CredentialScreenState extends ConsumerState<CredentialScreen> {
               value: _remembered,
               onChanged: _busy ? null : _onRememberChanged,
               title: Text(l.loginRememberPassword),
-              subtitle: Text(l.loginRememberPasswordHint),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.loginRememberPasswordHint),
+                  const SizedBox(height: 4),
+                  Text(
+                    l.loginRememberPasswordWarning,
+                    style: TextStyle(color: colorScheme.error),
+                  ),
+                ],
+              ),
               secondary: Icon(
                 Icons.key_rounded,
                 color: colorScheme.onSurfaceVariant,

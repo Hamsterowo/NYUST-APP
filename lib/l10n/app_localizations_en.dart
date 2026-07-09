@@ -361,6 +361,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'For the features below. Your password is stored on this device as a hash. Leaving it unchecked won\'t affect other features.';
 
   @override
+  String get loginRememberPasswordWarning =>
+      'If you don\'t remember your password, the app can\'t log in automatically once your credential expires.';
+
+  @override
   String get loginRememberPasswordScope => 'Scope: ';
 
   @override
@@ -375,6 +379,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appAuthCancel => 'Cancel';
+
+  @override
+  String get appAuthWrongPassword => 'Incorrect password. Please try again.';
 
   @override
   String get credentialTitle => 'App Credential';

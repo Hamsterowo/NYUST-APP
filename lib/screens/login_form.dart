@@ -249,6 +249,15 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).loginRememberPasswordWarning,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.error,
+                        ),
+                      ),
                     ],
                   ),
                 ),

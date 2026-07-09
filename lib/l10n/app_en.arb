@@ -184,11 +184,13 @@
 
   "loginRememberPassword": "Remember password",
   "loginRememberPasswordHint": "For the features below. Your password is stored on this device as a hash. Leaving it unchecked won't affect other features.",
+  "loginRememberPasswordWarning": "If you don't remember your password, the app can't log in automatically once your credential expires.",
   "loginRememberPasswordScope": "Scope: ",
   "appAuthRequiredTitle": "Re-authentication required",
   "appAuthRequiredMessage": "This feature's authorization has expired. Please re-enter your password to continue.",
   "appAuthUnlock": "Verify",
   "appAuthCancel": "Cancel",
+  "appAuthWrongPassword": "Incorrect password. Please try again.",
   "credentialTitle": "App Credential",
   "credentialStatusTitle": "Credential status",
   "credentialStatusValid": "Valid",

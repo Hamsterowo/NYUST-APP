@@ -184,11 +184,13 @@
 
   "loginRememberPassword": "記住密碼",
   "loginRememberPasswordHint": "供下列功能使用，密碼以雜湊形式儲存於本機中，未勾選不影響其他功能使用。",
+  "loginRememberPasswordWarning": "如未記住密碼，當憑證失效時，會無法自動登入。",
   "loginRememberPasswordScope": "使用範圍：",
   "appAuthRequiredTitle": "需要重新驗證",
   "appAuthRequiredMessage": "此功能的授權已過期，請重新輸入密碼以繼續使用。",
   "appAuthUnlock": "驗證",
   "appAuthCancel": "取消",
+  "appAuthWrongPassword": "密碼錯誤，請重新輸入。",
   "credentialTitle": "應用程式憑證",
   "credentialStatusTitle": "憑證狀態",
   "credentialStatusValid": "有效",

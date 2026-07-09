@@ -343,6 +343,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginRememberPasswordHint => '供下列功能使用，密碼以雜湊形式儲存於本機中，未勾選不影響其他功能使用。';
 
   @override
+  String get loginRememberPasswordWarning => '如未記住密碼，當憑證失效時，會無法自動登入。';
+
+  @override
   String get loginRememberPasswordScope => '使用範圍：';
 
   @override
@@ -356,6 +359,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get appAuthCancel => '取消';
+
+  @override
+  String get appAuthWrongPassword => '密碼錯誤，請重新輸入。';
 
   @override
   String get credentialTitle => '應用程式憑證';

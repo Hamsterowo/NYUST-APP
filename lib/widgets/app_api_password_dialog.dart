@@ -111,7 +111,7 @@ class _AppApiPasswordDialogState extends State<_AppApiPasswordDialog> {
               labelText: l.loginPasswordLabel,
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.lock),
-              errorText: _error ? l.loginFailed : null,
+              errorText: _error ? l.appAuthWrongPassword : null,
             ),
           ),
           if (widget.showRememberOption) ...[
