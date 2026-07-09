@@ -1,8 +1,8 @@
 ---
 title: YunTool Privacy Policy
 sourceUrl: https://github.com/Hamsterowo/NYUST-APP
-version: 2026-07-06
-lastUpdated: July 6, 2026
+version: 2026-07-09
+lastUpdated: July 9, 2026
 ---
 
 # YunTool Privacy Policy
@@ -17,11 +17,12 @@ This policy applies to the collection, processing, use, and protection of person
 
 ### (a) YunTech account and password
 
-Your student ID and password are used solely to authenticate you with YunTech's official system (the SSO portal) on your behalf:
+Your student ID and password are used solely to authenticate you with YunTech's official systems on your behalf. The app uses two official authentication channels: the web SSO portal (which requires an image captcha), and the dedicated endpoint used by the official mobile app (MobileAppService, captcha-free, powering certain features such as the Enrollment Certificate).
 
-- The password exists only in memory during login; **it is never written to device storage or saved on any server**.
+- By default the password exists only in memory during login and is released after authentication; **it is never written to device storage or saved on any server** (and it is hashed before being sent).
 - Credentials are sent directly and only to YunTech's official server (webapp.yuntech.edu.tw), never to any third party.
-- After a successful login, the session credential (cookie) issued by YunTech is stored encrypted in your device's secure storage for automatic login and background grade checks, and is cleared when you log out.
+- After a successful login, the credentials issued by YunTech (the web session cookie and the mobile endpoint's Bearer access token) are stored encrypted in your device's secure storage for automatic login, background grade checks, and features like the Enrollment Certificate; they are cleared when you log out.
+- **Remember password (optional, off by default)**: if you choose "Remember password" on the login screen or in the "App Credential" settings, the app stores a **one-way hash of your password (SHA-256, not the plaintext)** in your device's secure storage, used only to automatically re-obtain the mobile endpoint's access token when it expires, so features like the Enrollment Certificate don't require re-entering your password. This hash **cannot be reversed to your original password and cannot be used for the web login**; it stays only on your device and is never uploaded. You can turn "Remember password" off in settings or log out at any time to clear the stored hash.
 
 ### (b) Academic and personal data
 
@@ -41,7 +42,7 @@ App settings (display preferences, language, etc.) are stored locally on your de
 
 ## 3. Data Protection
 
-Your academic records, basic profile, session credential, and preferences are stored only on your device, and your password is never persisted. The app has no developer-operated backend server and does not collect, store, or transmit any of your personal or academic data. You can delete everything stored on your device at any time by logging out, clearing the app's data, or uninstalling it.
+Your academic records, basic profile, session credentials, and preferences are stored only on your device. Your **plaintext password is never persisted**; only when you actively choose "Remember password" is an irreversible hash of it stored in secure storage, used solely to auto-renew the mobile endpoint credential, and it can be cleared at any time by turning the option off or logging out. The app has no developer-operated backend server and does not collect, store, or transmit any of your personal or academic data. You can delete everything stored on your device at any time by logging out, clearing the app's data, or uninstalling it.
 
 ## 4. Sharing Personal Data With Third Parties
 

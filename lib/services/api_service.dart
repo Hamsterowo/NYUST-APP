@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'api_client.dart';
 import 'demo_mode.dart';
+import 'app_api/app_api_service.dart';
 import 'scrapers/sso_scraper.dart';
 import 'scrapers/info_scraper.dart';
 
@@ -14,6 +15,10 @@ import 'scrapers/info_scraper.dart';
 class ApiService {
   final ApiClient _client = ApiClient();
   late final ServiceFactory _factory = ServiceFactory(_client);
+
+  /// 雲科 App 端點（MobileAppService，Bearer token）client。與 web 爬蟲的
+  /// [ApiClient] 隔離，各用各的 session（見 [AppApiService]）。
+  final AppApiService appApi = AppApiService();
 
   ApiService();
 

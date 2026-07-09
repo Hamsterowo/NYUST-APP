@@ -52,6 +52,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> init() async {
     await _apiService.init();
+    // 載入先前保存的 App 端點 Bearer token（供在學證明等 /api 服務使用）。
+    await _apiService.appApi.loadPersisted();
 
     _apiService.onSessionExpired = () {
       handleSessionExpired();
@@ -178,7 +180,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> login(String username, String password, String captcha) async {
+  Future<bool> login(
+    String username,
+    String password,
+    String captcha, {
+    bool rememberPassword = false,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -216,6 +223,15 @@ class AuthProvider with ChangeNotifier {
 
         await _saveUserCache(_user!);
 
+        // 額外用同一組帳密（免驗證碼）拿 App 端點 Bearer token，供在學證明等
+        // /api 服務使用。用獨立 client、不影響網頁 session；失敗不影響登入。
+        // rememberPassword 為 true 時，會持久化密碼雜湊以便 token 過期後靜默重登。
+        await _apiService.appApi.login(
+          username,
+          password,
+          remember: rememberPassword,
+        );
+
         notifyListeners();
         onLoginSuccess?.call();
         return true;
@@ -242,6 +258,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _apiService.isMockMode = false;
     await _apiService.logout();
+    await _apiService.appApi.clear();
     await _clearUserCache();
     _user = null;
     onLogoutCallback?.call();

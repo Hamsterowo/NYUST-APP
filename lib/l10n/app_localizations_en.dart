@@ -332,6 +332,92 @@ class AppLocalizationsEn extends AppLocalizations {
       'View the campus map with search functionality to quickly find buildings.';
 
   @override
+  String get infoYunReportTitle => 'Enrollment Certificate';
+
+  @override
+  String get infoYunReportDesc =>
+      'View this semester\'s enrollment certificate.';
+
+  @override
+  String get yunReportUnavailable =>
+      'Couldn\'t load the enrollment certificate. Make sure your registration is complete, or try again later.';
+
+  @override
+  String get yunReportRetry => 'Retry';
+
+  @override
+  String get yunReportNoteDisplay =>
+      'For on-screen verification only. If you have any questions, please contact the Registration Section of the Office of Academic Affairs.';
+
+  @override
+  String get yunReportNotePaper =>
+      'For a paper copy, please apply through the Registration Section of the Office of Academic Affairs. Do not print this document yourself.';
+
+  @override
+  String get loginRememberPassword => 'Remember password';
+
+  @override
+  String get loginRememberPasswordHint =>
+      'For the features below. Your password is stored on this device as a hash. Leaving it unchecked won\'t affect other features.';
+
+  @override
+  String get loginRememberPasswordScope => 'Scope: ';
+
+  @override
+  String get appAuthRequiredTitle => 'Re-authentication required';
+
+  @override
+  String get appAuthRequiredMessage =>
+      'This feature\'s authorization has expired. Please re-enter your password to continue.';
+
+  @override
+  String get appAuthUnlock => 'Verify';
+
+  @override
+  String get appAuthCancel => 'Cancel';
+
+  @override
+  String get credentialTitle => 'App Credential';
+
+  @override
+  String get credentialStatusTitle => 'Credential status';
+
+  @override
+  String get credentialStatusValid => 'Valid';
+
+  @override
+  String get credentialStatusNone => 'Not obtained';
+
+  @override
+  String get credentialExpiryLabel => 'Valid until: ';
+
+  @override
+  String get credentialExpiryUnknown => 'Expiry unknown';
+
+  @override
+  String credentialDaysRemaining(int days) {
+    return '~$days days left';
+  }
+
+  @override
+  String get credentialEnableRememberTitle => 'Enable remember password';
+
+  @override
+  String get credentialEnableRememberMessage =>
+      'Enter your password to enable remembering it. This credential will then renew automatically when it expires, with no need to re-enter it.';
+
+  @override
+  String get credentialClearOnRestartHint =>
+      'Remember password turned off. For your security, the password stored on this device will be cleared the next time you restart the app.';
+
+  @override
+  String get credentialFeaturesTitle => 'Features using this credential';
+
+  @override
+  String get credentialAbout =>
+      'Some features use YunTech\'s mobile-app endpoint, which needs a credential (a Bearer token) separate from the web login. This credential lasts about 90 days. When it expires, if you chose to remember your password the app silently renews it using the stored hash — no interruption; otherwise you\'ll be asked to re-enter your password when using that feature. Your password is kept only as a hash in this device\'s secure storage; it cannot be reversed to plaintext and cannot be used for the web login.';
+
+  @override
   String get calendarTitle => 'Calendar';
 
   @override

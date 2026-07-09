@@ -15,7 +15,10 @@ flutter analyze                    # static analysis (flutter_lints)
 flutter test                       # run all tests
 flutter test test/widget_test.dart # run a single test file
 flutter gen-l10n                   # regenerate lib/l10n/app_localizations*.dart after editing the .arb files
+dart format .                      # ALWAYS run before committing — CI ("Analyze") fails on unformatted code
 ```
+
+**Before every commit, run `dart format .`** (or `dart format` on the files you touched). The GitHub Actions "Analyze" workflow runs `dart format --output=none --set-exit-if-changed .` and fails the check if any file is unformatted — this is the most common CI failure. `flutter analyze` passing is not enough; formatting is checked separately.
 
 Release builds (see `README.md` / `build.sh`):
 

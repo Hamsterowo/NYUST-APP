@@ -35,6 +35,14 @@ AccessTokenExpirationDate = now + expires_in 秒（無則預設 24h）
 UserName = json["UserName"]
 ```
 
+### 本 client（[`AppApiService`](../lib/services/app_api/app_api_service.dart)）的憑證處理
+
+- **token 效期**：實測 `expires_in ≈ 7775999`（約 90 天）。官方 App 無 refresh token，**重新 `POST /Token` 是取得新 token 的唯一途徑**；本 client 亦同。`expires_in` 會換算成到期時間存起來，**僅供設定頁「應用程式憑證」顯示用**，不參與更新判斷。
+- **反應式更新（reactive on 401）**：呼叫 `/api/...` 收到 `401` 時，若有可用憑證就靜默重登一次再重試；沒有則丟 `AppApiAuthRequiredException`，由 UI 跳出密碼輸入框。`403`（nonce / 權限）**不**視為過期、不觸發重登。
+- **記住密碼（opt-in）**：登入畫面與憑證頁可選擇記住密碼。記住的是 **`SHA-256(密碼)` 雜湊**（就是 `/Token` 要送的值），存在 `flutter_secure_storage`（key `app_api_pwd_hash`）；**不存明文**。雜湊無法還原明文，也無法用於網頁 SSO 登入（網頁端有驗證碼）。
+- **兩層憑證**：登入當下的雜湊會留在記憶體供本次執行期間靜默重登；勾了記住才會**持久化**跨重啟。未記住時，重啟後 token 過期就走 on-demand 密碼輸入。
+- 儲存的 secure-storage keys：`app_api_access_token`、`app_api_user_id`、`app_api_pwd_hash`（記住時）、`app_api_token_expiry`。登出（`clear()`）會一併清除。
+
 ---
 
 ## 2. 每個 API 請求都要帶的 Header

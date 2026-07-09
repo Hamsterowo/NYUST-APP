@@ -3,6 +3,7 @@ import '../l10n/app_localizations.dart';
 import 'grades_screen.dart';
 import 'graduation_screen.dart';
 import 'map_screen.dart';
+import 'yun_report_screen.dart';
 import '../widgets/custom_app_bar.dart';
 
 class InfoScreen extends StatelessWidget {
@@ -139,6 +140,22 @@ class InfoScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => const MapScreen(embed: false),
                     ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Card 4: Enrollment Certificate (在學證明) — app-endpoint /api
+              _buildDashboardCard(
+                context,
+                title: AppLocalizations.of(context).infoYunReportTitle,
+                description: AppLocalizations.of(context).infoYunReportDesc,
+                icon: Icons.verified_rounded,
+                themeColor: const Color(0xFF0EA5E9),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const YunReportScreen()),
                   );
                 },
               ),

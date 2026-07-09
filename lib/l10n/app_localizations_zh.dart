@@ -319,6 +319,86 @@ class AppLocalizationsZh extends AppLocalizations {
   String get infoMapDesc => '查看校園地圖，提供搜尋功能快速查看系館位置';
 
   @override
+  String get infoYunReportTitle => '在學證明';
+
+  @override
+  String get infoYunReportDesc => '檢視本學期在學證明';
+
+  @override
+  String get yunReportUnavailable => '無法取得在學證明，請先完成註冊，或稍後再試。';
+
+  @override
+  String get yunReportRetry => '重試';
+
+  @override
+  String get yunReportNoteDisplay => '僅提供顯示證明使用，如有疑問請洽教務處註冊組。';
+
+  @override
+  String get yunReportNotePaper => '如需紙本，請向教務處註冊組提出申請，勿擅自列印。';
+
+  @override
+  String get loginRememberPassword => '記住密碼';
+
+  @override
+  String get loginRememberPasswordHint => '供下列功能使用，密碼以雜湊形式儲存於本機中，未勾選不影響其他功能使用。';
+
+  @override
+  String get loginRememberPasswordScope => '使用範圍：';
+
+  @override
+  String get appAuthRequiredTitle => '需要重新驗證';
+
+  @override
+  String get appAuthRequiredMessage => '此功能的授權已過期，請重新輸入密碼以繼續使用。';
+
+  @override
+  String get appAuthUnlock => '驗證';
+
+  @override
+  String get appAuthCancel => '取消';
+
+  @override
+  String get credentialTitle => '應用程式憑證';
+
+  @override
+  String get credentialStatusTitle => '憑證狀態';
+
+  @override
+  String get credentialStatusValid => '有效';
+
+  @override
+  String get credentialStatusNone => '尚未取得';
+
+  @override
+  String get credentialExpiryLabel => '有效期限：';
+
+  @override
+  String get credentialExpiryUnknown => '有效期限未知';
+
+  @override
+  String credentialDaysRemaining(int days) {
+    return '約剩 $days 天';
+  }
+
+  @override
+  String get credentialEnableRememberTitle => '啟用記住密碼';
+
+  @override
+  String get credentialEnableRememberMessage =>
+      '請輸入密碼以啟用記住密碼。往後此憑證過期時會自動更新，不需再手動輸入。';
+
+  @override
+  String get credentialClearOnRestartHint =>
+      '已取消記住密碼。基於安全考量，本機儲存的密碼將於下次重新啟動應用程式時清除。';
+
+  @override
+  String get credentialFeaturesTitle => '使用此憑證的功能';
+
+  @override
+  String get credentialAbout =>
+      '部分功能會使用雲科行動 App 的專用端點，需要一組獨立於網頁登入的憑證（Bearer token）。此憑證有效期約 90 天，過期後若你已記住密碼，App 會自動以密碼雜湊重新取得，不會打擾你；若未記住密碼，使用該功能時會請你重新輸入一次密碼。密碼僅以雜湊形式儲存於本機安全儲存區，無法還原為明文，也無法用於網頁登入。';
+
+  @override
   String get calendarTitle => '行事曆';
 
   @override
