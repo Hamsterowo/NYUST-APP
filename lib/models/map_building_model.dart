@@ -1,6 +1,12 @@
 class MapBuilding {
   final String id;
   final String name;
+
+  /// Building latitude/longitude for external turn-by-turn navigation. Null when
+  /// the coordinate hasn't been collected yet — callers should hide the
+  /// "navigate" action in that case (see [hasLocation]).
+  final double? lat;
+  final double? lng;
   final List<String> aliases;
   final List<String> keyLocations;
   final String description;
@@ -8,15 +14,22 @@ class MapBuilding {
   MapBuilding({
     required this.id,
     required this.name,
+    this.lat,
+    this.lng,
     required this.aliases,
     required this.keyLocations,
     required this.description,
   });
 
+  /// Whether this building has a usable coordinate to navigate to.
+  bool get hasLocation => lat != null && lng != null;
+
   factory MapBuilding.fromJson(Map<String, dynamic> json) {
     return MapBuilding(
       id: json['id'] as String,
       name: json['name'] as String,
+      lat: (json['lat'] as num?)?.toDouble(),
+      lng: (json['lng'] as num?)?.toDouble(),
       aliases:
           (json['aliases'] as List<dynamic>?)
               ?.map((e) => e.toString())
@@ -35,6 +48,8 @@ class MapBuilding {
     return {
       'id': id,
       'name': name,
+      if (lat != null) 'lat': lat,
+      if (lng != null) 'lng': lng,
       'aliases': aliases,
       'keyLocations': keyLocations,
       'description': description,

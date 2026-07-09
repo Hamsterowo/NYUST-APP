@@ -1316,6 +1316,18 @@ abstract class AppLocalizations {
   /// **'暫無此建築物之詳細介紹。'**
   String get mapNoDescription;
 
+  /// No description provided for @mapNavigateButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'導航到這裡'**
+  String get mapNavigateButton;
+
+  /// No description provided for @mapNavigateFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法開啟地圖應用程式'**
+  String get mapNavigateFailed;
+
   /// No description provided for @mapResetView.
   ///
   /// In zh, this message translates to:

@@ -379,6 +379,8 @@
     }
   },
   "mapNoDescription": "No detailed description available for this building.",
+  "mapNavigateButton": "Navigate here",
+  "mapNavigateFailed": "Couldn't open a maps app",
   "mapResetView": "Reset map view",
   "mapFloorPlanUnderConstruction": "Coming Soon",
   "mapFloorPlanUnavailable": "{room}: No Plan",

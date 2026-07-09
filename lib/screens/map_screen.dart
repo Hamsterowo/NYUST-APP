@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../models/map_building_model.dart';
 import '../services/map_parser_service.dart';
@@ -426,6 +427,29 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 16),
 
+            if (building.hasLocation) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.directions_outlined, size: 16),
+                  label: Text(
+                    AppLocalizations.of(context).mapNavigateButton,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => _launchNavigation(building),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -457,6 +481,30 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  /// Opens the external maps app with turn-by-turn directions to [building].
+  /// Uses the cross-platform Google Maps directions URL so the OS routes it to
+  /// whatever maps app is installed (Android/iOS/web).
+  Future<void> _launchNavigation(MapBuilding building) async {
+    final lat = building.lat;
+    final lng = building.lng;
+    if (lat == null || lng == null) return;
+
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+    );
+    var ok = false;
+    try {
+      ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      ok = false;
+    }
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).mapNavigateFailed)),
+      );
+    }
   }
 
   void _onSearchChanged(String query) {

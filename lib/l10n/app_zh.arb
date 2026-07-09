@@ -379,6 +379,8 @@
     }
   },
   "mapNoDescription": "暫無此建築物之詳細介紹。",
+  "mapNavigateButton": "導航到這裡",
+  "mapNavigateFailed": "無法開啟地圖應用程式",
   "mapResetView": "重置地圖檢視",
   "mapFloorPlanUnderConstruction": "平面圖建置中",
   "mapFloorPlanUnavailable": "{room} 平面圖不可用",

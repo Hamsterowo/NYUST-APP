@@ -669,6 +669,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mapNoDescription => '暫無此建築物之詳細介紹。';
 
   @override
+  String get mapNavigateButton => '導航到這裡';
+
+  @override
+  String get mapNavigateFailed => '無法開啟地圖應用程式';
+
+  @override
   String get mapResetView => '重置地圖檢視';
 
   @override

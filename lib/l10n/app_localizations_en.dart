@@ -691,6 +691,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'No detailed description available for this building.';
 
   @override
+  String get mapNavigateButton => 'Navigate here';
+
+  @override
+  String get mapNavigateFailed => 'Couldn\'t open a maps app';
+
+  @override
   String get mapResetView => 'Reset map view';
 
   @override
