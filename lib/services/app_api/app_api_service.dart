@@ -52,6 +52,15 @@ class AppApiService {
   );
   final _storage = const FlutterSecureStorage();
 
+  /// Default constructor. Tests may pass a fake [httpClientAdapter] to drive the
+  /// `/Token` and `/api/...` calls without real network; production leaves it
+  /// null so the real HTTP client is used.
+  AppApiService({HttpClientAdapter? httpClientAdapter}) {
+    if (httpClientAdapter != null) {
+      _dio.httpClientAdapter = httpClientAdapter;
+    }
+  }
+
   String? _accessToken;
   String? _userId;
 
