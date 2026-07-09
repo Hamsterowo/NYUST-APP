@@ -6,6 +6,7 @@ import '../providers/providers.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
+import 'credential_screen.dart';
 import '../utils/pwa_interop.dart';
 import '../utils/settings_utils.dart';
 import 'privacy_policy_screen.dart';
@@ -340,6 +341,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   onTap: () =>
                                       SettingsUtils.openLanguageSettings(),
                                 ),
+                                if (!auth.api.isMockMode) ...[
+                                  const Divider(height: 1, indent: 56),
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.key_outlined,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    title: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).credentialTitle,
+                                    ),
+                                    trailing: Icon(
+                                      Icons.chevron_right,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const CredentialScreen(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
                                 if (!kIsWeb) ...[
                                   const Divider(height: 1, indent: 56),
                                   ListTile(

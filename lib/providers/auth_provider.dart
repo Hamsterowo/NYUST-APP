@@ -180,7 +180,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> login(String username, String password, String captcha) async {
+  Future<bool> login(
+    String username,
+    String password,
+    String captcha, {
+    bool rememberPassword = false,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -220,7 +225,12 @@ class AuthProvider with ChangeNotifier {
 
         // 額外用同一組帳密（免驗證碼）拿 App 端點 Bearer token，供在學證明等
         // /api 服務使用。用獨立 client、不影響網頁 session；失敗不影響登入。
-        await _apiService.appApi.login(username, password);
+        // rememberPassword 為 true 時，會持久化密碼雜湊以便 token 過期後靜默重登。
+        await _apiService.appApi.login(
+          username,
+          password,
+          remember: rememberPassword,
+        );
 
         notifyListeners();
         onLoginSuccess?.call();

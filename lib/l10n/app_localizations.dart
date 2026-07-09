@@ -710,6 +710,120 @@ abstract class AppLocalizations {
   /// **'如需紙本，請向教務處註冊組提出申請，勿擅自列印。'**
   String get yunReportNotePaper;
 
+  /// No description provided for @loginRememberPassword.
+  ///
+  /// In zh, this message translates to:
+  /// **'記住密碼'**
+  String get loginRememberPassword;
+
+  /// No description provided for @loginRememberPasswordHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'供下列功能使用，密碼以雜湊形式儲存於本機中，未勾選不影響其他功能使用。'**
+  String get loginRememberPasswordHint;
+
+  /// No description provided for @loginRememberPasswordScope.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用範圍：'**
+  String get loginRememberPasswordScope;
+
+  /// No description provided for @appAuthRequiredTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'需要重新驗證'**
+  String get appAuthRequiredTitle;
+
+  /// No description provided for @appAuthRequiredMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'此功能的授權已過期，請重新輸入密碼以繼續使用。'**
+  String get appAuthRequiredMessage;
+
+  /// No description provided for @appAuthUnlock.
+  ///
+  /// In zh, this message translates to:
+  /// **'驗證'**
+  String get appAuthUnlock;
+
+  /// No description provided for @appAuthCancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get appAuthCancel;
+
+  /// No description provided for @credentialTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'應用程式憑證'**
+  String get credentialTitle;
+
+  /// No description provided for @credentialStatusTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'憑證狀態'**
+  String get credentialStatusTitle;
+
+  /// No description provided for @credentialStatusValid.
+  ///
+  /// In zh, this message translates to:
+  /// **'有效'**
+  String get credentialStatusValid;
+
+  /// No description provided for @credentialStatusNone.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚未取得'**
+  String get credentialStatusNone;
+
+  /// No description provided for @credentialExpiryLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'有效期限：'**
+  String get credentialExpiryLabel;
+
+  /// No description provided for @credentialExpiryUnknown.
+  ///
+  /// In zh, this message translates to:
+  /// **'有效期限未知'**
+  String get credentialExpiryUnknown;
+
+  /// No description provided for @credentialDaysRemaining.
+  ///
+  /// In zh, this message translates to:
+  /// **'約剩 {days} 天'**
+  String credentialDaysRemaining(int days);
+
+  /// No description provided for @credentialEnableRememberTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'啟用記住密碼'**
+  String get credentialEnableRememberTitle;
+
+  /// No description provided for @credentialEnableRememberMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'請輸入密碼以啟用記住密碼。往後此憑證過期時會自動更新，不需再手動輸入。'**
+  String get credentialEnableRememberMessage;
+
+  /// No description provided for @credentialClearOnRestartHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'已取消記住密碼。基於安全考量，本機儲存的密碼將於下次重新啟動應用程式時清除。'**
+  String get credentialClearOnRestartHint;
+
+  /// No description provided for @credentialFeaturesTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用此憑證的功能'**
+  String get credentialFeaturesTitle;
+
+  /// No description provided for @credentialAbout.
+  ///
+  /// In zh, this message translates to:
+  /// **'部分功能會使用雲科行動 App 的專用端點，需要一組獨立於網頁登入的憑證（Bearer token）。此憑證有效期約 90 天，過期後若你已記住密碼，App 會自動以密碼雜湊重新取得，不會打擾你；若未記住密碼，使用該功能時會請你重新輸入一次密碼。密碼僅以雜湊形式儲存於本機安全儲存區，無法還原為明文，也無法用於網頁登入。'**
+  String get credentialAbout;
+
   /// No description provided for @calendarTitle.
   ///
   /// In zh, this message translates to:

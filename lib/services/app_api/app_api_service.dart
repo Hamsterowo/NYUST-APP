@@ -4,6 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/yuntech_app_crypto.dart';
 
+/// Thrown by app-endpoint calls when the Bearer token is missing/expired and
+/// there is **no saved credential** to silently re-mint it — the UI should
+/// prompt the user for their password (see `AppApiPasswordDialog`).
+class AppApiAuthRequiredException implements Exception {
+  const AppApiAuthRequiredException();
+  @override
+  String toString() => 'AppApiAuthRequiredException';
+}
+
 /// Client for the official app's MobileAppService backend (Bearer-token API).
 ///
 /// This is **deliberately isolated** from the web-scraping [ApiClient]: it uses
@@ -13,6 +22,15 @@ import '../../utils/yuntech_app_crypto.dart';
 ///   - web login (captcha) → `.YunTechSSO` cookie → existing scrapers
 ///   - app login (`/Token`) → Bearer token → `/api/...` features (this class)
 ///
+/// The Bearer token lasts ~90 days and there is no refresh-token endpoint, so
+/// re-login is the only way to mint a fresh one. To survive token expiry without
+/// forcing a full captcha login, this class can optionally persist the SHA-256
+/// **hash** of the password (never the plaintext) — `/Token` only needs the
+/// hash. Persisting is **opt-in** (`remember`); an in-memory hash is also kept
+/// for the current session so a 401 can self-heal even when the user chose not
+/// to persist. On a 401 the token is silently re-minted and the call retried
+/// once; if no credential is available, [AppApiAuthRequiredException] is thrown.
+///
 /// See `docs/mobile_api.md`.
 class AppApiService {
   static const String _baseUrl =
@@ -21,6 +39,8 @@ class AppApiService {
 
   static const String _tokenKey = 'app_api_access_token';
   static const String _userIdKey = 'app_api_user_id';
+  static const String _pwdHashKey = 'app_api_pwd_hash';
+  static const String _expiryKey = 'app_api_token_expiry';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -35,26 +55,123 @@ class AppApiService {
   String? _accessToken;
   String? _userId;
 
+  /// SHA-256 hash of the password. Held in memory for the current session; also
+  /// persisted only when the user opted in to "remember password".
+  String? _passwordHash;
+
+  /// Best-effort token expiry (from `/Token`'s `expires_in`), kept for display
+  /// on the credential settings page only — refresh is reactive on 401, so this
+  /// is never used to decide when to refresh.
+  DateTime? _tokenExpiry;
+
   bool get hasToken => _accessToken != null && _accessToken!.isNotEmpty;
 
-  /// Loads a previously persisted token (call on startup).
+  /// Approximate expiry of the current token, or null if unknown / no token.
+  DateTime? get tokenExpiry => _tokenExpiry;
+
+  /// Whether a credential is available (in-memory this session or persisted)
+  /// that can silently re-mint an expired token without prompting the user.
+  bool get hasSavedCredential =>
+      _passwordHash != null && _passwordHash!.isNotEmpty;
+
+  /// Whether the password hash is **persisted** (survives restart) — i.e. the
+  /// "remember password" setting is currently on.
+  Future<bool> isPasswordRemembered() async {
+    try {
+      final v = await _storage.read(key: _pwdHashKey);
+      return v != null && v.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Turns the persisted "remember password" setting on/off from the settings
+  /// page. Returns true when applied. When enabling but no in-memory credential
+  /// is available (e.g. token was restored from storage without the hash),
+  /// returns false so the caller can prompt for the password via
+  /// [reloginWithPassword].
+  Future<bool> setRememberPassword(bool value) async {
+    try {
+      if (value) {
+        if (!hasSavedCredential) return false;
+        await _storage.write(key: _pwdHashKey, value: _passwordHash!);
+        return true;
+      }
+      await _storage.delete(key: _pwdHashKey);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Loads a previously persisted token + credential (call on startup).
   Future<void> loadPersisted() async {
     try {
       _accessToken = await _storage.read(key: _tokenKey);
       _userId = await _storage.read(key: _userIdKey);
+      _passwordHash = await _storage.read(key: _pwdHashKey);
+      final expiryStr = await _storage.read(key: _expiryKey);
+      _tokenExpiry = expiryStr == null ? null : DateTime.tryParse(expiryStr);
     } catch (_) {}
   }
 
   /// Logs in via `POST /Token` (OAuth2 password grant, no captcha) and stores
-  /// the Bearer token. Returns true on success. Never throws.
-  Future<bool> login(String username, String password) async {
+  /// the Bearer token. When [remember] is true the SHA-256 password hash is
+  /// persisted so the token can be silently re-minted after it expires; when
+  /// false any previously-persisted hash is cleared (but a session-only copy is
+  /// still kept in memory). Returns true on success. Never throws.
+  Future<bool> login(
+    String username,
+    String password, {
+    bool remember = false,
+  }) async {
+    final hash = YuntechAppCrypto.sha256Hex(password);
+    final ok = await _requestToken(username, hash);
+    if (ok) {
+      _passwordHash = hash;
+      try {
+        if (remember) {
+          await _storage.write(key: _pwdHashKey, value: hash);
+        } else {
+          await _storage.delete(key: _pwdHashKey);
+        }
+      } catch (_) {}
+    }
+    return ok;
+  }
+
+  /// Re-authenticates using a plaintext password (from the on-demand prompt when
+  /// the token expired and nothing was remembered). Uses the already-known
+  /// [_userId]. Persists the hash only when [remember] is true.
+  Future<bool> reloginWithPassword(
+    String password, {
+    bool remember = false,
+  }) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return false;
+    final hash = YuntechAppCrypto.sha256Hex(password);
+    final ok = await _requestToken(userId, hash);
+    if (ok) {
+      _passwordHash = hash;
+      try {
+        if (remember) {
+          await _storage.write(key: _pwdHashKey, value: hash);
+        }
+      } catch (_) {}
+    }
+    return ok;
+  }
+
+  /// POST /Token with an already-hashed password; stores token + userId on
+  /// success. The single place the token is minted. Never throws.
+  Future<bool> _requestToken(String username, String passwordHash) async {
     try {
       final response = await _dio.post(
         '/Token',
         data: {
           'grant_type': 'password',
           'username': username,
-          'password': YuntechAppCrypto.sha256Hex(password),
+          'password': passwordHash,
         },
         options: Options(
           contentType: Headers.formUrlEncodedContentType,
@@ -69,48 +186,101 @@ class AppApiService {
         if (token != null && token.isNotEmpty) {
           _accessToken = token;
           _userId = username;
+          _tokenExpiry = _parseExpiry(data['expires_in']);
           await _storage.write(key: _tokenKey, value: token);
           await _storage.write(key: _userIdKey, value: username);
+          if (_tokenExpiry != null) {
+            await _storage.write(
+              key: _expiryKey,
+              value: _tokenExpiry!.toIso8601String(),
+            );
+          } else {
+            await _storage.delete(key: _expiryKey);
+          }
           return true;
         }
       }
     } catch (e) {
-      if (kDebugMode) print('AppApiService.login error: $e');
+      if (kDebugMode) print('AppApiService._requestToken error: $e');
     }
     return false;
   }
 
+  /// Converts a `/Token` `expires_in` (seconds) into an absolute expiry.
+  DateTime? _parseExpiry(dynamic expiresIn) {
+    final secs = expiresIn is int
+        ? expiresIn
+        : (expiresIn is String ? int.tryParse(expiresIn) : null);
+    if (secs == null || secs <= 0) return null;
+    return DateTime.now().add(Duration(seconds: secs));
+  }
+
+  /// Silently re-mints the token from the saved credential. Returns false when
+  /// no credential is available or the re-login fails.
+  Future<bool> _refreshToken() async {
+    final userId = _userId;
+    if (!hasSavedCredential || userId == null || userId.isEmpty) return false;
+    return _requestToken(userId, _passwordHash!);
+  }
+
   /// GET the current-semester enrollment certificate (在學證明) as PDF bytes.
-  /// Returns null if not logged in, not registered (503), or on error.
-  Future<Uint8List?> getYunReport() async {
-    if (!hasToken) return null;
+  /// Returns null if not registered (503) or on network/other error.
+  /// Throws [AppApiAuthRequiredException] when the token expired and there is no
+  /// saved credential to refresh it (caller should prompt for the password).
+  Future<Uint8List?> getYunReport() =>
+      _authedGetBytes('/api/User/GetYunReport');
+
+  /// Runs an authenticated GET returning bytes, transparently handling token
+  /// expiry: ensures a token (refreshing from the saved credential if needed),
+  /// and on a 401 re-mints once and retries. Throws
+  /// [AppApiAuthRequiredException] when no credential can satisfy the request.
+  /// Returns null on network/other/503 errors.
+  Future<Uint8List?> _authedGetBytes(String path) async {
+    if (!hasToken) {
+      if (!await _refreshToken()) throw const AppApiAuthRequiredException();
+    }
     try {
-      final response = await _dio.get(
-        '/api/User/GetYunReport',
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: {
-            ..._commonHeaders(_userId ?? ''),
-            'Authorization': 'Bearer $_accessToken',
-          },
-        ),
-      );
+      var response = await _get(path);
+      if (response.statusCode == 401) {
+        if (!await _refreshToken()) throw const AppApiAuthRequiredException();
+        response = await _get(path);
+        if (response.statusCode == 401) {
+          throw const AppApiAuthRequiredException();
+        }
+      }
       final data = response.data;
       if (response.statusCode == 200 && data is List<int>) {
         return Uint8List.fromList(data);
       }
+    } on AppApiAuthRequiredException {
+      rethrow;
     } catch (e) {
-      if (kDebugMode) print('AppApiService.getYunReport error: $e');
+      if (kDebugMode) print('AppApiService._authedGetBytes($path) error: $e');
     }
     return null;
   }
 
+  Future<Response<dynamic>> _get(String path) => _dio.get(
+    path,
+    options: Options(
+      responseType: ResponseType.bytes,
+      headers: {
+        ..._commonHeaders(_userId ?? ''),
+        'Authorization': 'Bearer $_accessToken',
+      },
+    ),
+  );
+
   Future<void> clear() async {
     _accessToken = null;
     _userId = null;
+    _passwordHash = null;
+    _tokenExpiry = null;
     try {
       await _storage.delete(key: _tokenKey);
       await _storage.delete(key: _userIdKey);
+      await _storage.delete(key: _pwdHashKey);
+      await _storage.delete(key: _expiryKey);
     } catch (_) {}
   }
 

@@ -23,14 +23,25 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   final _passwordFocusNode = FocusNode();
 
   String _versionStr = '';
+  bool _rememberPassword = false;
 
   @override
   void initState() {
     super.initState();
+    // Rebuild when the username changes so the remember-password checkbox can
+    // hide itself for the debug/demo account (which never uses the app endpoint).
+    _usernameController.addListener(_onUsernameChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authProvider).fetchCaptcha();
       _loadVersion();
     });
+  }
+
+  void _onUsernameChanged() => setState(() {});
+
+  bool get _isDebugUsername {
+    final u = _usernameController.text.trim();
+    return u == 'debug' || u.toLowerCase() == 'test';
   }
 
   Future<void> _loadVersion() async {
@@ -44,6 +55,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   @override
   void dispose() {
+    _usernameController.removeListener(_onUsernameChanged);
     _usernameController.dispose();
     _passwordController.dispose();
     _captchaController.dispose();
@@ -85,7 +97,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       }
     }
 
-    await auth.login(username, password, captcha);
+    await auth.login(
+      username,
+      password,
+      captcha,
+      rememberPassword: _rememberPassword,
+    );
 
     if (auth.error != null) {
       if (mounted) {
@@ -202,6 +219,40 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   ),
                 ],
               ),
+              if (!_isDebugUsername) ...[
+                const SizedBox(height: 8),
+                CheckboxListTile(
+                  value: _rememberPassword,
+                  onChanged: (v) =>
+                      setState(() => _rememberPassword = v ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: Text(
+                    AppLocalizations.of(context).loginRememberPassword,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).loginRememberPasswordHint,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.outline,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${AppLocalizations.of(context).loginRememberPasswordScope}'
+                        '${AppLocalizations.of(context).infoYunReportTitle}',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.outline,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
 
               if (auth.isLoading)

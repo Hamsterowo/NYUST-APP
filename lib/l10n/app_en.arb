@@ -182,6 +182,33 @@
   "yunReportNoteDisplay": "For on-screen verification only. If you have any questions, please contact the Registration Section of the Office of Academic Affairs.",
   "yunReportNotePaper": "For a paper copy, please apply through the Registration Section of the Office of Academic Affairs. Do not print this document yourself.",
 
+  "loginRememberPassword": "Remember password",
+  "loginRememberPasswordHint": "For the features below. Your password is stored on this device as a hash. Leaving it unchecked won't affect other features.",
+  "loginRememberPasswordScope": "Scope: ",
+  "appAuthRequiredTitle": "Re-authentication required",
+  "appAuthRequiredMessage": "This feature's authorization has expired. Please re-enter your password to continue.",
+  "appAuthUnlock": "Verify",
+  "appAuthCancel": "Cancel",
+  "credentialTitle": "App Credential",
+  "credentialStatusTitle": "Credential status",
+  "credentialStatusValid": "Valid",
+  "credentialStatusNone": "Not obtained",
+  "credentialExpiryLabel": "Valid until: ",
+  "credentialExpiryUnknown": "Expiry unknown",
+  "credentialDaysRemaining": "~{days} days left",
+  "@credentialDaysRemaining": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "credentialEnableRememberTitle": "Enable remember password",
+  "credentialEnableRememberMessage": "Enter your password to enable remembering it. This credential will then renew automatically when it expires, with no need to re-enter it.",
+  "credentialClearOnRestartHint": "Remember password turned off. For your security, the password stored on this device will be cleared the next time you restart the app.",
+  "credentialFeaturesTitle": "Features using this credential",
+  "credentialAbout": "Some features use YunTech's mobile-app endpoint, which needs a credential (a Bearer token) separate from the web login. This credential lasts about 90 days. When it expires, if you chose to remember your password the app silently renews it using the stored hash — no interruption; otherwise you'll be asked to re-enter your password when using that feature. Your password is kept only as a hash in this device's secure storage; it cannot be reversed to plaintext and cannot be used for the web login.",
+
   "calendarTitle": "Calendar",
   "legendTitle": "Calendar Icon Legend",
   "legendBgColor": "Date Background Colors:",

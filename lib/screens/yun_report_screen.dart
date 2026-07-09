@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
+import '../services/app_api/app_api_service.dart';
+import '../widgets/app_api_password_dialog.dart';
 import '../widgets/custom_app_bar.dart';
 
 /// 在學證明：以 App 端點（Bearer token）打 `/api/User/GetYunReport` 取得 PDF 並顯示。
@@ -18,6 +20,7 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
   PdfControllerPinch? _controller;
   bool _loading = true;
   bool _failed = false;
+  bool _needsAuth = false;
 
   @override
   void initState() {
@@ -29,10 +32,24 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
     setState(() {
       _loading = true;
       _failed = false;
+      _needsAuth = false;
     });
     Uint8List? bytes;
     try {
       bytes = await ref.read(authProvider).api.appApi.getYunReport();
+    } on AppApiAuthRequiredException {
+      // Token expired and no saved credential — prompt for the password.
+      if (!mounted) return;
+      final ok = await showAppApiPasswordDialog(context, ref);
+      if (!mounted) return;
+      if (ok == true) {
+        return _load(); // retry with the fresh token
+      }
+      setState(() {
+        _loading = false;
+        _needsAuth = true;
+      });
+      return;
     } catch (_) {
       bytes = null;
     }
@@ -66,6 +83,32 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
   Widget _buildBody(AppLocalizations l) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
+    }
+    if (_needsAuth) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 56,
+                color: colorScheme.outline,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l.appAuthRequiredMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(onPressed: _load, child: Text(l.appAuthUnlock)),
+            ],
+          ),
+        ),
+      );
     }
     if (_failed || _controller == null) {
       final colorScheme = Theme.of(context).colorScheme;
