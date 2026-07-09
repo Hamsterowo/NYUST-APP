@@ -9,7 +9,7 @@
   <a href="https://github.com/Hamsterowo/NYUST-APP/actions"><img src="https://github.com/Hamsterowo/NYUST-APP/actions/workflows/build.yaml/badge.svg" alt="Build Status"/></a>
   <img src="https://img.shields.io/badge/Flutter-%3E%3D%203.11.0-02569B?logo=flutter&logoColor=white" alt="Flutter Version"/>
   <img src="https://img.shields.io/badge/Platform-Android-blue" alt="Supported Platforms"/>
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
+  <img src="https://img.shields.io/badge/License-GPLv3-green" alt="License"/>
 </p>
 
 ---
@@ -23,13 +23,15 @@
 *   📅 **課表瀏覽**：快速瀏覽當前課表，可以查看上課位置以及課程詳細資訊等內容。
 *   📊 **成績追蹤**：提供歷年學期成績與排名，快速掌握學期進度。
 *   🎓 **畢業學分**：抓取畢業學分頁面，了解畢業所需學分。
+*   📄 **在學證明**：透過官方雲科 App 端點（免圖形驗證碼）取得在學證明 PDF，直接於 App 內檢視。
 *   🗓️ **學校行事曆**：整合學校重要日程與台灣法定假日，快速瀏覽下個假期以及重要資訊。
 *   🔔 **成績更新背景通知 (Background Sync)**：
     *   在背景定期向學校伺服器比對最新成績。
     *   在手機本機上比對，若有新成績公佈即觸發**純本地通知**，不經過任何第三方推播伺服器，速度極快且隱私安全。
 *   🔒 **隱私防護等級**：
     *   **無後端伺服器**：所有校務資料及個人基本資訊僅儲存於使用者手機本機。
-    *   **密碼不落地**：密碼僅存在於登入當下的記憶體中。驗證後取得的登入憑證 (Cookie) 以 AES 加密方式儲存於裝置的**安全儲存區 (Secure Storage)**。
+    *   **密碼不落地**：預設情況下密碼僅存在於登入當下的記憶體中。驗證後取得的登入憑證 (Cookie) 以 AES 加密方式儲存於裝置的**安全儲存區 (Secure Storage)**。
+    *   **記住密碼（選用）**：為讓在學證明等 App 端點功能於憑證過期時可自動重新登入，可選擇開啟「記住密碼」；此時**僅儲存密碼的 SHA-256 雜湊（非明文）** 於安全儲存區，且可隨時關閉並清除。
 
 ---
 
@@ -101,5 +103,5 @@ flutter build appbundle --release --dart-define=USE_FIREBASE=true
 ## 📜 法律聲明與授權 (License)
 
 *   **免責聲明**：本應用程式為第三方開源專案，與國立雲林科技大學官方單位無任何隸屬或合作關係。使用者輸入的帳號密碼僅直接與學校伺服器進行通信。
-*   **授權條款**：本專案採用 **[MIT License](LICENSE)** 授權開源。歡迎雲科大同學與開發者一同參與開發與貢獻！
+*   **授權條款**：本專案採用 **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)** 授權開源。歡迎雲科大同學與開發者一同參與開發與貢獻！
 
