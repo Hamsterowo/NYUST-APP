@@ -78,7 +78,10 @@ app.*.map.json
 !.env.example
 
 # Test
-test/
+# Tests are version-controlled so CI's "Test" step actually runs them.
+# Only local-only, sensitive, or scratch tests are ignored, by naming convention:
+#   *_local_test.dart  — keep real credentials / private experiments out of the repo
+test/**/*_local_test.dart
 
 # Local-only planning notes (kept out of version control)
 implementation_plan.md
