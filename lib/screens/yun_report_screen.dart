@@ -17,7 +17,8 @@ class YunReportScreen extends ConsumerStatefulWidget {
 }
 
 class _YunReportScreenState extends ConsumerState<YunReportScreen> {
-  PdfControllerPinch? _controller;
+  /// 每頁預先算好的點陣圖（PNG bytes），以固定頁寬顯示、不提供縮放。
+  List<Uint8List>? _pageImages;
   bool _loading = true;
   bool _failed = false;
   bool _needsAuth = false;
@@ -61,14 +62,52 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
       });
       return;
     }
-    _controller = PdfControllerPinch(document: PdfDocument.openData(bytes));
-    setState(() => _loading = false);
+    List<Uint8List> pages;
+    try {
+      pages = await _renderPages(bytes);
+    } catch (_) {
+      pages = const [];
+    }
+    if (!mounted) return;
+    if (pages.isEmpty) {
+      setState(() {
+        _loading = false;
+        _failed = true;
+      });
+      return;
+    }
+    setState(() {
+      _pageImages = pages;
+      _loading = false;
+    });
   }
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
+  /// 把 PDF 每頁算成點陣圖。以固定目標寬度算圖，之後 UI 再依螢幕寬縮放，
+  /// 確保「符合頁寬」且不需要縮放手勢。
+  Future<List<Uint8List>> _renderPages(Uint8List bytes) async {
+    const targetWidth = 1600.0;
+    final document = await PdfDocument.openData(bytes);
+    final images = <Uint8List>[];
+    try {
+      for (var i = 1; i <= document.pagesCount; i++) {
+        final page = await document.getPage(i);
+        try {
+          final scale = targetWidth / page.width;
+          final image = await page.render(
+            width: page.width * scale,
+            height: page.height * scale,
+            format: PdfPageImageFormat.png,
+            backgroundColor: '#FFFFFF',
+          );
+          if (image != null) images.add(image.bytes);
+        } finally {
+          await page.close();
+        }
+      }
+    } finally {
+      await document.close();
+    }
+    return images;
   }
 
   @override
@@ -110,7 +149,7 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
         ),
       );
     }
-    if (_failed || _controller == null) {
+    if (_failed || _pageImages == null || _pageImages!.isEmpty) {
       final colorScheme = Theme.of(context).colorScheme;
       return Center(
         child: Padding(
@@ -139,9 +178,27 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
         ),
       );
     }
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Expanded(child: PdfViewPinch(controller: _controller!)),
+        Expanded(
+          child: ColoredBox(
+            color: colorScheme.surfaceContainerHighest,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (final image in _pageImages!)
+                    Image.memory(
+                      image,
+                      width: double.infinity,
+                      fit: BoxFit.fitWidth,
+                      gaplessPlayback: true,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
         _buildNote(l),
       ],
     );
