@@ -30,7 +30,12 @@ class ApiService {
   /// demo / 除錯模式開關。實際上代理到 [ServiceFactory.isDemoMode]，
   /// 由它決定回傳 Mock 還是真實 Service 實作。
   bool get isMockMode => _factory.isDemoMode;
-  set isMockMode(bool v) => _factory.isDemoMode = v;
+  set isMockMode(bool v) {
+    _factory.isDemoMode = v;
+    // Keep the app-endpoint client in sync so the credential page shows
+    // sample data for the demo account (which never really logs in via /Token).
+    appApi.setMockMode(v);
+  }
 
   Future<void> init() => _client.init();
 

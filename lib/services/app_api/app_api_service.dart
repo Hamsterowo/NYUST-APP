@@ -64,6 +64,27 @@ class AppApiService {
   /// is never used to decide when to refresh.
   DateTime? _tokenExpiry;
 
+  /// Demo/mock mode: the demo account never really hits `/Token`, so we seed a
+  /// fake token + expiry (and short-circuit network calls) purely so the
+  /// credential settings page has sample data to show.
+  bool _mockMode = false;
+
+  /// Enables/disables mock mode, seeding or clearing the demo credential.
+  void setMockMode(bool value) {
+    _mockMode = value;
+    if (value) {
+      _accessToken = 'mock-access-token';
+      _userId = 'B12345678';
+      _tokenExpiry = DateTime.now().add(const Duration(days: 90));
+      _passwordHash = null; // "remember password" starts off in the demo
+    } else {
+      _accessToken = null;
+      _userId = null;
+      _tokenExpiry = null;
+      _passwordHash = null;
+    }
+  }
+
   bool get hasToken => _accessToken != null && _accessToken!.isNotEmpty;
 
   /// Approximate expiry of the current token, or null if unknown / no token.
@@ -77,6 +98,7 @@ class AppApiService {
   /// Whether the password hash is **persisted** (survives restart) — i.e. the
   /// "remember password" setting is currently on.
   Future<bool> isPasswordRemembered() async {
+    if (_mockMode) return _passwordHash != null;
     try {
       final v = await _storage.read(key: _pwdHashKey);
       return v != null && v.isNotEmpty;
@@ -91,6 +113,10 @@ class AppApiService {
   /// returns false so the caller can prompt for the password via
   /// [reloginWithPassword].
   Future<bool> setRememberPassword(bool value) async {
+    if (_mockMode) {
+      _passwordHash = value ? 'mock-hash' : null;
+      return true;
+    }
     try {
       if (value) {
         if (!hasSavedCredential) return false;
@@ -147,6 +173,10 @@ class AppApiService {
     String password, {
     bool remember = false,
   }) async {
+    if (_mockMode) {
+      _passwordHash = remember ? 'mock-hash' : _passwordHash;
+      return true;
+    }
     final userId = _userId;
     if (userId == null || userId.isEmpty) return false;
     final hash = YuntechAppCrypto.sha256Hex(password);
@@ -227,8 +257,12 @@ class AppApiService {
   /// Returns null if not registered (503) or on network/other error.
   /// Throws [AppApiAuthRequiredException] when the token expired and there is no
   /// saved credential to refresh it (caller should prompt for the password).
-  Future<Uint8List?> getYunReport() =>
-      _authedGetBytes('/api/User/GetYunReport');
+  Future<Uint8List?> getYunReport() async {
+    // The demo account has no real token; skip the network and show the
+    // "unavailable" state rather than prompting for a password.
+    if (_mockMode) return null;
+    return _authedGetBytes('/api/User/GetYunReport');
+  }
 
   /// Runs an authenticated GET returning bytes, transparently handling token
   /// expiry: ensures a token (refreshing from the saved credential if needed),
@@ -272,6 +306,7 @@ class AppApiService {
   );
 
   Future<void> clear() async {
+    _mockMode = false;
     _accessToken = null;
     _userId = null;
     _passwordHash = null;

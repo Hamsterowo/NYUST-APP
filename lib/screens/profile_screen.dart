@@ -341,32 +341,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   onTap: () =>
                                       SettingsUtils.openLanguageSettings(),
                                 ),
-                                if (!auth.api.isMockMode) ...[
-                                  const Divider(height: 1, indent: 56),
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.key_outlined,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                    title: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).credentialTitle,
-                                    ),
-                                    trailing: Icon(
-                                      Icons.chevron_right,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const CredentialScreen(),
-                                        ),
-                                      );
-                                    },
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.key_outlined,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
-                                ],
+                                  title: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).credentialTitle,
+                                  ),
+                                  trailing: Icon(
+                                    Icons.chevron_right,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const CredentialScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
                                 if (!kIsWeb) ...[
                                   const Divider(height: 1, indent: 56),
                                   ListTile(
