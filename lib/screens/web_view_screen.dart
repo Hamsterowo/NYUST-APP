@@ -91,6 +91,7 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
               if (controller != null && await controller.canGoBack()) {
                 await controller.goBack();
               } else {
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               }
             },

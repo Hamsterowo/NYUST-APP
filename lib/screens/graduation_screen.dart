@@ -576,6 +576,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         final file = await File('${tempDir.path}/schedule.png').create();
         await file.writeAsBytes(pngBytes);
 
+        if (!mounted) return;
         final box = context.findRenderObject() as RenderBox?;
         await Share.shareXFiles(
           [XFile(file.path)],
@@ -586,6 +587,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       }
     } catch (e) {
       if (kDebugMode) print("Share schedule error: $e");
+      if (!mounted) return;
       final isEnglish = Localizations.localeOf(context).languageCode == 'en';
       showTopSnackBar(
         context,
