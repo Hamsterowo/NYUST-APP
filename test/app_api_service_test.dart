@@ -101,9 +101,11 @@ void main() {
 
         expect(service.hasToken, isTrue);
         expect(service.tokenExpiry, isNotNull);
-        // Demo account never really logs in, so the report is "unavailable"
-        // (null) rather than a network call / password prompt.
-        expect(await service.getYunReport(), isNull);
+        // Demo account serves the bundled sample PDF (easter egg) instead of
+        // hitting the network or prompting for a password.
+        final pdf = await service.getYunReport();
+        expect(pdf, isNotNull);
+        expect(String.fromCharCodes(pdf!.take(5)), '%PDF-');
       },
     );
 

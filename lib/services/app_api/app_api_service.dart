@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/yuntech_app_crypto.dart';
 
@@ -282,9 +283,17 @@ class AppApiService {
   /// Throws [AppApiAuthRequiredException] when the token expired and there is no
   /// saved credential to refresh it (caller should prompt for the password).
   Future<Uint8List?> getYunReport() async {
-    // The demo account has no real token; skip the network and show the
-    // "unavailable" state rather than prompting for a password.
-    if (_mockMode) return null;
+    // The demo account has no real token; instead of hitting the network,
+    // serve a bundled sample PDF (an easter egg) so the demo shows a real
+    // document instead of an error/prompt.
+    if (_mockMode) {
+      try {
+        final data = await rootBundle.load('assets/demo_yun_report.pdf');
+        return data.buffer.asUint8List();
+      } catch (_) {
+        return null;
+      }
+    }
     return _authedGetBytes('/api/User/GetYunReport');
   }
 

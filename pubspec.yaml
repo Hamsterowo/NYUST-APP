@@ -98,6 +98,7 @@ flutter:
     - assets/icon/
     - assets/map.svg
     - assets/map_data.json
+    - assets/demo_yun_report.pdf
     - docs/PRIVACY.zh-TW.md
     - docs/PRIVACY.en.md
 
