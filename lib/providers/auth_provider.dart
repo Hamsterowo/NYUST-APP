@@ -91,6 +91,7 @@ class AuthProvider with ChangeNotifier {
         if (cachedUser['user']?['id'] == MockData.demoId) {
           _apiService.isMockMode = true;
         }
+        _seedAppApiUserId();
         isAlreadyLoggedIn = true;
         notifyListeners();
         onLoginSuccess?.call();
@@ -118,6 +119,7 @@ class AuthProvider with ChangeNotifier {
         // 等恢復連線後再驗證。絕不在這裡清除 cookie 或快取。
       } else if (info['success'] == true && hasValidUser) {
         _user = info;
+        _seedAppApiUserId();
         await _saveUserCache(info);
         if (!isAlreadyLoggedIn) {
           onLoginSuccess?.call();
@@ -152,6 +154,20 @@ class AuthProvider with ChangeNotifier {
     } finally {
       _isInitialized = true;
       notifyListeners();
+    }
+  }
+
+  /// Feeds the app-endpoint client the student ID from the authoritative web
+  /// session so it can mint/refresh a Bearer token even when it was never
+  /// stored (e.g. upgrade from an older build, or a failed background login).
+  /// The web login username and the app-endpoint username are the same student
+  /// ID. No-op when we don't have one or the app client already knows it.
+  void _seedAppApiUserId() {
+    final userMap = _user?['user'];
+    final id = (userMap is Map ? userMap['學號'] : null) ?? _user?['username'];
+    final studentId = id?.toString().trim();
+    if (studentId != null && studentId.isNotEmpty) {
+      _apiService.appApi.ensureUserId(studentId);
     }
   }
 
@@ -231,6 +247,9 @@ class AuthProvider with ChangeNotifier {
           password,
           remember: rememberPassword,
         );
+        // Even if that background /Token call failed, remember the student ID
+        // so a later app-endpoint re-login (在學證明 / remember-password) works.
+        _apiService.appApi.ensureUserId(username);
 
         notifyListeners();
         onLoginSuccess?.call();

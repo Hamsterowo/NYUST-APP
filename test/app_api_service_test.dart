@@ -188,6 +188,43 @@ void main() {
     });
   });
 
+  group('ensureUserId (seed student ID from web session)', () {
+    test('lets an upgraded user re-login without a stored id', () async {
+      final adapter = _FakeAdapter(
+        (options, i) => _jsonBody({'access_token': 'tok-1'}),
+      );
+      // No prior login → no stored user id, like a user upgrading from an
+      // older build. reloginWithPassword would otherwise fail before the call.
+      final service = AppApiService(httpClientAdapter: adapter);
+      expect(await service.reloginWithPassword('pw'), isFalse);
+
+      service.ensureUserId('D11012345');
+      expect(await service.reloginWithPassword('pw'), isTrue);
+      expect(service.hasToken, isTrue);
+    });
+
+    test('does not override an id already known from a real login', () async {
+      final adapter = _FakeAdapter(
+        (options, i) => _jsonBody({'access_token': 'tok-1'}),
+      );
+      final service = AppApiService(httpClientAdapter: adapter);
+      await service.login('D11012345', 'pw');
+
+      service.ensureUserId('OTHER999'); // should be ignored
+      expect(store['app_api_user_id'], 'D11012345');
+    });
+
+    test('is a no-op for empty ids and in mock mode', () async {
+      final service = AppApiService();
+      service.ensureUserId('');
+      expect(await service.reloginWithPassword('pw'), isFalse);
+
+      service.setMockMode(true);
+      service.ensureUserId('D11012345'); // mock mode keeps its own demo id
+      expect(await service.reloginWithPassword('pw'), isTrue);
+    });
+  });
+
   group('getYunReport auth handling', () {
     test('on 401 it silently re-mints the token and retries once', () async {
       final adapter = _FakeAdapter((options, i) {

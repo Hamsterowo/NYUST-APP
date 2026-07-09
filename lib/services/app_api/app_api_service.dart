@@ -94,6 +94,21 @@ class AppApiService {
     }
   }
 
+  /// Seeds the student ID used for app-endpoint logins from the authoritative
+  /// web SSO session, when it isn't already known. The app endpoint logs in
+  /// with the **same** student ID as the web portal, so as long as the user is
+  /// logged in on the web we can always mint/refresh a Bearer token — including
+  /// for users who upgraded from a version that never stored it, or whose
+  /// background `/Token` call happened to fail at login time. Kept in memory
+  /// only (re-seeded each launch from the live session); never overrides an id
+  /// already obtained from a real `/Token` response.
+  void ensureUserId(String? id) {
+    if (_mockMode) return;
+    if (id == null || id.isEmpty) return;
+    if (_userId != null && _userId!.isNotEmpty) return;
+    _userId = id;
+  }
+
   bool get hasToken => _accessToken != null && _accessToken!.isNotEmpty;
 
   /// Approximate expiry of the current token, or null if unknown / no token.
