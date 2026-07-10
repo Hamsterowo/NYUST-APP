@@ -27,8 +27,9 @@ class ScheduleScreen extends ConsumerStatefulWidget {
 
 class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   bool _isMapMode = false;
-  // 課程方塊只在第一次載入完成時淡入一次；之後的重建（例如切換地圖模式）不再淡入。
-  bool _cardsFadedIn = false;
+  // 課程方塊淡入的「世代」：每次進到課表分頁或切換學期時 +1，
+  // 讓所有方塊重新以隨機錯開的方式淡入一次（見 [_FadeInCard]）。
+  int _fadeGen = 0;
   final GlobalKey _repaintKey = GlobalKey();
 
   Timer? _timeLineTimer;
@@ -180,6 +181,14 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final auth = ref.watch(authProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
+    // 從其他分頁切回課表分頁（index 1）時：重播課程方塊淡入，並確保學期清單已載入。
+    ref.listen<int>(navIndexProvider, (prev, next) {
+      if (next == 1 && prev != 1 && mounted) {
+        setState(() => _fadeGen++);
+        ref.read(dataProvider).ensureScheduleSemesters();
+      }
+    });
+
     if (!auth.isInitialized) {
       if (widget.embed) {
         return const Center(child: CircularProgressIndicator());
@@ -294,7 +303,61 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   }
 
   Widget _buildBody(DataProvider data) {
-    if (data.scheduleFailed && data.scheduleData.isEmpty) {
+    final bar = _buildSemesterBar(data);
+    final content = _buildScheduleContent(data);
+    if (bar == null) return content;
+    return Column(
+      children: [
+        bar,
+        Expanded(child: content),
+      ],
+    );
+  }
+
+  /// 可水平捲動的學期切換列（分段膠囊，大小隨文字、不填滿）。
+  /// 學期少於 2 個時不顯示。
+  Widget? _buildSemesterBar(DataProvider data) {
+    final sems = data.scheduleSemesters;
+    if (sems.length < 2) return null;
+    final selected = data.selectedSemester ?? data.currentSemester;
+    return SizedBox(
+      height: 46,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        itemCount: sems.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          final value = sems[i]['value'] ?? '';
+          return _SemesterChip(
+            label: _shortSemester(value, sems[i]['label']),
+            selected: value == selected,
+            onTap: () {
+              if (value == selected) return;
+              setState(() => _fadeGen++);
+              data.selectSemester(value);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  /// 學期代碼縮寫：`1142` → `114-2`（拿不到就用完整 label）。
+  String _shortSemester(String value, String? fallback) {
+    if (value.length >= 2) {
+      return '${value.substring(0, value.length - 1)}-'
+          '${value.substring(value.length - 1)}';
+    }
+    return fallback ?? value;
+  }
+
+  Widget _buildScheduleContent(DataProvider data) {
+    final switching = data.isLoadingScheduleSemester;
+    final events = data.displayedSchedule;
+    final hasData = events.isNotEmpty;
+
+    if (data.scheduleFailed && data.scheduleData.isEmpty && !switching) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -320,63 +383,34 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       );
     }
 
-    final hasData = data.scheduleData.isNotEmpty;
-    final displayData = hasData
-        ? data.scheduleData
-        : [
-            ScheduleEvent(
-              semesterCourseNo: '11210001',
-              deptCourseNo: 'ABC0001',
-              name: '這是一堂假的課這是一堂假的課',
-              courseClass: 'A班',
-              classType: '必修',
-              requiredType: '必',
-              credits: '3',
-              timeRoomStr: '1-C,D/教室',
-              teacher: '教授',
-              remark: '',
-              times: ['C', 'D'],
-              weekday: '1',
-            ),
-            ScheduleEvent(
-              semesterCourseNo: '11210002',
-              deptCourseNo: 'ABC0002',
-              name: '這是一堂假的課這是一堂假的課',
-              courseClass: 'B班',
-              classType: '選修',
-              requiredType: '選',
-              credits: '3',
-              timeRoomStr: '2-E,F/教室',
-              teacher: '教授',
-              remark: '',
-              times: ['E', 'F'],
-              weekday: '2',
-            ),
-            ScheduleEvent(
-              semesterCourseNo: '11210003',
-              deptCourseNo: 'ABC0003',
-              name: '假的課',
-              courseClass: 'C班',
-              classType: '必修',
-              requiredType: '必',
-              credits: '3',
-              timeRoomStr: '3-A,B/教室',
-              teacher: '教授',
-              remark: '',
-              times: ['A', 'B'],
-              weekday: '3',
-            ),
-          ];
+    if ((data.isLoadingSchedule || switching) && !hasData) {
+      return _buildScheduleGrid(const <ScheduleEvent>[], isLoading: true);
+    }
 
-    if (!hasData && !data.isLoadingSchedule) {
+    if (!hasData) {
       return Center(child: Text(AppLocalizations.of(context).noScheduleData));
     }
 
-    if (data.isLoadingSchedule && !hasData) {
-      return _buildScheduleGrid(<ScheduleEvent>[], isLoading: true);
-    }
+    final grid = _buildScheduleGrid(events);
+    if (!switching) return grid;
 
-    return _buildScheduleGrid(displayData);
+    // 切換到另一個學期、抓取中：在現有課表上疊一層 loading。
+    return Stack(
+      children: [
+        grid,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.45),
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildScheduleGrid(
@@ -388,14 +422,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     const headerHeight = 36.0;
     const minCellWidth = 46.0;
     const minCellHeight = 28.0;
-
-    // 首次載入完成時，課程方塊淡入一次（之後重建不再淡入）。
-    final animateCards = !isLoading && !_cardsFadedIn;
-    if (animateCards) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _cardsFadedIn = true;
-      });
-    }
 
     final uniqueCourseNames =
         courses
@@ -550,11 +576,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
             final child = isLoading || !event.name.isNotEmpty
                 ? null
-                : _buildCourseCard(
-                    event,
-                    uniqueCourseNames,
-                    animate: animateCards,
-                  );
+                : _buildCourseCard(event, uniqueCourseNames);
 
             final cellWidget = Container(
               height: cellHeight * span,
@@ -773,11 +795,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
   }
 
-  Widget _buildCourseCard(
-    ScheduleEvent event,
-    List<String> uniqueCourseNames, {
-    bool animate = false,
-  }) {
+  Widget _buildCourseCard(ScheduleEvent event, List<String> uniqueCourseNames) {
     final colorScheme = Theme.of(context).colorScheme;
     final hasRoom = event.room != null && event.room!.isNotEmpty;
     final isLocatable = _isMapMode && hasRoom;
@@ -923,16 +941,111 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       ),
     );
 
-    if (!animate) return card;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 340),
-      curve: Curves.easeOut,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.scale(scale: 0.94 + 0.06 * t, child: child),
+    // 每次進到課表分頁或切換學期時（_fadeGen 改變），方塊以隨機錯開的方式淡入。
+    return _FadeInCard(generation: _fadeGen, child: card);
+  }
+}
+
+/// 學期切換膠囊：大小隨文字（不填滿），選中填 teal 色。
+class _SemesterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _SemesterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  static const Color _accent = Color(0xFF14B8A6);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? _accent : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: selected ? _accent : cs.outlineVariant),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.0,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            color: selected ? Colors.white : cs.onSurfaceVariant,
+          ),
+        ),
       ),
-      child: card,
+    );
+  }
+}
+
+/// 課程方塊的「進場淡入」包裝：以隨機的小延遲錯開，讓一整批方塊淡入時
+/// 有一點自然的隨機感。[generation] 改變時會重新播放一次淡入。
+class _FadeInCard extends StatefulWidget {
+  final Widget child;
+  final int generation;
+  const _FadeInCard({required this.child, required this.generation});
+
+  @override
+  State<_FadeInCard> createState() => _FadeInCardState();
+}
+
+class _FadeInCardState extends State<_FadeInCard> {
+  bool _visible = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _schedule();
+  }
+
+  @override
+  void didUpdateWidget(_FadeInCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.generation != widget.generation) {
+      setState(() => _visible = false);
+      _schedule();
+    }
+  }
+
+  void _schedule() {
+    _timer?.cancel();
+    // 0–300ms 的隨機延遲：一點點就好，但足以有錯落感。
+    final delayMs = Random().nextInt(300);
+    _timer = Timer(Duration(milliseconds: delayMs), () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _visible ? 1.0 : 0.94,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOut,
+      child: AnimatedOpacity(
+        opacity: _visible ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
     );
   }
 }
