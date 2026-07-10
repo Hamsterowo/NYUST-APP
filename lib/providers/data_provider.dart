@@ -150,10 +150,38 @@ class DataProvider with ChangeNotifier {
       await Future.delayed(const Duration(milliseconds: 200));
       await fetchGraduation(force: force);
       await fetchSchedule(force: force);
+      await _prefetchOtherSemesters(force: force);
     } finally {
       _isPrefetching = false;
       notifyListeners();
     }
+  }
+
+  /// 預先載入「其他學期」的課表（當前學期已由 [fetchSchedule] 抓好），
+  /// 讓使用者切換學期時無需等待。逐一抓取並加小延遲，避免 CookieJar 競爭；
+  /// 任一學期失敗都不影響其他（切換時仍可按需重抓）。
+  Future<void> _prefetchOtherSemesters({bool force = false}) async {
+    // 先確保已知道學期清單（cache-hit 時 fetchSchedule 不會帶回清單）。
+    if (scheduleSemesters.isEmpty) {
+      await ensureScheduleSemesters();
+    }
+    for (final s in scheduleSemesters) {
+      final value = s['value'] ?? '';
+      if (value.isEmpty || value == currentSemester) continue;
+      if (!force && _semesterCache.containsKey(value)) continue;
+      try {
+        await Future.delayed(const Duration(milliseconds: 200));
+        final resp = await _api.getSchedule(semester: value);
+        if (resp['status'] == 'success') {
+          _semesterCache[value] = _parseSchedule(
+            Map<String, dynamic>.from(resp),
+          );
+        }
+      } catch (_) {
+        // 略過此學期，使用者實際切換時會再按需抓一次。
+      }
+    }
+    notifyListeners();
   }
 
   /// 強制重新抓取（忽略 TTL）。
