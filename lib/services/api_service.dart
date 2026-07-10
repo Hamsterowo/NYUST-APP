@@ -100,8 +100,8 @@ class ApiService {
 
   // ---- Course ----
 
-  Future<Map<String, dynamic>> getSchedule() =>
-      _factory.courseService.getSchedule();
+  Future<Map<String, dynamic>> getSchedule({String? semester}) =>
+      _factory.courseService.getSchedule(semester: semester);
 
   Future<Map<String, dynamic>> getCourseDetail({
     required String year,

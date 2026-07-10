@@ -47,6 +47,32 @@ class DataProvider with ChangeNotifier {
   bool isLoadingSchedule = false;
   bool scheduleFailed = false;
 
+  // ── 多學期課表 ──────────────────────────────────────────────
+  /// 可切換的學期選項（[{value,label}]），線上抓到才有值。
+  List<Map<String, String>> scheduleSemesters = [];
+
+  /// 學校目前的當前學期代碼（例：1142）。
+  String? currentSemester;
+
+  /// 使用者正在查看的學期代碼（null 或等於 [currentSemester] 時看當前學期）。
+  String? selectedSemester;
+
+  /// 切換到非當前學期時的載入狀態。
+  bool isLoadingScheduleSemester = false;
+
+  /// 非當前學期的課表快取（僅記憶體，歷史資料可重抓）。
+  final Map<String, List<ScheduleEvent>> _semesterCache = {};
+
+  bool _loadingSemesterList = false;
+
+  /// 目前應顯示的課表：當前學期直接讀 Drift 快取的 [scheduleData]，
+  /// 其他學期讀記憶體快取。
+  List<ScheduleEvent> get displayedSchedule {
+    final sel = selectedSemester;
+    if (sel == null || sel == currentSemester) return scheduleData;
+    return _semesterCache[sel] ?? scheduleData;
+  }
+
   bool _isPrefetching = false;
   bool get isPrefetching => _isPrefetching;
 
@@ -155,6 +181,11 @@ class DataProvider with ChangeNotifier {
     gradesFailed = false;
     graduationFailed = false;
     scheduleFailed = false;
+    scheduleSemesters = [];
+    currentSemester = null;
+    selectedSemester = null;
+    _semesterCache.clear();
+    isLoadingScheduleSemester = false;
     _isPrefetching = false;
     notifyListeners();
 
@@ -205,10 +236,75 @@ class DataProvider with ChangeNotifier {
     try {
       final ok = await _courseRepo.refresh(force: force);
       if (!ok && scheduleData.isEmpty) scheduleFailed = true;
+      _captureSemesterMeta();
     } catch (_) {
       if (scheduleData.isEmpty) scheduleFailed = true;
     } finally {
       isLoadingSchedule = false;
+      notifyListeners();
+    }
+  }
+
+  /// 從 repository 擷取學期清單（僅在剛完成一次線上抓取時有值）。
+  void _captureSemesterMeta() {
+    if (_courseRepo.semesters.isNotEmpty) {
+      scheduleSemesters = _courseRepo.semesters;
+    }
+    if (_courseRepo.currentSemester.isNotEmpty) {
+      currentSemester = _courseRepo.currentSemester;
+      selectedSemester ??= currentSemester;
+    }
+  }
+
+  /// 課表畫面開啟時呼叫：若尚不知道學期清單且在線上，補抓一次以填入切換器。
+  Future<void> ensureScheduleSemesters() async {
+    if (scheduleSemesters.isNotEmpty || _loadingSemesterList) return;
+    if (!await ConnectivityService.instance.checkOnline()) return;
+    _loadingSemesterList = true;
+    try {
+      final resp = await _api.getSchedule();
+      if (resp['status'] == 'success') {
+        final data = resp['data'] as Map?;
+        final raw = (data?['semesters'] as List?) ?? const [];
+        scheduleSemesters = raw
+            .map(
+              (e) => (e as Map).map(
+                (k, v) => MapEntry(k.toString(), v?.toString() ?? ''),
+              ),
+            )
+            .toList();
+        currentSemester = (data?['currentSemester'] ?? '').toString();
+        selectedSemester ??= currentSemester;
+        notifyListeners();
+      }
+    } catch (_) {
+      // 靜默失敗：切換器沒出現而已，不影響當前學期課表顯示。
+    } finally {
+      _loadingSemesterList = false;
+    }
+  }
+
+  /// 切換到指定學期。當前學期直接切換；其他學期若未快取則按需抓取。
+  Future<void> selectSemester(String value) async {
+    if (value == selectedSemester) return;
+    selectedSemester = value;
+
+    if (value == currentSemester || _semesterCache.containsKey(value)) {
+      notifyListeners();
+      return;
+    }
+
+    isLoadingScheduleSemester = true;
+    notifyListeners();
+    try {
+      final resp = await _api.getSchedule(semester: value);
+      if (resp['status'] == 'success') {
+        _semesterCache[value] = _parseSchedule(Map<String, dynamic>.from(resp));
+      }
+    } catch (_) {
+      // 保留在該學期，顯示空資料；使用者可切回或重試。
+    } finally {
+      isLoadingScheduleSemester = false;
       notifyListeners();
     }
   }
