@@ -210,6 +210,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginCaptchaRefreshTooltip => 'Refresh Captcha';
 
   @override
+  String get loginShowPassword => 'Show password';
+
+  @override
+  String get loginHidePassword => 'Hide password';
+
+  @override
   String get loginButton => 'Login';
 
   @override

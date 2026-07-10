@@ -24,6 +24,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   String _versionStr = '';
   bool _rememberPassword = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -166,9 +167,21 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   labelText: AppLocalizations.of(context).loginPasswordLabel,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                    ),
+                    tooltip: _obscurePassword
+                        ? AppLocalizations.of(context).loginShowPassword
+                        : AppLocalizations.of(context).loginHidePassword,
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                  ),
                   filled: true,
                 ),
-                obscureText: true,
+                obscureText: _obscurePassword,
               ),
               SizedBox(height: 16),
               Row(

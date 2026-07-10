@@ -101,6 +101,8 @@
   "loginPasswordLabel": "密碼",
   "loginCaptchaLabel": "驗證碼",
   "loginCaptchaRefreshTooltip": "重新整理驗證碼",
+  "loginShowPassword": "顯示密碼",
+  "loginHidePassword": "隱藏密碼",
   "loginButton": "登入",
   "loginFailed": "帳密或驗證碼錯誤",
   "pleaseLoginToViewSchedule": "請在此登入以查看課表",

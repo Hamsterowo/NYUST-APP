@@ -204,6 +204,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginCaptchaRefreshTooltip => '重新整理驗證碼';
 
   @override
+  String get loginShowPassword => '顯示密碼';
+
+  @override
+  String get loginHidePassword => '隱藏密碼';
+
+  @override
   String get loginButton => '登入';
 
   @override
