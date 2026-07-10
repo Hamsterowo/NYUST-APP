@@ -33,6 +33,15 @@ class AuthProvider with ChangeNotifier {
   String? _verificationToken;
   bool _isInitialized = false;
 
+  // 二步驟驗證（TOTP）待處理狀態：login() 偵測到帳號啟用 2FA 後暫存，
+  // 待 UI 收集 6 碼驗證碼呼叫 submitTotp() 完成登入。密碼只保留在記憶體，
+  // 供驗證成功後補打 App 端點登入用，絕不持久化明文。
+  bool _mfaRequired = false;
+  String? _mfaVerificationToken;
+  String? _pendingUsername;
+  String? _pendingPassword;
+  bool _pendingRememberPassword = false;
+
   /// 登入成功後的回呼，由 DataProvider 設定
   VoidCallback? onLoginSuccess;
 
@@ -49,6 +58,9 @@ class AuthProvider with ChangeNotifier {
   Map<String, dynamic>? get user => _user;
   String? get error => _error;
   String? get captchaUrl => _captchaUrl;
+
+  /// login() 是否偵測到帳號啟用二步驟驗證，正等待 UI 收集 TOTP 驗證碼。
+  bool get mfaRequired => _mfaRequired;
 
   Future<void> init() async {
     await _apiService.init();
@@ -232,27 +244,21 @@ class AuthProvider with ChangeNotifier {
         _verificationToken!,
       );
 
-      if (result['success'] == true) {
-        final info = await _apiService.getUserInfo();
-        _user = info;
-        _user?['username'] = username;
-
-        await _saveUserCache(_user!);
-
-        // 額外用同一組帳密（免驗證碼）拿 App 端點 Bearer token，供在學證明等
-        // /api 服務使用。用獨立 client、不影響網頁 session；失敗不影響登入。
-        // rememberPassword 為 true 時，會持久化密碼雜湊以便 token 過期後靜默重登。
-        await _apiService.appApi.login(
-          username,
-          password,
-          remember: rememberPassword,
-        );
-        // Even if that background /Token call failed, remember the student ID
-        // so a later app-endpoint re-login (在學證明 / remember-password) works.
-        _apiService.appApi.ensureUserId(username);
-
+      // 帳號啟用二步驟驗證（TOTP）：尚未完成登入，暫存待驗證狀態，
+      // 交由 UI 收集 6 碼驗證碼後呼叫 submitTotp()。
+      if (result['mfaRequired'] == true) {
+        _mfaRequired = true;
+        _mfaVerificationToken = result['verificationToken'] as String?;
+        _pendingUsername = username;
+        _pendingPassword = password;
+        _pendingRememberPassword = rememberPassword;
+        _isLoading = false;
         notifyListeners();
-        onLoginSuccess?.call();
+        return false;
+      }
+
+      if (result['success'] == true) {
+        await _completeLogin(username, password, rememberPassword);
         return true;
       } else {
         final loginError = 'loginFailed';
@@ -274,11 +280,100 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// 登入成功後的共用收尾：抓使用者資訊、寫快取、補打 App 端點登入。
+  /// 由一般登入與 TOTP 驗證成功兩條路徑共用。
+  Future<void> _completeLogin(
+    String username,
+    String password,
+    bool rememberPassword,
+  ) async {
+    final info = await _apiService.getUserInfo();
+    _user = info;
+    _user?['username'] = username;
+
+    await _saveUserCache(_user!);
+
+    // 額外用同一組帳密（免驗證碼）拿 App 端點 Bearer token，供在學證明等
+    // /api 服務使用。用獨立 client、不影響網頁 session；失敗不影響登入。
+    // rememberPassword 為 true 時，會持久化密碼雜湊以便 token 過期後靜默重登。
+    await _apiService.appApi.login(
+      username,
+      password,
+      remember: rememberPassword,
+    );
+    // Even if that background /Token call failed, remember the student ID
+    // so a later app-endpoint re-login (在學證明 / remember-password) works.
+    _apiService.appApi.ensureUserId(username);
+
+    _clearMfaState();
+    notifyListeners();
+    onLoginSuccess?.call();
+  }
+
+  void _clearMfaState() {
+    _mfaRequired = false;
+    _mfaVerificationToken = null;
+    _pendingUsername = null;
+    _pendingPassword = null;
+    _pendingRememberPassword = false;
+  }
+
+  /// 提交二步驟驗證（TOTP）6 碼驗證碼，完成登入。
+  ///
+  /// 需先由 login() 進入 [mfaRequired] 狀態。驗證碼正確 → 完成登入回傳 true；
+  /// 錯誤 → 學校會作廢 session，這裡清掉待驗證狀態並重新取得驗證碼，
+  /// 設定 `_error = 'totpFailed'`，回傳 false，由 UI 引導重新登入。
+  Future<bool> submitTotp(String code) async {
+    if (!_mfaRequired || _mfaVerificationToken == null) return false;
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final username = _pendingUsername!;
+    final password = _pendingPassword!;
+    final rememberPassword = _pendingRememberPassword;
+
+    try {
+      final result = await _apiService.submitTotp(code, _mfaVerificationToken!);
+
+      if (result['success'] == true) {
+        await _completeLogin(username, password, rememberPassword);
+        return true;
+      }
+
+      // 驗證碼錯誤：session 已被學校作廢，需從頭重新登入（含重抓驗證碼）。
+      _clearMfaState();
+      await fetchCaptcha();
+      _error = 'totpFailed';
+      notifyListeners();
+      return false;
+    } catch (e) {
+      final offline = !await ConnectivityService.instance.checkOnline();
+      _clearMfaState();
+      await fetchCaptcha();
+      _error = offline ? 'loginNoNetwork' : 'totpFailed';
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// 使用者在 TOTP 頁選擇取消：放棄本次登入，回到登入頁並重取驗證碼。
+  Future<void> cancelMfa() async {
+    _clearMfaState();
+    await fetchCaptcha();
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     _apiService.isMockMode = false;
     await _apiService.logout();
     await _apiService.appApi.clear();
     await _clearUserCache();
+    _clearMfaState();
     _user = null;
     onLogoutCallback?.call();
     notifyListeners();

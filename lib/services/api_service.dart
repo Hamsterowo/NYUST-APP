@@ -62,6 +62,11 @@ class ApiService {
     requestVerificationToken,
   );
 
+  Future<Map<String, dynamic>> submitTotp(
+    String code,
+    String verificationToken,
+  ) => _factory.authService.submitTotp(code, verificationToken);
+
   Future<Map<String, dynamic>> getUserInfo() =>
       _factory.authService.getUserInfo();
 

@@ -51,6 +51,22 @@ class NyustAuthService implements AuthService {
   }
 
   @override
+  Future<Map<String, dynamic>> submitTotp(
+    String code,
+    String verificationToken,
+  ) async {
+    await _client.ensureInit();
+    try {
+      return await _ssoScraper.submitTotp(
+        code: code,
+        verificationToken: verificationToken,
+      );
+    } catch (e) {
+      throw Exception('TOTP verification failed: $e');
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> getUserInfo() async {
     await _client.ensureInit();
     return _infoScraper.getUserInfo();

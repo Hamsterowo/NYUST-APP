@@ -210,6 +210,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginFailed => '帳密或驗證碼錯誤';
 
   @override
+  String get totpTitle => '二步驟驗證';
+
+  @override
+  String get totpPrompt => '請輸入驗證器 App（如 Google Authenticator）顯示的 6 位數驗證碼';
+
+  @override
+  String get totpCodeLabel => '驗證碼';
+
+  @override
+  String get totpVerifyButton => '驗證';
+
+  @override
+  String get totpCancel => '取消';
+
+  @override
+  String get totpFailed => '驗證碼錯誤，請重新登入';
+
+  @override
   String get pleaseLoginToViewSchedule => '請在此登入以查看課表';
 
   @override

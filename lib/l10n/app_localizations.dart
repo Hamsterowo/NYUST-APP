@@ -476,6 +476,42 @@ abstract class AppLocalizations {
   /// **'帳密或驗證碼錯誤'**
   String get loginFailed;
 
+  /// No description provided for @totpTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'二步驟驗證'**
+  String get totpTitle;
+
+  /// No description provided for @totpPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'請輸入驗證器 App（如 Google Authenticator）顯示的 6 位數驗證碼'**
+  String get totpPrompt;
+
+  /// No description provided for @totpCodeLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'驗證碼'**
+  String get totpCodeLabel;
+
+  /// No description provided for @totpVerifyButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'驗證'**
+  String get totpVerifyButton;
+
+  /// No description provided for @totpCancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get totpCancel;
+
+  /// No description provided for @totpFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'驗證碼錯誤，請重新登入'**
+  String get totpFailed;
+
   /// No description provided for @pleaseLoginToViewSchedule.
   ///
   /// In zh, this message translates to:
