@@ -149,8 +149,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 size: 24,
               ),
               const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
+              // 字重即時切換，不做動畫：AnimatedDefaultTextStyle 會對 fontWeight
+              // 做離散跳階插值，粗體中文較寬會造成切換時文字抖動／位移。
+              Text(
+                label,
                 style: TextStyle(
                   fontFamily: 'JFOpenHuninn',
                   fontSize: 10,
@@ -158,7 +160,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? _navActiveColor : inactiveColor,
                 ),
-                child: Text(label),
               ),
             ],
           ),
