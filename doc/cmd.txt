@@ -1,3 +1,0 @@
-flutter build apk --release --obfuscate
-flutter build appbundle --release
-flutter run

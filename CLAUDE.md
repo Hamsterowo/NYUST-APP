@@ -23,7 +23,8 @@ dart format .                      # ALWAYS run before committing — CI ("Analy
 Release builds (see `README.md` / `build.sh`):
 
 ```bash
-flutter build apk --obfuscate --split-debug-info=build/app/outputs/symbols
+flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/symbols
+flutter build appbundle --release
 flutter build web
 ```
 
