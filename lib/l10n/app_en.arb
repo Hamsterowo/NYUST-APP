@@ -101,6 +101,8 @@
   "loginPasswordLabel": "Password",
   "loginCaptchaLabel": "Captcha",
   "loginCaptchaRefreshTooltip": "Refresh Captcha",
+  "loginShowPassword": "Show password",
+  "loginHidePassword": "Hide password",
   "loginButton": "Login",
   "loginFailed": "Invalid username, password, or captcha",
   "totpTitle": "Two-Step Verification",

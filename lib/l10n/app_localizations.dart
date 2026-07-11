@@ -464,6 +464,18 @@ abstract class AppLocalizations {
   /// **'重新整理驗證碼'**
   String get loginCaptchaRefreshTooltip;
 
+  /// No description provided for @loginShowPassword.
+  ///
+  /// In zh, this message translates to:
+  /// **'顯示密碼'**
+  String get loginShowPassword;
+
+  /// No description provided for @loginHidePassword.
+  ///
+  /// In zh, this message translates to:
+  /// **'隱藏密碼'**
+  String get loginHidePassword;
+
   /// No description provided for @loginButton.
   ///
   /// In zh, this message translates to:
