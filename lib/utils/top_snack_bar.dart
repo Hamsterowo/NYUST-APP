@@ -91,31 +91,38 @@ class _TopSnackBar extends StatefulWidget {
 }
 
 class _TopSnackBarState extends State<_TopSnackBar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  // 進退場動畫
   late AnimationController _ctrl;
   late Animation<Offset> _slide;
   late Animation<double> _fade;
   late Animation<double> _scale;
+
+  // 自動關閉的倒數進度條（滿 → 空）
+  late AnimationController _countdown;
+
+  static const Duration _visibleDuration = Duration(milliseconds: 2800);
 
   @override
   void initState() {
     super.initState();
 
     _currentDismissAction = () {
-      if (mounted) _ctrl.reverse();
+      if (mounted) _dismiss();
     };
 
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 380),
-      reverseDuration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 360),
+      reverseDuration: const Duration(milliseconds: 240),
     );
 
-    _slide = Tween<Offset>(begin: const Offset(0, 1.4), end: Offset.zero)
+    // 進場較克制：滑距短、無過衝
+    _slide = Tween<Offset>(begin: const Offset(0, 0.6), end: Offset.zero)
         .animate(
           CurvedAnimation(
             parent: _ctrl,
-            curve: Curves.easeOutBack,
+            curve: Curves.easeOutCubic,
             reverseCurve: Curves.fastOutSlowIn,
           ),
         );
@@ -128,51 +135,62 @@ class _TopSnackBarState extends State<_TopSnackBar>
       ),
     );
 
-    _scale = Tween<double>(begin: 0.9, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.96, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
+        curve: Curves.easeOutCubic,
         reverseCurve: Curves.easeIn,
       ),
     );
 
+    _countdown = AnimationController(
+      vsync: this,
+      duration: _visibleDuration,
+      value: 1.0,
+    );
+
     _ctrl.addStatusListener((status) {
       if (status == AnimationStatus.dismissed) widget.onDismissed();
+      // 進場完成後才開始倒數，計時與退場同步
+      if (status == AnimationStatus.completed) _countdown.reverse();
+    });
+
+    _countdown.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) _dismiss();
     });
 
     _ctrl.forward();
+  }
 
-    Future.delayed(const Duration(milliseconds: 2800), () {
-      if (mounted) _ctrl.reverse();
-    });
+  // 手動或倒數結束時退場：停止倒數並反轉進場動畫
+  void _dismiss() {
+    if (!mounted) return;
+    _countdown.stop();
+    _ctrl.reverse();
   }
 
   @override
   void dispose() {
     _currentDismissAction = null;
     _ctrl.dispose();
+    _countdown.dispose();
     super.dispose();
   }
 
-  (IconData, Color, Color) _typeStyle(ColorScheme cs) => switch (widget.type) {
-    SnackBarType.error => (Icons.error_rounded, cs.error, cs.onError),
+  (IconData, Color) _typeStyle(ColorScheme cs) => switch (widget.type) {
+    SnackBarType.error => (Icons.error_rounded, cs.error),
     SnackBarType.warning => (
       Icons.warning_amber_rounded,
       Colors.orange.shade800,
-      Colors.white,
     ),
-    SnackBarType.info => (Icons.info_rounded, cs.secondary, cs.onSecondary),
-    SnackBarType.success => (
-      Icons.check_circle_rounded,
-      cs.primary,
-      cs.onPrimary,
-    ),
+    SnackBarType.info => (Icons.info_rounded, cs.secondary),
+    SnackBarType.success => (Icons.check_circle_rounded, cs.primary),
   };
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final (icon, bgColor, fgColor) = _typeStyle(cs);
+    final (icon, accent) = _typeStyle(cs);
     final mq = MediaQuery.of(context);
 
     final keyboardHeight = mq.viewInsets.bottom;
@@ -188,6 +206,8 @@ class _TopSnackBarState extends State<_TopSnackBar>
         ? keyboardHeight + 16
         : mq.padding.bottom + navBarHeight + 16;
 
+    const radius = 10.0;
+
     return Positioned(
       bottom: bottomOffset,
       left: 16,
@@ -201,42 +221,85 @@ class _TopSnackBarState extends State<_TopSnackBar>
             child: Material(
               type: MaterialType.transparency,
               child: GestureDetector(
-                onTap: () {
-                  if (mounted) _ctrl.reverse();
-                },
+                onTap: _dismiss,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
-                  ),
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(16),
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(radius),
                     border: Border.all(
-                      color: fgColor.withValues(alpha: 0.15),
-                      width: 1.2,
+                      color: cs.outlineVariant.withValues(alpha: 0.5),
+                      width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.18),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                  child: Row(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(icon, color: fgColor, size: 24),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          widget.message,
-                          style: TextStyle(
-                            color: fgColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            height: 1.3,
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // 左側彩色色條
+                            Container(width: 4, color: accent),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  12,
+                                  16,
+                                  12,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // 彩色圖示晶片
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: accent.withValues(alpha: 0.12),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        icon,
+                                        color: accent,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Flexible(
+                                      child: Text(
+                                        widget.message,
+                                        style: TextStyle(
+                                          color: cs.onSurface,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // 底緣自動關閉倒數進度條
+                      AnimatedBuilder(
+                        animation: _countdown,
+                        builder: (_, _) => LinearProgressIndicator(
+                          value: _countdown.value,
+                          minHeight: 3,
+                          backgroundColor: Colors.transparent,
+                          valueColor: AlwaysStoppedAnimation(
+                            accent.withValues(alpha: 0.55),
                           ),
                         ),
                       ),
