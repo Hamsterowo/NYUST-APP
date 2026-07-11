@@ -118,8 +118,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  static const Color _navActiveColor = Color(0xFF14B8A6);
+
+  /// 底部導覽列的單一分頁（頂線滑動風格：圖示＋文字，選中變 teal，不放大）。
   Widget _buildNavItem({
-    required BuildContext context,
     required int index,
     required IconData activeIcon,
     required IconData inactiveIcon,
@@ -128,7 +130,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required ColorScheme colorScheme,
   }) {
     final isSelected = index == currentIndex;
-    final activeColor = const Color(0xFF14B8A6);
     final inactiveColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
 
     return Expanded(
@@ -142,32 +143,164 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedScale(
-                scale: isSelected ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                child: Icon(
-                  isSelected ? activeIcon : inactiveIcon,
-                  color: isSelected ? activeColor : inactiveColor,
-                  size: 24,
-                ),
+              Icon(
+                isSelected ? activeIcon : inactiveIcon,
+                color: isSelected ? _navActiveColor : inactiveColor,
+                size: 24,
               ),
               const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
+              // 字重即時切換，不做動畫：AnimatedDefaultTextStyle 會對 fontWeight
+              // 做離散跳階插值，粗體中文較寬會造成切換時文字抖動／位移。
+              Text(
+                label,
                 style: TextStyle(
                   fontFamily: 'JFOpenHuninn',
                   fontSize: 10,
                   height: 1.0,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? activeColor : inactiveColor,
+                  color: isSelected ? _navActiveColor : inactiveColor,
                 ),
-                child: Text(label),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// 各分頁畫面以「淡入交叉」切換：全部保持掛載（保留捲動位置等狀態），
+  /// 只有選中的那頁不透明並可互動。opacity 0 的頁面不會被繪製（Flutter 於
+  /// alpha==0 時略過繪製子節點），因此效能與原本的 IndexedStack 相當。
+  Widget _buildBody(BuildContext context, int currentIndex) {
+    final noAnim = MediaQuery.of(context).disableAnimations;
+    return Stack(
+      children: [
+        for (var i = 0; i < _screens.length; i++)
+          ExcludeSemantics(
+            excluding: i != currentIndex,
+            child: IgnorePointer(
+              ignoring: i != currentIndex,
+              child: AnimatedOpacity(
+                opacity: i == currentIndex ? 1.0 : 0.0,
+                duration: noAnim
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                child: _screens[i],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// 頂線滑動風格的底部導覽列（窄螢幕用）。
+  Widget _buildTopLineBar({
+    required int currentIndex,
+    required List<_NavItemData> navItems,
+    required List<String> labels,
+    required ColorScheme colorScheme,
+  }) {
+    return Container(
+      height: 64,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.25),
+            width: 1,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final n = navItems.length;
+          final itemWidth = constraints.maxWidth / n;
+          const lineFraction = 0.36;
+          final lineWidth = itemWidth * lineFraction;
+          final lineLeft =
+              currentIndex * itemWidth + (itemWidth - lineWidth) / 2;
+          return Stack(
+            children: [
+              // 滑到選中分頁上方的 teal 細線。
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 320),
+                curve: Curves.easeOutCubic,
+                top: 0,
+                left: lineLeft,
+                width: lineWidth,
+                height: 3,
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _navActiveColor,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < n; i++)
+                    _buildNavItem(
+                      index: i,
+                      activeIcon: navItems[i].active,
+                      inactiveIcon: navItems[i].inactive,
+                      label: labels[i],
+                      currentIndex: currentIndex,
+                      colorScheme: colorScheme,
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// 寬螢幕（平板/桌機視窗）用的側邊導覽列。
+  Widget _buildRail({
+    required int currentIndex,
+    required List<_NavItemData> navItems,
+    required List<String> labels,
+    required ColorScheme colorScheme,
+  }) {
+    return NavigationRail(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (i) =>
+          ref.read(navIndexProvider.notifier).state = i,
+      labelType: NavigationRailLabelType.all,
+      backgroundColor: colorScheme.surface,
+      indicatorColor: _navActiveColor.withValues(alpha: 0.16),
+      selectedIconTheme: const IconThemeData(color: _navActiveColor),
+      selectedLabelTextStyle: const TextStyle(
+        color: _navActiveColor,
+        fontFamily: 'JFOpenHuninn',
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+      ),
+      unselectedLabelTextStyle: TextStyle(
+        color: colorScheme.onSurfaceVariant,
+        fontFamily: 'JFOpenHuninn',
+        fontSize: 12,
+      ),
+      destinations: [
+        for (var i = 0; i < navItems.length; i++)
+          NavigationRailDestination(
+            icon: Icon(navItems[i].inactive),
+            selectedIcon: Icon(navItems[i].active),
+            label: Text(labels[i]),
+          ),
+      ],
     );
   }
 
@@ -216,81 +349,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       AppLocalizations.of(context).navSettings,
     ];
 
-    return Scaffold(
-      body: IndexedStack(index: currentIndex, children: _screens),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _OfflineBanner(visible: !isOnline, colorScheme: colorScheme),
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              height: 66,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.92,
-                ),
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
+    final body = _buildBody(context, currentIndex);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 寬螢幕（平板/桌機視窗）改用左側 NavigationRail；窄螢幕用底部頂線列。
+        final isWide = constraints.maxWidth >= 720;
+
+        if (isWide) {
+          return Scaffold(
+            body: SafeArea(
+              child: Row(
+                children: [
+                  _buildRail(
+                    currentIndex: currentIndex,
+                    navItems: navItems,
+                    labels: labels,
+                    colorScheme: colorScheme,
+                  ),
+                  const VerticalDivider(width: 1, thickness: 1),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _OfflineBanner(
+                          visible: !isOnline,
+                          colorScheme: colorScheme,
+                        ),
+                        Expanded(child: body),
+                      ],
+                    ),
                   ),
                 ],
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-                  width: 1.0,
-                ),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final itemWidth = constraints.maxWidth / navItems.length;
-                  // The sliding "pill" background behind the selected tab.
-                  const pillHInset = 10.0;
-                  const pillVInset = 8.0;
-                  return Stack(
-                    children: [
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 320),
-                        curve: Curves.easeOutCubic,
-                        top: pillVInset,
-                        bottom: pillVInset,
-                        left: currentIndex * itemWidth + pillHInset,
-                        width: itemWidth - pillHInset * 2,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: colorScheme.onSurface.withValues(
-                              alpha: 0.10,
-                            ),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (var i = 0; i < navItems.length; i++)
-                            _buildNavItem(
-                              context: context,
-                              index: i,
-                              activeIcon: navItems[i].active,
-                              inactiveIcon: navItems[i].inactive,
-                              label: labels[i],
-                              currentIndex: currentIndex,
-                              colorScheme: colorScheme,
-                            ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
               ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return Scaffold(
+          body: body,
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _OfflineBanner(visible: !isOnline, colorScheme: colorScheme),
+                _buildTopLineBar(
+                  currentIndex: currentIndex,
+                  navItems: navItems,
+                  labels: labels,
+                  colorScheme: colorScheme,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
