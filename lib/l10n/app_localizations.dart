@@ -881,7 +881,7 @@ abstract class AppLocalizations {
   /// No description provided for @credentialAbout.
   ///
   /// In zh, this message translates to:
-  /// **'部分功能會使用雲科行動 App 的專用端點，需要一組獨立於網頁登入的憑證（Bearer token）。此憑證有效期約 90 天，過期後若你已記住密碼，App 會自動以密碼雜湊重新取得，不會打擾你；若未記住密碼，使用該功能時會請你重新輸入一次密碼。密碼僅以雜湊形式儲存於本機安全儲存區，無法還原為明文，也無法用於網頁登入。'**
+  /// **'部分功能會使用雲科行動 App 的端點，需要一組額外的登入憑證。當憑證過期後若你已記住密碼，App 會自動重新取得憑證；若未記住密碼，使用憑證相關功能時，會請你重新輸入一次密碼。\n密碼僅以雜湊形式儲存於本機安全儲存區，無法還原為明文，也無法用於網頁登入。'**
   String get credentialAbout;
 
   /// No description provided for @calendarTitle.

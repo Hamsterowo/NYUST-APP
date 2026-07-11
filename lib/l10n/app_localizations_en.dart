@@ -447,7 +447,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get credentialAbout =>
-      'Some features use YunTech\'s mobile-app endpoint, which needs a credential (a Bearer token) separate from the web login. This credential lasts about 90 days. When it expires, if you chose to remember your password the app silently renews it using the stored hash — no interruption; otherwise you\'ll be asked to re-enter your password when using that feature. Your password is kept only as a hash in this device\'s secure storage; it cannot be reversed to plaintext and cannot be used for the web login.';
+      'Some features use YunTech\'s mobile-app endpoint, which needs a separate credential. When the credential expires, if you chose to remember your password the app renews it automatically; otherwise you\'ll be asked to re-enter your password when using that feature. Your password is kept only as a hash in this device\'s secure storage; it cannot be reversed to plaintext.';
 
   @override
   String get calendarTitle => 'Calendar';
