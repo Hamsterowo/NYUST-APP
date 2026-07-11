@@ -368,6 +368,43 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 變更 SSO 密碼。成功回傳 true；失敗時把訊息放進 [error] 回傳 false。
+  ///
+  /// 成功後以新密碼靜默重登 App 端點：更新記憶體中的密碼，若使用者開了
+  /// 「記住密碼」也一併把本機的密碼雜湊換成新密碼的，避免日後 token 續期
+  /// 仍用舊密碼而失敗。網頁 session（cookie）於同一 session 變更後通常仍有效。
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final result = await _apiService.changePassword(oldPassword, newPassword);
+      if (result['success'] == true) {
+        if (!_apiService.isMockMode) {
+          final username = _user?['username']?.toString() ?? '';
+          if (username.isNotEmpty) {
+            final remember = await _apiService.appApi.isPasswordRemembered();
+            await _apiService.appApi.login(
+              username,
+              newPassword,
+              remember: remember,
+            );
+          }
+        }
+        return true;
+      }
+      _error = result['message']?.toString() ?? 'changePasswordFailed';
+      return false;
+    } catch (e) {
+      final offline = !await ConnectivityService.instance.checkOnline();
+      _error = offline ? 'loginNoNetwork' : 'changePasswordFailed';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     _apiService.isMockMode = false;
     await _apiService.logout();

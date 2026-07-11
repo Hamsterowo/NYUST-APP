@@ -409,6 +409,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appAuthWrongPassword => 'Incorrect password. Please try again.';
 
   @override
+  String get changePasswordTitle => 'Change Password';
+
+  @override
+  String get changePasswordOldLabel => 'Current password';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm new password';
+
+  @override
+  String get changePasswordRule =>
+      'Password may only contain A-Z, a-z, 0-9 and @!\$%&*, with no spaces.';
+
+  @override
+  String get changePasswordHint =>
+      'Changing your password also changes your Microsoft 365 and Google Workspace password — please remember the new one.\nAfter you change it here, the app will automatically sign in again with the new password.';
+
+  @override
+  String get changePasswordButton => 'Confirm and save';
+
+  @override
+  String get changePasswordEmpty => 'Please fill in all fields.';
+
+  @override
+  String get changePasswordMismatch => 'The new passwords don\'t match.';
+
+  @override
+  String get changePasswordInvalidChars =>
+      'New password may only contain A-Z, a-z, 0-9 and @!\$%&*, with no spaces.';
+
+  @override
+  String get changePasswordSuccess => 'Password changed.';
+
+  @override
+  String get changePasswordFailed =>
+      'Couldn\'t change the password. Please try again.';
+
+  @override
   String get credentialTitle => 'App Credential';
 
   @override
@@ -582,6 +622,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courseClass => 'Class';
+
+  @override
+  String get scheduleNoTimeTitle => 'Unscheduled';
 
   @override
   String get courseRequiredElective => 'Required/Elective';

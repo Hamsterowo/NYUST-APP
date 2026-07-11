@@ -392,12 +392,24 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     }
 
     final grid = _buildScheduleGrid(events);
-    if (!switching) return grid;
+
+    // 沒有排定上課時間的課（times 為空）不會出現在格線裡，改用下方列表呈現。
+    final noTimeCourses = events.where((c) => c.times.isEmpty).toList();
+    final Widget content = noTimeCourses.isEmpty
+        ? grid
+        : Column(
+            children: [
+              Expanded(child: grid),
+              _buildNoTimeSection(noTimeCourses, events),
+            ],
+          );
+
+    if (!switching) return content;
 
     // 切換到另一個學期、抓取中：在現有課表上疊一層 loading。
     return Stack(
       children: [
-        grid,
+        content,
         Positioned.fill(
           child: IgnorePointer(
             child: Container(
@@ -943,6 +955,196 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
     // 每次進到課表分頁或切換學期時（_fadeGen 改變），方塊以隨機錯開的方式淡入。
     return _FadeInCard(generation: _fadeGen, child: card);
+  }
+
+  /// 格線下方的「無安排上課時間」區塊：標題 + 一疊左側色條小卡片。
+  Widget _buildNoTimeSection(
+    List<ScheduleEvent> noTimeCourses,
+    List<ScheduleEvent> allEvents,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final uniqueCourseNames =
+        allEvents
+            .map((c) => c.name)
+            .where((name) => name.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  AppLocalizations.of(context).scheduleNoTimeTitle,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '(${noTimeCourses.length})',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: noTimeCourses.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              itemBuilder: (context, i) =>
+                  _buildNoTimeCard(noTimeCourses[i], uniqueCourseNames),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 無時間課程的橫向小卡片：左側色條 + 課名 / 修別 / 學分 / 組合。
+  Widget _buildNoTimeCard(ScheduleEvent event, List<String> uniqueCourseNames) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+    final displayName =
+        (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
+        ? event.nameEn!
+        : event.name;
+
+    final courseIndex = uniqueCourseNames.indexOf(event.name);
+    final courseColor = getCourseColor(context, courseIndex);
+
+    final chips = <String>[
+      if (event.classType.isNotEmpty) event.classType,
+      if (event.credits.isNotEmpty)
+        AppLocalizations.of(context).courseCreditsFormat(event.credits),
+      if (event.courseClass.isNotEmpty) event.courseClass,
+    ];
+
+    return GestureDetector(
+      onTap: () {
+        if (event.year != null &&
+            event.semester != null &&
+            event.courseNo != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetailScreen(
+                year: event.year!,
+                semester: event.semester!,
+                courseNo: event.courseNo!,
+                courseName: displayName,
+              ),
+            ),
+          );
+        } else {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(displayName),
+              content: Text(
+                AppLocalizations.of(context).teacherLabel(event.teacher),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(AppLocalizations.of(context).close),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 5, color: courseColor.borderColor),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        displayName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      if (chips.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: chips
+                              .map(
+                                (label) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

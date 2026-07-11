@@ -20,6 +20,10 @@ class SsoScraper extends BaseScraper {
   static const String validateTotpUrl =
       'https://webapp.yuntech.edu.tw/YunTechSSO/Account/ValidateGoogleAuthCode';
 
+  /// 變更密碼頁（GET 取表單/token、POST 送出皆為此網址）。
+  static const String changePasswordUrl =
+      'https://webapp.yuntech.edu.tw/YunTechSSO/Account/ChangePassword';
+
   /// 初始化登入：獲取 VerificationToken 與驗證碼圖片
   Future<Map<String, dynamic>> loginInit() async {
     try {
@@ -158,6 +162,78 @@ class SsoScraper extends BaseScraper {
       return {'success': false, 'message': errorMsg};
     } catch (e) {
       return {'success': false, 'message': '登入請求發生錯誤: $e'};
+    }
+  }
+
+  /// 變更 SSO 密碼。需在已登入（有 `.YunTechSSO` cookie）狀態下呼叫。
+  ///
+  /// 流程與 [login] 相同：先 GET 變更密碼頁取 __RequestVerificationToken，
+  /// 再 POST `OldPassword`/`pNewPassword`/`pConfirmPassword`。成功回 302 轉址。
+  Future<Map<String, dynamic>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final pageRes = await getWithRedirects(
+        changePasswordUrl,
+        options: Options(headers: {...commonHeaders}),
+      );
+      final pageDoc = parseHtml(pageRes.data);
+
+      // 已登出會被導向登入頁 → 無變更密碼表單。
+      final tokenElement = pageDoc.querySelector(
+        '#ApplyForm input[name="__RequestVerificationToken"], '
+        'input[name="__RequestVerificationToken"]',
+      );
+      final token = getAttribute(tokenElement, 'value');
+      if (token.isEmpty) {
+        return {'success': false, 'message': '無法取得變更密碼表單，請重新登入'};
+      }
+
+      final formData = {
+        '__RequestVerificationToken': token,
+        'OldPassword': oldPassword,
+        'pNewPassword': newPassword,
+        'pConfirmPassword': newPassword,
+      };
+
+      final response = await dio.post(
+        changePasswordUrl,
+        data: FormData.fromMap(formData),
+        options: Options(
+          headers: {
+            ...commonHeaders,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Referer': changePasswordUrl,
+          },
+          followRedirects: false,
+          validateStatus: (status) => status! < 500,
+        ),
+      );
+
+      if (response.statusCode == 302 || response.statusCode == 301) {
+        return {'success': true, 'message': '密碼變更成功'};
+      }
+
+      // 停在原頁：解析驗證錯誤（舊密碼錯誤、格式不符等）。
+      final document = parseHtml(response.data);
+      String errorMsg = '密碼變更失敗';
+      final validationSum = document
+          .querySelector('.validation-summary-errors')
+          ?.text
+          .trim();
+      final fieldError = document
+          .querySelector('.field-validation-error')
+          ?.text
+          .trim();
+      if (validationSum != null && validationSum.isNotEmpty) {
+        errorMsg = validationSum;
+      } else if (fieldError != null && fieldError.isNotEmpty) {
+        errorMsg = fieldError;
+      }
+      return {'success': false, 'message': errorMsg};
+    } catch (e) {
+      return {'success': false, 'message': '變更密碼請求發生錯誤: $e'};
     }
   }
 

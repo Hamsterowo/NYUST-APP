@@ -578,6 +578,26 @@ class MockData {
 
   static const List<Map<String, dynamic>> _courses1142 = [
     {
+      'semesterCourseNo': '11420099',
+      'deptCourseNo': 'CSE4001',
+      'name': '專題實作',
+      'nameEn': 'Special Topics Project',
+      'courseClass': '資工三甲',
+      'classType': '必修',
+      'requiredType': '必',
+      'credits': '2',
+      'timeRoomStr': '',
+      'teacher': '陳建志',
+      'remark': '',
+      'times': <String>[],
+      'weekday': '',
+      'room': '',
+      'syllabusUrl': '',
+      'year': '114',
+      'semester': '2',
+      'courseNo': '30299',
+    },
+    {
       'semesterCourseNo': '11420001',
       'deptCourseNo': 'CSE3007',
       'name': '人機互動技術',

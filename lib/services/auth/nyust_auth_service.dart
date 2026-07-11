@@ -67,6 +67,22 @@ class NyustAuthService implements AuthService {
   }
 
   @override
+  Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+  ) async {
+    await _client.ensureInit();
+    try {
+      return await _ssoScraper.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      throw Exception('Change password failed: $e');
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> getUserInfo() async {
     await _client.ensureInit();
     return _infoScraper.getUserInfo();
