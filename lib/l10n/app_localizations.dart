@@ -1052,29 +1052,11 @@ abstract class AppLocalizations {
   /// **'GPA'**
   String get gradesGPA;
 
-  /// No description provided for @gradesCumulativeSummary.
-  ///
-  /// In zh, this message translates to:
-  /// **'歷年累計成績'**
-  String get gradesCumulativeSummary;
-
   /// No description provided for @gradesGPAShort.
   ///
   /// In zh, this message translates to:
   /// **'GPA: {gpa}'**
   String gradesGPAShort(String gpa);
-
-  /// No description provided for @gradesDetailHeader.
-  ///
-  /// In zh, this message translates to:
-  /// **'本學期修課成績明細'**
-  String get gradesDetailHeader;
-
-  /// No description provided for @gradesAllDetailHeader.
-  ///
-  /// In zh, this message translates to:
-  /// **'修課成績明細'**
-  String get gradesAllDetailHeader;
 
   /// No description provided for @gradesAverageShort.
   ///

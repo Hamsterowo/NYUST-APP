@@ -381,19 +381,6 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 課程列表標籤
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12, left: 4),
-              child: Text(
-                AppLocalizations.of(context).gradesDetailHeader,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-
             // 課程卡片列表
             Card(
               elevation: 0,
@@ -617,17 +604,6 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12, left: 4),
-              child: Text(
-                AppLocalizations.of(context).gradesCumulativeSummary,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
             Row(
               children: [
                 _buildStatCard(
@@ -661,18 +637,6 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
             ),
             const SizedBox(height: 8),
             const Divider(height: 24),
-            if (grades.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8, left: 4),
-                child: Text(
-                  AppLocalizations.of(context).gradesAllDetailHeader,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
           ],
         ),
       );
@@ -1026,19 +990,6 @@ class SemesterGradesDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-
-          // 課程列表標籤
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12, left: 4),
-            child: Text(
-              AppLocalizations.of(context).gradesAllDetailHeader,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
 
           // 課程卡片列表
           Card(

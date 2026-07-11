@@ -254,7 +254,6 @@
   "gradesRank": "班級排名",
   "gradesEarnedCredits": "實得學分",
   "gradesGPA": "GPA",
-  "gradesCumulativeSummary": "歷年累計成績",
   "gradesGPAShort": "GPA: {gpa}",
   "@gradesGPAShort": {
     "placeholders": {
@@ -263,8 +262,6 @@
       }
     }
   },
-  "gradesDetailHeader": "本學期修課成績明細",
-  "gradesAllDetailHeader": "修課成績明細",
   "gradesAverageShort": "平均: {avg}",
   "@gradesAverageShort": {
     "placeholders": {
