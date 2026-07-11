@@ -184,7 +184,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 opacity: i == currentIndex ? 1.0 : 0.0,
                 duration: noAnim
                     ? Duration.zero
-                    : const Duration(milliseconds: 220),
+                    : const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
                 child: _screens[i],
               ),

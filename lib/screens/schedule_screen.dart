@@ -1021,8 +1021,8 @@ class _FadeInCardState extends State<_FadeInCard> {
 
   void _schedule() {
     _timer?.cancel();
-    // 0–300ms 的隨機延遲：一點點就好，但足以有錯落感。
-    final delayMs = Random().nextInt(300);
+    // 0–200ms 的隨機延遲：一點點就好，但足以有錯落感。
+    final delayMs = Random().nextInt(200);
     _timer = Timer(Duration(milliseconds: delayMs), () {
       if (mounted) setState(() => _visible = true);
     });
@@ -1036,13 +1036,18 @@ class _FadeInCardState extends State<_FadeInCard> {
 
   @override
   Widget build(BuildContext context) {
+    // 隱藏（重播前的重置）要瞬間完成，只有「淡入」才用動畫時間，
+    // 否則重播時會先從 1.0 縮到 0.94 再長回來（看起來像先縮小再變大）。
+    final duration = _visible
+        ? const Duration(milliseconds: 200)
+        : Duration.zero;
     return AnimatedScale(
       scale: _visible ? 1.0 : 0.94,
-      duration: const Duration(milliseconds: 320),
+      duration: duration,
       curve: Curves.easeOut,
       child: AnimatedOpacity(
         opacity: _visible ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 320),
+        duration: duration,
         curve: Curves.easeOut,
         child: widget.child,
       ),
