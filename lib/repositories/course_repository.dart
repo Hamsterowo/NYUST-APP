@@ -14,6 +14,11 @@ class CourseRepository {
   static const String _datasetKey = 'schedule';
   static const Duration _ttl = Duration(hours: 1);
 
+  /// 上次線上抓取到的學期選項（value + label）與當前學期代碼。
+  /// 只有實際發出網路請求時才會更新（快取命中時維持不變）。
+  List<Map<String, String>> semesters = const [];
+  String currentSemester = '';
+
   CourseRepository(this._db, this._api);
 
   Stream<Map<String, dynamic>?> watchSchedule() {
@@ -26,8 +31,23 @@ class CourseRepository {
     final resp = await _api.getSchedule();
     if (resp['status'] != 'success' || resp['data'] == null) return false;
 
+    _captureMeta(resp);
     await _write(resp);
     return true;
+  }
+
+  /// 從回應擷取學期選項清單與當前學期代碼。
+  void _captureMeta(Map<String, dynamic> resp) {
+    final data = resp['data'] as Map?;
+    final raw = (data?['semesters'] as List?) ?? const [];
+    semesters = raw
+        .map(
+          (e) => (e as Map).map(
+            (k, v) => MapEntry(k.toString(), v?.toString() ?? ''),
+          ),
+        )
+        .toList();
+    currentSemester = (data?['currentSemester'] ?? '').toString();
   }
 
   Future<void> clear() async {

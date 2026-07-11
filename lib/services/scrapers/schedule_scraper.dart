@@ -10,8 +10,14 @@ class ScheduleScraper extends BaseScraper {
   static const String scheduleUrl =
       'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Course/';
 
-  /// 獲取學生課表資料
-  Future<Map<String, dynamic>> getSchedule() async {
+  /// 學期下拉選單的欄位名（ASP.NET DropDownList，AutoPostBack）。
+  static const String _acadSemeField = r'ctl00$MainContent$AcadSeme';
+
+  /// 獲取學生課表資料。
+  ///
+  /// [semester] 為學期代碼（例：`1142` = 114 學年第 2 學期）。傳 null 或當前
+  /// 選中的學期時，直接解析當前頁面；否則以 ASP.NET postback 切換到指定學期。
+  Future<Map<String, dynamic>> getSchedule({String? semester}) async {
     try {
       if (kDebugMode)
         print('ScheduleScraper: Fetching schedule from $scheduleUrl');
@@ -26,7 +32,7 @@ class ScheduleScraper extends BaseScraper {
         ),
       );
 
-      final document = parseHtml(response.data);
+      var document = parseHtml(response.data);
       if (kDebugMode)
         print(
           'ScheduleScraper: Page Title: ${document.querySelector('title')?.text.trim()}',
@@ -41,112 +47,195 @@ class ScheduleScraper extends BaseScraper {
         };
       }
 
-      final List<Map<String, dynamic>> courses = [];
+      final semesters = _parseSemesters(document);
+      final currentSemester = _selectedSemester(document);
 
-      final courseLinks = document.querySelectorAll('[id*="_cour_cname"]');
-
-      for (var anchor in courseLinks) {
-        final name = anchor.text.trim();
-
-        dom.Element? row = anchor.parent;
-        while (row != null && row.localName != 'tr') {
-          row = row.parent;
-        }
-
-        if (row != null && name.isNotEmpty) {
-          String syllabusUrl = '';
-          String year = '';
-          String semester = '';
-          String courseNo = '';
-          final relativeHref = anchor.attributes['href'];
-
-          if (relativeHref != null && relativeHref.isNotEmpty) {
-            syllabusUrl = relativeHref.replaceFirst(
-              RegExp(r'^(\.\.\/)+'),
-              'https://webapp.yuntech.edu.tw/WebNewCAS/',
-            );
-
-            final parts = relativeHref.split('&');
-            if (parts.length >= 4) {
-              year = parts[1];
-              semester = parts[2];
-              courseNo = parts[3];
-            }
-          }
-
-          final semesterCourseNo = _findTextById(row, '_current_subj');
-          final deptCourseNo = _findTextById(row, '_Dept_Cour_No');
-          final nameEn = _findTextById(row, '_cour_ename');
-          final courseClass = _findTextById(row, '_Cour_Class');
-          final classType = _findTextById(row, '_Subj_Team');
-          final requiredType = _findTextById(row, '_maj_op');
-          final credits = _findTextById(row, '_credits');
-          final timeRoomStr = _findTextById(row, '_Cour_Time');
-          final teacher = _findTextById(row, '_cour_emp');
-
-          String remark = '';
-          final remarkElements = row.querySelectorAll(
-            'span[id*="_comm"], span[id*="_CourRemark_00"], span[id*="_Remark_00_01"], span[id*="_remark_00_02"]',
-          );
-          for (var rEl in remarkElements) {
-            final rText = rEl.text.trim();
-            if (rText.isNotEmpty) {
-              remark += '$rText ';
-            }
-          }
-
-          String weekday = '';
-          List<String> times = [];
-          String room = '';
-
-          if (timeRoomStr.isNotEmpty) {
-            final parts = timeRoomStr.split('/');
-            if (parts.length == 2) {
-              final timePart = parts[0];
-              room = parts[1];
-
-              final timeParts = timePart.split('-');
-              if (timeParts.length == 2) {
-                weekday = timeParts[0];
-                times = timeParts[1].split('');
-              }
-            } else {
-              room = timeRoomStr;
-            }
-          }
-
-          courses.add({
-            'semesterCourseNo': semesterCourseNo,
-            'deptCourseNo': deptCourseNo,
-            'name': name,
-            'nameEn': nameEn,
-            'courseClass': courseClass,
-            'classType': classType,
-            'requiredType': requiredType,
-            'credits': credits,
-            'timeRoomStr': timeRoomStr,
-            'teacher': teacher,
-            'remark': remark.trim(),
-            'weekday': weekday,
-            'times': times,
-            'room': room,
-            'syllabusUrl': syllabusUrl,
-            'year': year,
-            'semester': semester,
-            'courseNo': courseNo,
-          });
-        }
+      // 要看的不是當前學期 → 送一次 postback 切換到指定學期。
+      if (semester != null &&
+          semester.isNotEmpty &&
+          semester != currentSemester) {
+        final switched = await _postbackSemester(document, semester);
+        if (switched != null) document = switched;
       }
+
+      final courses = _parseCourses(document);
 
       if (kDebugMode) print('ScheduleScraper: Found ${courses.length} courses');
 
       return {
         'status': 'success',
-        'data': {'schedule': courses},
+        'data': {
+          'schedule': courses,
+          'semesters': semesters,
+          'currentSemester': currentSemester,
+        },
       };
     } catch (e) {
       return {'status': 'error', 'message': '抓取課表失敗: $e'};
     }
+  }
+
+  /// 解析學期下拉選單的所有選項（value + 顯示文字）。
+  List<Map<String, String>> _parseSemesters(dom.Document document) {
+    final options = document.querySelectorAll(
+      '#ctl00_MainContent_AcadSeme option',
+    );
+    final result = <Map<String, String>>[];
+    for (final o in options) {
+      final value = o.attributes['value']?.trim() ?? '';
+      if (value.isEmpty) continue;
+      result.add({'value': value, 'label': o.text.trim()});
+    }
+    return result;
+  }
+
+  /// 取得目前選中的學期代碼。
+  String _selectedSemester(dom.Document document) {
+    final selected = document.querySelector(
+      '#ctl00_MainContent_AcadSeme option[selected]',
+    );
+    if (selected != null) {
+      return selected.attributes['value']?.trim() ?? '';
+    }
+    final first = document.querySelector('#ctl00_MainContent_AcadSeme option');
+    return first?.attributes['value']?.trim() ?? '';
+  }
+
+  /// 以 ASP.NET WebForms postback 切換學期，回傳切換後的頁面 document。
+  Future<dom.Document?> _postbackSemester(
+    dom.Document document,
+    String semester,
+  ) async {
+    try {
+      // 帶上頁面所有 hidden 欄位（__VIEWSTATE / __EVENTVALIDATION 等）。
+      final form = <String, String>{};
+      for (final input in document.querySelectorAll('input[type="hidden"]')) {
+        final name = input.attributes['name'];
+        if (name != null && name.isNotEmpty) {
+          form[name] = input.attributes['value'] ?? '';
+        }
+      }
+      form['__EVENTTARGET'] = _acadSemeField;
+      form['__EVENTARGUMENT'] = '';
+      form[_acadSemeField] = semester;
+
+      final res = await dio.post(
+        scheduleUrl,
+        data: form,
+        options: Options(
+          headers: {...commonHeaders, 'Referer': scheduleUrl},
+          contentType: Headers.formUrlEncodedContentType,
+          followRedirects: true,
+          validateStatus: (status) => status! < 500,
+        ),
+      );
+      return parseHtml(res.data);
+    } catch (e) {
+      if (kDebugMode) print('ScheduleScraper: postback failed: $e');
+      return null;
+    }
+  }
+
+  /// 從課表頁面 document 解析出課程清單。
+  List<Map<String, dynamic>> _parseCourses(dom.Document document) {
+    final List<Map<String, dynamic>> courses = [];
+
+    final courseLinks = document.querySelectorAll('[id*="_cour_cname"]');
+
+    for (var anchor in courseLinks) {
+      final name = anchor.text.trim();
+
+      dom.Element? row = anchor.parent;
+      while (row != null && row.localName != 'tr') {
+        row = row.parent;
+      }
+
+      if (row != null && name.isNotEmpty) {
+        String syllabusUrl = '';
+        String year = '';
+        String semester = '';
+        String courseNo = '';
+        final relativeHref = anchor.attributes['href'];
+
+        if (relativeHref != null && relativeHref.isNotEmpty) {
+          syllabusUrl = relativeHref.replaceFirst(
+            RegExp(r'^(\.\.\/)+'),
+            'https://webapp.yuntech.edu.tw/WebNewCAS/',
+          );
+
+          final parts = relativeHref.split('&');
+          if (parts.length >= 4) {
+            year = parts[1];
+            semester = parts[2];
+            courseNo = parts[3];
+          }
+        }
+
+        final semesterCourseNo = _findTextById(row, '_current_subj');
+        final deptCourseNo = _findTextById(row, '_Dept_Cour_No');
+        final nameEn = _findTextById(row, '_cour_ename');
+        final courseClass = _findTextById(row, '_Cour_Class');
+        final classType = _findTextById(row, '_Subj_Team');
+        final requiredType = _findTextById(row, '_maj_op');
+        final credits = _findTextById(row, '_credits');
+        final timeRoomStr = _findTextById(row, '_Cour_Time');
+        final teacher = _findTextById(row, '_cour_emp');
+
+        String remark = '';
+        final remarkElements = row.querySelectorAll(
+          'span[id*="_comm"], span[id*="_CourRemark_00"], span[id*="_Remark_00_01"], span[id*="_remark_00_02"]',
+        );
+        for (var rEl in remarkElements) {
+          final rText = rEl.text.trim();
+          if (rText.isNotEmpty) {
+            remark += '$rText ';
+          }
+        }
+
+        String weekday = '';
+        List<String> times = [];
+        String room = '';
+
+        if (timeRoomStr.isNotEmpty) {
+          final parts = timeRoomStr.split('/');
+          if (parts.length == 2) {
+            final timePart = parts[0];
+            room = parts[1];
+
+            final timeParts = timePart.split('-');
+            if (timeParts.length == 2) {
+              weekday = timeParts[0];
+              times = timeParts[1].split('');
+            }
+          } else {
+            room = timeRoomStr;
+          }
+        }
+
+        courses.add({
+          'semesterCourseNo': semesterCourseNo,
+          'deptCourseNo': deptCourseNo,
+          'name': name,
+          'nameEn': nameEn,
+          'courseClass': courseClass,
+          'classType': classType,
+          'requiredType': requiredType,
+          'credits': credits,
+          'timeRoomStr': timeRoomStr,
+          'teacher': teacher,
+          'remark': remark.trim(),
+          'weekday': weekday,
+          'times': times,
+          'room': room,
+          'syllabusUrl': syllabusUrl,
+          'year': year,
+          'semester': semester,
+          'courseNo': courseNo,
+        });
+      }
+    }
+
+    return courses;
   }
 
   /// 獲取課程詳細資訊 (大綱)

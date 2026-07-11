@@ -4,7 +4,8 @@ import '../mock/mock_data.dart';
 /// Demo 模式使用的 [CourseService]，回傳 [MockData] 中的課表與課程詳情。
 class MockCourseService implements CourseService {
   @override
-  Future<Map<String, dynamic>> getSchedule() async => MockData.schedule;
+  Future<Map<String, dynamic>> getSchedule({String? semester}) async =>
+      MockData.schedule;
 
   @override
   Future<Map<String, dynamic>> getCourseDetail({
