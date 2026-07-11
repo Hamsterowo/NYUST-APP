@@ -67,6 +67,11 @@ class ApiService {
     String verificationToken,
   ) => _factory.authService.submitTotp(code, verificationToken);
 
+  Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+  ) => _factory.authService.changePassword(oldPassword, newPassword);
+
   Future<Map<String, dynamic>> getUserInfo() =>
       _factory.authService.getUserInfo();
 

@@ -20,6 +20,12 @@ abstract interface class AuthService {
     String verificationToken,
   );
 
+  /// 變更 SSO 密碼（需已登入）。回傳 `{success, message}`。
+  Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+  );
+
   /// 取得目前登入使用者的資訊。
   Future<Map<String, dynamic>> getUserInfo();
 

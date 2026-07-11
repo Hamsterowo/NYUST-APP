@@ -388,6 +388,44 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appAuthWrongPassword => '密碼錯誤，請重新輸入。';
 
   @override
+  String get changePasswordTitle => '變更密碼';
+
+  @override
+  String get changePasswordOldLabel => '現在的密碼';
+
+  @override
+  String get changePasswordNewLabel => '新密碼';
+
+  @override
+  String get changePasswordConfirmLabel => '確認新密碼';
+
+  @override
+  String get changePasswordRule => '密碼僅可含 A-Z、a-z、0-9 及 @!\$%&*，不得含空白';
+
+  @override
+  String get changePasswordHint =>
+      '修改密碼後，將一併修改 Microsoft 365 與 Google Workspace 之密碼，請記住新密碼。\n使用此處修改密碼後，本應用程式將自動使用新密碼重新登入。';
+
+  @override
+  String get changePasswordButton => '確認並儲存';
+
+  @override
+  String get changePasswordEmpty => '請填寫所有欄位';
+
+  @override
+  String get changePasswordMismatch => '兩次輸入的新密碼不一致';
+
+  @override
+  String get changePasswordInvalidChars =>
+      '新密碼只能包含 A-Z、a-z、0-9 及 @!\$%&*，且不得含空白';
+
+  @override
+  String get changePasswordSuccess => '密碼已變更';
+
+  @override
+  String get changePasswordFailed => '密碼變更失敗，請稍後再試';
+
+  @override
   String get credentialTitle => '應用程式憑證';
 
   @override
@@ -561,6 +599,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get courseClass => '開課班級';
+
+  @override
+  String get scheduleNoTimeTitle => '無安排上課時間';
 
   @override
   String get courseRequiredElective => '修別';

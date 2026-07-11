@@ -812,6 +812,78 @@ abstract class AppLocalizations {
   /// **'密碼錯誤，請重新輸入。'**
   String get appAuthWrongPassword;
 
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'變更密碼'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordOldLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'現在的密碼'**
+  String get changePasswordOldLabel;
+
+  /// No description provided for @changePasswordNewLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'新密碼'**
+  String get changePasswordNewLabel;
+
+  /// No description provided for @changePasswordConfirmLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'確認新密碼'**
+  String get changePasswordConfirmLabel;
+
+  /// No description provided for @changePasswordRule.
+  ///
+  /// In zh, this message translates to:
+  /// **'密碼僅可含 A-Z、a-z、0-9 及 @!\$%&*，不得含空白'**
+  String get changePasswordRule;
+
+  /// No description provided for @changePasswordHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'修改密碼後，將一併修改 Microsoft 365 與 Google Workspace 之密碼，請記住新密碼。\n使用此處修改密碼後，本應用程式將自動使用新密碼重新登入。'**
+  String get changePasswordHint;
+
+  /// No description provided for @changePasswordButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'確認並儲存'**
+  String get changePasswordButton;
+
+  /// No description provided for @changePasswordEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'請填寫所有欄位'**
+  String get changePasswordEmpty;
+
+  /// No description provided for @changePasswordMismatch.
+  ///
+  /// In zh, this message translates to:
+  /// **'兩次輸入的新密碼不一致'**
+  String get changePasswordMismatch;
+
+  /// No description provided for @changePasswordInvalidChars.
+  ///
+  /// In zh, this message translates to:
+  /// **'新密碼只能包含 A-Z、a-z、0-9 及 @!\$%&*，且不得含空白'**
+  String get changePasswordInvalidChars;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'密碼已變更'**
+  String get changePasswordSuccess;
+
+  /// No description provided for @changePasswordFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'密碼變更失敗，請稍後再試'**
+  String get changePasswordFailed;
+
   /// No description provided for @credentialTitle.
   ///
   /// In zh, this message translates to:
@@ -1123,6 +1195,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'開課班級'**
   String get courseClass;
+
+  /// No description provided for @scheduleNoTimeTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'無安排上課時間'**
+  String get scheduleNoTimeTitle;
 
   /// No description provided for @courseRequiredElective.
   ///
