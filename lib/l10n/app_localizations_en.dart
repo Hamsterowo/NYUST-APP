@@ -536,18 +536,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gradesGPA => 'GPA';
 
   @override
-  String get gradesCumulativeSummary => 'Cumulative Academic Summary';
-
-  @override
   String gradesGPAShort(String gpa) {
     return 'GPA: $gpa';
   }
-
-  @override
-  String get gradesDetailHeader => 'Course Grade Details for This Semester';
-
-  @override
-  String get gradesAllDetailHeader => 'Course Grade Details';
 
   @override
   String gradesAverageShort(String avg) {

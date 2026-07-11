@@ -254,7 +254,6 @@
   "gradesRank": "Class Rank",
   "gradesEarnedCredits": "Earned Credits",
   "gradesGPA": "GPA",
-  "gradesCumulativeSummary": "Cumulative Academic Summary",
   "gradesGPAShort": "GPA: {gpa}",
   "@gradesGPAShort": {
     "placeholders": {
@@ -263,8 +262,6 @@
       }
     }
   },
-  "gradesDetailHeader": "Course Grade Details for This Semester",
-  "gradesAllDetailHeader": "Course Grade Details",
   "gradesAverageShort": "Avg: {avg}",
   "@gradesAverageShort": {
     "placeholders": {
