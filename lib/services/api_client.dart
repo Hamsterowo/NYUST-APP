@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:intl/intl.dart';
 import 'cookie_manager/cookie_manager_api.dart' as cookie_mgr;
+import 'server_time_service.dart';
 
 /// 共用的 HTTP 客戶端。
 ///
@@ -94,6 +95,13 @@ class ApiClient {
 }
 
 class LanguageInterceptor extends Interceptor {
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    // 從每個回應的 Date header 更新伺服器時間偏移量，供校正時間與誤差橫幅使用。
+    ServerTimeService.instance.reportServerDate(response.headers.value('date'));
+    super.onResponse(response, handler);
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final uri = options.uri;
