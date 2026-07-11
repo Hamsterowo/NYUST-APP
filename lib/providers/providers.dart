@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'auth_provider.dart';
 import 'data_provider.dart';
 import '../services/connectivity_service.dart';
+import '../services/server_time_service.dart';
 import '../services/grade_notification_service.dart';
 
 /// Stage 5：DI 由 `provider` 套件全面改吃 Riverpod。
@@ -59,4 +60,14 @@ class GradeNotificationEnabledNotifier extends Notifier<bool> {
 /// 初值先給 `true`，避免 App 一啟動、串流尚未回報前就閃現離線橫幅。
 final isOnlineProvider = StreamProvider<bool>((ref) {
   return ConnectivityService.instance.onStatusChange;
+});
+
+/// 裝置時間是否與伺服器時間偏差過大（`true` = 誤差過大）。用於時間誤差橫幅。
+///
+/// 訂閱當下先種入目前值，再跟隨後續變化 —— 因為偏差可能在 HomeScreen 建立
+/// （訂閱）之前、於登入的 prefetch 階段就已偵測到，而 broadcast stream 不會
+/// 補發給晚到的訂閱者。尚未收到任何伺服器回應前為 `false`。
+final isClockSkewedProvider = StreamProvider<bool>((ref) async* {
+  yield ServerTimeService.instance.isSkewed;
+  yield* ServerTimeService.instance.onSkewChange;
 });

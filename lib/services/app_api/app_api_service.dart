@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/yuntech_app_crypto.dart';
+import '../server_time_service.dart';
 
 /// Thrown by app-endpoint calls when the Bearer token is missing/expired and
 /// there is **no saved credential** to silently re-mint it — the UI should
@@ -60,6 +61,18 @@ class AppApiService {
     if (httpClientAdapter != null) {
       _dio.httpClientAdapter = httpClientAdapter;
     }
+    // 讓這個獨立 client（含 /Token）的回應也更新伺服器時間偏移量，
+    // 使 nonce 的校正時間能在登入當下即時可用。
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (response, handler) {
+          ServerTimeService.instance.reportServerDate(
+            response.headers.value('date'),
+          );
+          handler.next(response);
+        },
+      ),
+    );
   }
 
   String? _accessToken;
@@ -360,6 +373,7 @@ class AppApiService {
     'X-User-Nonce': YuntechAppCrypto.buildNonce(
       userId: userId,
       appVersion: _appVersion,
+      now: ServerTimeService.instance.now(),
     ),
   };
 
