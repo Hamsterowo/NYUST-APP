@@ -20,11 +20,11 @@ dart format .                      # ALWAYS run before committing — CI ("Analy
 
 **Before every commit, run `dart format .`** (or `dart format` on the files you touched). The GitHub Actions "Analyze" workflow runs `dart format --output=none --set-exit-if-changed .` and fails the check if any file is unformatted — this is the most common CI failure. `flutter analyze` passing is not enough; formatting is checked separately.
 
-Release builds (see `README.md` / `build.sh`):
+Release builds — the APK/AAB are produced by CI (`.github/workflows/build.yaml`); web by `build.sh`:
 
 ```bash
-flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/symbols
-flutter build appbundle --release
+flutter build apk --release --dart-define=USE_FIREBASE=true
+flutter build appbundle --release --dart-define=USE_FIREBASE=true
 flutter build web
 ```
 
