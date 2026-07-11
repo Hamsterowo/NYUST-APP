@@ -333,6 +333,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final colorScheme = Theme.of(context).colorScheme;
     // StreamProvider 尚未回報前預設為線上，避免啟動瞬間閃現離線橫幅。
     final isOnline = ref.watch(isOnlineProvider).value ?? true;
+    // 尚未收到伺服器時間前預設無誤差。
+    final isClockSkewed = ref.watch(isClockSkewedProvider).value ?? false;
 
     const navItems = <_NavItemData>[
       _NavItemData(Icons.dashboard, Icons.dashboard_outlined),
@@ -375,6 +377,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           visible: !isOnline,
                           colorScheme: colorScheme,
                         ),
+                        _ClockSkewBanner(
+                          visible: isClockSkewed,
+                          colorScheme: colorScheme,
+                        ),
                         Expanded(child: body),
                       ],
                     ),
@@ -393,6 +399,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 _OfflineBanner(visible: !isOnline, colorScheme: colorScheme),
+                _ClockSkewBanner(
+                  visible: isClockSkewed,
+                  colorScheme: colorScheme,
+                ),
                 _buildTopLineBar(
                   currentIndex: currentIndex,
                   navItems: navItems,
@@ -414,12 +424,24 @@ class _NavItemData {
   const _NavItemData(this.active, this.inactive);
 }
 
-/// 浮動導覽列上方的離線提示條。線上時佔零高度（以動畫收合）。
-class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner({required this.visible, required this.colorScheme});
+/// 浮動導覽列上方的狀態提示條（離線、時間誤差等共用）。
+/// 不可見時佔零高度（以動畫收合）。
+class _StatusBanner extends StatelessWidget {
+  const _StatusBanner({
+    required this.visible,
+    required this.icon,
+    required this.text,
+    required this.background,
+    required this.foreground,
+    required this.border,
+  });
 
   final bool visible;
-  final ColorScheme colorScheme;
+  final IconData icon;
+  final String text;
+  final Color background;
+  final Color foreground;
+  final Color border;
 
   @override
   Widget build(BuildContext context) {
@@ -432,32 +454,23 @@ class _OfflineBanner extends StatelessWidget {
               margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.92,
-                ),
+                color: background,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-                  width: 1.0,
-                ),
+                border: Border.all(color: border, width: 1.0),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.cloud_off_rounded,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  Icon(icon, size: 16, color: foreground),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      AppLocalizations.of(context).offlineBanner,
+                      text,
                       style: TextStyle(
                         fontFamily: 'JFOpenHuninn',
                         fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
+                        color: foreground,
                       ),
                     ),
                   ),
@@ -465,6 +478,46 @@ class _OfflineBanner extends StatelessWidget {
               ),
             )
           : const SizedBox(width: double.infinity),
+    );
+  }
+}
+
+/// 離線提示條。
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner({required this.visible, required this.colorScheme});
+
+  final bool visible;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return _StatusBanner(
+      visible: visible,
+      icon: Icons.cloud_off_rounded,
+      text: AppLocalizations.of(context).offlineBanner,
+      background: colorScheme.surfaceContainerHighest.withValues(alpha: 0.92),
+      foreground: colorScheme.onSurfaceVariant,
+      border: colorScheme.outlineVariant.withValues(alpha: 0.2),
+    );
+  }
+}
+
+/// 裝置時間誤差過大提示條（警示色，與離線提示區隔）。
+class _ClockSkewBanner extends StatelessWidget {
+  const _ClockSkewBanner({required this.visible, required this.colorScheme});
+
+  final bool visible;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return _StatusBanner(
+      visible: visible,
+      icon: Icons.access_time_rounded,
+      text: AppLocalizations.of(context).clockSkewBanner,
+      background: colorScheme.errorContainer.withValues(alpha: 0.92),
+      foreground: colorScheme.onErrorContainer,
+      border: colorScheme.error.withValues(alpha: 0.2),
     );
   }
 }

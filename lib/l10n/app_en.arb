@@ -119,6 +119,7 @@
   "checkNetworkRetry": "Please check your network and try again.",
   "retry": "Retry",
   "offlineBanner": "Offline — showing previously cached data",
+  "clockSkewBanner": "Device clock is off — this may cause errors. Please fix your device time.",
   "loginNoNetwork": "No internet connection. Please check your network and try again.",
   "noScheduleData": "No schedule data available",
   "weekdayHeader": "{day}",

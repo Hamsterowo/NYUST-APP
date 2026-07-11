@@ -258,6 +258,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get offlineBanner => '離線模式・顯示的是先前的快取資料';
 
   @override
+  String get clockSkewBanner => '裝置時間誤差過大，可能導致異常，請校正系統時間';
+
+  @override
   String get loginNoNetwork => '無法連線，請檢查網路後再試';
 
   @override
