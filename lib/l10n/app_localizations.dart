@@ -572,6 +572,12 @@ abstract class AppLocalizations {
   /// **'離線模式・顯示的是先前的快取資料'**
   String get offlineBanner;
 
+  /// No description provided for @clockSkewBanner.
+  ///
+  /// In zh, this message translates to:
+  /// **'裝置時間誤差過大，可能導致異常，請校正系統時間'**
+  String get clockSkewBanner;
+
   /// No description provided for @loginNoNetwork.
   ///
   /// In zh, this message translates to:

@@ -267,6 +267,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineBanner => 'Offline — showing previously cached data';
 
   @override
+  String get clockSkewBanner =>
+      'Device clock is off — this may cause errors. Please fix your device time.';
+
+  @override
   String get loginNoNetwork =>
       'No internet connection. Please check your network and try again.';
 

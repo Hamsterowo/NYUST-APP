@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
+import '../services/server_time_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
@@ -67,10 +68,10 @@ class CalendarScreenState extends State<CalendarScreen> {
 
   final Set<int> _fetchingYears = {};
 
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedDay = ServerTimeService.instance.now();
   DateTime? _selectedDay;
 
-  int _currentYear = DateTime.now().year;
+  int _currentYear = ServerTimeService.instance.now().year;
 
   PageController? _pageController;
 
@@ -531,7 +532,7 @@ class CalendarScreenState extends State<CalendarScreen> {
                                   context,
                                 ).backToTodayTooltip,
                                 onPressed: () {
-                                  final now = DateTime.now();
+                                  final now = ServerTimeService.instance.now();
                                   setState(() {
                                     _focusedDay = now;
                                     _selectedDay = now;
@@ -573,6 +574,8 @@ class CalendarScreenState extends State<CalendarScreen> {
                               _pageController = controller,
                           firstDay: DateTime.utc(2000, 1, 1),
                           lastDay: DateTime.utc(2100, 12, 31),
+                          // 用校正後的時間標記「今天」，避免裝置時鐘錯誤時標錯日子。
+                          currentDay: ServerTimeService.instance.now(),
                           focusedDay: _focusedDay,
                           selectedDayPredicate: (day) =>
                               isSameDay(_selectedDay, day),
@@ -937,7 +940,7 @@ class CalendarScreenState extends State<CalendarScreen> {
             icon: const Icon(Icons.today),
             tooltip: AppLocalizations.of(context).backToTodayTooltip,
             onPressed: () {
-              final now = DateTime.now();
+              final now = ServerTimeService.instance.now();
               setState(() {
                 _focusedDay = now;
                 _selectedDay = now;

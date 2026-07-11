@@ -12,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import '../models/schedule_event.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
+import '../services/server_time_service.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import 'course_detail_screen.dart';
@@ -69,7 +70,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   }
 
   double? _calculateTimeLineY(List<String> activePeriods, double cellHeight) {
-    final now = DateTime.now();
+    final now = ServerTimeService.instance.now();
     final nowMinutes = now.hour * 60 + now.minute;
 
     for (int i = 0; i < activePeriods.length; i++) {
@@ -609,7 +610,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
           Widget columnWidget = Column(children: cells);
 
-          final todayWeekday = DateTime.now().weekday;
+          final todayWeekday = ServerTimeService.instance.now().weekday;
           if (dayIndex + 1 == todayWeekday) {
             final lineY = _calculateTimeLineY(activePeriods, cellHeight);
             if (lineY != null) {
