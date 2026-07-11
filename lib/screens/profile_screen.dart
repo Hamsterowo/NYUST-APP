@@ -344,7 +344,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 const Divider(height: 1, indent: 56),
                                 ListTile(
                                   leading: Icon(
-                                    Icons.key_outlined,
+                                    Icons.lock_outlined,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
                                   title: Text(
