@@ -4,10 +4,19 @@ abstract interface class AuthService {
   Future<Map<String, dynamic>> loginInit();
 
   /// 以帳號密碼與驗證碼登入。
+  ///
+  /// 若帳號啟用二步驟驗證（TOTP），回傳的 Map 會含 `mfaRequired: true` 與
+  /// 一個新的 `verificationToken`，需再呼叫 [submitTotp] 完成登入。
   Future<Map<String, dynamic>> login(
     String username,
     String password,
     String captcha,
+    String verificationToken,
+  );
+
+  /// 提交二步驟驗證（TOTP）6 碼驗證碼，完成登入。
+  Future<Map<String, dynamic>> submitTotp(
+    String code,
     String verificationToken,
   );
 

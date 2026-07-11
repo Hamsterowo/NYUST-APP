@@ -24,6 +24,14 @@ class MockAuthService implements AuthService {
   }
 
   @override
+  Future<Map<String, dynamic>> submitTotp(
+    String code,
+    String verificationToken,
+  ) async {
+    return {'success': true};
+  }
+
+  @override
   Future<Map<String, dynamic>> getUserInfo() async {
     return {'success': true, 'user': Map<String, dynamic>.from(MockData.user)};
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
+import 'totp_screen.dart';
 import '../providers/providers.dart';
 import '../utils/top_snack_bar.dart';
 import 'dart:convert';
@@ -103,6 +104,28 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       captcha,
       rememberPassword: _rememberPassword,
     );
+
+    // 帳號啟用二步驟驗證：跳出 TOTP 輸入畫面，收集 6 碼驗證碼後完成登入。
+    if (auth.mfaRequired && mounted) {
+      _captchaController.clear();
+      final ok = await Navigator.of(
+        context,
+      ).push<bool>(MaterialPageRoute(builder: (_) => const TotpScreen()));
+      if (ok == true) {
+        TextInput.finishAutofillContext();
+        return;
+      }
+      // 驗證失敗或取消：session 已作廢，AuthProvider 已重取驗證碼並設好錯誤訊息。
+      if (auth.error != null && mounted) {
+        final errorMsg = auth.error == 'totpFailed'
+            ? AppLocalizations.of(context).totpFailed
+            : auth.error == 'loginNoNetwork'
+            ? AppLocalizations.of(context).loginNoNetwork
+            : AppLocalizations.of(context).loginFailed;
+        showTopSnackBar(context, errorMsg, isError: true);
+      }
+      return;
+    }
 
     if (auth.error != null) {
       if (mounted) {

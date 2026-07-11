@@ -216,6 +216,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginFailed => 'Invalid username, password, or captcha';
 
   @override
+  String get totpTitle => 'Two-Step Verification';
+
+  @override
+  String get totpPrompt =>
+      'Enter the 6-digit code from your authenticator app (e.g. Google Authenticator)';
+
+  @override
+  String get totpCodeLabel => 'Verification code';
+
+  @override
+  String get totpVerifyButton => 'Verify';
+
+  @override
+  String get totpCancel => 'Cancel';
+
+  @override
+  String get totpFailed => 'Incorrect code. Please log in again.';
+
+  @override
   String get pleaseLoginToViewSchedule =>
       'Please log in here to view your schedule.';
 
