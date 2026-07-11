@@ -394,14 +394,20 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final grid = _buildScheduleGrid(events);
 
     // 沒有排定上課時間的課（times 為空）不會出現在格線裡，改用下方列表呈現。
+    // 課表維持整頁高度、不被下方列表壓縮，整頁改為可捲動以顯示列表。
     final noTimeCourses = events.where((c) => c.times.isEmpty).toList();
     final Widget content = noTimeCourses.isEmpty
         ? grid
-        : Column(
-            children: [
-              Expanded(child: grid),
-              _buildNoTimeSection(noTimeCourses, events),
-            ],
+        : LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: Column(
+                children: [
+                  // 課表略縮 32px，讓下方列表露一角，提示使用者可往下捲。
+                  SizedBox(height: constraints.maxHeight - 32, child: grid),
+                  _buildNoTimeSection(noTimeCourses, events),
+                ],
+              ),
+            ),
           );
 
     if (!switching) return content;
@@ -1008,18 +1014,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               ],
             ),
           ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: noTimeCourses.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (context, i) =>
-                  _buildNoTimeCard(noTimeCourses[i], uniqueCourseNames),
-            ),
-          ),
+          for (var i = 0; i < noTimeCourses.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            _buildNoTimeCard(noTimeCourses[i], uniqueCourseNames),
+          ],
         ],
       ),
     );
@@ -1038,10 +1036,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final courseColor = getCourseColor(context, courseIndex);
 
     final chips = <String>[
-      if (event.classType.isNotEmpty) event.classType,
+      if (event.requiredType.isNotEmpty) event.requiredType, // 修別（必/選）
       if (event.credits.isNotEmpty)
-        AppLocalizations.of(context).courseCreditsFormat(event.credits),
-      if (event.courseClass.isNotEmpty) event.courseClass,
+        AppLocalizations.of(context).courseCreditsFormat(event.credits), // 學分
+      if (event.classType.isNotEmpty) event.classType, // 組合（科目組別）
     ];
 
     return GestureDetector(
