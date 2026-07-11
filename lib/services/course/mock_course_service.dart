@@ -5,7 +5,7 @@ import '../mock/mock_data.dart';
 class MockCourseService implements CourseService {
   @override
   Future<Map<String, dynamic>> getSchedule({String? semester}) async =>
-      MockData.schedule;
+      MockData.scheduleFor(semester);
 
   @override
   Future<Map<String, dynamic>> getCourseDetail({
