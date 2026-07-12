@@ -186,7 +186,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ? Duration.zero
                     : const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                child: _screens[i],
+                // 每頁各自成一個繪製圖層：交叉淡入時直接以快取圖層做透明度
+                // 合成，不必每幀重繪螢幕內容，避免切換時掉幀拖累導覽列動畫。
+                child: RepaintBoundary(child: _screens[i]),
               ),
             ),
           ),
@@ -229,7 +231,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               currentIndex * itemWidth + (itemWidth - lineWidth) / 2;
           return Stack(
             children: [
-              // 滑到選中分頁上方的 teal 細線。
+              // 滑到選中分頁上方的 teal 細線。自成一個繪製圖層，移動時只
+              // 重繪這條線，不牽動下方整排圖示／文字，避免動畫掉幀。
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 320),
                 curve: Curves.easeOutCubic,
@@ -237,28 +240,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 left: lineLeft,
                 width: lineWidth,
                 height: 3,
-                child: const DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _navActiveColor,
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(3),
+                child: const RepaintBoundary(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: _navActiveColor,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(3),
+                      ),
                     ),
                   ),
                 ),
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = 0; i < n; i++)
-                    _buildNavItem(
-                      index: i,
-                      activeIcon: navItems[i].active,
-                      inactiveIcon: navItems[i].inactive,
-                      label: labels[i],
-                      currentIndex: currentIndex,
-                      colorScheme: colorScheme,
-                    ),
-                ],
+              // 圖示列獨立成層：滑線移動時不會被連帶重繪。
+              RepaintBoundary(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < n; i++)
+                      _buildNavItem(
+                        index: i,
+                        activeIcon: navItems[i].active,
+                        inactiveIcon: navItems[i].inactive,
+                        label: labels[i],
+                        currentIndex: currentIndex,
+                        colorScheme: colorScheme,
+                      ),
+                  ],
+                ),
               ),
             ],
           );
