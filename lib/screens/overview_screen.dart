@@ -11,6 +11,7 @@ import '../widgets/shimmer_box.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'course_detail_screen.dart';
+import 'map_screen.dart';
 import 'web_view_screen.dart';
 
 class OverviewScreen extends ConsumerStatefulWidget {
@@ -1078,6 +1079,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               location: (c.room != null && c.room!.isNotEmpty)
                   ? c.room!
                   : AppLocalizations.of(context).notSpecified,
+              roomCode: c.room,
               state: classState,
               year: c.year,
               semester: c.semester,
@@ -1095,6 +1097,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     required String className,
     required String location,
     required String state,
+    String? roomCode,
     String? year,
     String? semester,
     String? courseNo,
@@ -1189,36 +1192,74 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                 ],
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 16,
-                      color: iconColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      location,
-                      style: TextStyle(
-                        color: iconColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+              _buildLocationBadge(
+                context,
+                location: location,
+                roomCode: roomCode,
+                iconBgColor: iconBgColor,
+                iconColor: iconColor,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// 每日課程卡片右側的地點膠囊。有教室時可點擊，導向地圖頁並定位該教室。
+  Widget _buildLocationBadge(
+    BuildContext context, {
+    required String location,
+    required String? roomCode,
+    required Color iconBgColor,
+    required Color iconColor,
+  }) {
+    final hasRoom = roomCode != null && roomCode.trim().isNotEmpty;
+
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.location_on_outlined, size: 16, color: iconColor),
+          const SizedBox(width: 4),
+          Text(
+            location,
+            style: TextStyle(color: iconColor, fontWeight: FontWeight.w500),
+          ),
+          if (hasRoom) ...[
+            const SizedBox(width: 4),
+            Icon(Icons.near_me_rounded, size: 14, color: iconColor),
+          ],
+        ],
+      ),
+    );
+
+    if (!hasRoom) {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: iconBgColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: content,
+      );
+    }
+
+    return Material(
+      color: iconBgColor,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  MapScreen(embed: false, targetRoomCode: roomCode),
+            ),
+          );
+        },
+        child: content,
       ),
     );
   }
