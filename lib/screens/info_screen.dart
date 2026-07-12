@@ -4,6 +4,7 @@ import 'grades_screen.dart';
 import 'graduation_screen.dart';
 import 'map_screen.dart';
 import 'yun_report_screen.dart';
+import 'absent_screen.dart';
 import '../widgets/custom_app_bar.dart';
 
 class InfoScreen extends StatelessWidget {
@@ -156,6 +157,22 @@ class InfoScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const YunReportScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Card 5: Leave records (請假記錄) — WebASXASG scraper
+              _buildDashboardCard(
+                context,
+                title: AppLocalizations.of(context).infoAbsentTitle,
+                description: AppLocalizations.of(context).infoAbsentDesc,
+                icon: Icons.event_busy_rounded,
+                themeColor: const Color(0xFFDB2777),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AbsentScreen()),
                   );
                 },
               ),

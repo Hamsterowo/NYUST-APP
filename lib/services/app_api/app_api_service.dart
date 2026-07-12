@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/yuntech_app_crypto.dart';
+import '../mock/mock_data.dart';
 import '../server_time_service.dart';
 
 /// Thrown by app-endpoint calls when the Bearer token is missing/expired and
@@ -97,7 +98,7 @@ class AppApiService {
     _mockMode = value;
     if (value) {
       _accessToken = 'mock-access-token';
-      _userId = 'B12345678';
+      _userId = MockData.demoId;
       _tokenExpiry = DateTime.now().add(const Duration(days: 90));
       _passwordHash = null; // "remember password" starts off in the demo
     } else {

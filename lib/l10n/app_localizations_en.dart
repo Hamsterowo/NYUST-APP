@@ -366,6 +366,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'View this semester\'s enrollment certificate.';
 
   @override
+  String get infoAbsentTitle => 'Leave Records';
+
+  @override
+  String get infoAbsentDesc =>
+      'View leave applications and approval status by semester.';
+
+  @override
+  String get absentLoadFailed => 'Failed to load leave records';
+
+  @override
+  String get absentEmpty => 'No leave records for this semester';
+
+  @override
+  String absentHours(String hours) {
+    return '$hours hour(s)';
+  }
+
+  @override
   String get yunReportUnavailable =>
       'Couldn\'t load the enrollment certificate. Make sure your registration is complete, or try again later.';
 

@@ -740,6 +740,36 @@ abstract class AppLocalizations {
   /// **'檢視本學期在學證明'**
   String get infoYunReportDesc;
 
+  /// No description provided for @infoAbsentTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'請假記錄'**
+  String get infoAbsentTitle;
+
+  /// No description provided for @infoAbsentDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'查詢各學年期的請假申請與簽核狀態'**
+  String get infoAbsentDesc;
+
+  /// No description provided for @absentLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'載入請假記錄失敗'**
+  String get absentLoadFailed;
+
+  /// No description provided for @absentEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'這個學年期沒有請假記錄'**
+  String get absentEmpty;
+
+  /// No description provided for @absentHours.
+  ///
+  /// In zh, this message translates to:
+  /// **'請假時數 {hours} 小時'**
+  String absentHours(String hours);
+
   /// No description provided for @yunReportUnavailable.
   ///
   /// In zh, this message translates to:

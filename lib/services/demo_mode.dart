@@ -10,6 +10,9 @@ import 'course/nyust_course_service.dart';
 import 'course/mock_course_service.dart';
 import 'calendar/calendar_service.dart';
 import 'calendar/nyust_calendar_service.dart';
+import 'absent/absent_service.dart';
+import 'absent/nyust_absent_service.dart';
+import 'absent/mock_absent_service.dart';
 
 /// 根據 demo 模式狀態，回傳正確的 Service 實作。
 ///
@@ -33,10 +36,13 @@ class ServiceFactory {
   late final NyustCourseService _nyustCourse = NyustCourseService(client);
   late final MockCourseService _mockCourse = MockCourseService();
   late final NyustCalendarService _nyustCalendar = NyustCalendarService(client);
+  late final NyustAbsentService _nyustAbsent = NyustAbsentService(client);
+  late final MockAbsentService _mockAbsent = MockAbsentService();
 
   AuthService get authService => isDemoMode ? _mockAuth : _nyustAuth;
   GradesService get gradesService => isDemoMode ? _mockGrades : _nyustGrades;
   CourseService get courseService => isDemoMode ? _mockCourse : _nyustCourse;
+  AbsentService get absentService => isDemoMode ? _mockAbsent : _nyustAbsent;
 
   /// 行事曆為全校共用的學術行事曆／假日，從公開網頁爬取，與帳號無關，
   /// 因此即使在 demo 模式也一律使用真實實作，讓測試帳號也能正常抓取行事曆。

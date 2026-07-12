@@ -350,6 +350,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get infoYunReportDesc => '檢視本學期在學證明';
 
   @override
+  String get infoAbsentTitle => '請假記錄';
+
+  @override
+  String get infoAbsentDesc => '查詢各學年期的請假申請與簽核狀態';
+
+  @override
+  String get absentLoadFailed => '載入請假記錄失敗';
+
+  @override
+  String get absentEmpty => '這個學年期沒有請假記錄';
+
+  @override
+  String absentHours(String hours) {
+    return '請假時數 $hours 小時';
+  }
+
+  @override
   String get yunReportUnavailable => '無法取得在學證明，請先完成註冊，或稍後再試。';
 
   @override
