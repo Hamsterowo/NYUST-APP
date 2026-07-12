@@ -70,7 +70,7 @@ Routing is **`go_router`** (`lib/router/app_router.dart`, the global `appRouter`
 
 ### Mock/debug mode
 
-Logging in with username `debug` or `test` (case-insensitive) sets `ApiService.isMockMode = true` and short-circuits `getUserInfo`/`getGrades`/`getGraduation`/`getSchedule` to return hardcoded sample data instead of hitting the network — used for UI development without real credentials. The mock user's fixed ID `D11012345` is also how `AuthProvider.init()` detects a cached mock session on cold start.
+Logging in with username `demo` (case-insensitive) sets `ApiService.isMockMode = true` and short-circuits `getUserInfo`/`getGrades`/`getGraduation`/`getSchedule` to return hardcoded sample data instead of hitting the network — used for UI development without real credentials. The demo account name and its fixed user ID `B12345678` both live in `lib/services/mock/mock_data.dart` (`MockData.demoUsername` / `MockData.demoId` / `MockData.isDemoAccount`) — **this is the single source of truth**; `login_form.dart` and `AuthProvider` must call `MockData.isDemoAccount()` rather than hardcoding the name. The demo account needs no password or captcha: the login form is identical for all accounts (no username-driven UI changes), but `_submit` calls `MockData.isDemoAccount()` and skips password/captcha validation for the demo account, so entering `demo` and pressing the login button logs straight in. The fixed ID `B12345678` is also how `AuthProvider.init()` detects a cached mock session on cold start.
 
 ### Platform-conditional code
 
