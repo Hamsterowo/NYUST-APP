@@ -437,7 +437,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     bool isLoading = false,
   }) {
     final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
-    const timeColumnWidth = 28.0;
+    const timeColumnWidth = 18.0;
     const headerHeight = 36.0;
     const minCellWidth = 46.0;
     const minCellHeight = 28.0;
@@ -828,18 +828,14 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final courseIndex = uniqueCourseNames.indexOf(event.name);
     final courseColor = getCourseColor(context, courseIndex);
 
-    final cardBgColor = isLocatable
-        ? colorScheme.secondaryContainer.withValues(alpha: 0.95)
-        : courseColor.backgroundColor;
+    // 地圖模式下不改變課程的顏色/背景，僅以「高亮邊框 + 粗體標題 + 導航 icon」
+    // 標示可定位的課程（見下方 cardBorder / fontWeight / near_me icon）。
+    final cardBgColor = courseColor.backgroundColor;
     final cardBorder = isLocatable
         ? Border.all(color: colorScheme.secondary, width: 1.5)
         : Border.all(color: courseColor.borderColor, width: 0.5);
-    final textThemeColor = isLocatable
-        ? colorScheme.onSecondaryContainer
-        : courseColor.textColor;
-    final roomThemeColor = isLocatable
-        ? colorScheme.onSecondaryContainer.withValues(alpha: 0.8)
-        : courseColor.textColor.withValues(alpha: 0.75);
+    final textThemeColor = courseColor.textColor;
+    final roomThemeColor = courseColor.textColor.withValues(alpha: 0.75);
 
     final Widget card = GestureDetector(
       onTap: () {
@@ -926,7 +922,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               child: Text(
                 displayName,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 11,
                   color: textThemeColor,
                   height: 1.15,
                   fontWeight: isLocatable ? FontWeight.bold : FontWeight.normal,
@@ -942,7 +938,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                   Expanded(
                     child: Text(
                       event.room!,
-                      style: TextStyle(fontSize: 12, color: roomThemeColor),
+                      style: TextStyle(fontSize: 10, color: roomThemeColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
