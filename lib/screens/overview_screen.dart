@@ -386,9 +386,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         ? const Color(0xFFEA580C)
         : const Color(0xFF0284C7);
 
-    // progress 為「已度過」比例。上課學期累積（0→100），放假期間反向消耗（100→0）。
+    // progress 為「已度過」比例；上課與放假兩狀態的進度條一律 0→100 填滿。
     final double progress = data['progress'] ?? 0.0;
-    final double barValue = isVacation ? (1.0 - progress) : progress;
 
     return GestureDetector(
       onTap: () => _showVacationInfoDialog(context),
@@ -429,7 +428,13 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        AppLocalizations.of(context).vacationCountdownPrefix,
+                        isVacation
+                            ? AppLocalizations.of(
+                                context,
+                              ).vacationCountdownPrefix
+                            : AppLocalizations.of(
+                                context,
+                              ).vacationCountdownPrefixSchool,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -462,7 +467,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: barValue,
+                  value: progress,
                   backgroundColor: Colors.white.withValues(alpha: 0.2),
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   minHeight: 8,
@@ -473,13 +478,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isVacation
-                        ? AppLocalizations.of(context).vacationConsumed(
-                            (progress * 100).toStringAsFixed(0),
-                          )
-                        : AppLocalizations.of(context).vacationElapsed(
-                            (progress * 100).toStringAsFixed(0),
-                          ),
+                    AppLocalizations.of(
+                      context,
+                    ).vacationElapsed((progress * 100).toStringAsFixed(0)),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.white70,

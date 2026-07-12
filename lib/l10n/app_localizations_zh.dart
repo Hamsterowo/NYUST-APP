@@ -114,6 +114,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vacationCountdownPrefix => '還有';
 
   @override
+  String get vacationCountdownPrefixSchool => '再';
+
+  @override
   String get vacationCountdownSuffix => '天';
 
   @override
@@ -122,16 +125,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String vacationConsumed(String percentage) {
-    return '已消耗 $percentage%';
-  }
-
-  @override
   String get vacationInfoTitle => '放假小卡說明';
 
   @override
   String get vacationInfoContent =>
-      '這是一張倒數放假及開學日子的功能小卡。\n\n如何計算：\n1. 假期起點提前：若放假日前有連續假日（週末或國定假日），假期起點會提前至假期的第一天。\n2. 倒數與進度：倒數顯示今日到目標日期的實際天數。上課期間進度條會逐漸累積（越接近放假越滿）；放假期間則反向消耗（越接近開學越空），底部改顯示假期已消耗的比例。';
+      '這是一張倒數放假及開學日子的功能小卡。\n\n如何計算：\n1. 假期起點提前：若放假日前有連續假日（週末或國定假日），假期起點會提前至假期的第一天。\n2. 倒數與進度：上課期間顯示「再幾天放假」，放假期間顯示「還有幾天開學」。進度條顯示目前階段已度過的比例（0→100 逐漸填滿），底部顯示已度過的百分比。';
 
   @override
   String get todayClassesTitle => '今日課程';
