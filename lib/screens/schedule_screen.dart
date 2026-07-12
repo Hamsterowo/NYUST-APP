@@ -437,7 +437,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     bool isLoading = false,
   }) {
     final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
-    const timeColumnWidth = 18.0;
+    const timeColumnWidth = 20.0;
     const headerHeight = 36.0;
     const minCellWidth = 46.0;
     const minCellHeight = 28.0;
