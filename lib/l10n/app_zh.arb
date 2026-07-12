@@ -179,6 +179,14 @@
   "infoMapDesc": "查看校園地圖，提供搜尋功能快速查看系館位置",
   "infoYunReportTitle": "在學證明",
   "infoYunReportDesc": "檢視本學期在學證明",
+  "infoAbsentTitle": "請假記錄",
+  "infoAbsentDesc": "查詢各學年期的請假申請與簽核狀態",
+  "absentLoadFailed": "載入請假記錄失敗",
+  "absentEmpty": "這個學年期沒有請假記錄",
+  "absentHours": "請假時數 {hours} 小時",
+  "@absentHours": {
+    "placeholders": { "hours": { "type": "String" } }
+  },
   "yunReportUnavailable": "無法取得在學證明，請先完成註冊，或稍後再試。",
   "yunReportRetry": "重試",
   "yunReportNoteDisplay": "僅提供顯示證明使用，如有疑問請洽教務處註冊組。",
