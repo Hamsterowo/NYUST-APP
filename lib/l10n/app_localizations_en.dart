@@ -133,7 +133,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vacationInfoContent =>
-      'This card displays the countdown to the start of vacation or the new semester.\n\nHow it is calculated:\n1. Early Holiday Start: If vacation start is preceded by consecutive holidays (weekends or national holidays), the start date shifts to the first holiday day.\n2. Countdown & Progress: During the semester it shows the days until vacation; during vacation it shows the days until the new semester. The bar shows how much of the current phase has elapsed (filling from 0 to 100), and the bottom label shows the elapsed percentage.';
+      'A countdown to the next break and back to school.\n\n・In session → days until the break\n・On break → days until classes resume\n\nThe bar and bottom percentage show how much of the current phase has elapsed (filling 0→100%).\n\nTip: if a weekend or public holidays fall right before a break, its start shifts to that first day off.';
 
   @override
   String get todayClassesTitle => 'Today\'s Classes';
