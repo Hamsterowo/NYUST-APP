@@ -118,6 +118,7 @@ class DataProvider with ChangeNotifier {
   }
 
   void _init() {
+    _hydrateSemesterCache();
     if (_auth.isLoggedIn) {
       prefetchAll();
     }
@@ -125,6 +126,27 @@ class DataProvider with ChangeNotifier {
     _auth.onLogoutCallback = () => clearAll();
     _watchConnectivity();
   }
+
+  /// 啟動時從 Drift 還原「其他學期」課表到記憶體快取，
+  /// 使歷史學期在網路預抓完成前、甚至離線時也能立即切換顯示。
+  Future<void> _hydrateSemesterCache() async {
+    try {
+      final cached = await _courseRepo.loadCachedSemesters();
+      if (cached.isEmpty) return;
+      cached.forEach((key, rawList) {
+        _semesterCache[key] = _parseSchedule({
+          'data': {'schedule': rawList},
+        });
+      });
+      notifyListeners();
+    } catch (_) {
+      // 還原失敗不影響當前學期顯示。
+    }
+  }
+
+  /// 從課表回應取出原始課程陣列（供持久化）。
+  List<dynamic> _rawSchedule(Map<String, dynamic> resp) =>
+      (resp['data']?['schedule'] as List?) ?? const [];
 
   /// 監聽連線狀態:從「離線」恢復到「上線」時,若已登入就重新抓取一次。
   /// 這也會順帶重新驗證 session(prefetchAll → fetchUserInfo),
@@ -173,9 +195,9 @@ class DataProvider with ChangeNotifier {
         await Future.delayed(const Duration(milliseconds: 200));
         final resp = await _api.getSchedule(semester: value);
         if (resp['status'] == 'success') {
-          _semesterCache[value] = _parseSchedule(
-            Map<String, dynamic>.from(resp),
-          );
+          final respMap = Map<String, dynamic>.from(resp);
+          _semesterCache[value] = _parseSchedule(respMap);
+          await _courseRepo.saveCachedSemester(value, _rawSchedule(respMap));
         }
       } catch (_) {
         // 略過此學期，使用者實際切換時會再按需抓一次。
@@ -327,7 +349,9 @@ class DataProvider with ChangeNotifier {
     try {
       final resp = await _api.getSchedule(semester: value);
       if (resp['status'] == 'success') {
-        _semesterCache[value] = _parseSchedule(Map<String, dynamic>.from(resp));
+        final respMap = Map<String, dynamic>.from(resp);
+        _semesterCache[value] = _parseSchedule(respMap);
+        await _courseRepo.saveCachedSemester(value, _rawSchedule(respMap));
       }
     } catch (_) {
       // 保留在該學期，顯示空資料；使用者可切回或重試。

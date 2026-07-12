@@ -53,10 +53,43 @@ class CourseRepository {
   Future<void> clear() async {
     await _db.transaction(() async {
       await _db.delete(_db.scheduleCourses).go();
+      await _db.delete(_db.semesterScheduleCacheTable).go();
       await (_db.delete(
         _db.cacheMeta,
       )..where((t) => t.datasetKey.equals(_datasetKey))).go();
     });
+  }
+
+  /// 載入所有已持久化的「其他學期」課表（key = 學期下拉選單 value，
+  /// value = 該學期課程陣列的原始 map 清單）。啟動時用來還原記憶體快取，
+  /// 使歷史學期跨重啟仍可離線顯示。
+  Future<Map<String, List<dynamic>>> loadCachedSemesters() async {
+    final rows = await _db.select(_db.semesterScheduleCacheTable).get();
+    final result = <String, List<dynamic>>{};
+    for (final r in rows) {
+      try {
+        result[r.cacheKey] = jsonDecode(r.dataJson) as List<dynamic>;
+      } catch (_) {
+        // 略過毀損的一列。
+      }
+    }
+    return result;
+  }
+
+  /// 持久化某「其他學期」的課表原始課程陣列。
+  /// 當前學期不走這裡（由 [refresh]/[watchSchedule] 的正規化表負責）。
+  Future<void> saveCachedSemester(String key, List<dynamic> courses) async {
+    if (key.isEmpty) return;
+    await _db
+        .into(_db.semesterScheduleCacheTable)
+        .insert(
+          SemesterScheduleCacheTableCompanion.insert(
+            cacheKey: key,
+            dataJson: jsonEncode(courses),
+            updatedAt: DateTime.now(),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
   }
 
   Future<bool> _isStale() async {
