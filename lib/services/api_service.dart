@@ -118,6 +118,11 @@ class ApiService {
     courseNo: courseNo,
   );
 
+  // ---- Absent（請假記錄）----
+
+  Future<Map<String, dynamic>> getAbsentRecords({String? semester}) =>
+      _factory.absentService.getAbsentRecords(semester: semester);
+
   // ---- Scraper 存取（維持既有對外 getter；目前無外部使用者）----
 
   SsoScraper get ssoScraper => _factory.nyustAuth.ssoScraper;

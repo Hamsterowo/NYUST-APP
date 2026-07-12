@@ -1,6 +1,6 @@
 /// Demo 模式靜態資料——所有 mock service 的唯一來源。
 ///
-/// 學生設定：B12345678 王小明，112 學年入學（資工系），
+/// 學生設定：B11212345 王小明，112 學年入學（資工系），
 /// 成績橫跨 112 上 ~ 114 上（3 個學年 5 學期），目前修讀 114 下。
 /// 所有學分數與畢業審核互相吻合。
 library;
@@ -11,7 +11,7 @@ class MockData {
   // ── 帳號 ────────────────────────────────────────────
 
   /// Demo 學號。同時作為冷啟動辨識 mock session 的依據。
-  static const String demoId = 'B12345678';
+  static const String demoId = 'B11212345';
 
   /// 登入時觸發 demo 模式的帳號名稱。
   static const String demoUsername = 'demo';
@@ -582,6 +582,108 @@ class MockData {
       },
     };
   }
+
+  // ── 請假記錄 ────────────────────────────────────────
+  /// 請假記錄的學年期清單（value 形如 `114,2`，對齊真實頁面）。
+  static const List<Map<String, String>> _absentSemesters = [
+    {'value': '114,2', 'label': '114學年第2學期'},
+    {'value': '114,1', 'label': '114學年第1學期'},
+  ];
+
+  static const String _absentCurrentSemester = '114,2';
+
+  /// Demo 模式的請假記錄：依 [semester] 回傳對應學年期記錄。
+  static Map<String, dynamic> absentFor(String? semester) {
+    final sem = (semester == null || semester.isEmpty)
+        ? _absentCurrentSemester
+        : semester;
+    final records = switch (sem) {
+      '114,1' => _absent1141,
+      _ => _absent1142,
+    };
+    return {
+      'status': 'success',
+      'data': {
+        'records': records,
+        'semesters': _absentSemesters,
+        'currentSemester': _absentCurrentSemester,
+      },
+    };
+  }
+
+  static const List<Map<String, dynamic>> _absent1142 = [
+    {
+      'formNo': '0000000009900001',
+      'proofDoc': '紙本',
+      'year': '114',
+      'semester': '2',
+      'formType': '一般請假',
+      'leaveType': '病假',
+      'subType': '',
+      'startDate': '115/03/12',
+      'startTime': '08',
+      'startSection': 'A',
+      'endDate': '115/03/12',
+      'endTime': '12',
+      'endSection': 'D',
+      'hours': '4',
+      'status': '已核可',
+    },
+    {
+      'formNo': '0000000009900002',
+      'proofDoc': '電子',
+      'year': '114',
+      'semester': '2',
+      'formType': '一般請假',
+      'leaveType': '事假',
+      'subType': '',
+      'startDate': '115/04/08',
+      'startTime': '13',
+      'startSection': 'E',
+      'endDate': '115/04/08',
+      'endTime': '15',
+      'endSection': 'F',
+      'hours': '2',
+      'status': '審核中',
+    },
+    {
+      'formNo': '0000000009900003',
+      'proofDoc': '紙本',
+      'year': '114',
+      'semester': '2',
+      'formType': '一般請假',
+      'leaveType': '公假',
+      'subType': '',
+      'startDate': '115/05/20',
+      'startTime': '08',
+      'startSection': 'A',
+      'endDate': '115/05/21',
+      'endTime': '17',
+      'endSection': 'H',
+      'hours': '16',
+      'status': '已核可',
+    },
+  ];
+
+  static const List<Map<String, dynamic>> _absent1141 = [
+    {
+      'formNo': '0000000009800001',
+      'proofDoc': '紙本',
+      'year': '114',
+      'semester': '1',
+      'formType': '一般請假',
+      'leaveType': '病假',
+      'subType': '',
+      'startDate': '114/11/03',
+      'startTime': '10',
+      'startSection': 'C',
+      'endDate': '114/11/03',
+      'endTime': '12',
+      'endSection': 'D',
+      'hours': '2',
+      'status': '已核可',
+    },
+  ];
 
   static const List<Map<String, dynamic>> _courses1142 = [
     {
