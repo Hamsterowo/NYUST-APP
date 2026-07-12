@@ -16,6 +16,7 @@ part 'database.g.dart';
     // Stage 3A
     CourseDetailCacheTable,
     CalendarCacheTable,
+    SemesterScheduleCacheTable,
     // Stage 3B
     CacheMeta,
     GradesSemesters,
@@ -30,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _open());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,6 +48,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(scheduleCourses);
         await m.createTable(graduationInfo);
         await m.createTable(graduationCredits);
+      }
+      // v2 → v3: 新增「其他學期課表」的持久化快取表。
+      if (from < 3) {
+        await m.createTable(semesterScheduleCacheTable);
       }
     },
   );

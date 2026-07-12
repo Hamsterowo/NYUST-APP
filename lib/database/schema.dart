@@ -36,6 +36,23 @@ class CalendarCacheTable extends Table {
   String get tableName => 'calendar_cache';
 }
 
+/// 非當前學期的課表快取（每學期一列 JSON blob）。
+///
+/// [cacheKey] 為學期下拉選單的 value（例：`1142`），[dataJson] 存該學期課程
+/// 陣列的 JSON，[updatedAt] 保留供除錯/未來 TTL。當前學期仍走 [ScheduleCourses]
+/// 的正規化表；此表讓「其他學期」的預抓結果能跨重啟持久保存、離線可看。
+class SemesterScheduleCacheTable extends Table {
+  TextColumn get cacheKey => text()();
+  TextColumn get dataJson => text()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {cacheKey};
+
+  @override
+  String get tableName => 'semester_schedule_cache';
+}
+
 // ---------------------------------------------------------------------------
 // 正規化的學術資料表（Stage 3B）— 供 Repository + 未來統計查詢使用
 // ---------------------------------------------------------------------------

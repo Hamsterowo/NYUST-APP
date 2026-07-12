@@ -550,6 +550,286 @@ class CalendarCacheTableCompanion
   }
 }
 
+class $SemesterScheduleCacheTableTable extends SemesterScheduleCacheTable
+    with
+        TableInfo<
+          $SemesterScheduleCacheTableTable,
+          SemesterScheduleCacheTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SemesterScheduleCacheTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _cacheKeyMeta = const VerificationMeta(
+    'cacheKey',
+  );
+  @override
+  late final GeneratedColumn<String> cacheKey = GeneratedColumn<String>(
+    'cache_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataJsonMeta = const VerificationMeta(
+    'dataJson',
+  );
+  @override
+  late final GeneratedColumn<String> dataJson = GeneratedColumn<String>(
+    'data_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [cacheKey, dataJson, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'semester_schedule_cache';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SemesterScheduleCacheTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('cache_key')) {
+      context.handle(
+        _cacheKeyMeta,
+        cacheKey.isAcceptableOrUnknown(data['cache_key']!, _cacheKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cacheKeyMeta);
+    }
+    if (data.containsKey('data_json')) {
+      context.handle(
+        _dataJsonMeta,
+        dataJson.isAcceptableOrUnknown(data['data_json']!, _dataJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataJsonMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cacheKey};
+  @override
+  SemesterScheduleCacheTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SemesterScheduleCacheTableData(
+      cacheKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cache_key'],
+      )!,
+      dataJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data_json'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SemesterScheduleCacheTableTable createAlias(String alias) {
+    return $SemesterScheduleCacheTableTable(attachedDatabase, alias);
+  }
+}
+
+class SemesterScheduleCacheTableData extends DataClass
+    implements Insertable<SemesterScheduleCacheTableData> {
+  final String cacheKey;
+  final String dataJson;
+  final DateTime updatedAt;
+  const SemesterScheduleCacheTableData({
+    required this.cacheKey,
+    required this.dataJson,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['cache_key'] = Variable<String>(cacheKey);
+    map['data_json'] = Variable<String>(dataJson);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SemesterScheduleCacheTableCompanion toCompanion(bool nullToAbsent) {
+    return SemesterScheduleCacheTableCompanion(
+      cacheKey: Value(cacheKey),
+      dataJson: Value(dataJson),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SemesterScheduleCacheTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SemesterScheduleCacheTableData(
+      cacheKey: serializer.fromJson<String>(json['cacheKey']),
+      dataJson: serializer.fromJson<String>(json['dataJson']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'cacheKey': serializer.toJson<String>(cacheKey),
+      'dataJson': serializer.toJson<String>(dataJson),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SemesterScheduleCacheTableData copyWith({
+    String? cacheKey,
+    String? dataJson,
+    DateTime? updatedAt,
+  }) => SemesterScheduleCacheTableData(
+    cacheKey: cacheKey ?? this.cacheKey,
+    dataJson: dataJson ?? this.dataJson,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SemesterScheduleCacheTableData copyWithCompanion(
+    SemesterScheduleCacheTableCompanion data,
+  ) {
+    return SemesterScheduleCacheTableData(
+      cacheKey: data.cacheKey.present ? data.cacheKey.value : this.cacheKey,
+      dataJson: data.dataJson.present ? data.dataJson.value : this.dataJson,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SemesterScheduleCacheTableData(')
+          ..write('cacheKey: $cacheKey, ')
+          ..write('dataJson: $dataJson, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(cacheKey, dataJson, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SemesterScheduleCacheTableData &&
+          other.cacheKey == this.cacheKey &&
+          other.dataJson == this.dataJson &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SemesterScheduleCacheTableCompanion
+    extends UpdateCompanion<SemesterScheduleCacheTableData> {
+  final Value<String> cacheKey;
+  final Value<String> dataJson;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SemesterScheduleCacheTableCompanion({
+    this.cacheKey = const Value.absent(),
+    this.dataJson = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SemesterScheduleCacheTableCompanion.insert({
+    required String cacheKey,
+    required String dataJson,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : cacheKey = Value(cacheKey),
+       dataJson = Value(dataJson),
+       updatedAt = Value(updatedAt);
+  static Insertable<SemesterScheduleCacheTableData> custom({
+    Expression<String>? cacheKey,
+    Expression<String>? dataJson,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (cacheKey != null) 'cache_key': cacheKey,
+      if (dataJson != null) 'data_json': dataJson,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SemesterScheduleCacheTableCompanion copyWith({
+    Value<String>? cacheKey,
+    Value<String>? dataJson,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SemesterScheduleCacheTableCompanion(
+      cacheKey: cacheKey ?? this.cacheKey,
+      dataJson: dataJson ?? this.dataJson,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (cacheKey.present) {
+      map['cache_key'] = Variable<String>(cacheKey.value);
+    }
+    if (dataJson.present) {
+      map['data_json'] = Variable<String>(dataJson.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SemesterScheduleCacheTableCompanion(')
+          ..write('cacheKey: $cacheKey, ')
+          ..write('dataJson: $dataJson, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CacheMetaTable extends CacheMeta
     with TableInfo<$CacheMetaTable, CacheMetaData> {
   @override
@@ -4233,6 +4513,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CourseDetailCacheTableTable(this);
   late final $CalendarCacheTableTable calendarCacheTable =
       $CalendarCacheTableTable(this);
+  late final $SemesterScheduleCacheTableTable semesterScheduleCacheTable =
+      $SemesterScheduleCacheTableTable(this);
   late final $CacheMetaTable cacheMeta = $CacheMetaTable(this);
   late final $GradesSemestersTable gradesSemesters = $GradesSemestersTable(
     this,
@@ -4254,6 +4536,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     courseDetailCacheTable,
     calendarCacheTable,
+    semesterScheduleCacheTable,
     cacheMeta,
     gradesSemesters,
     gradesCourses,
@@ -4618,6 +4901,187 @@ typedef $$CalendarCacheTableTableProcessedTableManager =
         >,
       ),
       CalendarCacheTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$SemesterScheduleCacheTableTableCreateCompanionBuilder =
+    SemesterScheduleCacheTableCompanion Function({
+      required String cacheKey,
+      required String dataJson,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SemesterScheduleCacheTableTableUpdateCompanionBuilder =
+    SemesterScheduleCacheTableCompanion Function({
+      Value<String> cacheKey,
+      Value<String> dataJson,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SemesterScheduleCacheTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SemesterScheduleCacheTableTable> {
+  $$SemesterScheduleCacheTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get cacheKey => $composableBuilder(
+    column: $table.cacheKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dataJson => $composableBuilder(
+    column: $table.dataJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SemesterScheduleCacheTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SemesterScheduleCacheTableTable> {
+  $$SemesterScheduleCacheTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get cacheKey => $composableBuilder(
+    column: $table.cacheKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dataJson => $composableBuilder(
+    column: $table.dataJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SemesterScheduleCacheTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SemesterScheduleCacheTableTable> {
+  $$SemesterScheduleCacheTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get cacheKey =>
+      $composableBuilder(column: $table.cacheKey, builder: (column) => column);
+
+  GeneratedColumn<String> get dataJson =>
+      $composableBuilder(column: $table.dataJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SemesterScheduleCacheTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SemesterScheduleCacheTableTable,
+          SemesterScheduleCacheTableData,
+          $$SemesterScheduleCacheTableTableFilterComposer,
+          $$SemesterScheduleCacheTableTableOrderingComposer,
+          $$SemesterScheduleCacheTableTableAnnotationComposer,
+          $$SemesterScheduleCacheTableTableCreateCompanionBuilder,
+          $$SemesterScheduleCacheTableTableUpdateCompanionBuilder,
+          (
+            SemesterScheduleCacheTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $SemesterScheduleCacheTableTable,
+              SemesterScheduleCacheTableData
+            >,
+          ),
+          SemesterScheduleCacheTableData,
+          PrefetchHooks Function()
+        > {
+  $$SemesterScheduleCacheTableTableTableManager(
+    _$AppDatabase db,
+    $SemesterScheduleCacheTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SemesterScheduleCacheTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$SemesterScheduleCacheTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SemesterScheduleCacheTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> cacheKey = const Value.absent(),
+                Value<String> dataJson = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SemesterScheduleCacheTableCompanion(
+                cacheKey: cacheKey,
+                dataJson: dataJson,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String cacheKey,
+                required String dataJson,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SemesterScheduleCacheTableCompanion.insert(
+                cacheKey: cacheKey,
+                dataJson: dataJson,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SemesterScheduleCacheTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SemesterScheduleCacheTableTable,
+      SemesterScheduleCacheTableData,
+      $$SemesterScheduleCacheTableTableFilterComposer,
+      $$SemesterScheduleCacheTableTableOrderingComposer,
+      $$SemesterScheduleCacheTableTableAnnotationComposer,
+      $$SemesterScheduleCacheTableTableCreateCompanionBuilder,
+      $$SemesterScheduleCacheTableTableUpdateCompanionBuilder,
+      (
+        SemesterScheduleCacheTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $SemesterScheduleCacheTableTable,
+          SemesterScheduleCacheTableData
+        >,
+      ),
+      SemesterScheduleCacheTableData,
       PrefetchHooks Function()
     >;
 typedef $$CacheMetaTableCreateCompanionBuilder =
@@ -6546,6 +7010,12 @@ class $AppDatabaseManager {
       );
   $$CalendarCacheTableTableTableManager get calendarCacheTable =>
       $$CalendarCacheTableTableTableManager(_db, _db.calendarCacheTable);
+  $$SemesterScheduleCacheTableTableTableManager
+  get semesterScheduleCacheTable =>
+      $$SemesterScheduleCacheTableTableTableManager(
+        _db,
+        _db.semesterScheduleCacheTable,
+      );
   $$CacheMetaTableTableManager get cacheMeta =>
       $$CacheMetaTableTableManager(_db, _db.cacheMeta);
   $$GradesSemestersTableTableManager get gradesSemesters =>
