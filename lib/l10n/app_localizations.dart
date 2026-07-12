@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'還有'**
   String get vacationCountdownPrefix;
 
+  /// No description provided for @vacationCountdownPrefixSchool.
+  ///
+  /// In zh, this message translates to:
+  /// **'再'**
+  String get vacationCountdownPrefixSchool;
+
   /// No description provided for @vacationCountdownSuffix.
   ///
   /// In zh, this message translates to:
@@ -314,12 +320,6 @@ abstract class AppLocalizations {
   /// **'已度過 {percentage}%'**
   String vacationElapsed(String percentage);
 
-  /// No description provided for @vacationConsumed.
-  ///
-  /// In zh, this message translates to:
-  /// **'已消耗 {percentage}%'**
-  String vacationConsumed(String percentage);
-
   /// No description provided for @vacationInfoTitle.
   ///
   /// In zh, this message translates to:
@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @vacationInfoContent.
   ///
   /// In zh, this message translates to:
-  /// **'這是一張倒數放假及開學日子的功能小卡。\n\n如何計算：\n1. 假期起點提前：若放假日前有連續假日（週末或國定假日），假期起點會提前至假期的第一天。\n2. 倒數與進度：倒數顯示今日到目標日期的實際天數。上課期間進度條會逐漸累積（越接近放假越滿）；放假期間則反向消耗（越接近開學越空），底部改顯示假期已消耗的比例。'**
+  /// **'倒數放假與開學的小卡。\n\n・上課期間 → 「再 X 天放假」\n・放假期間 → 「還有 X 天開學」\n\n進度條與底部百分比 = 目前階段「已度過」多少（0→100% 逐漸填滿）。\n\n小提醒：放假前若接著週末或國定假日，假期起點會提前到第一個放假日。'**
   String get vacationInfoContent;
 
   /// No description provided for @todayClassesTitle.

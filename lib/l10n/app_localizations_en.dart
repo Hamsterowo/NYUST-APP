@@ -118,6 +118,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vacationCountdownPrefix => 'Still';
 
   @override
+  String get vacationCountdownPrefixSchool => 'In';
+
+  @override
   String get vacationCountdownSuffix => 'Days';
 
   @override
@@ -126,16 +129,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String vacationConsumed(String percentage) {
-    return '$percentage% used';
-  }
-
-  @override
   String get vacationInfoTitle => 'About Holiday Countdown Card';
 
   @override
   String get vacationInfoContent =>
-      'This card displays the countdown to the start of vacation or the new semester.\n\nHow it is calculated:\n1. Early Holiday Start: If vacation start is preceded by consecutive holidays (weekends or national holidays), the start date shifts to the first holiday day.\n2. Countdown & Progress: Shows remaining days to the target date. During the semester the bar fills up as vacation approaches; during vacation it depletes as the new semester approaches, and the bottom label shows how much of the break has been used.';
+      'A countdown to the next break and back to school.\n\n・In session → days until the break\n・On break → days until classes resume\n\nThe bar and bottom percentage show how much of the current phase has elapsed (filling 0→100%).\n\nTip: if a weekend or public holidays fall right before a break, its start shifts to that first day off.';
 
   @override
   String get todayClassesTitle => 'Today\'s Classes';
