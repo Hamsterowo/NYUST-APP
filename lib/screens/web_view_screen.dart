@@ -27,6 +27,13 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
   bool _isLoading = true;
   bool _hasError = false;
 
+  /// The URL to actually load — the WebView bypasses the Dio
+  /// [LanguageInterceptor], so mirror its `lang=` logic here (based on the
+  /// app locale) for portal pages, otherwise the page would ignore the
+  /// app language and render in the portal's default (Chinese).
+  String get _effectiveUrl =>
+      _localizedPortalUrl(widget.url, Localizations.localeOf(context));
+
   /// Injects the app's session cookies into the WebView before loading, then
   /// kicks off the initial page load. Cookies are set via the global
   /// [CookieManager] so this must complete before the first request is made,
@@ -35,7 +42,34 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
     if (widget.injectCookies) {
       await _injectCookies(controller);
     }
-    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(widget.url)));
+    await controller.loadUrl(
+      urlRequest: URLRequest(url: WebUri(_effectiveUrl)),
+    );
+  }
+
+  /// Appends `lang=en` / `lang=zh-TW` to WebNewCAS/eStudent portal pages on
+  /// webapp.yuntech.edu.tw so the in-app browser honours the app language.
+  /// Non-portal or already-tagged URLs are returned unchanged. Mirrors
+  /// `LanguageInterceptor` in `api_client.dart`.
+  String _localizedPortalUrl(String url, Locale locale) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return url;
+    final path = uri.path.toLowerCase();
+    final isPortal =
+        uri.host == 'webapp.yuntech.edu.tw' &&
+        (path.contains('/webnewcas/') || path.contains('/estudent/'));
+    if (!isPortal || url.toLowerCase().contains('lang=')) return url;
+
+    final langValue = locale.languageCode.toLowerCase() == 'en'
+        ? 'en'
+        : 'zh-TW';
+    if (url.contains('?')) {
+      final last = url[url.length - 1];
+      return (last == '?' || last == '&')
+          ? '${url}lang=$langValue'
+          : '$url&lang=$langValue';
+    }
+    return '$url?lang=$langValue';
   }
 
   Future<void> _injectCookies(InAppWebViewController controller) async {
@@ -244,7 +278,7 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
                         final controller = _controller;
                         if (controller != null) {
                           controller.loadUrl(
-                            urlRequest: URLRequest(url: WebUri(widget.url)),
+                            urlRequest: URLRequest(url: WebUri(_effectiveUrl)),
                           );
                         }
                       },
