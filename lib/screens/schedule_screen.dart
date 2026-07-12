@@ -1020,7 +1020,19 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
   }
 
-  /// 無時間課程的橫向小卡片：左側色條 + 課名 / 修別 / 學分 / 組合。
+  /// 修別在英文模式時直接翻成英文（只寫英文、不併中文），中文模式維持原文。
+  String _localizedRequiredType(String rawType, bool isEnglish) {
+    final type = rawType.trim();
+    if (!isEnglish) return type;
+    if (type == '必修' || type.toLowerCase() == 'required') return 'Required';
+    if (type == '選修' || type.toLowerCase() == 'elective') return 'Elective';
+    if (type == '通識' || type.toLowerCase().contains('general')) {
+      return 'General Education';
+    }
+    return type;
+  }
+
+  /// 無時間課程的橫向小卡片：左側色條 + 課名 / 修別 / 學分 / 系所課號。
   Widget _buildNoTimeCard(ScheduleEvent event, List<String> uniqueCourseNames) {
     final colorScheme = Theme.of(context).colorScheme;
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
@@ -1033,10 +1045,11 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final courseColor = getCourseColor(context, courseIndex);
 
     final chips = <String>[
-      if (event.requiredType.isNotEmpty) event.requiredType, // 修別（必/選）
+      if (event.requiredType.isNotEmpty)
+        _localizedRequiredType(event.requiredType, isEnglish), // 修別（必/選）
       if (event.credits.isNotEmpty)
         AppLocalizations.of(context).courseCreditsFormat(event.credits), // 學分
-      if (event.classType.isNotEmpty) event.classType, // 組合（科目組別）
+      if (event.deptCourseNo.isNotEmpty) event.deptCourseNo, // 系所課號
     ];
 
     return GestureDetector(
