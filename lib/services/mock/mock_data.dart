@@ -20,12 +20,19 @@ class MockData {
   static bool isDemoAccount(String username) =>
       username.toLowerCase() == demoUsername;
 
-  /// Mock 使用者資料。
+  /// Mock 使用者資料。鍵值對齊 `InfoScraper.getUserInfo()` 的實際輸出
+  /// （中文欄位名 + `name`／`department` 英文別名），設定頁才能正確顯示；
+  /// 另保留 `id` 供 `AuthProvider.init()` 於冷啟動辨識 mock session。
   static const Map<String, dynamic> user = {
+    '入學年制': '四技',
+    '學號': demoId,
+    '姓名': '王小明',
+    '系(所)別': '資訊工程學系',
+    '班級': '資工三甲',
+    '性別': '男',
     'name': '王小明',
+    'department': '資訊工程學系',
     'id': demoId,
-    'dept': '資訊工程學系',
-    'class': '資工三甲',
   };
 
   // ── 成績（5 學期 × 3 學年）──────────────────────────
