@@ -1,4 +1,4 @@
-# 🎓 YunTool 雲科工具箱
+# YunTool 雲科工具箱
 
 <p align="center">
   <img src="assets/icon/icon.png" alt="YunTool Logo" width="120" height="120" style="border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);"/>
@@ -20,11 +20,14 @@
 
 ## ✨ 特色
 
-*   📅 **課表瀏覽**：快速瀏覽當前課表，可以查看上課位置以及課程詳細資訊等內容。
+*   📅 **課表瀏覽**：快速瀏覽課表，可以查看上課位置以及課程詳細資訊。
+*   🗺️ **校園地圖**：內建校園地圖並支援搜尋系館位置；於課表與每日課程可點選教室直接定位。
 *   📊 **成績追蹤**：提供歷年學期成績與排名，快速掌握學期進度。
 *   🎓 **畢業學分**：抓取畢業學分頁面，了解畢業所需學分。
-*   📄 **在學證明**：透過官方雲科 App 端點（免圖形驗證碼）取得在學證明 PDF，直接於 App 內檢視。
-*   🗓️ **學校行事曆**：整合學校重要日程與台灣法定假日，快速瀏覽下個假期以及重要資訊。
+*   📄 **在學證明**：透過官方取得在學證明 PDF，直接於 App 內檢視。
+*   📝 **請假記錄**：查詢各學年期的請假申請與簽核狀態。
+*   🔗 **常用連結**：於資訊頁彙整常用校務系統連結，點擊後以 App 內建瀏覽器開啟。
+*   🗓️ **學校行事曆**：整合學校重要日程與台灣法定假日，快速瀏覽重要資訊。
 *   🔔 **成績更新背景通知 (Background Sync)**：
     *   在背景定期向學校伺服器比對最新成績。
     *   在手機本機上比對，若有新成績公佈即觸發**純本地通知**，不經過任何第三方推播伺服器，速度極快且隱私安全。
@@ -37,11 +40,20 @@
 
 ## 🛠️ 技術棧與架構設計
 
-本專案遵循現代 Flutter 架構，採 **Repository 模式** 進行資料流控制：`網頁爬蟲 (Scraper) / API ➡️ Drift 本地資料庫 ➡️ Repository Stream ➡️ UI`。
+本專案遵循現代 Flutter 架構，採 **Repository 模式** 進行資料流控制：`網頁爬蟲 (Scraper) / App 端點 ➡️ Drift 本地資料庫 ➡️ Repository Stream ➡️ UI`。部分唯讀功能（如請假記錄）則採即時抓取、不落地快取。
+
+**兩個獨立的資料來源**：
+
+*   **網頁爬蟲**：大多數功能直接以 `Dio` 爬取學校 SSO / WebNewCAS / eStudent 等 HTML 頁面並解析。
+*   **雲科 App 端點（免圖形驗證碼）**：少數功能（如在學證明）改用官方行動 App 的私有 Bearer Token 後端（`MobileAppService`），與網頁 session 完全隔離。
+
+服務層以 **Service Factory** 抽象化：由單一 `demo` 開關決定回傳真實爬蟲或 `MockData` 實作，讓測試帳號無需真實 SSO 也能完整體驗。
 
 *   **UI / State**: [Flutter Riverpod](https://pub.dev/packages/flutter_riverpod) / [Provider](https://pub.dev/packages/provider)
 *   **Database**: [Drift](https://pub.dev/packages/drift) (基於 SQLite 的反應式 ORM 資料庫)
 *   **Networking**: [Dio](https://pub.dev/packages/dio) + [Cookie Jar](https://pub.dev/packages/cookie_jar)
+*   **HTML 解析**: [html](https://pub.dev/packages/html)
+*   **內建瀏覽器**: [Flutter InAppWebView](https://pub.dev/packages/flutter_inappwebview)（帶登入 Cookie 開啟校務頁面）
 *   **Scheduler**: [Workmanager](https://pub.dev/packages/workmanager)
 *   **Notifications**: [Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications)
 *   **Analytics**: Firebase Core & Analytics & Crashlytics
@@ -79,10 +91,9 @@
 為了方便商店審核團隊 (Google Play Reviewers) 或開發測試者在沒有真實雲科大 SSO 學生帳號的情況下體驗 App，我們提供了**單一來源 Demo 模式**：
 
 *   **測試帳號 (Username)**: `demo`
-*   **測試密碼 (Password)**: *（任意填寫即可）*
-*   **驗證碼 (CAPTCHA)**: *（任意填寫即可）*
+*   **測試密碼 / 驗證碼**: *免填*
 
-> 💡 **Demo 模式特點**：使用該帳號登入後，App 會啟用 `MockData`，提供橫跨 3 個學年、5 個學期的完整虛擬成績、課表、畢業門檻以及行事曆資料，所有學分數與圖表皆完美契合，可供深度審核。
+> 💡 **Demo 模式特點**：使用該帳號登入後，App 會啟用 `MockData`（學號 `B11212345`，112 學年入學），提供橫跨 3 個學年、5 個學期的完整虛擬成績、課表、畢業門檻與請假記錄，所有學分數與圖表皆完美契合，可供深度審核。（行事曆為全校公開資料，Demo 模式下仍抓取真實內容。）
 
 ---
 
@@ -102,6 +113,6 @@ flutter build appbundle --release --dart-define=USE_FIREBASE=true
 
 ## 📜 法律聲明與授權 (License)
 
-*   **免責聲明**：本應用程式為第三方開源專案，與國立雲林科技大學官方單位無任何隸屬或合作關係。使用者輸入的帳號密碼僅直接與學校伺服器進行通信。
-*   **授權條款**：本專案採用 **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)** 授權開源。歡迎雲科大同學與開發者一同參與開發與貢獻！
+*   **免責聲明**：本應用程式為第三方開源專案，與國立雲林科技大學官方單位無任何隸屬或合作關係。使用者輸入的帳號密碼僅直接與學校伺服器進行交換。
+*   **授權條款**：本專案採用 **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)** 授權開源。
 
