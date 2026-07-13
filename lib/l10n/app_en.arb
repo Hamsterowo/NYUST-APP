@@ -187,6 +187,7 @@
   "@absentHours": {
     "placeholders": { "hours": { "type": "String" } }
   },
+  "infoCommonLinks": "Quick Links",
   "yunReportUnavailable": "Couldn't load the enrollment certificate. Make sure your registration is complete, or try again later.",
   "yunReportRetry": "Retry",
   "yunReportNoteDisplay": "For on-screen verification only. If you have any questions, please contact the Registration Section of the Office of Academic Affairs.",

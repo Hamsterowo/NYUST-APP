@@ -27,6 +27,9 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
   bool _isLoading = true;
   bool _hasError = false;
 
+  /// 只做一次「導回目標深層頁」的重導（見 [_maybeReachIntendedPage]）。
+  bool _reNavigated = false;
+
   /// The URL to actually load — the WebView bypasses the Dio
   /// [LanguageInterceptor], so mirror its `lang=` logic here (based on the
   /// app locale) for portal pages, otherwise the page would ignore the
@@ -70,6 +73,29 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
           : '$url&lang=$langValue';
     }
     return '$url?lang=$langValue';
+  }
+
+  /// 有些雲科子系統（WebASXASG / AsxServ…）是各自獨立的 ASP.NET App：第一次
+  /// 直接開深層頁時，因該 App 的 session 尚未建立，會先走 SSO 交握、最後停在
+  /// 該 App 的 `default.aspx` 首頁而非目標頁。此時 App session 已建立，再導一次
+  /// 目標網址即可正確落在深層頁。只做一次，避免無限重導。
+  void _maybeReachIntendedPage(
+    InAppWebViewController controller,
+    WebUri? current,
+  ) {
+    if (_reNavigated || current == null) return;
+    final target = Uri.tryParse(_effectiveUrl);
+    if (target == null) return;
+
+    final curPath = current.path.toLowerCase();
+    final tgtPath = target.path.toLowerCase();
+    final wantedDeepPage = !tgtPath.endsWith('/default.aspx');
+    final bouncedToHome = curPath.endsWith('/default.aspx');
+
+    if (wantedDeepPage && bouncedToHome && curPath != tgtPath) {
+      _reNavigated = true;
+      controller.loadUrl(urlRequest: URLRequest(url: WebUri(_effectiveUrl)));
+    }
   }
 
   Future<void> _injectCookies(InAppWebViewController controller) async {
@@ -233,6 +259,7 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
                       _isLoading = false;
                     });
                   }
+                  _maybeReachIntendedPage(controller, url);
                 },
                 onReceivedError: (controller, request, error) {
                   debugPrint(

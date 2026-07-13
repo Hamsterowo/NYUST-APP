@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../data/common_links.dart';
 import 'grades_screen.dart';
 import 'graduation_screen.dart';
 import 'map_screen.dart';
 import 'yun_report_screen.dart';
 import 'absent_screen.dart';
+import 'web_view_screen.dart';
 import '../widgets/custom_app_bar.dart';
 
 class InfoScreen extends StatelessWidget {
@@ -176,10 +178,80 @@ class InfoScreen extends StatelessWidget {
                   );
                 },
               ),
+
+              if (kCommonLinks.isNotEmpty) _buildCommonLinks(context),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// 「常用連結」區塊：標題 + 由 [kCommonLinks] 自動排出的按鈕（兩個一排）。
+  /// 點按用內建瀏覽器（帶登入 cookie）開啟。
+  Widget _buildCommonLinks(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 28),
+        Text(
+          AppLocalizations.of(context).infoCommonLinks,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const spacing = 12.0;
+            final itemWidth = (constraints.maxWidth - spacing) / 2;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                for (final link in kCommonLinks)
+                  SizedBox(
+                    width: itemWidth,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                        side: BorderSide(color: colorScheme.outlineVariant),
+                        foregroundColor: colorScheme.onSurface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AppWebViewScreen(url: link.url),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        isEnglish && link.titleEn != null
+                            ? link.titleEn!
+                            : link.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

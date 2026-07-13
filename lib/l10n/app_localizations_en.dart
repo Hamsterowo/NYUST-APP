@@ -384,6 +384,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get infoCommonLinks => 'Quick Links';
+
+  @override
   String get yunReportUnavailable =>
       'Couldn\'t load the enrollment certificate. Make sure your registration is complete, or try again later.';
 

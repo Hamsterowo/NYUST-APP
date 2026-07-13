@@ -367,6 +367,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get infoCommonLinks => '常用連結';
+
+  @override
   String get yunReportUnavailable => '無法取得在學證明，請先完成註冊，或稍後再試。';
 
   @override

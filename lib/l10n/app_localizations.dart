@@ -770,6 +770,12 @@ abstract class AppLocalizations {
   /// **'請假時數 {hours} 小時'**
   String absentHours(String hours);
 
+  /// No description provided for @infoCommonLinks.
+  ///
+  /// In zh, this message translates to:
+  /// **'常用連結'**
+  String get infoCommonLinks;
+
   /// No description provided for @yunReportUnavailable.
   ///
   /// In zh, this message translates to:
