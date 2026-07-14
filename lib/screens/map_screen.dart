@@ -820,7 +820,7 @@ class FloorPlanPainter extends CustomPainter {
         text: '中 央 走 廊 (Corridor)',
         style: TextStyle(
           color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          fontFamily: 'JFOpenHuninn',
+          fontFamily: 'SweiGothic',
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 4.0,
@@ -874,7 +874,7 @@ class FloorPlanPainter extends CustomPainter {
             text: '${room.code}\n',
             style: TextStyle(
               color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-              fontFamily: 'JFOpenHuninn',
+              fontFamily: 'SweiGothic',
               fontWeight: FontWeight.bold,
               fontSize: 14,
               height: 1.3,
@@ -886,7 +886,7 @@ class FloorPlanPainter extends CustomPainter {
               color: isSelected
                   ? colorScheme.onPrimaryContainer
                   : colorScheme.onSurfaceVariant,
-              fontFamily: 'JFOpenHuninn',
+              fontFamily: 'SweiGothic',
               fontSize: 10,
               height: 1.3,
             ),
