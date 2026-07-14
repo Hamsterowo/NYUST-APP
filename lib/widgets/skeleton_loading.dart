@@ -262,98 +262,128 @@ class GraduationSkeletonView extends StatelessWidget {
   }
 }
 
-/// 行事曆的骨架框架（月曆格子 + 事件列表）
+/// 行事曆的骨架框架，忠實對應真實版面：
+/// 上方月曆卡（月份標題列 + 星期列 + 6×7 日期圓圈），下方選定日的事件時間軸。
 class CalendarSkeletonView extends StatelessWidget {
-  final bool isExpanded;
-  const CalendarSkeletonView({super.key, this.isExpanded = true});
+  const CalendarSkeletonView({super.key});
+
+  /// 時間軸列左側的圓點欄，寬度與真實 [TimelinePainter] 欄一致（40）。
+  Widget _timelineDot() => const SizedBox(
+    width: 40,
+    child: Center(child: SkeletonBox(width: 12, height: 12, borderRadius: 6)),
+  );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final calendarCard = Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant),
-      ),
-      color: colorScheme.surfaceContainerHighest,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SkeletonBox(width: 32, height: 32, borderRadius: 16),
-                SkeletonBox(width: 120, height: 20),
-                SkeletonBox(width: 32, height: 32, borderRadius: 16),
-              ],
+    return Column(
+      children: [
+        // ── 月曆卡（樣式對齊真實卡片：radius 10、surface、outlineVariant 邊框）──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: colorScheme.outlineVariant),
             ),
-            const SizedBox(height: 12),
-
-            if (isExpanded)
-              Row(
-                children: List.generate(
-                  7,
-                  (_) => const Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: SkeletonBox(height: 14),
+            color: colorScheme.surface,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  // 月份標題列：月份文字在左、兩個切換箭頭在右。
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Row(
+                      children: [
+                        SkeletonBox(width: 120, height: 22),
+                        Spacer(),
+                        SkeletonBox(width: 28, height: 28, borderRadius: 14),
+                        SizedBox(width: 8),
+                        SkeletonBox(width: 28, height: 28, borderRadius: 14),
+                      ],
                     ),
                   ),
-                ),
-              ),
-            if (isExpanded) const SizedBox(height: 8),
-
-            if (isExpanded)
-              ...List.generate(
-                5,
-                (_) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Row(
-                    children: List.generate(
-                      7,
-                      (_) => Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: SkeletonBox(height: 48, borderRadius: 24),
+                  const SizedBox(height: 8),
+                  // 星期列（daysOfWeekHeight 24）。
+                  SizedBox(
+                    height: 24,
+                    child: Row(
+                      children: List.generate(
+                        7,
+                        (_) => const Expanded(
+                          child: Center(
+                            child: SkeletonBox(width: 20, height: 12),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  // 日期格：6 週 × 7 天，每格一個小圓圈（rowHeight 48）。
+                  ...List.generate(
+                    6,
+                    (_) => SizedBox(
+                      height: 48,
+                      child: Row(
+                        children: List.generate(
+                          7,
+                          (_) => const Expanded(
+                            child: Center(
+                              child: SkeletonBox(
+                                width: 34,
+                                height: 34,
+                                borderRadius: 17,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-          ],
+            ),
+          ),
         ),
-      ),
-    );
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: calendarCard,
-          ),
-          if (isExpanded) const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: List.generate(
-                3,
-                (_) => const Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: SkeletonBox(height: 52, borderRadius: 12),
+        const SizedBox(height: 8),
+        // ── 選定日事件的時間軸骨架 ──
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.only(left: 8, right: 16, bottom: 16),
+            children: [
+              // 日期標題列（時間軸首列）。
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  children: [
+                    _timelineDot(),
+                    const SkeletonBox(width: 160, height: 16),
+                  ],
                 ),
               ),
-            ),
+              // 幾筆事件卡片。
+              ...List.generate(
+                3,
+                (_) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    children: [
+                      _timelineDot(),
+                      const Expanded(
+                        child: SkeletonBox(height: 44, borderRadius: 8),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
