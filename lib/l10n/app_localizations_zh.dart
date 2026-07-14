@@ -86,7 +86,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get install => '安裝';
 
   @override
-  String get profileDisclaimer => '※ 此頁面僅供參考，無法作為在學證明等正式用途';
+  String get profileDisclaimer => '※ 此頁面僅供參考，無法用於身分證明';
 
   @override
   String get installError => '目前無法安裝：您可能已安裝，或瀏覽器不支援此功能';
@@ -220,7 +220,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get totpTitle => '二步驟驗證';
 
   @override
-  String get totpPrompt => '請輸入驗證器 App（如 Google Authenticator）顯示的 6 位數驗證碼';
+  String get totpPrompt => '請輸入驗證器 App（如 Google Authenticator）\n顯示的 6 位數驗證碼';
 
   @override
   String get totpCodeLabel => '驗證碼';
@@ -417,7 +417,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginRememberPassword => '記住密碼';
 
   @override
-  String get loginRememberPasswordHint => '供下列功能使用，密碼以雜湊形式儲存於本機中，未勾選不影響其他功能使用。';
+  String get loginRememberPasswordHint => '供下列功能使用。密碼會安全地儲存在本機，未勾選不影響其他功能。';
 
   @override
   String get loginRememberPasswordWarning => '如未記住密碼，當憑證失效時，會無法自動登入。';
@@ -510,14 +510,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get credentialClearOnRestartHint =>
-      '已取消記住密碼。基於安全考量，本機儲存的密碼將於下次重新啟動應用程式時清除。';
+      '已取消記住密碼。為了安全，儲存在本機的密碼會在下次重新開啟 App 時清除。';
 
   @override
   String get credentialFeaturesTitle => '使用此憑證的功能';
 
   @override
   String get credentialAbout =>
-      '部分功能會使用雲科行動 App 的端點，需要一組額外的登入憑證。當憑證過期後若你已記住密碼，App 會自動重新取得憑證；若未記住密碼，使用憑證相關功能時，會請你重新輸入一次密碼。\n密碼僅以雜湊形式儲存於本機安全儲存區，無法還原為明文，也無法用於網頁登入。';
+      '部分功能需要一組額外的憑證。若已記住密碼，憑證過期時 App 會自動更新；若未記住，使用相關功能時會請你重新輸入一次密碼。\n密碼只會安全地儲存在本機，無法還原，也無法用於網頁登入。';
 
   @override
   String get calendarTitle => '行事曆';

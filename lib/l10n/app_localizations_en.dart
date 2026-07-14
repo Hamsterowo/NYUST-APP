@@ -88,7 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDisclaimer =>
-      '※ This page is for reference only and cannot be used as an official proof of enrollment.';
+      '※ This page is for reference only and cannot be used as proof of identity.';
 
   @override
   String get installError =>
@@ -228,7 +228,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totpPrompt =>
-      'Enter the 6-digit code from your authenticator app (e.g. Google Authenticator)';
+      'Enter the 6-digit code from your authenticator app\n(e.g. Google Authenticator)';
 
   @override
   String get totpCodeLabel => 'Verification code';
@@ -440,7 +440,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginRememberPasswordHint =>
-      'For the features below. Your password is stored on this device as a hash. Leaving it unchecked won\'t affect other features.';
+      'For the features below. Your password is stored securely on this device. Leaving it off won\'t affect other features.';
 
   @override
   String get loginRememberPasswordWarning =>
@@ -537,14 +537,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get credentialClearOnRestartHint =>
-      'Remember password turned off. For your security, the password stored on this device will be cleared the next time you restart the app.';
+      'Remember password turned off. For your security, the password saved on this device will be cleared next time you open the app.';
 
   @override
   String get credentialFeaturesTitle => 'Features using this credential';
 
   @override
   String get credentialAbout =>
-      'Some features use YunTech\'s mobile-app endpoint, which needs a separate credential. When the credential expires, if you chose to remember your password the app renews it automatically; otherwise you\'ll be asked to re-enter your password when using that feature. Your password is kept only as a hash in this device\'s secure storage; it cannot be reversed to plaintext.';
+      'Some features need a separate credential. If you remember your password, the app renews the credential automatically when it expires; otherwise you\'ll be asked to re-enter it when using those features.\nYour password is stored securely on this device only, can\'t be recovered, and can\'t be used for the website login.';
 
   @override
   String get calendarTitle => 'Calendar';
