@@ -31,4 +31,9 @@ const List<CommonLink> kCommonLinks = [
     url:
         'https://webapp.yuntech.edu.tw/WebASXASG/StudAbsentApp/StudAbsentAppQry.aspx',
   ),
+  CommonLink(
+    title: '選課系統',
+    titleEn: 'Course Selection',
+    url: 'https://webapp.yuntech.edu.tw/AAXCCS/CourseSelectionRegister.aspx',
+  ),
 ];
