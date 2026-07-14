@@ -1,14 +1,25 @@
+import '../l10n/app_localizations.dart';
+
+/// 一則成績異動：[title] 是通知標題（科目名或項目名，例如「微積分」「學期排名」），
+/// [body] 是通知內文（變化內容，例如「成績更新：90 分」）。
+class GradeChange {
+  final String title;
+  final String body;
+  const GradeChange(this.title, this.body);
+}
+
 class GradesComparator {
-  /// 比對新舊成績資料，回傳具體異動說明清單。
+  /// 比對新舊成績資料，回傳每個項目一則的異動清單。
   /// [oldData] 是先前的 `cache_grades` JSON Map
   /// [newData] 是新抓取的 `cache_grades` JSON Map
-  /// [isEnglish] 控制回傳英文還是中文格式的訊息
-  static List<String> compare(
+  /// [l10n] 提供本地化字串，並依語系選擇科目的中/英文名稱
+  static List<GradeChange> compare(
     Map<String, dynamic>? oldData,
     Map<String, dynamic>? newData, {
-    bool isEnglish = false,
+    required AppLocalizations l10n,
   }) {
-    final List<String> changes = [];
+    final bool isEnglish = l10n.localeName.startsWith('en');
+    final List<GradeChange> changes = [];
     if (newData == null || newData['success'] != true) return changes;
     if (oldData == null || oldData['success'] != true) return changes;
 
@@ -46,24 +57,13 @@ class GradesComparator {
         if (newCourses != null) {
           for (var course in newCourses) {
             if (course is Map) {
-              final nameZh = course['name']?.toString() ?? '';
-              final nameEn = course['name_en']?.toString() ?? '';
-              final score = course['score']?.toString() ?? '';
-              final displayName = isEnglish && nameEn.isNotEmpty
-                  ? nameEn
-                  : nameZh;
-              if (displayName.isNotEmpty && score.isNotEmpty) {
-                if (isEnglish) {
-                  changes.add('$displayName: $score');
-                } else {
-                  changes.add('$displayName：$score 分');
-                }
-              }
+              final change = _courseChange(course, l10n, isEnglish);
+              if (change != null) changes.add(change);
             }
           }
         }
       } else {
-        // 已存在學期：比對科目分數與排名
+        // 已存在學期：比對科目分數
         final oldCourses = oldSem['courses'] as List?;
         final newCourses = newSem['courses'] as List?;
 
@@ -85,54 +85,75 @@ class GradesComparator {
             final code = newCourse['code']?.toString() ?? '';
             if (code.isEmpty) continue;
 
-            final nameZh = newCourse['name']?.toString() ?? '';
-            final nameEn = newCourse['name_en']?.toString() ?? '';
-            final newScore = newCourse['score']?.toString() ?? '';
-            final displayName = isEnglish && nameEn.isNotEmpty
-                ? nameEn
-                : nameZh;
-
             final oldCourse = oldCoursesMap[code];
-            if (oldCourse == null) {
-              // 新增科目
-              if (displayName.isNotEmpty && newScore.isNotEmpty) {
-                if (isEnglish) {
-                  changes.add('$displayName: $newScore');
-                } else {
-                  changes.add('$displayName：$newScore 分');
-                }
-              }
-            } else {
-              // 比對分數
-              final oldScore = oldCourse['score']?.toString() ?? '';
-              if (newScore != oldScore && newScore.isNotEmpty) {
-                if (isEnglish) {
-                  changes.add('$displayName: $newScore');
-                } else {
-                  changes.add('$displayName：$newScore 分');
-                }
-              }
+            final oldScore = oldCourse?['score']?.toString() ?? '';
+            final newScore = newCourse['score']?.toString() ?? '';
+
+            // 新增科目，或分數有異動
+            if (oldCourse == null || newScore != oldScore) {
+              final change = _courseChange(newCourse, l10n, isEnglish);
+              if (change != null) changes.add(change);
             }
           }
         }
 
-        // 比對學期排名
+        // 比對學期整體項目：排名、GPA、平均分數
         final oldSummary = oldSem['summary'] as Map?;
         final newSummary = newSem['summary'] as Map?;
         if (oldSummary != null && newSummary != null) {
-          final oldRank = oldSummary['rank']?.toString() ?? '';
+          // 學期排名（rank 已是 "5 / 100" 格式）
           final newRank = newSummary['rank']?.toString() ?? '';
-          if (newRank.isNotEmpty && newRank != oldRank) {
-            if (isEnglish) {
-              changes.add('Semester Rank: No. $newRank');
-            } else {
-              changes.add('學期排名：第$newRank名');
-            }
+          if (newRank.isNotEmpty &&
+              newRank != (oldSummary['rank']?.toString() ?? '')) {
+            changes.add(
+              GradeChange(
+                l10n.gradeNotifyRankTitle,
+                l10n.gradeNotifyRankBody(newRank),
+              ),
+            );
+          }
+
+          // 學期 GPA
+          final newGpa = newSummary['gpa']?.toString() ?? '';
+          if (newGpa.isNotEmpty &&
+              newGpa != (oldSummary['gpa']?.toString() ?? '')) {
+            changes.add(
+              GradeChange(
+                l10n.gradeNotifyGpaTitle,
+                l10n.gradeNotifyGpaBody(newGpa),
+              ),
+            );
+          }
+
+          // 學期平均分數
+          final newAvg = newSummary['average_score']?.toString() ?? '';
+          if (newAvg.isNotEmpty &&
+              newAvg != (oldSummary['average_score']?.toString() ?? '')) {
+            changes.add(
+              GradeChange(
+                l10n.gradeNotifyAvgTitle,
+                l10n.gradeNotifyAvgBody(newAvg),
+              ),
+            );
           }
         }
       }
     }
 
     return changes;
+  }
+
+  /// 將單一科目轉成一則異動（標題=科目名、內文=成績更新）。
+  static GradeChange? _courseChange(
+    Map course,
+    AppLocalizations l10n,
+    bool isEnglish,
+  ) {
+    final nameZh = course['name']?.toString() ?? '';
+    final nameEn = course['name_en']?.toString() ?? '';
+    final score = course['score']?.toString() ?? '';
+    final displayName = isEnglish && nameEn.isNotEmpty ? nameEn : nameZh;
+    if (displayName.isEmpty || score.isEmpty) return null;
+    return GradeChange(displayName, l10n.gradeNotifyScoreBody(score));
   }
 }

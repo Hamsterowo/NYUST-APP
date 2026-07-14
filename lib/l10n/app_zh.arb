@@ -429,6 +429,41 @@
   "settingsGradeNotification": "成績更新通知",
   "settingsGradeNotificationSub": "背景每 30 分鐘檢查一次成績",
   "notificationPermissionDenied": "無法開啟通知：請前往系統設定啟用通知權限",
+  "gradeNotifyScoreBody": "成績更新：{score} 分",
+  "@gradeNotifyScoreBody": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeNotifyRankTitle": "學期排名",
+  "gradeNotifyRankBody": "排名：{rank}",
+  "@gradeNotifyRankBody": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeNotifyGpaTitle": "學期 GPA",
+  "gradeNotifyGpaBody": "GPA 更新：{gpa}",
+  "@gradeNotifyGpaBody": {
+    "placeholders": {
+      "gpa": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeNotifyAvgTitle": "學期平均",
+  "gradeNotifyAvgBody": "平均更新：{avg} 分",
+  "@gradeNotifyAvgBody": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
   "termsAgree": "同意",
   "termsRejectAndExit": "拒絕並退出程式",
   "termsLastUpdated": "最後更新日期：{date}",

@@ -1598,6 +1598,48 @@ abstract class AppLocalizations {
   /// **'無法開啟通知：請前往系統設定啟用通知權限'**
   String get notificationPermissionDenied;
 
+  /// No description provided for @gradeNotifyScoreBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績更新：{score} 分'**
+  String gradeNotifyScoreBody(String score);
+
+  /// No description provided for @gradeNotifyRankTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期排名'**
+  String get gradeNotifyRankTitle;
+
+  /// No description provided for @gradeNotifyRankBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'排名：{rank}'**
+  String gradeNotifyRankBody(String rank);
+
+  /// No description provided for @gradeNotifyGpaTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期 GPA'**
+  String get gradeNotifyGpaTitle;
+
+  /// No description provided for @gradeNotifyGpaBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'GPA 更新：{gpa}'**
+  String gradeNotifyGpaBody(String gpa);
+
+  /// No description provided for @gradeNotifyAvgTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期平均'**
+  String get gradeNotifyAvgTitle;
+
+  /// No description provided for @gradeNotifyAvgBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'平均更新：{avg} 分'**
+  String gradeNotifyAvgBody(String avg);
+
   /// No description provided for @termsAgree.
   ///
   /// In zh, this message translates to:
