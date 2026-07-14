@@ -833,8 +833,14 @@ abstract class AppLocalizations {
   /// No description provided for @yunReportUnavailable.
   ///
   /// In zh, this message translates to:
-  /// **'無法取得在學證明，請先完成註冊，或稍後再試。'**
+  /// **'無法取得在學證明，請稍後再試。'**
   String get yunReportUnavailable;
+
+  /// No description provided for @yunReportNotRegistered.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚未完成本學期註冊，暫時無法提供在學證明。'**
+  String get yunReportNotRegistered;
 
   /// No description provided for @yunReportRetry.
   ///

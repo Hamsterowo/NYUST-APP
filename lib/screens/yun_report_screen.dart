@@ -5,8 +5,21 @@ import 'package:pdfx/pdfx.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
 import '../services/app_api/app_api_service.dart';
+import '../utils/network_error.dart';
 import '../widgets/app_api_password_dialog.dart';
 import '../widgets/custom_app_bar.dart';
+
+/// 載入失敗的種類,對應不同的使用者訊息。
+enum _FailureKind {
+  /// 503:本學期尚未完成註冊,學校不核發在學證明。
+  notRegistered,
+
+  /// 連不上在學證明服務(離線/逾時)。
+  offline,
+
+  /// 其他錯誤(伺服器異常、PDF 解析失敗等)。
+  generic,
+}
 
 /// 在學證明：以 App 端點（Bearer token）打 `/api/User/GetYunReport` 取得 PDF 並顯示。
 class YunReportScreen extends ConsumerStatefulWidget {
@@ -21,6 +34,7 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
   List<Uint8List>? _pageImages;
   bool _loading = true;
   bool _failed = false;
+  _FailureKind _failureKind = _FailureKind.generic;
   bool _needsAuth = false;
 
   @override
@@ -33,6 +47,7 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
     setState(() {
       _loading = true;
       _failed = false;
+      _failureKind = _FailureKind.generic;
       _needsAuth = false;
     });
     Uint8List? bytes;
@@ -51,8 +66,26 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
         _needsAuth = true;
       });
       return;
-    } catch (_) {
-      bytes = null;
+    } on AppApiNotRegisteredException {
+      // 503:未完成本學期註冊 — 顯示明確原因,而非籠統失敗。
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _failed = true;
+        _failureKind = _FailureKind.notRegistered;
+      });
+      return;
+    } catch (e) {
+      // 離線/連不上與其他錯誤分開,顯示對應訊息。
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _failed = true;
+        _failureKind = isNetworkError(e)
+            ? _FailureKind.offline
+            : _FailureKind.generic;
+      });
+      return;
     }
     if (!mounted) return;
     if (bytes == null || bytes.isEmpty) {
@@ -151,6 +184,12 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
     }
     if (_failed || _pageImages == null || _pageImages!.isEmpty) {
       final colorScheme = Theme.of(context).colorScheme;
+      // 依失敗種類顯示明確原因:未註冊 / 連不上服務 / 其他錯誤。
+      final String failureText = switch (_failureKind) {
+        _FailureKind.notRegistered => l.yunReportNotRegistered,
+        _FailureKind.offline => l.serviceUnavailable(l.serviceYunReport),
+        _FailureKind.generic => l.yunReportUnavailable,
+      };
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -158,13 +197,15 @@ class _YunReportScreenState extends ConsumerState<YunReportScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.error_outline_rounded,
+                _failureKind == _FailureKind.notRegistered
+                    ? Icons.info_outline_rounded
+                    : Icons.error_outline_rounded,
                 size: 56,
                 color: colorScheme.outline,
               ),
               const SizedBox(height: 16),
               Text(
-                l.yunReportUnavailable,
+                failureText,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),

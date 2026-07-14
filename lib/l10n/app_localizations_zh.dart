@@ -399,7 +399,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get infoCommonLinks => '常用連結';
 
   @override
-  String get yunReportUnavailable => '無法取得在學證明，請先完成註冊，或稍後再試。';
+  String get yunReportUnavailable => '無法取得在學證明，請稍後再試。';
+
+  @override
+  String get yunReportNotRegistered => '尚未完成本學期註冊，暫時無法提供在學證明。';
 
   @override
   String get yunReportRetry => '重試';

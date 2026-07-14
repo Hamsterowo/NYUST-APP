@@ -288,6 +288,25 @@ void main() {
         );
       },
     );
+
+    test(
+      'throws AppApiNotRegisteredException on 503 (not registered)',
+      () async {
+        final adapter = _FakeAdapter((options, i) {
+          if (options.path.contains('Token')) {
+            return _jsonBody({'access_token': 'tok-1'});
+          }
+          return _bytesBody(const [], status: 503);
+        });
+        final service = AppApiService(httpClientAdapter: adapter);
+        await service.login('D11012345', 'pw', remember: true);
+
+        await expectLater(
+          service.getYunReport(),
+          throwsA(isA<AppApiNotRegisteredException>()),
+        );
+      },
+    );
   });
 
   group('remember-password persistence', () {

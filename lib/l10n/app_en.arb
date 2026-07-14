@@ -204,7 +204,8 @@
     "placeholders": { "hours": { "type": "String" } }
   },
   "infoCommonLinks": "Quick Links",
-  "yunReportUnavailable": "Couldn't load the enrollment certificate. Make sure your registration is complete, or try again later.",
+  "yunReportUnavailable": "Couldn't load the enrollment certificate. Please try again later.",
+  "yunReportNotRegistered": "The enrollment certificate is unavailable because this semester's registration is not complete.",
   "yunReportRetry": "Retry",
   "yunReportNoteDisplay": "For on-screen verification only. If you have any questions, please contact the Registration Section of the Office of Academic Affairs.",
   "yunReportNotePaper": "For a paper copy, please apply through the Registration Section of the Office of Academic Affairs. Do not print this document yourself.",

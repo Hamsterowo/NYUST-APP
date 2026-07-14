@@ -418,7 +418,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yunReportUnavailable =>
-      'Couldn\'t load the enrollment certificate. Make sure your registration is complete, or try again later.';
+      'Couldn\'t load the enrollment certificate. Please try again later.';
+
+  @override
+  String get yunReportNotRegistered =>
+      'The enrollment certificate is unavailable because this semester\'s registration is not complete.';
 
   @override
   String get yunReportRetry => 'Retry';

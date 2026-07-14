@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../utils/network_error.dart';
 import '../../utils/yuntech_app_crypto.dart';
 import '../mock/mock_data.dart';
 import '../server_time_service.dart';
@@ -14,6 +15,16 @@ class AppApiAuthRequiredException implements Exception {
   const AppApiAuthRequiredException();
   @override
   String toString() => 'AppApiAuthRequiredException';
+}
+
+/// Thrown when the app endpoint answers 503 for the enrollment certificate,
+/// which the official app treats as "current-semester registration is not
+/// complete" — the UI should show the not-registered message, not a generic
+/// failure.
+class AppApiNotRegisteredException implements Exception {
+  const AppApiNotRegisteredException();
+  @override
+  String toString() => 'AppApiNotRegisteredException';
 }
 
 /// Client for the official app's MobileAppService backend (Bearer-token API).
@@ -293,9 +304,12 @@ class AppApiService {
   }
 
   /// GET the current-semester enrollment certificate (在學證明) as PDF bytes.
-  /// Returns null if not registered (503) or on network/other error.
-  /// Throws [AppApiAuthRequiredException] when the token expired and there is no
-  /// saved credential to refresh it (caller should prompt for the password).
+  /// Returns null on unexpected server/parse errors. Throws:
+  /// - [AppApiAuthRequiredException] when the token expired and there is no
+  ///   saved credential to refresh it (caller should prompt for the password);
+  /// - [AppApiNotRegisteredException] on 503 (not registered this semester);
+  /// - the original network exception when the server is unreachable (caller
+  ///   classifies it with `isNetworkError`).
   Future<Uint8List?> getYunReport() async {
     // The demo account has no real token; instead of hitting the network,
     // serve a bundled sample PDF (an easter egg) so the demo shows a real
@@ -314,8 +328,10 @@ class AppApiService {
   /// Runs an authenticated GET returning bytes, transparently handling token
   /// expiry: ensures a token (refreshing from the saved credential if needed),
   /// and on a 401 re-mints once and retries. Throws
-  /// [AppApiAuthRequiredException] when no credential can satisfy the request.
-  /// Returns null on network/other/503 errors.
+  /// [AppApiAuthRequiredException] when no credential can satisfy the request,
+  /// [AppApiNotRegisteredException] on 503, and rethrows connectivity errors
+  /// so callers can distinguish "offline" from other failures. Returns null on
+  /// unexpected server/parse errors.
   Future<Uint8List?> _authedGetBytes(String path) async {
     if (!hasToken) {
       if (!await _refreshToken()) throw const AppApiAuthRequiredException();
@@ -337,6 +353,13 @@ class AppApiService {
       rethrow;
     } catch (e) {
       if (kDebugMode) print('AppApiService._authedGetBytes($path) error: $e');
+      // BaseOptions.validateStatus 只放行 <500,503 會以 DioException 到這裡:
+      // 對在學證明而言 503 = 本學期未完成註冊,拋專屬例外讓 UI 顯示對應訊息。
+      if (e is DioException && e.response?.statusCode == 503) {
+        throw const AppApiNotRegisteredException();
+      }
+      // 連線類錯誤原樣拋回,讓呼叫端用 isNetworkError 區分「離線」。
+      if (isNetworkError(e)) rethrow;
     }
     return null;
   }

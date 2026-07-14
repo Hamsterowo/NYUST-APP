@@ -204,7 +204,8 @@
     "placeholders": { "hours": { "type": "String" } }
   },
   "infoCommonLinks": "常用連結",
-  "yunReportUnavailable": "無法取得在學證明，請先完成註冊，或稍後再試。",
+  "yunReportUnavailable": "無法取得在學證明，請稍後再試。",
+  "yunReportNotRegistered": "尚未完成本學期註冊，暫時無法提供在學證明。",
   "yunReportRetry": "重試",
   "yunReportNoteDisplay": "僅提供顯示證明使用，如有疑問請洽教務處註冊組。",
   "yunReportNotePaper": "如需紙本，請向教務處註冊組提出申請，勿擅自列印。",
