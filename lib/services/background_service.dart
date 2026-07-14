@@ -86,22 +86,23 @@ void callbackDispatcher() {
           if (changes.isNotEmpty) {
             if (kDebugMode)
               print(
-                'BackgroundService: Found ${changes.length} changes. Sending notification.',
+                'BackgroundService: Found ${changes.length} changes. Sending notifications.',
               );
             final notificationService = NotificationService();
             await notificationService.init();
 
-            final String title = isEnglish
-                ? '🎓 Grade Update Notification'
-                : '🎓 成績更新通知';
-            final String body = changes.join('\n');
-
-            await notificationService.showNotification(
-              id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
-              title: title,
-              body: body,
-              payload: 'grades',
-            );
+            // 每個項目各發一則通知：標題=科目/項目，內文=變化內容。
+            final int baseId =
+                DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF;
+            for (var i = 0; i < changes.length; i++) {
+              final change = changes[i];
+              await notificationService.showNotification(
+                id: (baseId + i) & 0x7FFFFFFF,
+                title: change.title,
+                body: change.body,
+                payload: 'grades',
+              );
+            }
 
             // 更新本地快取成績資料，確保下次不會重複發送相同通知
             await secureStorage.write(
