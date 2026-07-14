@@ -91,6 +91,28 @@ class AppLocalizationsEn extends AppLocalizations {
       '※ This page is for reference only and cannot be used as proof of identity.';
 
   @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get logoutConfirmTitle => 'Log out?';
+
+  @override
+  String get logoutConfirmMessage =>
+      'Logging out clears the sign-in state on this device. You\'ll need to sign in again to view your data.';
+
+  @override
+  String get profileNameFallback => 'Student';
+
+  @override
+  String get profileDepartmentFallback => 'Unknown department';
+
+  @override
+  String get profileIdFallback => 'ID unknown';
+
+  @override
+  String get profileClassFallback => 'No class info';
+
+  @override
   String get installError =>
       'Currently unable to install: You might have installed it already, or your browser does not support this feature.';
 
