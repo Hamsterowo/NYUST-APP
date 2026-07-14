@@ -220,6 +220,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginFailed => 'Invalid username, password, or captcha';
 
   @override
+  String get loginServiceUnavailable =>
+      'Cannot reach the YunTech SSO portal. Please try again later.';
+
+  @override
   String get totpTitle => 'Two-Step Verification';
 
   @override

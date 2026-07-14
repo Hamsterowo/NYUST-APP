@@ -98,6 +98,7 @@
   "loginHidePassword": "隱藏密碼",
   "loginButton": "登入",
   "loginFailed": "帳密或驗證碼錯誤",
+  "loginServiceUnavailable": "無法連線至單一入口服務網，請稍後再試",
   "totpTitle": "二步驟驗證",
   "totpPrompt": "請輸入驗證器 App（如 Google Authenticator）顯示的 6 位數驗證碼",
   "totpCodeLabel": "驗證碼",

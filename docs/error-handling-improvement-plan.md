@@ -3,9 +3,8 @@
 > 狀態:**規劃完成、尚未實作**。
 > 產出自 2026-07-14 的錯誤處理全面審查(Claude Code 對話)。
 >
-> **工作流程**:實作時從 `main` 開一個新分支、**開一個全新的 PR**,
-> 每完成一個 Phase 就 commit 一次推上去(commit 訊息見文末切分建議),
-> 六個 Phase 都在同一個 PR 內完成後 review/merge。
+> **工作流程**:實作時從 `main` 開新分支 `fix/error-handling-messages`(**不開 PR,本地 branch 即可**),
+> 每完成一個 Phase 就 commit 一次(commit 訊息見文末切分建議),全部完成後再決定合併方式。
 
 ---
 

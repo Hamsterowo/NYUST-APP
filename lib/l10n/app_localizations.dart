@@ -488,6 +488,12 @@ abstract class AppLocalizations {
   /// **'帳密或驗證碼錯誤'**
   String get loginFailed;
 
+  /// No description provided for @loginServiceUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法連線至單一入口服務網，請稍後再試'**
+  String get loginServiceUnavailable;
+
   /// No description provided for @totpTitle.
   ///
   /// In zh, this message translates to:

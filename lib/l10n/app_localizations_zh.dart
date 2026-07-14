@@ -214,6 +214,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginFailed => '帳密或驗證碼錯誤';
 
   @override
+  String get loginServiceUnavailable => '無法連線至單一入口服務網，請稍後再試';
+
+  @override
   String get totpTitle => '二步驟驗證';
 
   @override

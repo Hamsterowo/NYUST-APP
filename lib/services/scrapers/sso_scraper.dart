@@ -154,14 +154,17 @@ class SsoScraper extends BaseScraper {
       }
 
       final document = parseHtml(response.data);
-      String errorMsg = '登入失敗，請檢查帳號密碼與驗證碼';
 
+      // 從頁面解析學校的驗證錯誤原文（帳密錯誤、驗證碼錯誤、帳號鎖定等）。
+      // 有解析到才視為「憑證被明確拒絕」；200 但無驗證訊息代表頁面異常
+      // （學校改版/服務異常），歸類為 error 而非帳密錯誤，避免誤導使用者。
+      String? serverMessage;
       final validationSum = document
           .querySelector('.validation-summary-errors')
           ?.text
           .trim();
       if (validationSum != null && validationSum.isNotEmpty) {
-        errorMsg = validationSum;
+        serverMessage = validationSum;
       }
 
       final fieldError = document
@@ -169,11 +172,24 @@ class SsoScraper extends BaseScraper {
           ?.text
           .trim();
       if (fieldError != null && fieldError.isNotEmpty) {
-        errorMsg += ' ($fieldError)';
+        serverMessage = serverMessage == null
+            ? fieldError
+            : '$serverMessage ($fieldError)';
       }
 
-      // 伺服器有回應且解析到驗證錯誤 → 憑證被明確拒絕（帳密/驗證碼錯）。
-      return {'success': false, 'status': 'rejected', 'message': errorMsg};
+      if (serverMessage != null) {
+        return {
+          'success': false,
+          'status': 'rejected',
+          'serverMessage': serverMessage,
+          'message': serverMessage,
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Login failed with no validation message (unexpected page)',
+      };
     } catch (e) {
       if (isNetworkError(e)) {
         return {
@@ -245,8 +261,9 @@ class SsoScraper extends BaseScraper {
       }
 
       // 停在原頁：解析驗證錯誤（舊密碼錯誤、格式不符等）。
+      // 有解析到學校原文才視為「被明確拒絕」，否則歸類為頁面異常。
       final document = parseHtml(response.data);
-      String errorMsg = '密碼變更失敗';
+      String? serverMessage;
       final validationSum = document
           .querySelector('.validation-summary-errors')
           ?.text
@@ -256,12 +273,24 @@ class SsoScraper extends BaseScraper {
           ?.text
           .trim();
       if (validationSum != null && validationSum.isNotEmpty) {
-        errorMsg = validationSum;
+        serverMessage = validationSum;
       } else if (fieldError != null && fieldError.isNotEmpty) {
-        errorMsg = fieldError;
+        serverMessage = fieldError;
       }
-      // 伺服器有回應且解析到驗證錯誤（舊密碼錯誤、格式不符等）。
-      return {'success': false, 'status': 'rejected', 'message': errorMsg};
+      if (serverMessage != null) {
+        return {
+          'success': false,
+          'status': 'rejected',
+          'serverMessage': serverMessage,
+          'message': serverMessage,
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message':
+            'Password change failed with no validation message (unexpected page)',
+      };
     } catch (e) {
       if (isNetworkError(e)) {
         return {

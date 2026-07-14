@@ -108,28 +108,40 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       }
       // 驗證失敗或取消：session 已作廢，AuthProvider 已重取驗證碼並設好錯誤訊息。
       if (auth.error != null && mounted) {
-        final errorMsg = auth.error == 'totpFailed'
-            ? AppLocalizations.of(context).totpFailed
-            : auth.error == 'loginNoNetwork'
-            ? AppLocalizations.of(context).loginNoNetwork
-            : AppLocalizations.of(context).loginFailed;
-        showTopSnackBar(context, errorMsg, isError: true);
+        showTopSnackBar(context, _errorMessage(auth), isError: true);
       }
       return;
     }
 
     if (auth.error != null) {
       if (mounted) {
-        final errorMsg = auth.error == 'loginFailed'
-            ? AppLocalizations.of(context).loginFailed
-            : auth.error == 'loginNoNetwork'
-            ? AppLocalizations.of(context).loginNoNetwork
-            : auth.error!;
-        showTopSnackBar(context, errorMsg, isError: true);
+        showTopSnackBar(context, _errorMessage(auth), isError: true);
         _captchaController.clear();
       }
     } else {
       TextInput.finishAutofillContext();
+    }
+  }
+
+  /// 把 [AuthProvider.error] 的錯誤代碼轉成使用者可讀的訊息。
+  /// 憑證被拒(loginFailed)時優先顯示學校頁面解析出的原文(errorDetail)；
+  /// 絕不顯示原始例外字串。
+  String _errorMessage(AuthProvider auth) {
+    final l10n = AppLocalizations.of(context);
+    switch (auth.error) {
+      case 'totpFailed':
+        return l10n.totpFailed;
+      case 'loginNoNetwork':
+        return l10n.loginNoNetwork;
+      case 'ssoUnavailable':
+        return l10n.loginServiceUnavailable;
+      case 'loginFailed':
+        final detail = auth.errorDetail;
+        return (detail != null && detail.isNotEmpty)
+            ? detail
+            : l10n.loginFailed;
+      default:
+        return l10n.loginFailed;
     }
   }
 
