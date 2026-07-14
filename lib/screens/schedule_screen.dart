@@ -359,6 +359,44 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final events = data.displayedSchedule;
     final hasData = events.isNotEmpty;
 
+    // 切換到其他學期抓取失敗且無快取:顯示失敗提示與重試,
+    // 而非默默 fallback 顯示當前學期的資料造成誤導。
+    final sel = data.selectedSemester;
+    if (data.semesterLoadFailed &&
+        !switching &&
+        sel != null &&
+        sel != data.currentSemester &&
+        !data.hasSemesterCache(sel)) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context).loadScheduleFailed,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              data.semesterLoadFailReason == RefreshOutcome.networkError
+                  ? AppLocalizations.of(context).serviceUnavailable(
+                      AppLocalizations.of(context).serviceSchedule,
+                    )
+                  : AppLocalizations.of(context).checkNetworkRetry,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.tonal(
+              onPressed: () => data.selectSemester(sel),
+              child: Text(AppLocalizations.of(context).retry),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (data.scheduleFailed && data.scheduleData.isEmpty && !switching) {
       return Center(
         child: Column(

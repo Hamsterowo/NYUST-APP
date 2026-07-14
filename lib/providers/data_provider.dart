@@ -67,6 +67,11 @@ class DataProvider with ChangeNotifier {
   /// 切換到非當前學期時的載入狀態。
   bool isLoadingScheduleSemester = false;
 
+  /// 最近一次「切換到其他學期」的抓取是否失敗（且無快取可顯示）。
+  /// 供課表畫面顯示失敗提示與重試,而非默默顯示空白/錯誤學期的資料。
+  bool semesterLoadFailed = false;
+  RefreshOutcome? semesterLoadFailReason;
+
   /// 非當前學期的課表快取（僅記憶體，歷史資料可重抓）。
   final Map<String, List<ScheduleEvent>> _semesterCache = {};
 
@@ -246,6 +251,8 @@ class DataProvider with ChangeNotifier {
     selectedSemester = null;
     _semesterCache.clear();
     isLoadingScheduleSemester = false;
+    semesterLoadFailed = false;
+    semesterLoadFailReason = null;
     _isPrefetching = false;
     notifyListeners();
 
@@ -365,10 +372,17 @@ class DataProvider with ChangeNotifier {
     }
   }
 
+  /// 是否已有指定學期的記憶體快取。
+  bool hasSemesterCache(String? value) =>
+      value != null && _semesterCache.containsKey(value);
+
   /// 切換到指定學期。當前學期直接切換；其他學期若未快取則按需抓取。
+  /// 已選中但上次抓取失敗時,再次呼叫視為「重試」。
   Future<void> selectSemester(String value) async {
-    if (value == selectedSemester) return;
+    if (value == selectedSemester && !semesterLoadFailed) return;
     selectedSemester = value;
+    semesterLoadFailed = false;
+    semesterLoadFailReason = null;
 
     if (value == currentSemester || _semesterCache.containsKey(value)) {
       notifyListeners();
@@ -383,9 +397,16 @@ class DataProvider with ChangeNotifier {
         final respMap = Map<String, dynamic>.from(resp);
         _semesterCache[value] = _parseSchedule(respMap);
         await _courseRepo.saveCachedSemester(value, _rawSchedule(respMap));
+      } else if (selectedSemester == value) {
+        // 記錄失敗讓 UI 顯示提示與重試（使用者已切走則不覆蓋）。
+        semesterLoadFailed = true;
+        semesterLoadFailReason = classifyRefreshFailure(resp);
       }
     } catch (_) {
-      // 保留在該學期，顯示空資料；使用者可切回或重試。
+      if (selectedSemester == value) {
+        semesterLoadFailed = true;
+        semesterLoadFailReason = RefreshOutcome.serviceError;
+      }
     } finally {
       isLoadingScheduleSemester = false;
       notifyListeners();

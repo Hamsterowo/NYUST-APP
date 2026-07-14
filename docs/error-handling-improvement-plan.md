@@ -1,6 +1,6 @@
 # 錯誤處理改善計畫
 
-> 狀態:**規劃完成、尚未實作**。
+> 狀態:**已實作完成**(2026-07-14,分支 `fix/error-handling-messages`,六個 Phase 各一 commit)。
 > 產出自 2026-07-14 的錯誤處理全面審查(Claude Code 對話)。
 >
 > **工作流程**:實作時從 `main` 開新分支 `fix/error-handling-messages`(**不開 PR,本地 branch 即可**),
