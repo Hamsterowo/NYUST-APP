@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+
 import '../utils/clock_drift.dart';
 
 /// 全 App 共用的「可信任時間」服務。
@@ -16,7 +18,13 @@ import '../utils/clock_drift.dart';
 /// 使用者把時鐘改回正確時，週期性重評（[_reevalInterval]）會讓 [isSkewed]
 /// 轉回 `false`、橫幅自動收合；反之亦然。未取得任何 `Date` header 前，[now]
 /// 退化為裝置本地時間，行為與現況一致。
-class ServerTimeService {
+///
+/// 注意：單調時鐘（[Stopwatch]）在 App 被系統凍結／裝置休眠期間**不會前進**，
+/// 但牆上時鐘 `DateTime.now()` 照走真實時間。若 App 背景放置一段時間後恢復，
+/// 舊錨點會失準（推算出的真實時間落後於實際），拿去比對就會誤判成「時間誤差
+/// 過大」而彈出橫幅。為此 [startLifecycleWatch] 會監聽 App 生命週期，於進背景／
+/// 恢復時作廢錨點，待恢復後第一個回應重新校準，避免這種假陽性。
+class ServerTimeService with WidgetsBindingObserver {
   ServerTimeService._();
   static final ServerTimeService instance = ServerTimeService._();
 
@@ -34,6 +42,39 @@ class ServerTimeService {
 
   /// 有錨點後，每隔這段時間重新評估一次偏差（讓使用者改回時鐘後橫幅能自動收合）。
   static const Duration _reevalInterval = Duration(seconds: 15);
+
+  bool _observing = false;
+
+  /// 開始監聽 App 生命週期，於背景／恢復時作廢陳舊錨點。由 `main()` 呼叫一次即可
+  /// （重複呼叫為 no-op）。單調時鐘在背景凍結期間不前進，恢復後舊錨點會失準而
+  /// 造成時間誤差橫幅假陽性——這裡在切換前後清掉錨點以避免之。
+  void startLifecycleWatch() {
+    if (_observing) return;
+    _observing = true;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 進背景（paused／hidden）與恢復（resumed）都作廢：於 paused 清掉可避免恢復後
+    // 週期性重評搶在生命週期回呼前用陳舊錨點誤判；resumed 再清一次作為保險。
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.resumed) {
+      _invalidateAnchor();
+    }
+  }
+
+  /// 作廢目前錨點並收合橫幅：清掉後 [now] 退化為 `DateTime.now()`、[_reevaluate]
+  /// 在無錨點時直接跳過，待下一個回應的 `Date` header 重新校準。
+  void _invalidateAnchor() {
+    _serverAnchorUtc = null;
+    _anchorElapsed = null;
+    if (_isSkewed) {
+      _isSkewed = false;
+      _skewController.add(false);
+    }
+  }
 
   /// 由 client 的 `onResponse` 呼叫，餵入回應的 `Date` header 值。
   /// header 為 `null`／無法解析時忽略（不動先前的錨點）。

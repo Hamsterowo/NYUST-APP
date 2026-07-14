@@ -9,9 +9,13 @@ import 'screens/desktop_screen.dart';
 import 'services/background_service.dart';
 import 'services/notification_service.dart';
 import 'services/firebase_service.dart';
+import 'services/server_time_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 監聽 App 生命週期，於背景／恢復時作廢陳舊的時間錨點，避免恢復後誤判時間誤差。
+  ServerTimeService.instance.startLifecycleWatch();
 
   // 初始化 Firebase（僅在 USE_FIREBASE=true 且平台已設定時，否則為 no-op）。
   await firebaseService.init();
