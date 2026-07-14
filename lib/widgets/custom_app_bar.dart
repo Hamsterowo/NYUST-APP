@@ -22,7 +22,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize {
     final double bottomHeight = bottom?.preferredSize.height ?? 0.0;
-    return Size.fromHeight(kToolbarHeight + 4.0 + bottomHeight);
+    return Size.fromHeight(kToolbarHeight + bottomHeight);
   }
 }
 
@@ -33,57 +33,50 @@ class _CustomAppBarState extends State<CustomAppBar> {
   Widget build(BuildContext context) {
     final bool showSpinner = widget.isLoading || _isRefreshing;
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Theme.of(context).primaryColor, width: 4.0),
-        ),
+    return AppBar(
+      title: Text(
+        widget.title,
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      child: AppBar(
-        title: Text(
-          widget.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          ...?widget.actions,
-          if (showSpinner)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.0),
-              ),
-            )
-          else if (widget.onRefresh != null)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () async {
+      centerTitle: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      surfaceTintColor: Colors.transparent,
+      actions: [
+        ...?widget.actions,
+        if (showSpinner)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2.0),
+            ),
+          )
+        else if (widget.onRefresh != null)
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              if (mounted) {
+                setState(() {
+                  _isRefreshing = true;
+                });
+              }
+              try {
+                await widget.onRefresh!();
+              } finally {
                 if (mounted) {
                   setState(() {
-                    _isRefreshing = true;
+                    _isRefreshing = false;
                   });
                 }
-                try {
-                  await widget.onRefresh!();
-                } finally {
-                  if (mounted) {
-                    setState(() {
-                      _isRefreshing = false;
-                    });
-                  }
-                }
-              },
-              tooltip: '重新整理',
-            ),
-        ],
-        bottom: widget.bottom,
-      ),
+              }
+            },
+            tooltip: '重新整理',
+          ),
+      ],
+      bottom: widget.bottom,
     );
   }
 }
