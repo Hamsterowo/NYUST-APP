@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 請假記錄查詢（WebASXASG/StudAbsentApp/DeepQry）。
@@ -37,9 +38,8 @@ class AbsentScraper extends BaseScraper {
       // 指向各子系統登入頁的連結，正常登入時也會命中而誤判為過期。
       if (document.querySelectorAll(_semesterSelector).isEmpty) {
         return {
-          'status': 'error',
+          'status': 'session_expired',
           'message': 'Session expired, please login again',
-          'isExpired': true,
         };
       }
 
@@ -71,7 +71,17 @@ class AbsentScraper extends BaseScraper {
         },
       };
     } catch (e) {
-      return {'status': 'error', 'message': '抓取請假記錄失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'status': 'network_error',
+          'message': 'Network error fetching absent records: $e',
+        };
+      }
+      return {
+        'status': 'error',
+        'message': 'Failed to fetch absent records: $e',
+      };
     }
   }
 

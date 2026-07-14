@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
+import '../repositories/refresh_outcome.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/grade_notification_sheet.dart';
@@ -167,7 +168,13 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).checkNetworkRetry,
+              // 離線/連不上 → 具名「無法連線至成績系統」;其他失敗 → 通用提示。
+              data.gradesFailReason == RefreshOutcome.networkError
+                  ? AppLocalizations.of(context).serviceUnavailable(
+                      AppLocalizations.of(context).serviceGrades,
+                    )
+                  : AppLocalizations.of(context).checkNetworkRetry,
+              textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),

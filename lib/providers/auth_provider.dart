@@ -11,6 +11,10 @@ class AuthProvider with ChangeNotifier {
   Map<String, dynamic>? _user;
   String? _error;
 
+  /// 學校頁面解析出的驗證錯誤原文（例：帳號或密碼錯誤、驗證碼錯誤、帳號鎖定）。
+  /// 僅在 [_error] 為 'loginFailed'（憑證被明確拒絕）時可能有值，供 UI 優先顯示。
+  String? _errorDetail;
+
   final _secureStorage = const FlutterSecureStorage();
   static const String _cachedUserInfoKey = 'cached_user_info';
 
@@ -57,6 +61,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoggedIn => _user != null;
   Map<String, dynamic>? get user => _user;
   String? get error => _error;
+  String? get errorDetail => _errorDetail;
   String? get captchaUrl => _captchaUrl;
 
   /// login() 是否偵測到帳號啟用二步驟驗證，正等待 UI 收集 TOTP 驗證碼。
@@ -186,6 +191,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> fetchCaptcha() async {
     _isLoading = true;
     _error = null;
+    _errorDetail = null;
     notifyListeners();
     try {
       await _apiService.logout();
@@ -196,12 +202,15 @@ class AuthProvider with ChangeNotifier {
         _captchaUrl = data['captchaImage'];
         _verificationToken = data['verificationToken'];
       } else {
-        throw Exception(data['message'] ?? 'Failed to init login');
+        // 依 scraper 分類顯示「無網路」或「登入服務不可用」,
+        // 絕不把原始錯誤字串（Dio 例外等）丟給 UI。
+        _error = data['status'] == 'network_error'
+            ? 'loginNoNetwork'
+            : 'ssoUnavailable';
       }
     } catch (e) {
-      // 離線時顯示友善的「無網路」訊息,而非原始的 Dio 例外字串。
       final offline = !await ConnectivityService.instance.checkOnline();
-      _error = offline ? 'loginNoNetwork' : e.toString();
+      _error = offline ? 'loginNoNetwork' : 'ssoUnavailable';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -216,6 +225,7 @@ class AuthProvider with ChangeNotifier {
   }) async {
     _isLoading = true;
     _error = null;
+    _errorDetail = null;
     notifyListeners();
 
     try {
@@ -261,17 +271,30 @@ class AuthProvider with ChangeNotifier {
         await _completeLogin(username, password, rememberPassword);
         return true;
       } else {
-        final loginError = 'loginFailed';
+        // 三態分流:憑證被明確拒絕(rejected) / 無網路 / 登入服務異常。
+        // 只有 rejected 才顯示「帳密錯誤」類訊息,伺服器掛掉不能誤怪使用者。
+        final status = result['status']?.toString();
+        final String loginError;
+        String? detail;
+        if (status == 'rejected') {
+          loginError = 'loginFailed';
+          detail = result['serverMessage']?.toString();
+        } else if (status == 'network_error') {
+          loginError = 'loginNoNetwork';
+        } else {
+          loginError = 'ssoUnavailable';
+        }
         await fetchCaptcha();
         _error = loginError;
+        _errorDetail = detail;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      // 離線時給明確的「無網路」訊息,而非籠統的帳密/驗證碼錯誤。
+      // 例外不是憑證錯誤:離線給「無網路」,其餘視為登入服務異常。
       final offline = !await ConnectivityService.instance.checkOnline();
       await fetchCaptcha();
-      _error = offline ? 'loginNoNetwork' : 'loginFailed';
+      _error = offline ? 'loginNoNetwork' : 'ssoUnavailable';
       notifyListeners();
       return false;
     } finally {
@@ -343,16 +366,22 @@ class AuthProvider with ChangeNotifier {
       }
 
       // 驗證碼錯誤：session 已被學校作廢，需從頭重新登入（含重抓驗證碼）。
+      // 僅 rejected(驗證碼錯) 顯示 totpFailed;連線/伺服器問題給對應訊息。
+      final status = result['status']?.toString();
       _clearMfaState();
       await fetchCaptcha();
-      _error = 'totpFailed';
+      _error = status == 'network_error'
+          ? 'loginNoNetwork'
+          : status == 'rejected'
+          ? 'totpFailed'
+          : 'ssoUnavailable';
       notifyListeners();
       return false;
     } catch (e) {
       final offline = !await ConnectivityService.instance.checkOnline();
       _clearMfaState();
       await fetchCaptcha();
-      _error = offline ? 'loginNoNetwork' : 'totpFailed';
+      _error = offline ? 'loginNoNetwork' : 'ssoUnavailable';
       notifyListeners();
       return false;
     } finally {
@@ -393,7 +422,18 @@ class AuthProvider with ChangeNotifier {
         }
         return true;
       }
-      _error = result['message']?.toString() ?? 'changePasswordFailed';
+      // rejected(舊密碼錯誤等) → 顯示學校原文;無網路/其他 → 對應通用訊息。
+      final status = result['status']?.toString();
+      final serverMessage = result['serverMessage']?.toString();
+      if (status == 'rejected' &&
+          serverMessage != null &&
+          serverMessage.isNotEmpty) {
+        _error = serverMessage;
+      } else if (status == 'network_error') {
+        _error = 'loginNoNetwork';
+      } else {
+        _error = 'changePasswordFailed';
+      }
       return false;
     } catch (e) {
       final offline = !await ConnectivityService.instance.checkOnline();

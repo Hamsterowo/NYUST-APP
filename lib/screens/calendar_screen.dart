@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/network_error.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
@@ -331,9 +333,16 @@ class CalendarScreenState extends State<CalendarScreen> {
       }
     } catch (e) {
       _fetchingYears.remove(year);
+      if (kDebugMode) print('CalendarScreen: fetch year $year failed: $e');
       if (foreground && mounted) {
         setState(() {
-          _errorMessage = e.toString();
+          // 連線類錯誤 → 具名「無法連線至學校行事曆」;其他 → 通用載入失敗。
+          // 絕不把原始例外字串顯示給使用者。
+          _errorMessage = isNetworkError(e)
+              ? AppLocalizations.of(context).serviceUnavailable(
+                  AppLocalizations.of(context).serviceCalendar,
+                )
+              : AppLocalizations.of(context).loadCalendarFailed;
         });
         _setLoading(false);
       }
@@ -750,11 +759,8 @@ class CalendarScreenState extends State<CalendarScreen> {
                               color: Colors.red,
                             ),
                             const SizedBox(height: 16),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              ).loadErrorPrefix(_errorMessage!),
-                            ),
+                            // _errorMessage 已是完整的 l10n 文案，直接顯示。
+                            Text(_errorMessage!, textAlign: TextAlign.center),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () => _fetchYearIfNeeded(_currentYear),

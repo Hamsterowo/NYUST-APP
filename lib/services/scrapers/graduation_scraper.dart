@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 處理畢業審核資料爬取的類別
@@ -37,8 +38,8 @@ class GraduationScraper extends BaseScraper {
       if (response.data.toString().contains('Login.aspx')) {
         return {
           'success': false,
+          'status': 'session_expired',
           'message': 'Session expired',
-          'isExpired': true,
         };
       }
 
@@ -104,7 +105,19 @@ class GraduationScraper extends BaseScraper {
 
       return {'success': true, 'graduation_info': data};
     } catch (e) {
-      return {'success': false, 'message': '抓取畢業審核失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error fetching graduation info: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Failed to fetch graduation info: $e',
+      };
     }
   }
 }

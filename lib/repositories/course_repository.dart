@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../services/api_service.dart';
+import 'refresh_outcome.dart';
 
 /// 課表資料的 Repository。將課表課程正規化寫入 [ScheduleCourses]，
 /// 重建時還原成與 scraper 相同結構的 Map（`status` / `data.schedule`）。
@@ -25,15 +26,18 @@ class CourseRepository {
     return _db.select(_db.scheduleCourses).watch().asyncMap((_) => _buildMap());
   }
 
-  Future<bool> refresh({bool force = false}) async {
-    if (!force && !await _isStale()) return true;
+  /// 依 TTL 抓取課表。回傳 [RefreshOutcome]，失敗時含原因分類。
+  Future<RefreshOutcome> refresh({bool force = false}) async {
+    if (!force && !await _isStale()) return RefreshOutcome.success;
 
     final resp = await _api.getSchedule();
-    if (resp['status'] != 'success' || resp['data'] == null) return false;
+    if (resp['status'] != 'success' || resp['data'] == null) {
+      return classifyRefreshFailure(resp);
+    }
 
     _captureMeta(resp);
     await _write(resp);
-    return true;
+    return RefreshOutcome.success;
   }
 
   /// 從回應擷取學期選項清單與當前學期代碼。

@@ -98,6 +98,7 @@
   "loginHidePassword": "隱藏密碼",
   "loginButton": "登入",
   "loginFailed": "帳密或驗證碼錯誤",
+  "loginServiceUnavailable": "無法連線至單一入口服務網，請稍後再試",
   "totpTitle": "二步驟驗證",
   "totpPrompt": "請輸入驗證器 App（如 Google Authenticator）顯示的 6 位數驗證碼",
   "totpCodeLabel": "驗證碼",
@@ -110,6 +111,21 @@
   "mapModeTooltip": "地圖定位模式",
   "loadScheduleFailed": "無法載入課表",
   "checkNetworkRetry": "請確認網路連線後重試",
+  "serviceUnavailable": "無法連線至{service}，請確認網路，或稍後再試",
+  "@serviceUnavailable": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceGrades": "成績系統",
+  "serviceSchedule": "課表系統",
+  "serviceGraduation": "畢業審核系統",
+  "serviceAbsent": "請假系統",
+  "serviceCalendar": "學校行事曆",
+  "serviceCourseDetail": "課程大綱系統",
+  "serviceYunReport": "在學證明服務",
   "retry": "重試",
   "offlineBanner": "離線模式・顯示的是先前的快取資料",
   "clockSkewBanner": "裝置時間誤差過大，可能導致異常，請校正系統時間",
@@ -188,7 +204,8 @@
     "placeholders": { "hours": { "type": "String" } }
   },
   "infoCommonLinks": "常用連結",
-  "yunReportUnavailable": "無法取得在學證明，請先完成註冊，或稍後再試。",
+  "yunReportUnavailable": "無法取得在學證明，請稍後再試。",
+  "yunReportNotRegistered": "尚未完成本學期註冊，暫時無法提供在學證明。",
   "yunReportRetry": "重試",
   "yunReportNoteDisplay": "僅提供顯示證明使用，如有疑問請洽教務處註冊組。",
   "yunReportNotePaper": "如需紙本，請向教務處註冊組提出申請，勿擅自列印。",
@@ -248,14 +265,6 @@
   "legendTooltip": "圖示說明",
   "backToTodayTooltip": "回到今日",
   "loadCalendarFailed": "載入失敗",
-  "loadErrorPrefix": "發生錯誤：{error}",
-  "@loadErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "gradesTitle": "成績查詢",
   "gradesSegmentSemester": "學期",
   "gradesSegmentHistory": "歷年",
@@ -355,14 +364,7 @@
       }
     }
   },
-  "courseLoadMapDataFailed": "讀取地圖資料失敗: {error}",
-  "@courseLoadMapDataFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
+  "courseLoadMapDataFailed": "讀取地圖資料失敗",
   "gradLoadFailed": "無法載入畢業學分",
   "gradNoData": "尚無畢業學分資料",
   "gradDetailTitle": "學分統計詳細",

@@ -220,6 +220,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginFailed => 'Invalid username, password, or captcha';
 
   @override
+  String get loginServiceUnavailable =>
+      'Cannot reach the YunTech SSO portal. Please try again later.';
+
+  @override
   String get totpTitle => 'Two-Step Verification';
 
   @override
@@ -257,6 +261,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkNetworkRetry => 'Please check your network and try again.';
+
+  @override
+  String serviceUnavailable(String service) {
+    return 'Cannot reach $service. Check your network or try again later.';
+  }
+
+  @override
+  String get serviceGrades => 'the grades system';
+
+  @override
+  String get serviceSchedule => 'the schedule system';
+
+  @override
+  String get serviceGraduation => 'the graduation audit system';
+
+  @override
+  String get serviceAbsent => 'the leave system';
+
+  @override
+  String get serviceCalendar => 'the school calendar';
+
+  @override
+  String get serviceCourseDetail => 'the course syllabus system';
+
+  @override
+  String get serviceYunReport => 'the enrollment certificate service';
 
   @override
   String get retry => 'Retry';
@@ -388,7 +418,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yunReportUnavailable =>
-      'Couldn\'t load the enrollment certificate. Make sure your registration is complete, or try again later.';
+      'Couldn\'t load the enrollment certificate. Please try again later.';
+
+  @override
+  String get yunReportNotRegistered =>
+      'The enrollment certificate is unavailable because this semester\'s registration is not complete.';
 
   @override
   String get yunReportRetry => 'Retry';
@@ -555,11 +589,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadCalendarFailed => 'Failed to load';
 
   @override
-  String loadErrorPrefix(String error) {
-    return 'An error occurred: $error';
-  }
-
-  @override
   String get gradesTitle => 'Grades';
 
   @override
@@ -697,9 +726,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String courseLoadMapDataFailed(String error) {
-    return 'Failed to load map data: $error';
-  }
+  String get courseLoadMapDataFailed => 'Failed to load map data';
 
   @override
   String get gradLoadFailed => 'Failed to load graduation credits';

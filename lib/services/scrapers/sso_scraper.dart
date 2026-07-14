@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 處理學校 SSO 登入邏輯的類別
@@ -78,7 +79,19 @@ class SsoScraper extends BaseScraper {
       };
     } catch (e) {
       if (kDebugMode) print('SsoScraper Error: $e');
-      return {'success': false, 'message': '登入初始化失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error during login init: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Login init failed: $e',
+      };
     }
   }
 
@@ -141,14 +154,17 @@ class SsoScraper extends BaseScraper {
       }
 
       final document = parseHtml(response.data);
-      String errorMsg = '登入失敗，請檢查帳號密碼與驗證碼';
 
+      // 從頁面解析學校的驗證錯誤原文（帳密錯誤、驗證碼錯誤、帳號鎖定等）。
+      // 有解析到才視為「憑證被明確拒絕」；200 但無驗證訊息代表頁面異常
+      // （學校改版/服務異常），歸類為 error 而非帳密錯誤，避免誤導使用者。
+      String? serverMessage;
       final validationSum = document
           .querySelector('.validation-summary-errors')
           ?.text
           .trim();
       if (validationSum != null && validationSum.isNotEmpty) {
-        errorMsg = validationSum;
+        serverMessage = validationSum;
       }
 
       final fieldError = document
@@ -156,12 +172,37 @@ class SsoScraper extends BaseScraper {
           ?.text
           .trim();
       if (fieldError != null && fieldError.isNotEmpty) {
-        errorMsg += ' ($fieldError)';
+        serverMessage = serverMessage == null
+            ? fieldError
+            : '$serverMessage ($fieldError)';
       }
 
-      return {'success': false, 'message': errorMsg};
+      if (serverMessage != null) {
+        return {
+          'success': false,
+          'status': 'rejected',
+          'serverMessage': serverMessage,
+          'message': serverMessage,
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Login failed with no validation message (unexpected page)',
+      };
     } catch (e) {
-      return {'success': false, 'message': '登入請求發生錯誤: $e'};
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error during login: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Login request failed: $e',
+      };
     }
   }
 
@@ -187,7 +228,11 @@ class SsoScraper extends BaseScraper {
       );
       final token = getAttribute(tokenElement, 'value');
       if (token.isEmpty) {
-        return {'success': false, 'message': '無法取得變更密碼表單，請重新登入'};
+        return {
+          'success': false,
+          'status': 'error',
+          'message': '無法取得變更密碼表單，請重新登入',
+        };
       }
 
       final formData = {
@@ -216,8 +261,9 @@ class SsoScraper extends BaseScraper {
       }
 
       // 停在原頁：解析驗證錯誤（舊密碼錯誤、格式不符等）。
+      // 有解析到學校原文才視為「被明確拒絕」，否則歸類為頁面異常。
       final document = parseHtml(response.data);
-      String errorMsg = '密碼變更失敗';
+      String? serverMessage;
       final validationSum = document
           .querySelector('.validation-summary-errors')
           ?.text
@@ -227,13 +273,37 @@ class SsoScraper extends BaseScraper {
           ?.text
           .trim();
       if (validationSum != null && validationSum.isNotEmpty) {
-        errorMsg = validationSum;
+        serverMessage = validationSum;
       } else if (fieldError != null && fieldError.isNotEmpty) {
-        errorMsg = fieldError;
+        serverMessage = fieldError;
       }
-      return {'success': false, 'message': errorMsg};
+      if (serverMessage != null) {
+        return {
+          'success': false,
+          'status': 'rejected',
+          'serverMessage': serverMessage,
+          'message': serverMessage,
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message':
+            'Password change failed with no validation message (unexpected page)',
+      };
     } catch (e) {
-      return {'success': false, 'message': '變更密碼請求發生錯誤: $e'};
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error during password change: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Password change request failed: $e',
+      };
     }
   }
 
@@ -259,7 +329,7 @@ class SsoScraper extends BaseScraper {
 
     if (token.isEmpty) {
       // 拿不到 token 就無法提交 TOTP；回報錯誤讓使用者重登。
-      return {'success': false, 'message': '無法取得二步驟驗證表單'};
+      return {'success': false, 'status': 'error', 'message': '無法取得二步驟驗證表單'};
     }
 
     return {'success': false, 'mfaRequired': true, 'verificationToken': token};
@@ -309,7 +379,12 @@ class SsoScraper extends BaseScraper {
 
         // 驗證碼錯誤 → 被導回登入頁，session 已失效，需重新登入。
         if (location.contains('Account/Login')) {
-          return {'success': false, 'restart': true, 'message': '二步驟驗證碼錯誤'};
+          return {
+            'success': false,
+            'status': 'rejected',
+            'restart': true,
+            'message': '二步驟驗證碼錯誤',
+          };
         }
 
         final redirectUrl = location.startsWith('http')
@@ -323,9 +398,20 @@ class SsoScraper extends BaseScraper {
       }
 
       // 沒有轉址（停留在 Authenticator 頁）視為驗證失敗，可再試一次。
-      return {'success': false, 'message': '二步驟驗證碼錯誤'};
+      return {'success': false, 'status': 'rejected', 'message': '二步驟驗證碼錯誤'};
     } catch (e) {
-      return {'success': false, 'message': '二步驟驗證請求發生錯誤: $e'};
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error during TOTP validation: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'TOTP validation request failed: $e',
+      };
     }
   }
 }

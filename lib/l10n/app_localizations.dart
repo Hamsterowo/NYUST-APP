@@ -488,6 +488,12 @@ abstract class AppLocalizations {
   /// **'帳密或驗證碼錯誤'**
   String get loginFailed;
 
+  /// No description provided for @loginServiceUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法連線至單一入口服務網，請稍後再試'**
+  String get loginServiceUnavailable;
+
   /// No description provided for @totpTitle.
   ///
   /// In zh, this message translates to:
@@ -559,6 +565,54 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'請確認網路連線後重試'**
   String get checkNetworkRetry;
+
+  /// No description provided for @serviceUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法連線至{service}，請確認網路，或稍後再試'**
+  String serviceUnavailable(String service);
+
+  /// No description provided for @serviceGrades.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績系統'**
+  String get serviceGrades;
+
+  /// No description provided for @serviceSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'課表系統'**
+  String get serviceSchedule;
+
+  /// No description provided for @serviceGraduation.
+  ///
+  /// In zh, this message translates to:
+  /// **'畢業審核系統'**
+  String get serviceGraduation;
+
+  /// No description provided for @serviceAbsent.
+  ///
+  /// In zh, this message translates to:
+  /// **'請假系統'**
+  String get serviceAbsent;
+
+  /// No description provided for @serviceCalendar.
+  ///
+  /// In zh, this message translates to:
+  /// **'學校行事曆'**
+  String get serviceCalendar;
+
+  /// No description provided for @serviceCourseDetail.
+  ///
+  /// In zh, this message translates to:
+  /// **'課程大綱系統'**
+  String get serviceCourseDetail;
+
+  /// No description provided for @serviceYunReport.
+  ///
+  /// In zh, this message translates to:
+  /// **'在學證明服務'**
+  String get serviceYunReport;
 
   /// No description provided for @retry.
   ///
@@ -779,8 +833,14 @@ abstract class AppLocalizations {
   /// No description provided for @yunReportUnavailable.
   ///
   /// In zh, this message translates to:
-  /// **'無法取得在學證明，請先完成註冊，或稍後再試。'**
+  /// **'無法取得在學證明，請稍後再試。'**
   String get yunReportUnavailable;
+
+  /// No description provided for @yunReportNotRegistered.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚未完成本學期註冊，暫時無法提供在學證明。'**
+  String get yunReportNotRegistered;
 
   /// No description provided for @yunReportRetry.
   ///
@@ -1082,12 +1142,6 @@ abstract class AppLocalizations {
   /// **'載入失敗'**
   String get loadCalendarFailed;
 
-  /// No description provided for @loadErrorPrefix.
-  ///
-  /// In zh, this message translates to:
-  /// **'發生錯誤：{error}'**
-  String loadErrorPrefix(String error);
-
   /// No description provided for @gradesTitle.
   ///
   /// In zh, this message translates to:
@@ -1331,8 +1385,8 @@ abstract class AppLocalizations {
   /// No description provided for @courseLoadMapDataFailed.
   ///
   /// In zh, this message translates to:
-  /// **'讀取地圖資料失敗: {error}'**
-  String courseLoadMapDataFailed(String error);
+  /// **'讀取地圖資料失敗'**
+  String get courseLoadMapDataFailed;
 
   /// No description provided for @gradLoadFailed.
   ///

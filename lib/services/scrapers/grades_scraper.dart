@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 處理成績資料爬取的類別
@@ -37,8 +38,10 @@ class GradesScraper extends BaseScraper {
         );
 
       if (response.data.toString().contains('Login.aspx')) {
+        // isExpired 保留給背景成績檢查 isolate（background_service）相容使用。
         return {
           'success': false,
+          'status': 'session_expired',
           'message': 'Session expired',
           'isExpired': true,
         };
@@ -288,7 +291,19 @@ class GradesScraper extends BaseScraper {
         'cumulative': cumulativeData.isNotEmpty ? cumulativeData : null,
       };
     } catch (e) {
-      return {'success': false, 'message': '抓取成績失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error fetching grades: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Failed to fetch grades: $e',
+      };
     }
   }
 }

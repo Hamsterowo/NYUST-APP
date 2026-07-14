@@ -21,6 +21,11 @@ class AbsentScreen extends ConsumerStatefulWidget {
 class _AbsentScreenState extends ConsumerState<AbsentScreen> {
   bool _loading = true;
   bool _failed = false;
+
+  /// 失敗時是否為連線類錯誤（scraper 回報 network_error），
+  /// 供 UI 顯示具名的「無法連線至請假系統」而非通用失敗。
+  bool _failedOffline = false;
+
   List<AbsentRecord> _records = const [];
   List<Map<String, String>> _semesters = const [];
   String? _selectedSemester;
@@ -35,6 +40,7 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
     setState(() {
       _loading = true;
       _failed = false;
+      _failedOffline = false;
     });
     try {
       final api = ref.read(authProvider).api;
@@ -60,6 +66,7 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
       } else {
         setState(() {
           _failed = true;
+          _failedOffline = res['status'] == 'network_error';
           _loading = false;
         });
       }
@@ -175,6 +182,18 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
             Text(
               l10n.absentLoadFailed,
               style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                // 連線類錯誤 → 具名「無法連線至請假系統」;其他 → 通用提示。
+                _failedOffline
+                    ? l10n.serviceUnavailable(l10n.serviceAbsent)
+                    : l10n.checkNetworkRetry,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.tonal(

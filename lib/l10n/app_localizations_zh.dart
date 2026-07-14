@@ -214,6 +214,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginFailed => '帳密或驗證碼錯誤';
 
   @override
+  String get loginServiceUnavailable => '無法連線至單一入口服務網，請稍後再試';
+
+  @override
   String get totpTitle => '二步驟驗證';
 
   @override
@@ -248,6 +251,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get checkNetworkRetry => '請確認網路連線後重試';
+
+  @override
+  String serviceUnavailable(String service) {
+    return '無法連線至$service，請確認網路，或稍後再試';
+  }
+
+  @override
+  String get serviceGrades => '成績系統';
+
+  @override
+  String get serviceSchedule => '課表系統';
+
+  @override
+  String get serviceGraduation => '畢業審核系統';
+
+  @override
+  String get serviceAbsent => '請假系統';
+
+  @override
+  String get serviceCalendar => '學校行事曆';
+
+  @override
+  String get serviceCourseDetail => '課程大綱系統';
+
+  @override
+  String get serviceYunReport => '在學證明服務';
 
   @override
   String get retry => '重試';
@@ -370,7 +399,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get infoCommonLinks => '常用連結';
 
   @override
-  String get yunReportUnavailable => '無法取得在學證明，請先完成註冊，或稍後再試。';
+  String get yunReportUnavailable => '無法取得在學證明，請稍後再試。';
+
+  @override
+  String get yunReportNotRegistered => '尚未完成本學期註冊，暫時無法提供在學證明。';
 
   @override
   String get yunReportRetry => '重試';
@@ -530,11 +562,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadCalendarFailed => '載入失敗';
 
   @override
-  String loadErrorPrefix(String error) {
-    return '發生錯誤：$error';
-  }
-
-  @override
   String get gradesTitle => '成績查詢';
 
   @override
@@ -671,9 +698,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String courseLoadMapDataFailed(String error) {
-    return '讀取地圖資料失敗: $error';
-  }
+  String get courseLoadMapDataFailed => '讀取地圖資料失敗';
 
   @override
   String get gradLoadFailed => '無法載入畢業學分';

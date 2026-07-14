@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 處理課表資料爬取的類別
@@ -41,9 +42,8 @@ class ScheduleScraper extends BaseScraper {
       if (response.data.toString().contains('Login.aspx') ||
           document.querySelector('form[action="./Login/Login.aspx"]') != null) {
         return {
-          'status': 'error',
+          'status': 'session_expired',
           'message': 'Session expired, please login again',
-          'isExpired': true,
         };
       }
 
@@ -71,7 +71,14 @@ class ScheduleScraper extends BaseScraper {
         },
       };
     } catch (e) {
-      return {'status': 'error', 'message': '抓取課表失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'status': 'network_error',
+          'message': 'Network error fetching schedule: $e',
+        };
+      }
+      return {'status': 'error', 'message': 'Failed to fetch schedule: $e'};
     }
   }
 
@@ -322,7 +329,17 @@ class ScheduleScraper extends BaseScraper {
 
       return {'status': 'success', 'data': courseDetail};
     } catch (e) {
-      return {'status': 'error', 'message': '獲取課程詳情失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'status': 'network_error',
+          'message': 'Network error fetching course detail: $e',
+        };
+      }
+      return {
+        'status': 'error',
+        'message': 'Failed to fetch course detail: $e',
+      };
     }
   }
 

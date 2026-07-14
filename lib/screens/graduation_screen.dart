@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
+import '../repositories/refresh_outcome.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
 import 'web_view_screen.dart';
@@ -37,7 +38,13 @@ class GraduationContent extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).checkNetworkRetry,
+              // 離線/連不上 → 具名「無法連線至畢業審核系統」;其他 → 通用提示。
+              data.graduationFailReason == RefreshOutcome.networkError
+                  ? AppLocalizations.of(context).serviceUnavailable(
+                      AppLocalizations.of(context).serviceGraduation,
+                    )
+                  : AppLocalizations.of(context).checkNetworkRetry,
+              textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
