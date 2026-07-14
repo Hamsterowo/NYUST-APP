@@ -28,6 +28,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _versionStr = '';
 
+  // 個人資料卡片刻意採用固定深色底 + 白字，作為淺色介面中的視覺錨點。
+  // 集中在此以避免在 build 中散落魔術色碼；要改色只改這兩個常數。
+  static const Color _profileCardBg = Color(0xFF1E293B);
+  static const Color _profileCardFg = Colors.white;
+
   @override
   void initState() {
     super.initState();
@@ -153,6 +158,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _confirmLogout(dynamic auth) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.logoutConfirmTitle),
+        content: Text(l10n.logoutConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+            child: Text(l10n.logout),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      auth.logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
@@ -197,7 +228,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(24.0),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: _profileCardBg,
                               borderRadius: BorderRadius.circular(16.0),
                               boxShadow: [
                                 BoxShadow(
@@ -234,21 +265,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           Text(
                                             user?["user"]?["name"] ??
                                                 user?["user"]?["姓名"] ??
-                                                "Student",
+                                                AppLocalizations.of(
+                                                  context,
+                                                ).profileNameFallback,
                                             style: textTheme.headlineSmall
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
+                                                  color: _profileCardFg,
                                                 ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             user?["user"]?["系(所)別"] ??
                                                 user?["user"]?["department"] ??
-                                                "Unknown",
+                                                AppLocalizations.of(
+                                                  context,
+                                                ).profileDepartmentFallback,
                                             style: textTheme.bodyMedium
                                                 ?.copyWith(
-                                                  color: Colors.white
+                                                  color: _profileCardFg
                                                       .withValues(alpha: 0.7),
                                                 ),
                                           ),
@@ -256,13 +291,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           _buildInfoRow(
                                             Icons.badge_outlined,
                                             user?["user"]?["學號"] ??
-                                                "ID Unknown",
+                                                AppLocalizations.of(
+                                                  context,
+                                                ).profileIdFallback,
                                           ),
                                           const SizedBox(height: 8),
                                           _buildInfoRow(
                                             Icons.school_outlined,
                                             user?["user"]?["班級"] ??
-                                                "No Class Info",
+                                                AppLocalizations.of(
+                                                  context,
+                                                ).profileClassFallback,
                                           ),
                                         ],
                                       ),
@@ -274,16 +313,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 12),
                         Text(
                           AppLocalizations.of(context).profileDisclaimer,
                           style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.7,
-                            ),
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 16),
 
                         Card(
                           elevation: 0,
@@ -402,13 +439,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         context,
                                       ).settingsGradeNotification,
                                     ),
-                                    trailing: Transform.scale(
-                                      scale: 0.8, // 縮小 20%
-                                      alignment: Alignment.centerRight, // 靠右對齊
-                                      child: Switch.adaptive(
-                                        value: gradeNotifEnabled,
-                                        onChanged: _toggleGradeNotification,
-                                      ),
+                                    trailing: Switch.adaptive(
+                                      value: gradeNotifEnabled,
+                                      onChanged: _toggleGradeNotification,
                                     ),
                                     onTap: () => _toggleGradeNotification(
                                       !gradeNotifEnabled,
@@ -419,7 +452,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   const Divider(height: 1, indent: 56),
                                   ListTile(
                                     leading: const Icon(
-                                      Icons.bug_report_outlined,
+                                      Icons.science_outlined,
                                       color: Colors.orange,
                                     ),
                                     title: const Text('【開發者】立即觸發一次背景檢查'),
@@ -472,7 +505,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       bottomRight: Radius.circular(12),
                                     ),
                                   ),
-                                  onTap: () => auth.logout(),
+                                  onTap: () => _confirmLogout(auth),
                                 ),
                               ],
                             ),
@@ -491,8 +524,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               child: FilledButton(
                                 onPressed: () => _showInstallPrompt(context),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.grey.shade200,
-                                  foregroundColor: Colors.black87,
+                                  backgroundColor:
+                                      colorScheme.secondaryContainer,
+                                  foregroundColor:
+                                      colorScheme.onSecondaryContainer,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
                                   ),
@@ -515,7 +550,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
                           ],
 
                           const SizedBox(height: 16),
@@ -542,9 +576,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.7)),
+        Icon(icon, size: 16, color: _profileCardFg.withValues(alpha: 0.7)),
         const SizedBox(width: 8),
-        Text(text, style: const TextStyle(fontSize: 14, color: Colors.white)),
+        Text(text, style: const TextStyle(fontSize: 14, color: _profileCardFg)),
       ],
     );
   }
@@ -572,9 +606,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (extraFields.isEmpty) return [];
 
     return [
-      const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: Divider(color: Colors.white24, height: 1),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Divider(
+          color: _profileCardFg.withValues(alpha: 0.24),
+          height: 1,
+        ),
       ),
       Wrap(
         spacing: 8.0,
@@ -602,10 +639,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               vertical: 8.0,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: _profileCardFg.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
+                color: _profileCardFg.withValues(alpha: 0.12),
                 width: 1.0,
               ),
             ),
@@ -616,7 +653,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(width: 8),
                 Text(
                   '$displayLabel: $value',
-                  style: const TextStyle(color: Colors.white, fontSize: 12.0),
+                  style: const TextStyle(color: _profileCardFg, fontSize: 12.0),
                 ),
               ],
             ),

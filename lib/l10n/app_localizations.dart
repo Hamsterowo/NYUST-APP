@@ -254,6 +254,48 @@ abstract class AppLocalizations {
   /// **'※ 此頁面僅供參考，無法用於身分證明'**
   String get profileDisclaimer;
 
+  /// No description provided for @cancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get cancel;
+
+  /// No description provided for @logoutConfirmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'確定要登出嗎？'**
+  String get logoutConfirmTitle;
+
+  /// No description provided for @logoutConfirmMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'登出後將清除此裝置上的登入狀態，需重新登入才能查看資料。'**
+  String get logoutConfirmMessage;
+
+  /// No description provided for @profileNameFallback.
+  ///
+  /// In zh, this message translates to:
+  /// **'同學'**
+  String get profileNameFallback;
+
+  /// No description provided for @profileDepartmentFallback.
+  ///
+  /// In zh, this message translates to:
+  /// **'系所未知'**
+  String get profileDepartmentFallback;
+
+  /// No description provided for @profileIdFallback.
+  ///
+  /// In zh, this message translates to:
+  /// **'學號未知'**
+  String get profileIdFallback;
+
+  /// No description provided for @profileClassFallback.
+  ///
+  /// In zh, this message translates to:
+  /// **'無班級資訊'**
+  String get profileClassFallback;
+
   /// No description provided for @installError.
   ///
   /// In zh, this message translates to:

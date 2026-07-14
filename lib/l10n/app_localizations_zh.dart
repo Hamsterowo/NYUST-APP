@@ -89,6 +89,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileDisclaimer => '※ 此頁面僅供參考，無法用於身分證明';
 
   @override
+  String get cancel => '取消';
+
+  @override
+  String get logoutConfirmTitle => '確定要登出嗎？';
+
+  @override
+  String get logoutConfirmMessage => '登出後將清除此裝置上的登入狀態，需重新登入才能查看資料。';
+
+  @override
+  String get profileNameFallback => '同學';
+
+  @override
+  String get profileDepartmentFallback => '系所未知';
+
+  @override
+  String get profileIdFallback => '學號未知';
+
+  @override
+  String get profileClassFallback => '無班級資訊';
+
+  @override
   String get installError => '目前無法安裝：您可能已安裝，或瀏覽器不支援此功能';
 
   @override
