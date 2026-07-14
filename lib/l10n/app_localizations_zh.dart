@@ -814,6 +814,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationPermissionDenied => '無法開啟通知：請前往系統設定啟用通知權限';
 
   @override
+  String gradeNotifyScoreBody(String score) {
+    return '成績更新：$score 分';
+  }
+
+  @override
+  String get gradeNotifyRankTitle => '學期排名';
+
+  @override
+  String gradeNotifyRankBody(String rank) {
+    return '排名：$rank';
+  }
+
+  @override
+  String get gradeNotifyGpaTitle => '學期 GPA';
+
+  @override
+  String gradeNotifyGpaBody(String gpa) {
+    return 'GPA 更新：$gpa';
+  }
+
+  @override
+  String get gradeNotifyAvgTitle => '學期平均';
+
+  @override
+  String gradeNotifyAvgBody(String avg) {
+    return '平均更新：$avg 分';
+  }
+
+  @override
   String get termsAgree => '同意';
 
   @override

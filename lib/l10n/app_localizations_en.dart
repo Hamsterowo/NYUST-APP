@@ -845,6 +845,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cannot enable notifications: Please grant notification permission in system settings';
 
   @override
+  String gradeNotifyScoreBody(String score) {
+    return 'Grade updated: $score';
+  }
+
+  @override
+  String get gradeNotifyRankTitle => 'Semester Rank';
+
+  @override
+  String gradeNotifyRankBody(String rank) {
+    return 'Rank: $rank';
+  }
+
+  @override
+  String get gradeNotifyGpaTitle => 'Semester GPA';
+
+  @override
+  String gradeNotifyGpaBody(String gpa) {
+    return 'GPA updated: $gpa';
+  }
+
+  @override
+  String get gradeNotifyAvgTitle => 'Semester Average';
+
+  @override
+  String gradeNotifyAvgBody(String avg) {
+    return 'Average updated: $avg';
+  }
+
+  @override
   String get termsAgree => 'Agree';
 
   @override

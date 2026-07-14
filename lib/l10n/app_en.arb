@@ -429,6 +429,41 @@
   "settingsGradeNotification": "Grade Update Notification",
   "settingsGradeNotificationSub": "Check grades in background every 30 mins",
   "notificationPermissionDenied": "Cannot enable notifications: Please grant notification permission in system settings",
+  "gradeNotifyScoreBody": "Grade updated: {score}",
+  "@gradeNotifyScoreBody": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeNotifyRankTitle": "Semester Rank",
+  "gradeNotifyRankBody": "Rank: {rank}",
+  "@gradeNotifyRankBody": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeNotifyGpaTitle": "Semester GPA",
+  "gradeNotifyGpaBody": "GPA updated: {gpa}",
+  "@gradeNotifyGpaBody": {
+    "placeholders": {
+      "gpa": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeNotifyAvgTitle": "Semester Average",
+  "gradeNotifyAvgBody": "Average updated: {avg}",
+  "@gradeNotifyAvgBody": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
   "termsAgree": "Agree",
   "termsRejectAndExit": "Decline & Exit",
   "termsLastUpdated": "Last updated: {date}",

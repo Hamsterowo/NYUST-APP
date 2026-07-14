@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:workmanager/workmanager.dart';
 import 'api_service.dart';
 import 'notification_service.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/grades_comparator.dart';
 
 const String checkGradesTask = "tw.hamster.yuntool.checkGradesTask";
@@ -73,15 +74,14 @@ void callbackDispatcher() {
         if (cachedGradesStr != null) {
           final Map<String, dynamic> oldData = jsonDecode(cachedGradesStr);
 
-          // 取得系統當前語系，由於是在 Isolate 中，我們可以用 Platform.localeName 來判斷
-          final String locale = Platform.localeName;
-          final bool isEnglish = locale.toLowerCase().startsWith('en');
-
-          final changes = GradesComparator.compare(
-            oldData,
-            result,
-            isEnglish: isEnglish,
+          // 取得系統當前語系，由於是在 Isolate 中，我們用 Platform.localeName 判斷；
+          // 僅支援 en / zh，其餘一律回落到 zh。
+          final bool isEnglish = Platform.localeName.toLowerCase().startsWith(
+            'en',
           );
+          final l10n = lookupAppLocalizations(Locale(isEnglish ? 'en' : 'zh'));
+
+          final changes = GradesComparator.compare(oldData, result, l10n: l10n);
 
           if (changes.isNotEmpty) {
             if (kDebugMode)

@@ -1,3 +1,5 @@
+import '../l10n/app_localizations.dart';
+
 /// 一則成績異動：[title] 是通知標題（科目名或項目名，例如「微積分」「學期排名」），
 /// [body] 是通知內文（變化內容，例如「成績更新：90 分」）。
 class GradeChange {
@@ -10,12 +12,13 @@ class GradesComparator {
   /// 比對新舊成績資料，回傳每個項目一則的異動清單。
   /// [oldData] 是先前的 `cache_grades` JSON Map
   /// [newData] 是新抓取的 `cache_grades` JSON Map
-  /// [isEnglish] 控制回傳英文還是中文格式的訊息
+  /// [l10n] 提供本地化字串，並依語系選擇科目的中/英文名稱
   static List<GradeChange> compare(
     Map<String, dynamic>? oldData,
     Map<String, dynamic>? newData, {
-    bool isEnglish = false,
+    required AppLocalizations l10n,
   }) {
+    final bool isEnglish = l10n.localeName.startsWith('en');
     final List<GradeChange> changes = [];
     if (newData == null || newData['success'] != true) return changes;
     if (oldData == null || oldData['success'] != true) return changes;
@@ -54,7 +57,7 @@ class GradesComparator {
         if (newCourses != null) {
           for (var course in newCourses) {
             if (course is Map) {
-              final change = _courseChange(course, isEnglish);
+              final change = _courseChange(course, l10n, isEnglish);
               if (change != null) changes.add(change);
             }
           }
@@ -88,7 +91,7 @@ class GradesComparator {
 
             // 新增科目，或分數有異動
             if (oldCourse == null || newScore != oldScore) {
-              final change = _courseChange(newCourse, isEnglish);
+              final change = _courseChange(newCourse, l10n, isEnglish);
               if (change != null) changes.add(change);
             }
           }
@@ -104,8 +107,8 @@ class GradesComparator {
               newRank != (oldSummary['rank']?.toString() ?? '')) {
             changes.add(
               GradeChange(
-                isEnglish ? 'Semester Rank' : '學期排名',
-                isEnglish ? 'Rank: $newRank' : '排名：$newRank',
+                l10n.gradeNotifyRankTitle,
+                l10n.gradeNotifyRankBody(newRank),
               ),
             );
           }
@@ -116,8 +119,8 @@ class GradesComparator {
               newGpa != (oldSummary['gpa']?.toString() ?? '')) {
             changes.add(
               GradeChange(
-                isEnglish ? 'Semester GPA' : '學期 GPA',
-                isEnglish ? 'GPA updated: $newGpa' : 'GPA 更新：$newGpa',
+                l10n.gradeNotifyGpaTitle,
+                l10n.gradeNotifyGpaBody(newGpa),
               ),
             );
           }
@@ -128,8 +131,8 @@ class GradesComparator {
               newAvg != (oldSummary['average_score']?.toString() ?? '')) {
             changes.add(
               GradeChange(
-                isEnglish ? 'Semester Average' : '學期平均',
-                isEnglish ? 'Average updated: $newAvg' : '平均更新：$newAvg 分',
+                l10n.gradeNotifyAvgTitle,
+                l10n.gradeNotifyAvgBody(newAvg),
               ),
             );
           }
@@ -141,15 +144,16 @@ class GradesComparator {
   }
 
   /// 將單一科目轉成一則異動（標題=科目名、內文=成績更新）。
-  static GradeChange? _courseChange(Map course, bool isEnglish) {
+  static GradeChange? _courseChange(
+    Map course,
+    AppLocalizations l10n,
+    bool isEnglish,
+  ) {
     final nameZh = course['name']?.toString() ?? '';
     final nameEn = course['name_en']?.toString() ?? '';
     final score = course['score']?.toString() ?? '';
     final displayName = isEnglish && nameEn.isNotEmpty ? nameEn : nameZh;
     if (displayName.isEmpty || score.isEmpty) return null;
-    return GradeChange(
-      displayName,
-      isEnglish ? 'Grade updated: $score' : '成績更新：$score 分',
-    );
+    return GradeChange(displayName, l10n.gradeNotifyScoreBody(score));
   }
 }
