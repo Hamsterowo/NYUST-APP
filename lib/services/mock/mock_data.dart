@@ -1,6 +1,6 @@
 /// Demo 模式靜態資料——所有 mock service 的唯一來源。
 ///
-/// 學生設定：B32117001 王小明，資工系三年級（四技），
+/// 學生設定：B11217990 王小明，112 學年入學（資工系，四技三年級），
 /// 成績橫跨 112 上 ~ 114 上（3 個學年 5 學期），目前修讀 114 下。
 /// 所有學分數與畢業審核互相吻合。
 library;
@@ -11,7 +11,7 @@ class MockData {
   // ── 帳號 ────────────────────────────────────────────
 
   /// Demo 學號。同時作為冷啟動辨識 mock session 的依據。
-  static const String demoId = 'B32117001';
+  static const String demoId = 'B11217990';
 
   /// 登入時觸發 demo 模式的帳號名稱。
   static const String demoUsername = 'demo';
