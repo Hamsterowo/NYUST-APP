@@ -239,7 +239,13 @@ class _AppWebViewScreenState extends ConsumerState<AppWebViewScreen> {
           children: [
             if (!_hasError)
               InAppWebView(
-                initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
+                initialSettings: InAppWebViewSettings(
+                  javaScriptEnabled: true,
+                  // 雲科入口頁以 http 引用校徽等圖片；Android 預設會封鎖 https
+                  // 頁面上的 http 子資源，故改用相容模式讓圖片能載入。
+                  mixedContentMode:
+                      MixedContentMode.MIXED_CONTENT_COMPATIBILITY_MODE,
+                ),
                 onWebViewCreated: (controller) {
                   _controller = controller;
                   _loadInitial(controller);
