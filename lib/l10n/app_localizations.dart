@@ -269,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirmMessage.
   ///
   /// In zh, this message translates to:
-  /// **'登出後將清除此裝置上的登入狀態，需重新登入才能查看資料。'**
+  /// **'登出後需重新登入才能查看資料。'**
   String get logoutConfirmMessage;
 
   /// No description provided for @profileNameFallback.

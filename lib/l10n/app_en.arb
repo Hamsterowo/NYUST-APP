@@ -38,7 +38,7 @@
   "profileDisclaimer": "※ This page is for reference only and cannot be used as proof of identity.",
   "cancel": "Cancel",
   "logoutConfirmTitle": "Log out?",
-  "logoutConfirmMessage": "Logging out clears the sign-in state on this device. You'll need to sign in again to view your data.",
+  "logoutConfirmMessage": "You'll need to sign in again to view your data.",
   "profileNameFallback": "Student",
   "profileDepartmentFallback": "Unknown department",
   "profileIdFallback": "ID unknown",

@@ -98,7 +98,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutConfirmMessage =>
-      'Logging out clears the sign-in state on this device. You\'ll need to sign in again to view your data.';
+      'You\'ll need to sign in again to view your data.';
 
   @override
   String get profileNameFallback => 'Student';

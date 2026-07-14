@@ -38,7 +38,7 @@
   "profileDisclaimer": "※ 此頁面僅供參考，無法用於身分證明",
   "cancel": "取消",
   "logoutConfirmTitle": "確定要登出嗎？",
-  "logoutConfirmMessage": "登出後將清除此裝置上的登入狀態，需重新登入才能查看資料。",
+  "logoutConfirmMessage": "登出後需重新登入才能查看資料。",
   "profileNameFallback": "同學",
   "profileDepartmentFallback": "系所未知",
   "profileIdFallback": "學號未知",
