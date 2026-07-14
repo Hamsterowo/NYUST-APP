@@ -272,13 +272,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_errorMessage != null) {
+      final colorScheme = Theme.of(context).colorScheme;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            Icon(Icons.error_outline, size: 48, color: colorScheme.error),
             const SizedBox(height: 16),
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(_errorMessage!, style: TextStyle(color: colorScheme.error)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {

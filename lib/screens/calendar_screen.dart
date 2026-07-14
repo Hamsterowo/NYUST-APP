@@ -144,10 +144,10 @@ class CalendarScreenState extends State<CalendarScreen> {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
+                    child: Text(
                       '1',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -476,15 +476,15 @@ class CalendarScreenState extends State<CalendarScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.cloud_off_rounded,
                   size: 64,
-                  color: Colors.grey,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 24),
                 FilledButton.tonal(
@@ -633,8 +633,8 @@ class CalendarScreenState extends State<CalendarScreen> {
                                     alignment: Alignment.center,
                                     child: Text(
                                       '${day.day}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),
@@ -753,10 +753,10 @@ class CalendarScreenState extends State<CalendarScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.error_outline,
                               size: 48,
-                              color: Colors.red,
+                              color: colorScheme.error,
                             ),
                             const SizedBox(height: 16),
                             // _errorMessage 已是完整的 l10n 文案，直接顯示。
@@ -828,7 +828,9 @@ class CalendarScreenState extends State<CalendarScreen> {
                               ),
                               child: Text(
                                 AppLocalizations.of(context).noEventsToday,
-                                style: const TextStyle(color: Colors.grey),
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
                               ),
                             );
                           }

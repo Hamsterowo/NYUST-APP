@@ -28,6 +28,16 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   bool _isLoadingCalendar = true;
   String? _currentLanguageCode;
 
+  // 總覽頁的語意色：暖橘=需注意（放假倒數／重要行事曆／今日放假）、
+  // 天藍=上課中、石板灰=錯誤。集中於此，避免同組色碼散落在多個 build 方法。
+  static const Color _warmAccent = Color(0xFFEA580C);
+  static const Color _schoolAccent = Color(0xFF0284C7);
+  static const Color _countdownErrorColor = Color(0xFF475569);
+
+  // 前述彩色卡片（暖橘／天藍／石板灰）上的文字色。集中管理，避免白字色碼散落。
+  static const Color _onAccent = Colors.white;
+  static const Color _onAccentMuted = Colors.white70;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -340,7 +350,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       if (msgKey == 'vacationError') {
         errorMsg = AppLocalizations.of(context).vacationError;
       }
-      const Color errorColor = Color(0xFF475569);
+      const Color errorColor = _countdownErrorColor;
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -358,14 +368,14 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
           child: Row(
             children: [
-              const Icon(Icons.info_outline, color: Colors.white70, size: 24),
+              const Icon(Icons.info_outline, color: _onAccentMuted, size: 24),
               const SizedBox(width: 12),
               Text(
                 errorMsg,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: _onAccent,
                 ),
               ),
             ],
@@ -383,9 +393,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     }
 
     final bool isVacation = data['isVacation'] ?? false;
-    final Color cardColor = isVacation
-        ? const Color(0xFFEA580C)
-        : const Color(0xFF0284C7);
+    final Color cardColor = isVacation ? _warmAccent : _schoolAccent;
 
     // progress 為「已度過」比例；上課與放假兩狀態的進度條一律 0→100 填滿。
     final double progress = data['progress'] ?? 0.0;
@@ -420,7 +428,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: _onAccent,
                     ),
                   ),
                   Row(
@@ -439,7 +447,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white70,
+                          color: _onAccentMuted,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -448,7 +456,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: _onAccent,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -457,7 +465,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white70,
+                          color: _onAccentMuted,
                         ),
                       ),
                     ],
@@ -469,8 +477,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                  backgroundColor: _onAccent.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation<Color>(_onAccent),
                   minHeight: 8,
                 ),
               ),
@@ -484,7 +492,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                     ).vacationElapsed((progress * 100).toStringAsFixed(0)),
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white70,
+                      color: _onAccentMuted,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -492,7 +500,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                     '${data['startStr']} - ${data['endStr']}',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white70,
+                      color: _onAccentMuted,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -599,7 +607,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                     !_isLoadingCalendar
               ? Text(
                   AppLocalizations.of(context).noUpcomingEvents,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 )
               : ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 260),
@@ -635,9 +645,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final dateStr =
         '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
 
-    final Color dotColor = e.isImportant
-        ? const Color(0xFFEA580C)
-        : colorScheme.primary;
+    final Color dotColor = e.isImportant ? _warmAccent : colorScheme.primary;
     final Color lineColor = colorScheme.outlineVariant;
 
     final now = DateTime.now();
@@ -787,7 +795,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
 
     if (!isTodayHoliday) return title;
 
-    const holidayColor = Color(0xFFEA580C);
+    const holidayColor = _warmAccent;
     return Row(
       children: [
         Flexible(child: title),
@@ -834,7 +842,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               child: Center(
                 child: Text(
                   AppLocalizations.of(context).notLoggedInMessage,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -937,7 +947,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               child: Center(
                 child: Text(
                   AppLocalizations.of(context).noClassesToday,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -1117,20 +1129,20 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         ? Colors.transparent
         : colorScheme.outlineVariant;
     final titleColor = isPast
-        ? Colors.grey
+        ? colorScheme.onSurfaceVariant
         : (isCurrent ? colorScheme.onPrimaryContainer : colorScheme.onSurface);
     final subtitleColor = isPast
-        ? Colors.grey
+        ? colorScheme.onSurfaceVariant
         : (isCurrent
               ? colorScheme.onPrimaryContainer
               : colorScheme.onSurfaceVariant);
     final iconBgColor = isPast
-        ? Colors.grey.withValues(alpha: 0.1)
+        ? colorScheme.onSurfaceVariant.withValues(alpha: 0.1)
         : (isCurrent
               ? colorScheme.primary.withValues(alpha: 0.1)
               : colorScheme.surfaceContainerHighest);
     final iconColor = isPast
-        ? Colors.grey
+        ? colorScheme.onSurfaceVariant
         : (isCurrent ? colorScheme.primary : colorScheme.onSurfaceVariant);
 
     return Card(

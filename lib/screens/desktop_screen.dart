@@ -71,7 +71,7 @@ class DesktopScreen extends ConsumerWidget {
                   '或點擊下方按鈕繼續使用',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     height: 1.6,
-                    color: Colors.grey.shade800,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
