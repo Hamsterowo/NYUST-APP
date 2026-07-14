@@ -393,36 +393,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get infoGradesTitle => 'Grades Inquiry';
 
   @override
-  String get infoGradesDesc =>
-      'Check semester grades, history, and class rankings.';
+  String get infoGradesDesc => 'Semester & past grades, class rankings';
 
   @override
   String get infoGradTitle => 'Graduation Credits';
 
   @override
-  String get infoGradDesc =>
-      'Review graduation requirements and credit progress.';
+  String get infoGradDesc => 'Graduation requirements & credit progress';
 
   @override
   String get infoMapTitle => 'Campus Map';
 
   @override
-  String get infoMapDesc =>
-      'View the campus map with search functionality to quickly find buildings.';
+  String get infoMapDesc => 'Search and locate campus buildings';
 
   @override
   String get infoYunReportTitle => 'Enrollment Certificate';
 
   @override
-  String get infoYunReportDesc =>
-      'View this semester\'s enrollment certificate.';
+  String get infoYunReportDesc => 'This semester\'s enrollment certificate';
 
   @override
   String get infoAbsentTitle => 'Leave Records';
 
   @override
-  String get infoAbsentDesc =>
-      'View leave applications and approval status by semester.';
+  String get infoAbsentDesc => 'Leave applications & approval status';
 
   @override
   String get absentLoadFailed => 'Failed to load leave records';

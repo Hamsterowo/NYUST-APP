@@ -37,21 +37,21 @@ class InfoScreen extends StatelessWidget {
           highlightColor: themeColor.withValues(alpha: 0.05),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 16.0,
+              horizontal: 16.0,
+              vertical: 12.0,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: themeColor.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 28, color: themeColor),
+                  child: Icon(icon, size: 24, color: themeColor),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,12 +60,12 @@ class InfoScreen extends StatelessWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         description,
                         style: TextStyle(
@@ -112,7 +112,7 @@ class InfoScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Card 2: Graduation Credits
               _buildDashboardCard(
@@ -128,7 +128,7 @@ class InfoScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Card 3: Campus Map
               _buildDashboardCard(
@@ -146,7 +146,7 @@ class InfoScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Card 4: Enrollment Certificate (在學證明) — app-endpoint /api
               _buildDashboardCard(
@@ -162,7 +162,7 @@ class InfoScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Card 5: Leave records (請假記錄) — WebASXASG scraper
               _buildDashboardCard(
