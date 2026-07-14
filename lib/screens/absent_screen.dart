@@ -5,6 +5,7 @@ import '../models/absent_record.dart';
 import '../providers/providers.dart';
 import '../services/scrapers/absent_scraper.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/shimmer_box.dart';
 import 'web_view_screen.dart';
 
 /// 請假記錄查詢畫面。
@@ -170,7 +171,7 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
 
   Widget _buildBody(AppLocalizations l10n) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildSkeleton();
     }
     if (_failed) {
       final colorScheme = Theme.of(context).colorScheme;
@@ -239,6 +240,40 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
       itemCount: _records.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, i) => _buildCard(_records[i], l10n),
+    );
+  }
+
+  /// 載入中的骨架：沿用 [ShimmerBox]，比照 [_buildCard] 的版面配置，
+  /// 讓載入→內容的替換平順、避免空白閃爍。
+  Widget _buildSkeleton() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, i) => Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: ShimmerBox(width: 140, height: 18)),
+                SizedBox(width: 12),
+                ShimmerBox(width: 56, height: 24, borderRadius: 20),
+              ],
+            ),
+            SizedBox(height: 16),
+            ShimmerBox(width: 180, height: 13),
+            SizedBox(height: 10),
+            ShimmerBox(width: 120, height: 13),
+          ],
+        ),
+      ),
     );
   }
 
