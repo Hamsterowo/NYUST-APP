@@ -323,25 +323,13 @@ class CalendarSkeletonView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // 日期格：6 週 × 7 天，每格一個小圓圈（rowHeight 48）。
+                  // 日期格：每週用一整條連續的骨架（如寒暑假的連續色塊），
+                  // 不逐日分格。6 週，每列高 48（32 + 上下各 8）。
                   ...List.generate(
                     6,
-                    (_) => SizedBox(
-                      height: 48,
-                      child: Row(
-                        children: List.generate(
-                          7,
-                          (_) => const Expanded(
-                            child: Center(
-                              child: SkeletonBox(
-                                width: 34,
-                                height: 34,
-                                borderRadius: 17,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    (_) => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                      child: SkeletonBox(height: 32, borderRadius: 16),
                     ),
                   ),
                 ],
