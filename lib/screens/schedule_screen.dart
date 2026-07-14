@@ -258,7 +258,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
             key: _repaintKey,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: _ShareScheduleCard(courses: data.scheduleData),
+              // 分享目前「顯示中」的學期，而非固定的當前學期——否則切到其他
+              // 學期後分享出來的圖仍是當前學期。
+              child: _ShareScheduleCard(courses: data.displayedSchedule),
             ),
           ),
         ),
@@ -273,7 +275,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            onPressed: data.isLoadingSchedule || data.scheduleData.isEmpty
+            onPressed:
+                data.isLoadingSchedule ||
+                    data.isLoadingScheduleSemester ||
+                    data.displayedSchedule.isEmpty
                 ? null
                 : _shareScheduleImage,
             tooltip: Localizations.localeOf(context).languageCode == 'en'
