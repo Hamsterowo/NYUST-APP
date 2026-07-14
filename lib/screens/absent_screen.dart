@@ -173,15 +173,23 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_failed) {
+      final colorScheme = Theme.of(context).colorScheme;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 64,
+              color: colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.absentLoadFailed,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 18,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             Padding(
@@ -192,7 +200,7 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
                     ? l10n.serviceUnavailable(l10n.serviceAbsent)
                     : l10n.checkNetworkRetry,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             ),
             const SizedBox(height: 24),

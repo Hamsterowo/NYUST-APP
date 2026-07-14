@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../repositories/refresh_outcome.dart';
+import '../utils/status_colors.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/grade_notification_sheet.dart';
@@ -160,11 +161,18 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 64,
+              color: colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context).loadGradesFailed,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 18,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -175,7 +183,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                     )
                   : AppLocalizations.of(context).checkNetworkRetry,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
             FilledButton.tonal(
@@ -541,8 +549,10 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                                 color: isEmpty
                                     ? colorScheme.surfaceContainerHighest
                                     : effectivePass
-                                    ? Colors.green.withValues(alpha: 0.15)
-                                    : Colors.red.withValues(alpha: 0.15),
+                                    ? StatusColors.success.withValues(
+                                        alpha: 0.15,
+                                      )
+                                    : colorScheme.error.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -553,8 +563,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                                   color: isEmpty
                                       ? colorScheme.onSurfaceVariant
                                       : effectivePass
-                                      ? Colors.green[700]
-                                      : Colors.red[700],
+                                      ? StatusColors.success
+                                      : colorScheme.error,
                                 ),
                               ),
                             ),
@@ -1150,8 +1160,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                               color: isEmpty
                                   ? colorScheme.surfaceContainerHighest
                                   : effectivePass
-                                  ? Colors.green.withValues(alpha: 0.15)
-                                  : Colors.red.withValues(alpha: 0.15),
+                                  ? StatusColors.success.withValues(alpha: 0.15)
+                                  : colorScheme.error.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -1162,8 +1172,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                                 color: isEmpty
                                     ? colorScheme.onSurfaceVariant
                                     : effectivePass
-                                    ? Colors.green[700]
-                                    : Colors.red[700],
+                                    ? StatusColors.success
+                                    : colorScheme.error,
                               ),
                             ),
                           ),

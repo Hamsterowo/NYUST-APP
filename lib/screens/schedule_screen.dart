@@ -371,11 +371,18 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context).loadScheduleFailed,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -385,7 +392,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                     )
                   : AppLocalizations.of(context).checkNetworkRetry,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.tonal(
@@ -402,11 +411,18 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey),
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context).loadScheduleFailed,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -417,7 +433,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                     )
                   : AppLocalizations.of(context).checkNetworkRetry,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.tonal(
@@ -1212,8 +1230,6 @@ class _SemesterChip extends StatelessWidget {
     required this.onTap,
   });
 
-  static const Color _accent = Color(0xFF14B8A6);
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -1226,9 +1242,9 @@ class _SemesterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? _accent : Colors.transparent,
+          color: selected ? cs.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: selected ? _accent : cs.outlineVariant),
+          border: Border.all(color: selected ? cs.primary : cs.outlineVariant),
         ),
         child: Text(
           label,
@@ -1236,7 +1252,7 @@ class _SemesterChip extends StatelessWidget {
             fontSize: 13,
             height: 1.0,
             fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            color: selected ? Colors.white : cs.onSurfaceVariant,
+            color: selected ? cs.onPrimary : cs.onSurfaceVariant,
           ),
         ),
       ),

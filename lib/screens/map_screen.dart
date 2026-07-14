@@ -469,7 +469,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 ),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  backgroundColor: Colors.grey,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  disabledBackgroundColor: colorScheme.surfaceContainerHighest,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

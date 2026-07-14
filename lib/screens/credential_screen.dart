@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
+import '../utils/status_colors.dart';
 import '../widgets/app_api_password_dialog.dart';
 import '../widgets/custom_app_bar.dart';
 
@@ -105,7 +106,9 @@ class _CredentialScreenState extends ConsumerState<CredentialScreen> {
                         hasToken
                             ? Icons.verified_user_rounded
                             : Icons.gpp_bad_rounded,
-                        color: hasToken ? Colors.green : colorScheme.outline,
+                        color: hasToken
+                            ? StatusColors.success
+                            : colorScheme.outline,
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -118,7 +121,9 @@ class _CredentialScreenState extends ConsumerState<CredentialScreen> {
                             ? l.credentialStatusValid
                             : l.credentialStatusNone,
                         style: textTheme.titleMedium?.copyWith(
-                          color: hasToken ? Colors.green : colorScheme.outline,
+                          color: hasToken
+                              ? StatusColors.success
+                              : colorScheme.outline,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

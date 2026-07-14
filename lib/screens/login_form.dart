@@ -240,7 +240,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                     Container(
                       height: 56,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: colorScheme.outline),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Image.memory(
