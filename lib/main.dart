@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
     final theme = ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       useMaterial3: true,
-      fontFamily: 'JFOpenHuninn',
+      fontFamily: 'SweiGothic',
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
 
