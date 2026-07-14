@@ -1136,12 +1136,6 @@ abstract class AppLocalizations {
   /// **'載入失敗'**
   String get loadCalendarFailed;
 
-  /// No description provided for @loadErrorPrefix.
-  ///
-  /// In zh, this message translates to:
-  /// **'發生錯誤：{error}'**
-  String loadErrorPrefix(String error);
-
   /// No description provided for @gradesTitle.
   ///
   /// In zh, this message translates to:
@@ -1385,8 +1379,8 @@ abstract class AppLocalizations {
   /// No description provided for @courseLoadMapDataFailed.
   ///
   /// In zh, this message translates to:
-  /// **'讀取地圖資料失敗: {error}'**
-  String courseLoadMapDataFailed(String error);
+  /// **'讀取地圖資料失敗'**
+  String get courseLoadMapDataFailed;
 
   /// No description provided for @gradLoadFailed.
   ///

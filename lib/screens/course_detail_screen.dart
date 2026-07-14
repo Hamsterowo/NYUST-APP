@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../l10n/app_localizations.dart';
@@ -6,6 +7,7 @@ import '../models/course_detail_model.dart';
 import '../models/map_building_model.dart';
 import '../services/api_service.dart';
 import '../services/course_detail_cache.dart';
+import '../utils/network_error.dart';
 import '../utils/top_snack_bar.dart';
 import 'map_screen.dart';
 import 'web_view_screen.dart';
@@ -61,19 +63,29 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           _isLoading = false;
         });
       } else {
+        // 依 scraper 分類顯示具名「無法連線至課程大綱系統」或通用載入失敗;
+        // scraper 的 message 僅供除錯,不直接顯示給使用者。
+        if (kDebugMode) {
+          print('CourseDetailScreen: fetch failed: ${response?['message']}');
+        }
         setState(() {
-          _errorMessage =
-              response?['message'] ??
-              AppLocalizations.of(context).loadCalendarFailed;
+          _errorMessage = response?['status'] == 'network_error'
+              ? AppLocalizations.of(context).serviceUnavailable(
+                  AppLocalizations.of(context).serviceCourseDetail,
+                )
+              : AppLocalizations.of(context).loadCalendarFailed;
           _isLoading = false;
         });
       }
     } catch (e) {
+      if (kDebugMode) print('CourseDetailScreen: fetch threw: $e');
       if (!mounted) return;
       setState(() {
-        _errorMessage = AppLocalizations.of(
-          context,
-        ).loadErrorPrefix(e.toString());
+        _errorMessage = isNetworkError(e)
+            ? AppLocalizations.of(context).serviceUnavailable(
+                AppLocalizations.of(context).serviceCourseDetail,
+              )
+            : AppLocalizations.of(context).loadCalendarFailed;
         _isLoading = false;
       });
     }
@@ -171,10 +183,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         );
       }
     } catch (e) {
+      // 地圖資料是內建 asset,失敗屬本機解析問題;不顯示原始例外字串。
+      if (kDebugMode) print('CourseDetailScreen: map data load failed: $e');
       if (mounted) {
         showTopSnackBar(
           context,
-          AppLocalizations.of(context).courseLoadMapDataFailed(e.toString()),
+          AppLocalizations.of(context).courseLoadMapDataFailed,
           isError: true,
         );
       }

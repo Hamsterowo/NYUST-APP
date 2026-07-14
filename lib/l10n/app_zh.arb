@@ -264,14 +264,6 @@
   "legendTooltip": "圖示說明",
   "backToTodayTooltip": "回到今日",
   "loadCalendarFailed": "載入失敗",
-  "loadErrorPrefix": "發生錯誤：{error}",
-  "@loadErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "gradesTitle": "成績查詢",
   "gradesSegmentSemester": "學期",
   "gradesSegmentHistory": "歷年",
@@ -371,14 +363,7 @@
       }
     }
   },
-  "courseLoadMapDataFailed": "讀取地圖資料失敗: {error}",
-  "@courseLoadMapDataFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
+  "courseLoadMapDataFailed": "讀取地圖資料失敗",
   "gradLoadFailed": "無法載入畢業學分",
   "gradNoData": "尚無畢業學分資料",
   "gradDetailTitle": "學分統計詳細",

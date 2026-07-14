@@ -264,14 +264,6 @@
   "legendTooltip": "Icon Legend",
   "backToTodayTooltip": "Back to Today",
   "loadCalendarFailed": "Failed to load",
-  "loadErrorPrefix": "An error occurred: {error}",
-  "@loadErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "gradesTitle": "Grades",
   "gradesSegmentSemester": "Semester",
   "gradesSegmentHistory": "History",
@@ -371,14 +363,7 @@
       }
     }
   },
-  "courseLoadMapDataFailed": "Failed to load map data: {error}",
-  "@courseLoadMapDataFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
+  "courseLoadMapDataFailed": "Failed to load map data",
   "gradLoadFailed": "Failed to load graduation credits",
   "gradNoData": "No graduation credits data available",
   "gradDetailTitle": "Credit Statistics Details",

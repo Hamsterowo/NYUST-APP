@@ -585,11 +585,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadCalendarFailed => 'Failed to load';
 
   @override
-  String loadErrorPrefix(String error) {
-    return 'An error occurred: $error';
-  }
-
-  @override
   String get gradesTitle => 'Grades';
 
   @override
@@ -727,9 +722,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String courseLoadMapDataFailed(String error) {
-    return 'Failed to load map data: $error';
-  }
+  String get courseLoadMapDataFailed => 'Failed to load map data';
 
   @override
   String get gradLoadFailed => 'Failed to load graduation credits';

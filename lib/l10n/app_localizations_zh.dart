@@ -559,11 +559,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadCalendarFailed => '載入失敗';
 
   @override
-  String loadErrorPrefix(String error) {
-    return '發生錯誤：$error';
-  }
-
-  @override
   String get gradesTitle => '成績查詢';
 
   @override
@@ -700,9 +695,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String courseLoadMapDataFailed(String error) {
-    return '讀取地圖資料失敗: $error';
-  }
+  String get courseLoadMapDataFailed => '讀取地圖資料失敗';
 
   @override
   String get gradLoadFailed => '無法載入畢業學分';
