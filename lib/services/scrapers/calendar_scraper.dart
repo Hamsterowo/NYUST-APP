@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
+import '../../utils/network_error.dart';
 import 'base_scraper.dart';
 
 /// 處理行事曆與假日爬取的類別
@@ -125,7 +126,19 @@ class CalendarScraper extends BaseScraper {
         'events': events,
       };
     } catch (e) {
-      return {'success': false, 'message': '獲取行事曆失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error fetching calendar: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Failed to fetch calendar: $e',
+      };
     }
   }
 
@@ -237,7 +250,19 @@ class CalendarScraper extends BaseScraper {
         'holidayDetails': holidayDetails,
       };
     } catch (e) {
-      return {'success': false, 'message': '獲取假日資訊失敗: $e'};
+      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      if (isNetworkError(e)) {
+        return {
+          'success': false,
+          'status': 'network_error',
+          'message': 'Network error fetching holidays: $e',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'error',
+        'message': 'Failed to fetch holidays: $e',
+      };
     }
   }
 
