@@ -9,8 +9,10 @@ import '../utils/clock_drift.dart';
 /// 從每個 HTTP 回應都自帶的 `Date` header 取得伺服器 UTC 時間，並以**單調時鐘**
 /// （[Stopwatch]，不受使用者改動裝置牆上時鐘影響）當錨點推算「真實時間」，
 /// 對外提供：
-/// - [now]：校正後的現在時間，供課表紅線、行事曆「今天」、nonce 等使用，
-///   讓裝置時鐘偏差時仍顯示/送出正確時間。
+/// - [now]：校正後的現在時間，**固定以台灣時區 (UTC+8) 的牆上時間呈現**，不受
+///   裝置時區設定影響（裝置時區設錯時仍顯示正確的台灣日期/時間）。供課表紅線、
+///   行事曆「今天」等顯示用途。
+/// - [trueUtcNow]：校正後的 UTC instant，供 nonce 等需要正確時間戳的用途。
 /// - [onSkewChange]：偏差是否超過 [clockSkewThreshold] 的變化串流，供提示橫幅
 ///   （比照離線橫幅）訂閱。
 ///
@@ -109,8 +111,31 @@ class ServerTimeService with WidgetsBindingObserver {
     }
   }
 
-  /// 校正後的現在時間（本地時區）。尚未取得伺服器時間前，退化為 `DateTime.now()`。
-  DateTime now() => _trueUtcNow()?.toLocal() ?? DateTime.now();
+  /// 台灣時區固定偏移 (UTC+8)。雲科是台灣的服務，時間顯示一律用台灣牆上時間，
+  /// 不隨裝置時區設定改變。
+  static const Duration _taipeiOffset = Duration(hours: 8);
+
+  /// 校正後的真實時間（UTC instant）。供 nonce 等需要正確時間戳的用途；
+  /// 尚未取得伺服器時間前，退化為裝置的 UTC 時鐘。
+  DateTime trueUtcNow() => _trueUtcNow() ?? DateTime.now().toUtc();
+
+  /// 校正後的現在時間，固定以**台灣時區 (UTC+8) 的牆上時間**呈現，
+  /// **不受裝置時區設定影響**：即使使用者裝置時區設錯，行事曆「今天」與
+  /// 課表紅線仍以台灣時間為準。回傳 local-flavour 的 [DateTime]（其
+  /// 年/月/日/時分秒即台灣牆上時間），呼叫端沿用既有欄位讀取即可。
+  DateTime now() {
+    final tw = trueUtcNow().add(_taipeiOffset);
+    return DateTime(
+      tw.year,
+      tw.month,
+      tw.day,
+      tw.hour,
+      tw.minute,
+      tw.second,
+      tw.millisecond,
+      tw.microsecond,
+    );
+  }
 
   /// 目前是否偏差過大（同步取現值，供 provider 種初值）。
   bool get isSkewed => _isSkewed;

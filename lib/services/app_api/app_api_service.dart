@@ -397,7 +397,8 @@ class AppApiService {
     'X-User-Nonce': YuntechAppCrypto.buildNonce(
       userId: userId,
       appVersion: _appVersion,
-      now: ServerTimeService.instance.now(),
+      // nonce 需要正確的 UTC 時間戳，用 trueUtcNow()（now() 已改為台灣牆上時間）。
+      now: ServerTimeService.instance.trueUtcNow(),
     ),
   };
 
