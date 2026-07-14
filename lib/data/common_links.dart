@@ -21,9 +21,9 @@ class CommonLink {
 /// 常用連結清單。要新增／刪除連結，直接改這個清單即可。
 const List<CommonLink> kCommonLinks = [
   CommonLink(
-    title: '學生居住情形登陸',
-    titleEn: 'Housing Registration',
-    url: 'https://webapp.yuntech.edu.tw/AsxServ/StudDorm/Index',
+    title: '選課系統',
+    titleEn: 'Course Selection',
+    url: 'https://webapp.yuntech.edu.tw/AAXCCS/CourseSelectionRegister.aspx',
   ),
   CommonLink(
     title: '學生請假系統',
@@ -32,8 +32,8 @@ const List<CommonLink> kCommonLinks = [
         'https://webapp.yuntech.edu.tw/WebASXASG/StudAbsentApp/StudAbsentAppQry.aspx',
   ),
   CommonLink(
-    title: '選課系統',
-    titleEn: 'Course Selection',
-    url: 'https://webapp.yuntech.edu.tw/AAXCCS/CourseSelectionRegister.aspx',
+    title: '學生居住情形登陸',
+    titleEn: 'Housing Registration',
+    url: 'https://webapp.yuntech.edu.tw/AsxServ/StudDorm/Index',
   ),
 ];
