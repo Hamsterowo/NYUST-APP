@@ -18,7 +18,7 @@
   "reportViaEmail": "Report via Email",
   "reportViaDiscord": "Report via Discord community",
   "reportEmailSubject": "[YunTool] Issue Report",
-  "reportEmailBody": "Please describe the issue here:\n\n\n------\nApp version: {version}\nPlatform: {platform}",
+  "reportEmailBody": "[What happened]\n(Describe the problem you ran into)\n\n[Steps you took]\n1. \n2. \n3. \n\n[When it happened]\n\n------ Diagnostic info, please keep ------\nApp version: {version}\nPlatform: {platform}",
   "@reportEmailBody": {
     "placeholders": {
       "version": {

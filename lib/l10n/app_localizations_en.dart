@@ -65,7 +65,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String reportEmailBody(String version, String platform) {
-    return 'Please describe the issue here:\n\n\n------\nApp version: $version\nPlatform: $platform';
+    return '[What happened]\n(Describe the problem you ran into)\n\n[Steps you took]\n1. \n2. \n3. \n\n[When it happened]\n\n------ Diagnostic info, please keep ------\nApp version: $version\nPlatform: $platform';
   }
 
   @override

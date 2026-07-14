@@ -64,7 +64,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String reportEmailBody(String version, String platform) {
-    return '請在此描述您遇到的問題：\n\n\n------\nApp 版本：$version\n平台：$platform';
+    return '【問題描述】\n（請描述您遇到的狀況）\n\n【操作步驟】\n1. \n2. \n3. \n\n【發生時間】\n\n------ 以下為協助排查的資訊，請勿刪除 ------\nApp 版本：$version\n平台：$platform';
   }
 
   @override
