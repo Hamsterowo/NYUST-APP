@@ -87,6 +87,12 @@ test/**/*_local_test.dart
 implementation_plan.md
 todo.md
 
+# Impeccable design skill — local tooling, do not commit
+.claude/skills/impeccable/
+.github/skills/impeccable/
+.github/hooks/impeccable.json
+.impeccable/
+
 # Reverse-engineering artifacts (decompiled official app + APKs) — local only, do NOT commit
 reverse-engineering/
 
