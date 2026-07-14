@@ -12,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import '../models/schedule_event.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
+import '../repositories/refresh_outcome.dart';
 import '../services/server_time_service.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
@@ -371,7 +372,13 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).checkNetworkRetry,
+              // 離線/連不上 → 具名「無法連線至課表系統」;其他 → 通用提示。
+              data.scheduleFailReason == RefreshOutcome.networkError
+                  ? AppLocalizations.of(context).serviceUnavailable(
+                      AppLocalizations.of(context).serviceSchedule,
+                    )
+                  : AppLocalizations.of(context).checkNetworkRetry,
+              textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),

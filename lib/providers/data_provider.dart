@@ -4,6 +4,7 @@ import '../database/database.dart';
 import '../repositories/grades_repository.dart';
 import '../repositories/graduation_repository.dart';
 import '../repositories/course_repository.dart';
+import '../repositories/refresh_outcome.dart';
 import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/course_detail_cache.dart';
@@ -39,13 +40,19 @@ class DataProvider with ChangeNotifier {
   bool isLoadingGrades = false;
   bool gradesFailed = false;
 
+  /// 最近一次成績抓取失敗的原因（networkError/serviceError），供 UI 顯示
+  /// 「無法連線至成績系統」或通用載入失敗。成功或未失敗時為 null。
+  RefreshOutcome? gradesFailReason;
+
   Map<String, dynamic>? graduationData;
   bool isLoadingGraduation = false;
   bool graduationFailed = false;
+  RefreshOutcome? graduationFailReason;
 
   List<ScheduleEvent> scheduleData = [];
   bool isLoadingSchedule = false;
   bool scheduleFailed = false;
+  RefreshOutcome? scheduleFailReason;
 
   // ── 多學期課表 ──────────────────────────────────────────────
   /// 可切換的學期選項（[{value,label}]），線上抓到才有值。
@@ -231,6 +238,9 @@ class DataProvider with ChangeNotifier {
     gradesFailed = false;
     graduationFailed = false;
     scheduleFailed = false;
+    gradesFailReason = null;
+    graduationFailReason = null;
+    scheduleFailReason = null;
     scheduleSemesters = [];
     currentSemester = null;
     selectedSemester = null;
@@ -250,12 +260,19 @@ class DataProvider with ChangeNotifier {
     if (isLoadingGrades) return;
     isLoadingGrades = true;
     gradesFailed = false;
+    gradesFailReason = null;
     notifyListeners();
     try {
-      final ok = await _gradesRepo.refresh(force: force);
-      if (!ok && gradesData == null) gradesFailed = true;
+      final outcome = await _gradesRepo.refresh(force: force);
+      if (!outcome.isSuccess && gradesData == null) {
+        gradesFailed = true;
+        gradesFailReason = outcome;
+      }
     } catch (_) {
-      if (gradesData == null) gradesFailed = true;
+      if (gradesData == null) {
+        gradesFailed = true;
+        gradesFailReason = RefreshOutcome.serviceError;
+      }
     } finally {
       isLoadingGrades = false;
       notifyListeners();
@@ -266,12 +283,19 @@ class DataProvider with ChangeNotifier {
     if (isLoadingGraduation) return;
     isLoadingGraduation = true;
     graduationFailed = false;
+    graduationFailReason = null;
     notifyListeners();
     try {
-      final ok = await _graduationRepo.refresh(force: force);
-      if (!ok && graduationData == null) graduationFailed = true;
+      final outcome = await _graduationRepo.refresh(force: force);
+      if (!outcome.isSuccess && graduationData == null) {
+        graduationFailed = true;
+        graduationFailReason = outcome;
+      }
     } catch (_) {
-      if (graduationData == null) graduationFailed = true;
+      if (graduationData == null) {
+        graduationFailed = true;
+        graduationFailReason = RefreshOutcome.serviceError;
+      }
     } finally {
       isLoadingGraduation = false;
       notifyListeners();
@@ -282,13 +306,20 @@ class DataProvider with ChangeNotifier {
     if (isLoadingSchedule) return;
     isLoadingSchedule = true;
     scheduleFailed = false;
+    scheduleFailReason = null;
     notifyListeners();
     try {
-      final ok = await _courseRepo.refresh(force: force);
-      if (!ok && scheduleData.isEmpty) scheduleFailed = true;
+      final outcome = await _courseRepo.refresh(force: force);
+      if (!outcome.isSuccess && scheduleData.isEmpty) {
+        scheduleFailed = true;
+        scheduleFailReason = outcome;
+      }
       _captureSemesterMeta();
     } catch (_) {
-      if (scheduleData.isEmpty) scheduleFailed = true;
+      if (scheduleData.isEmpty) {
+        scheduleFailed = true;
+        scheduleFailReason = RefreshOutcome.serviceError;
+      }
     } finally {
       isLoadingSchedule = false;
       notifyListeners();

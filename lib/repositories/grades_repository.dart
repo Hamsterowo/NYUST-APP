@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../database/database.dart';
 import '../services/api_service.dart';
+import 'refresh_outcome.dart';
 
 /// 成績資料的 Repository：網路 → 正規化寫入 Drift → 由 Drift stream 推給 UI。
 ///
@@ -26,18 +27,19 @@ class GradesRepository {
     return _db.select(_db.gradesSemesters).watch().asyncMap((_) => _buildMap());
   }
 
-  /// 依 TTL 抓取成績。回傳是否成功取得資料。[force] 為 true 時忽略 TTL。
-  Future<bool> refresh({bool force = false}) async {
-    if (!force && !await _isStale()) return true;
+  /// 依 TTL 抓取成績。回傳 [RefreshOutcome]，失敗時含原因分類（離線/服務異常）。
+  /// [force] 為 true 時忽略 TTL。
+  Future<RefreshOutcome> refresh({bool force = false}) async {
+    if (!force && !await _isStale()) return RefreshOutcome.success;
 
     final resp = await _api.getGrades();
-    if (resp['success'] != true) return false;
+    if (resp['success'] != true) return classifyRefreshFailure(resp);
 
     await _write(resp);
     try {
       await _secureStorage.write(key: 'cache_grades', value: jsonEncode(resp));
     } catch (_) {}
-    return true;
+    return RefreshOutcome.success;
   }
 
   Future<void> clear() async {

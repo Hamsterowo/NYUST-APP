@@ -111,6 +111,21 @@
   "mapModeTooltip": "Map Mode",
   "loadScheduleFailed": "Failed to load schedule",
   "checkNetworkRetry": "Please check your network and try again.",
+  "serviceUnavailable": "Cannot reach {service}. Check your network or try again later.",
+  "@serviceUnavailable": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceGrades": "the grades system",
+  "serviceSchedule": "the schedule system",
+  "serviceGraduation": "the graduation audit system",
+  "serviceAbsent": "the leave system",
+  "serviceCalendar": "the school calendar",
+  "serviceCourseDetail": "the course syllabus system",
+  "serviceYunReport": "the enrollment certificate service",
   "retry": "Retry",
   "offlineBanner": "Offline — showing previously cached data",
   "clockSkewBanner": "Device clock is off — this may cause errors. Please fix your device time.",

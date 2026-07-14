@@ -263,6 +263,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkNetworkRetry => 'Please check your network and try again.';
 
   @override
+  String serviceUnavailable(String service) {
+    return 'Cannot reach $service. Check your network or try again later.';
+  }
+
+  @override
+  String get serviceGrades => 'the grades system';
+
+  @override
+  String get serviceSchedule => 'the schedule system';
+
+  @override
+  String get serviceGraduation => 'the graduation audit system';
+
+  @override
+  String get serviceAbsent => 'the leave system';
+
+  @override
+  String get serviceCalendar => 'the school calendar';
+
+  @override
+  String get serviceCourseDetail => 'the course syllabus system';
+
+  @override
+  String get serviceYunReport => 'the enrollment certificate service';
+
+  @override
   String get retry => 'Retry';
 
   @override

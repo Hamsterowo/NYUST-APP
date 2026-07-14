@@ -111,6 +111,21 @@
   "mapModeTooltip": "地圖定位模式",
   "loadScheduleFailed": "無法載入課表",
   "checkNetworkRetry": "請確認網路連線後重試",
+  "serviceUnavailable": "無法連線至{service}，請確認網路，或稍後再試",
+  "@serviceUnavailable": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceGrades": "成績系統",
+  "serviceSchedule": "課表系統",
+  "serviceGraduation": "畢業審核系統",
+  "serviceAbsent": "請假系統",
+  "serviceCalendar": "學校行事曆",
+  "serviceCourseDetail": "課程大綱系統",
+  "serviceYunReport": "在學證明服務",
   "retry": "重試",
   "offlineBanner": "離線模式・顯示的是先前的快取資料",
   "clockSkewBanner": "裝置時間誤差過大，可能導致異常，請校正系統時間",

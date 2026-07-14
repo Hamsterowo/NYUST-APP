@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../services/api_service.dart';
+import 'refresh_outcome.dart';
 
 /// 畢業審核資料的 Repository。頂層欄位存 [GraduationInfo]（單列），
 /// 各分組的學分明細以 EAV（[GraduationCredits]）儲存，重建時還原成巢狀 Map。
@@ -19,14 +20,15 @@ class GraduationRepository {
     return _db.select(_db.graduationInfo).watch().asyncMap((_) => _buildMap());
   }
 
-  Future<bool> refresh({bool force = false}) async {
-    if (!force && !await _isStale()) return true;
+  /// 依 TTL 抓取畢業審核。回傳 [RefreshOutcome]，失敗時含原因分類。
+  Future<RefreshOutcome> refresh({bool force = false}) async {
+    if (!force && !await _isStale()) return RefreshOutcome.success;
 
     final resp = await _api.getGraduation();
-    if (resp['success'] != true) return false;
+    if (resp['success'] != true) return classifyRefreshFailure(resp);
 
     await _write(resp);
-    return true;
+    return RefreshOutcome.success;
   }
 
   Future<void> clear() async {

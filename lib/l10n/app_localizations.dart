@@ -566,6 +566,54 @@ abstract class AppLocalizations {
   /// **'請確認網路連線後重試'**
   String get checkNetworkRetry;
 
+  /// No description provided for @serviceUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法連線至{service}，請確認網路，或稍後再試'**
+  String serviceUnavailable(String service);
+
+  /// No description provided for @serviceGrades.
+  ///
+  /// In zh, this message translates to:
+  /// **'成績系統'**
+  String get serviceGrades;
+
+  /// No description provided for @serviceSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'課表系統'**
+  String get serviceSchedule;
+
+  /// No description provided for @serviceGraduation.
+  ///
+  /// In zh, this message translates to:
+  /// **'畢業審核系統'**
+  String get serviceGraduation;
+
+  /// No description provided for @serviceAbsent.
+  ///
+  /// In zh, this message translates to:
+  /// **'請假系統'**
+  String get serviceAbsent;
+
+  /// No description provided for @serviceCalendar.
+  ///
+  /// In zh, this message translates to:
+  /// **'學校行事曆'**
+  String get serviceCalendar;
+
+  /// No description provided for @serviceCourseDetail.
+  ///
+  /// In zh, this message translates to:
+  /// **'課程大綱系統'**
+  String get serviceCourseDetail;
+
+  /// No description provided for @serviceYunReport.
+  ///
+  /// In zh, this message translates to:
+  /// **'在學證明服務'**
+  String get serviceYunReport;
+
   /// No description provided for @retry.
   ///
   /// In zh, this message translates to:
