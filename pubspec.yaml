@@ -115,10 +115,10 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: SweiGothic
+    - family: SarasaGothic
       fonts:
-        - asset: assets/fonts/SweiGothicCJKtc-Regular.ttf
-        - asset: assets/fonts/SweiGothicCJKtc-Bold.ttf
+        - asset: assets/fonts/SarasaGothicTC-Regular.ttf
+        - asset: assets/fonts/SarasaGothicTC-Bold.ttf
           weight: 700
 
 flutter_launcher_icons:
