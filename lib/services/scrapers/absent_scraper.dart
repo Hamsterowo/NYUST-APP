@@ -26,12 +26,26 @@ class AbsentScraper extends BaseScraper {
   /// 直接解析當前頁面，否則以 postback 切換。
   Future<Map<String, dynamic>> getAbsentRecords({String? semester}) async {
     try {
-      final response = await getWithRedirects(
+      var response = await getWithRedirects(
         absentUrl,
         options: Options(headers: commonHeaders),
       );
 
       var document = parseHtml(response.data);
+
+      // WebASXASG 是獨立的 ASP.NET App：第一次直接開 DeepQry 深層頁時，若該
+      // App 自己的 session 尚未建立，SSO 交握會把我們彈回其首頁
+      // （StudAbsentAppQry.aspx），該頁沒有「學年期」下拉，會誤判為過期。此時
+      // App session 其實已經建立，重新打一次同一個網址就會正確落在深層頁
+      // （比照 [AppWebViewScreen] 的 `_maybeReachIntendedPage`）。只重試一次，
+      // 避免真的過期時無限重試。
+      if (document.querySelectorAll(_semesterSelector).isEmpty) {
+        response = await getWithRedirects(
+          absentUrl,
+          options: Options(headers: {...commonHeaders, 'Referer': absentUrl}),
+        );
+        document = parseHtml(response.data);
+      }
 
       // Session 判斷：正常頁面一定有「學年期」下拉；被導回登入頁時則沒有。
       // 注意：不能用 `contains('Login.aspx')` 判斷——此頁頁首選單本來就含多個
