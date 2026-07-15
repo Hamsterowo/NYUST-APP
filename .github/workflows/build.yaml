@@ -37,9 +37,11 @@ jobs:
           storeFile=upload-keystore.jks
           EOF
 
+      # --split-per-abi 讓每個 ABI（arm64-v8a / armeabi-v7a / x86_64）各出一支 APK，
+      # 而不是塞進單一支「胖」APK，大幅縮小下載體積。
       - name: Build release APK & AAB
         run: |
-          flutter build apk --release --dart-define=USE_FIREBASE=true
+          flutter build apk --release --dart-define=USE_FIREBASE=true --split-per-abi
           flutter build appbundle --release --dart-define=USE_FIREBASE=true
 
       - name: Upload APK & AAB artifacts
@@ -47,7 +49,7 @@ jobs:
         with:
           name: app-release-bundles
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/*.apk
             build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
@@ -63,13 +65,13 @@ jobs:
           name: app-release-bundles
           path: build/app/outputs
 
-      # 推 tag 時，建立「草稿」GitHub Release 並附上 APK（永久下載連結）。
+      # 推 tag 時，建立「草稿」GitHub Release 並附上各 ABI 的 APK（永久下載連結）。
       # draft: true → 自動預填變更說明並附好 APK，但先不公開；
       # 你可在 Releases 頁面補寫「這版改了什麼」後再手動按 Publish。
       - name: Create GitHub Release (draft)
         uses: softprops/action-gh-release@v2
         with:
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: build/app/outputs/flutter-apk/*.apk
           generate_release_notes: true
           draft: true
 

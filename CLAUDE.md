@@ -23,7 +23,7 @@ dart format .                      # ALWAYS run before committing — CI ("Analy
 Release builds — the APK/AAB are produced by CI (`.github/workflows/build.yaml`); web by `build.sh`:
 
 ```bash
-flutter build apk --release --dart-define=USE_FIREBASE=true
+flutter build apk --release --dart-define=USE_FIREBASE=true --split-per-abi
 flutter build appbundle --release --dart-define=USE_FIREBASE=true
 flutter build web
 ```
