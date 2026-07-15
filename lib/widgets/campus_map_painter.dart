@@ -159,7 +159,7 @@ class CampusMapPainter extends CustomPainter {
           textPainter.text = TextSpan(
             text: labelText,
             style: TextStyle(
-              fontFamily: 'SweiGothic',
+              fontFamily: 'SarasaGothic',
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
             ),
@@ -173,7 +173,7 @@ class CampusMapPainter extends CustomPainter {
           textPainter.text = TextSpan(
             text: labelText,
             style: TextStyle(
-              fontFamily: 'SweiGothic',
+              fontFamily: 'SarasaGothic',
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
               foreground: Paint()
@@ -191,7 +191,7 @@ class CampusMapPainter extends CustomPainter {
             text: labelText,
             style: TextStyle(
               color: textColor,
-              fontFamily: 'SweiGothic',
+              fontFamily: 'SarasaGothic',
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
             ),

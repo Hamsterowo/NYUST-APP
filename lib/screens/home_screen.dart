@@ -154,7 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Text(
                 label,
                 style: TextStyle(
-                  fontFamily: 'SweiGothic',
+                  fontFamily: 'SarasaGothic',
                   fontSize: 10,
                   height: 1.0,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -292,13 +292,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       selectedIconTheme: const IconThemeData(color: _navActiveColor),
       selectedLabelTextStyle: const TextStyle(
         color: _navActiveColor,
-        fontFamily: 'SweiGothic',
+        fontFamily: 'SarasaGothic',
         fontWeight: FontWeight.bold,
         fontSize: 12,
       ),
       unselectedLabelTextStyle: TextStyle(
         color: colorScheme.onSurfaceVariant,
-        fontFamily: 'SweiGothic',
+        fontFamily: 'SarasaGothic',
         fontSize: 12,
       ),
       destinations: [
@@ -476,7 +476,7 @@ class _StatusBanner extends StatelessWidget {
                     child: Text(
                       text,
                       style: TextStyle(
-                        fontFamily: 'SweiGothic',
+                        fontFamily: 'SarasaGothic',
                         fontSize: 12,
                         color: foreground,
                       ),
