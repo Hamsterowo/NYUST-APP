@@ -14,12 +14,11 @@ permissions:
   contents: write # 建立 GitHub Release 需要
 
 jobs:
-  build-apk:
+  build:
+    name: Build APK & AAB
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 需要完整歷史與 tag，才能算出上一版 tag 與 compare 連結
 
       - uses: ./.github/actions/setup-project
 
@@ -52,23 +51,49 @@ jobs:
             build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+  github-release:
+    name: Create GitHub Release (draft)
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-bundles
+          path: build/app/outputs
+
       # 推 tag 時，建立「草稿」GitHub Release 並附上 APK（永久下載連結）。
       # draft: true → 自動預填變更說明並附好 APK，但先不公開；
       # 你可在 Releases 頁面補寫「這版改了什麼」後再手動按 Publish。
       - name: Create GitHub Release (draft)
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           generate_release_notes: true
           draft: true
 
+  play-release:
+    name: Upload to Google Play (Internal Testing)
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 需要完整歷史與 tag，才能算出上一版 tag 與 compare 連結
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-bundles
+          path: build/app/outputs
+
       # 從 pubspec.yaml 讀出版本，組出 Play 的版本名稱與更新說明（what's new）。
       # 版本名稱格式為「versionCode (versionName)」，例如 0.4.4+30 → 「30 (0.4.4)」。
       # 更新說明會附上這版的最新 commit 與對上一版 tag 的 compare 編輯日誌。
       - name: Prepare Play release metadata
         id: meta
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           VERSION_LINE=$(grep '^version:' pubspec.yaml | awk '{print $2}')
           VERSION_NAME=${VERSION_LINE%%+*}
@@ -94,7 +119,6 @@ jobs:
 
       # 當推 v* 標籤時，自動發布至 Google Play Console (內部測試軌道)
       - name: Upload to Google Play (Internal Testing)
-        if: startsWith(github.ref, 'refs/tags/')
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
@@ -104,4 +128,3 @@ jobs:
           status: draft
           releaseName: ${{ steps.meta.outputs.release_name }}
           whatsNewDirectory: build/play-whatsnew
-
