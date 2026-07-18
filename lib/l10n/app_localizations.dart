@@ -1831,6 +1831,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'已註冊立即執行的背景任務，請查看通知！'**
   String get devTriggerBgCheckRegistered;
+
+  /// No description provided for @languageZh.
+  ///
+  /// In zh, this message translates to:
+  /// **'中文'**
+  String get languageZh;
+
+  /// No description provided for @languageEn.
+  ///
+  /// In zh, this message translates to:
+  /// **'English'**
+  String get languageEn;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'跟隨系統'**
+  String get languageSystem;
 }
 
 class _AppLocalizationsDelegate

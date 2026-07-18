@@ -969,4 +969,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get devTriggerBgCheckRegistered =>
       'One-off background task registered — check your notifications!';
+
+  @override
+  String get languageZh => '中文';
+
+  @override
+  String get languageEn => 'English';
+
+  @override
+  String get languageSystem => 'Follow system';
 }
