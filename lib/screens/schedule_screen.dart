@@ -54,11 +54,19 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     'L': [1270, 1320],
   };
 
+  /// 課表在首頁 `_screens` 中的分頁索引。
+  static const int _scheduleTabIndex = 1;
+
+  /// 五個分頁常駐於首頁 Stack，非當前分頁也會收到計時器回呼；
+  /// 只有課表分頁被選中時才需要重繪時間線。
+  bool get _isVisibleTab =>
+      widget.embed || ref.read(navIndexProvider) == _scheduleTabIndex;
+
   @override
   void initState() {
     super.initState();
     _timeLineTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
-      if (mounted) {
+      if (mounted && _isVisibleTab) {
         setState(() {});
       }
     });
@@ -183,9 +191,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final auth = ref.watch(authProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    // 從其他分頁切回課表分頁（index 1）時：重播課程方塊淡入，並確保學期清單已載入。
+    // 從其他分頁切回課表分頁時：重播課程方塊淡入、確保學期清單已載入；
+    // 這次 setState 也會立即重算時間線（背景時計時器不重繪，見 initState）。
     ref.listen<int>(navIndexProvider, (prev, next) {
-      if (next == 1 && prev != 1 && mounted) {
+      if (next == _scheduleTabIndex && prev != _scheduleTabIndex && mounted) {
         setState(() => _fadeGen++);
         ref.read(dataProvider).ensureScheduleSemesters();
       }
