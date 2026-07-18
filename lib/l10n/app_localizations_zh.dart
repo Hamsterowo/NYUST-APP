@@ -938,4 +938,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get devTriggerBgCheckRegistered => '已註冊立即執行的背景任務，請查看通知！';
+
+  @override
+  String get languageZh => '中文';
+
+  @override
+  String get languageEn => 'English';
+
+  @override
+  String get languageSystem => '跟隨系統';
 }

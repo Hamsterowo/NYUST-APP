@@ -1,6 +1,9 @@
 // Riverpod 3.x：ChangeNotifierProvider / StateProvider 已移到 legacy。
+import 'dart:ui' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_provider.dart';
 import 'data_provider.dart';
 import '../services/connectivity_service.dart';
@@ -28,6 +31,50 @@ final dataProvider = ChangeNotifierProvider<DataProvider>((ref) {
 
 /// 底部分頁索引（取代 NavigationProvider）。
 final navIndexProvider = StateProvider<int>((ref) => 0);
+
+/// App 內語言覆寫（`null` = 跟隨系統）。兩個 MaterialApp 都吃這個值。
+final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
+  LocaleNotifier.new,
+);
+
+class LocaleNotifier extends Notifier<Locale?> {
+  static const _prefKey = 'app_locale';
+
+  @override
+  Locale? build() {
+    _load();
+    return null; // 讀到偏好設定前先跟隨系統。
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final code = prefs.getString(_prefKey);
+      if (code != null && code.isNotEmpty) {
+        state = Locale(code);
+        Intl.defaultLocale = code;
+      }
+    } catch (_) {}
+  }
+
+  /// 設定語言覆寫並持久化；`null` 表示清除覆寫、跟隨系統。
+  ///
+  /// 同步更新 `Intl.defaultLocale`，讓以它判斷語系的邏輯
+  /// （LanguageInterceptor、CalendarScraper 等）跟著 App 內設定走；
+  /// 清除時回退為平台語系判斷。
+  Future<void> setLocale(Locale? locale) async {
+    state = locale;
+    Intl.defaultLocale = locale?.languageCode;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (locale == null) {
+        await prefs.remove(_prefKey);
+      } else {
+        await prefs.setString(_prefKey, locale.languageCode);
+      }
+    } catch (_) {}
+  }
+}
 
 /// 成績通知（背景檢查）是否啟用。設定分頁與成績頁的就地開關面板共用此狀態，
 /// 任一處切換後另一處會即時同步（不需重開 App）。

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:workmanager/workmanager.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/providers.dart';
 import 'router/app_router.dart';
 import 'screens/desktop_screen.dart';
 import 'services/background_service.dart';
@@ -32,10 +33,13 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // App 內語言覆寫（null = 跟隨系統）。
+    final locale = ref.watch(localeProvider);
+
     final isDesktopWeb =
         kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||
@@ -61,6 +65,7 @@ class MyApp extends StatelessWidget {
     if (isDesktopWeb) {
       return MaterialApp(
         title: '雲科工具箱',
+        locale: locale,
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales,
         theme: theme,
@@ -70,6 +75,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp.router(
       title: '雲科工具箱',
+      locale: locale,
       localizationsDelegates: localizationsDelegates,
       supportedLocales: supportedLocales,
       theme: theme,

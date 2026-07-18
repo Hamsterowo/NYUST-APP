@@ -9,7 +9,6 @@ import 'login_form.dart';
 import 'credential_screen.dart';
 import 'change_password_screen.dart';
 import '../utils/pwa_interop.dart';
-import '../utils/settings_utils.dart';
 import 'privacy_policy_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,6 +36,53 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     _loadVersion();
+  }
+
+  /// 目前語言設定的顯示文字（跟隨系統／中文／English）。
+  String _currentLanguageLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = ref.watch(localeProvider);
+    if (locale == null) return l10n.languageSystem;
+    return locale.languageCode == 'en' ? l10n.languageEn : l10n.languageZh;
+  }
+
+  /// App 內語言選單：中文／English／跟隨系統。
+  /// 直接寫入 [localeProvider]（並持久化），不再跳系統設定，
+  /// Android 12 以下也能單獨切換 App 語言。
+  void _showLanguagePicker() {
+    final l10n = AppLocalizations.of(context);
+    final current = ref.read(localeProvider);
+
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        Widget option(String label, Locale? value) {
+          final selected = current?.languageCode == value?.languageCode;
+          return ListTile(
+            title: Text(label),
+            trailing: selected
+                ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                : null,
+            onTap: () {
+              ref.read(localeProvider.notifier).setLocale(value);
+              Navigator.of(ctx).pop();
+            },
+          );
+        }
+
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              option(l10n.languageZh, const Locale('zh')),
+              option(l10n.languageEn, const Locale('en')),
+              option(l10n.languageSystem, null),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _toggleGradeNotification(bool enabled) async {
@@ -398,12 +444,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       context,
                                     ).languageSetting,
                                   ),
+                                  subtitle: Text(
+                                    _currentLanguageLabel(context),
+                                  ),
                                   trailing: Icon(
                                     Icons.chevron_right,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  onTap: () =>
-                                      SettingsUtils.openLanguageSettings(),
+                                  onTap: _showLanguagePicker,
                                 ),
                                 const Divider(height: 1, indent: 56),
                                 ListTile(
