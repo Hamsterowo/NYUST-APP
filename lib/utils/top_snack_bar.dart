@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
+import '../router/app_router.dart';
 
 enum SnackBarType { success, error, info, warning }
 
 class _SnackBarItem {
   final String message;
   final SnackBarType type;
-  final BuildContext context;
 
-  _SnackBarItem({
-    required this.message,
-    required this.type,
-    required this.context,
-  });
+  _SnackBarItem({required this.message, required this.type});
 }
 
 final List<_SnackBarItem> _snackBarQueue = [];
 bool _isSnackBarShowing = false;
 VoidCallback? _currentDismissAction;
 
+/// 顯示頂部樣式的提示條。
+///
+/// Overlay 一律取自根 navigator（[rootNavigatorKey]），不把呼叫端的
+/// [BuildContext] 存進佇列跨非同步使用；`context` 參數僅保留簽名相容。
 void showTopSnackBar(
   BuildContext context,
   String message, {
@@ -26,9 +26,7 @@ void showTopSnackBar(
 }) {
   final resolvedType = isError ? SnackBarType.error : type;
 
-  _snackBarQueue.add(
-    _SnackBarItem(message: message, type: resolvedType, context: context),
-  );
+  _snackBarQueue.add(_SnackBarItem(message: message, type: resolvedType));
 
   // 避免佇列無限增長，若大於 2 個等待項目則丟棄最舊的
   if (_snackBarQueue.length > 2) {
@@ -48,13 +46,13 @@ void _showNextSnackBar() {
   _isSnackBarShowing = true;
   final item = _snackBarQueue.removeAt(0);
 
-  if (!item.context.mounted) {
+  final overlay = rootNavigatorKey.currentState?.overlay;
+  if (overlay == null) {
     _isSnackBarShowing = false;
     _showNextSnackBar();
     return;
   }
 
-  final overlay = Overlay.of(item.context);
   late OverlayEntry entry;
 
   entry = OverlayEntry(
