@@ -1176,20 +1176,19 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    time,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: subtitleColor,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      time,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: subtitleColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    child: Text(
+                    const SizedBox(height: 4),
+                    Text(
                       className,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -1197,10 +1196,10 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         color: titleColor,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               _buildLocationBadge(
                 context,
                 location: location,
