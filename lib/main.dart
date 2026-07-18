@@ -68,6 +68,9 @@ class MyApp extends ConsumerWidget {
     if (isDesktopWeb) {
       return MaterialApp(
         title: '雲科工具箱',
+        // 與 go_router 共用同一把根 navigator key（同一時間只會有一個
+        // MaterialApp 存在），讓 showTopSnackBar 一律能從根 navigator 取 Overlay。
+        navigatorKey: rootNavigatorKey,
         locale: locale,
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales,
