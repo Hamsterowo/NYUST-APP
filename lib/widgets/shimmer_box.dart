@@ -44,8 +44,7 @@ class _ShimmerBoxState extends State<ShimmerBox>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
+    final baseColor = Colors.grey.shade300;
 
     return AnimatedBuilder(
       animation: _animation,

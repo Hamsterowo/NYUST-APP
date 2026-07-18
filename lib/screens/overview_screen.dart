@@ -1119,11 +1119,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final isCurrent = state == 'current';
     final isPast = state == 'past';
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isCurrent
-        ? (isDark
-              ? const Color(0xFF0F2D2A)
-              : const Color.fromARGB(255, 172, 255, 251))
+        ? const Color.fromARGB(255, 172, 255, 251)
         : colorScheme.surface;
     final borderColor = isCurrent
         ? Colors.transparent
