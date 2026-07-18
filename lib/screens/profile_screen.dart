@@ -481,9 +481,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       Icons.science_outlined,
                                       color: Colors.orange,
                                     ),
-                                    title: const Text('【開發者】立即觸發一次背景檢查'),
-                                    subtitle: const Text(
-                                      '點擊後將會立刻在背景啟動一次排程任務進行測試',
+                                    title: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).devTriggerBgCheckTitle,
+                                    ),
+                                    subtitle: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).devTriggerBgCheckSubtitle,
                                     ),
                                     trailing: const Icon(Icons.play_arrow),
                                     onTap: () async {
@@ -494,7 +500,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       if (!context.mounted) return;
                                       showTopSnackBar(
                                         context,
-                                        '已註冊立即執行的背景任務，請查看通知！',
+                                        AppLocalizations.of(
+                                          context,
+                                        ).devTriggerBgCheckRegistered,
                                         type: SnackBarType.info,
                                       );
                                     },

@@ -901,4 +901,41 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get refresh => '重新整理';
+
+  @override
+  String get mapBlockActivityCenter => '活動中心區';
+
+  @override
+  String get mapBlockManagement => '管理學院';
+
+  @override
+  String get mapBlockEngineering => '工程學院';
+
+  @override
+  String get mapBlockHumanities => '人文科學院';
+
+  @override
+  String get mapBlockDesign => '設計學院';
+
+  @override
+  String get mapBlockSportsField => '體育場區';
+
+  @override
+  String get desktopNoticeTitle => '雲科工具箱 是為行動裝置設計的工具';
+
+  @override
+  String get desktopNoticeBody =>
+      '您目前正在使用電腦版網頁\n\n建議您使用行動裝置以獲得更好的使用體驗\n或點擊下方按鈕繼續使用';
+
+  @override
+  String get desktopContinue => '繼續前往';
+
+  @override
+  String get devTriggerBgCheckTitle => '【開發者】立即觸發一次背景檢查';
+
+  @override
+  String get devTriggerBgCheckSubtitle => '點擊後將會立刻在背景啟動一次排程任務進行測試';
+
+  @override
+  String get devTriggerBgCheckRegistered => '已註冊立即執行的背景任務，請查看通知！';
 }
