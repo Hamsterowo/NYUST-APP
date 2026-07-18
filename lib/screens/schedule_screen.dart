@@ -1,19 +1,17 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../models/schedule_event.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../repositories/refresh_outcome.dart';
 import '../services/server_time_service.dart';
+import '../utils/share_image/share_image.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import 'course_detail_screen.dart';
@@ -120,24 +118,15 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       if (byteData == null) return;
       final pngBytes = byteData.buffer.asUint8List();
 
-      if (kIsWeb) {
-        await Share.shareXFiles([
-          XFile.fromData(pngBytes, mimeType: 'image/png', name: 'schedule.png'),
-        ]);
-      } else {
-        final tempDir = await getTemporaryDirectory();
-        final file = await File('${tempDir.path}/schedule.png').create();
-        await file.writeAsBytes(pngBytes);
-
-        if (!mounted) return;
-        final box = context.findRenderObject() as RenderBox?;
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          sharePositionOrigin: box != null
-              ? box.localToGlobal(Offset.zero) & box.size
-              : null,
-        );
-      }
+      if (!mounted) return;
+      final box = context.findRenderObject() as RenderBox?;
+      await sharePngBytes(
+        pngBytes,
+        filename: 'schedule.png',
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : null,
+      );
     } catch (e) {
       if (kDebugMode) print("Share schedule error: $e");
       if (!mounted) return;
