@@ -603,6 +603,26 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                       transformationController: _transformationController,
                       labelOpacityAnimation: _labelOpacityAnimation,
                       buildings: _buildings,
+                      blockLabels: {
+                        'block-A': AppLocalizations.of(
+                          context,
+                        ).mapBlockActivityCenter,
+                        'block-management': AppLocalizations.of(
+                          context,
+                        ).mapBlockManagement,
+                        'block-engineering': AppLocalizations.of(
+                          context,
+                        ).mapBlockEngineering,
+                        'block-haas': AppLocalizations.of(
+                          context,
+                        ).mapBlockHumanities,
+                        'block-design': AppLocalizations.of(
+                          context,
+                        ).mapBlockDesign,
+                        'block-sports field': AppLocalizations.of(
+                          context,
+                        ).mapBlockSportsField,
+                      },
                     ),
                   ),
                 ),
