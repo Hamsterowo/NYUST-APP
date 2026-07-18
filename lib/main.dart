@@ -11,6 +11,7 @@ import 'services/background_service.dart';
 import 'services/notification_service.dart';
 import 'services/firebase_service.dart';
 import 'services/server_time_service.dart';
+import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,8 +56,10 @@ class MyApp extends ConsumerWidget {
 
     const supportedLocales = [Locale('zh'), Locale('en')];
 
+    // seed 用品牌 teal（同底部導覽列），避免 Material teal / Tailwind teal
+    // 兩種色相並存。
     final theme = ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.brandTeal),
       useMaterial3: true,
       fontFamily: 'SarasaGothic',
       visualDensity: VisualDensity.adaptivePlatformDensity,

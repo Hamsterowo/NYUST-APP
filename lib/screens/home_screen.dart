@@ -10,6 +10,7 @@ import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
 import '../services/update_service.dart';
+import '../theme/app_colors.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -118,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  static const Color _navActiveColor = Color(0xFF14B8A6);
+  static const Color _navActiveColor = AppColors.brandTeal;
 
   /// 底部導覽列的單一分頁（頂線滑動風格：圖示＋文字，選中變 teal，不放大）。
   Widget _buildNavItem({
