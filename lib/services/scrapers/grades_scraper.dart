@@ -7,8 +7,10 @@ import 'base_scraper.dart';
 class GradesScraper extends BaseScraper {
   GradesScraper(super.dio);
 
+  // 固定 lang=zh-TW：學年/學期標題正則（第X學年第Y學期）與課名解析依賴中文頁面，
+  // URL 已帶 lang= 時 LanguageInterceptor 不會再依 UI 語系覆寫。
   static const String gradesUrl =
-      'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx';
+      'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx?lang=zh-TW';
 
   /// 獲取歷年成績資料
   Future<Map<String, dynamic>> getGrades() async {
@@ -16,7 +18,7 @@ class GradesScraper extends BaseScraper {
       if (kDebugMode) print('GradesScraper: Fetching grades from $gradesUrl');
 
       await getWithRedirects(
-        'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Course/',
+        'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Course/?lang=zh-TW',
         options: Options(headers: commonHeaders),
       );
 
@@ -55,7 +57,7 @@ class GradesScraper extends BaseScraper {
       try {
         if (kDebugMode) print('GradesScraper: Fetching StudScoreRank.aspx...');
         final rankResponse = await getWithRedirects(
-          'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScoreRank.aspx',
+          'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScoreRank.aspx?lang=zh-TW',
           options: Options(headers: {...commonHeaders, 'Referer': gradesUrl}),
         );
 

@@ -8,8 +8,10 @@ import 'base_scraper.dart';
 class InfoScraper extends BaseScraper {
   InfoScraper(super.dio);
 
+  // 固定 lang=zh-TW：本類的欄位解析依賴中文標籤（姓名/系(所)別…），
+  // URL 已帶 lang= 時 LanguageInterceptor 不會再依 UI 語系覆寫。
   static const String infoPageUrl =
-      'https://webapp.yuntech.edu.tw/eStudent/EStud/Default.aspx';
+      'https://webapp.yuntech.edu.tw/eStudent/EStud/Default.aspx?lang=zh-TW';
 
   /// 獲取使用者基本資料
   Future<Map<String, dynamic>> getUserInfo() async {
@@ -39,7 +41,7 @@ class InfoScraper extends BaseScraper {
             'InfoScraper: Content seems missing, trying fallback to StudInfo.aspx...',
           );
         final studInfoRes = await getWithRedirects(
-          'https://webapp.yuntech.edu.tw/eStudent/EStud/StudInfo.aspx',
+          'https://webapp.yuntech.edu.tw/eStudent/EStud/StudInfo.aspx?lang=zh-TW',
           options: Options(headers: commonHeaders),
         );
         document = parseHtml(studInfoRes.data);
