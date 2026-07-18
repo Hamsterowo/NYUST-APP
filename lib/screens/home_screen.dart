@@ -133,35 +133,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final inactiveColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
 
     return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          ref.read(navIndexProvider.notifier).state = index;
-        },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? _navActiveColor : inactiveColor,
-                size: 24,
-              ),
-              const SizedBox(height: 4),
-              // 字重即時切換，不做動畫：AnimatedDefaultTextStyle 會對 fontWeight
-              // 做離散跳階插值，粗體中文較寬會造成切換時文字抖動／位移。
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'SarasaGothic',
-                  fontSize: 10,
-                  height: 1.0,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      // 裸 GestureDetector 沒有語意節點，螢幕閱讀器讀不出「已選取／可點擊」，
+      // 這裡補上與 NavigationBar 相同層級的語意資訊。
+      child: Semantics(
+        selected: isSelected,
+        button: true,
+        label: label,
+        // 子樹的 Text 會再產生一次相同文字的語意節點，排除以免重複朗讀。
+        excludeSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            ref.read(navIndexProvider.notifier).state = index;
+          },
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : inactiveIcon,
                   color: isSelected ? _navActiveColor : inactiveColor,
+                  size: 24,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                // 字重即時切換，不做動畫：AnimatedDefaultTextStyle 會對 fontWeight
+                // 做離散跳階插值，粗體中文較寬會造成切換時文字抖動／位移。
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'SarasaGothic',
+                    fontSize: 10,
+                    height: 1.0,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected ? _navActiveColor : inactiveColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
