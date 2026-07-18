@@ -1119,11 +1119,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final isCurrent = state == 'current';
     final isPast = state == 'past';
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isCurrent
-        ? (isDark
-              ? const Color(0xFF0F2D2A)
-              : const Color.fromARGB(255, 172, 255, 251))
+        ? const Color.fromARGB(255, 172, 255, 251)
         : colorScheme.surface;
     final borderColor = isCurrent
         ? Colors.transparent
@@ -1179,20 +1176,19 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    time,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: subtitleColor,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      time,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: subtitleColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    child: Text(
+                    const SizedBox(height: 4),
+                    Text(
                       className,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -1200,10 +1196,10 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         color: titleColor,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               _buildLocationBadge(
                 context,
                 location: location,

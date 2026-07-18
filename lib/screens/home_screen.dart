@@ -10,6 +10,7 @@ import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
 import '../services/update_service.dart';
+import '../theme/app_colors.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -118,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  static const Color _navActiveColor = Color(0xFF14B8A6);
+  static const Color _navActiveColor = AppColors.brandTeal;
 
   /// 底部導覽列的單一分頁（頂線滑動風格：圖示＋文字，選中變 teal，不放大）。
   Widget _buildNavItem({
@@ -133,35 +134,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final inactiveColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
 
     return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          ref.read(navIndexProvider.notifier).state = index;
-        },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? _navActiveColor : inactiveColor,
-                size: 24,
-              ),
-              const SizedBox(height: 4),
-              // 字重即時切換，不做動畫：AnimatedDefaultTextStyle 會對 fontWeight
-              // 做離散跳階插值，粗體中文較寬會造成切換時文字抖動／位移。
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'SarasaGothic',
-                  fontSize: 10,
-                  height: 1.0,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      // 裸 GestureDetector 沒有語意節點，螢幕閱讀器讀不出「已選取／可點擊」，
+      // 這裡補上與 NavigationBar 相同層級的語意資訊。
+      child: Semantics(
+        selected: isSelected,
+        button: true,
+        label: label,
+        // 子樹的 Text 會再產生一次相同文字的語意節點，排除以免重複朗讀。
+        excludeSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            ref.read(navIndexProvider.notifier).state = index;
+          },
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : inactiveIcon,
                   color: isSelected ? _navActiveColor : inactiveColor,
+                  size: 24,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                // 字重即時切換，不做動畫：AnimatedDefaultTextStyle 會對 fontWeight
+                // 做離散跳階插值，粗體中文較寬會造成切換時文字抖動／位移。
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'SarasaGothic',
+                    fontSize: 10,
+                    height: 1.0,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected ? _navActiveColor : inactiveColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -197,80 +209,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   /// 頂線滑動風格的底部導覽列（窄螢幕用）。
+  /// 高度固定 64，系統字級放太大會垂直溢位，故限制字級縮放上限。
   Widget _buildTopLineBar({
     required int currentIndex,
     required List<_NavItemData> navItems,
     required List<String> labels,
     required ColorScheme colorScheme,
   }) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.25),
-            width: 1,
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.2,
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.25),
+              width: 1,
+            ),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final n = navItems.length;
-          final itemWidth = constraints.maxWidth / n;
-          const lineFraction = 0.36;
-          final lineWidth = itemWidth * lineFraction;
-          final lineLeft =
-              currentIndex * itemWidth + (itemWidth - lineWidth) / 2;
-          return Stack(
-            children: [
-              // 滑到選中分頁上方的 teal 細線。自成一個繪製圖層，移動時只
-              // 重繪這條線，不牽動下方整排圖示／文字，避免動畫掉幀。
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 320),
-                curve: Curves.easeOutCubic,
-                top: 0,
-                left: lineLeft,
-                width: lineWidth,
-                height: 3,
-                child: const RepaintBoundary(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: _navActiveColor,
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(3),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final n = navItems.length;
+            final itemWidth = constraints.maxWidth / n;
+            const lineFraction = 0.36;
+            final lineWidth = itemWidth * lineFraction;
+            final lineLeft =
+                currentIndex * itemWidth + (itemWidth - lineWidth) / 2;
+            return Stack(
+              children: [
+                // 滑到選中分頁上方的 teal 細線。自成一個繪製圖層，移動時只
+                // 重繪這條線，不牽動下方整排圖示／文字，避免動畫掉幀。
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeOutCubic,
+                  top: 0,
+                  left: lineLeft,
+                  width: lineWidth,
+                  height: 3,
+                  child: const RepaintBoundary(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _navActiveColor,
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(3),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // 圖示列獨立成層：滑線移動時不會被連帶重繪。
-              RepaintBoundary(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < n; i++)
-                      _buildNavItem(
-                        index: i,
-                        activeIcon: navItems[i].active,
-                        inactiveIcon: navItems[i].inactive,
-                        label: labels[i],
-                        currentIndex: currentIndex,
-                        colorScheme: colorScheme,
-                      ),
-                  ],
+                // 圖示列獨立成層：滑線移動時不會被連帶重繪。
+                RepaintBoundary(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < n; i++)
+                        _buildNavItem(
+                          index: i,
+                          activeIcon: navItems[i].active,
+                          inactiveIcon: navItems[i].inactive,
+                          label: labels[i],
+                          currentIndex: currentIndex,
+                          colorScheme: colorScheme,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -453,39 +469,46 @@ class _StatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-      child: visible
-          ? Container(
-              width: double.infinity,
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: background,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: border, width: 1.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 16, color: foreground),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        fontFamily: 'SarasaGothic',
-                        fontSize: 12,
-                        color: foreground,
+    // 與底部導覽列同步限制字級縮放，避免超大字級把橫幅撐爆版面。
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.2,
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        child: visible
+            ? Container(
+                width: double.infinity,
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: border, width: 1.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 16, color: foreground),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        text,
+                        style: TextStyle(
+                          fontFamily: 'SarasaGothic',
+                          fontSize: 12,
+                          color: foreground,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          : const SizedBox(width: double.infinity),
+                  ],
+                ),
+              )
+            : const SizedBox(width: double.infinity),
+      ),
     );
   }
 }

@@ -483,6 +483,21 @@
       }
     }
   },
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "mapBlockActivityCenter": "Activity Center",
+  "mapBlockManagement": "College of Management",
+  "mapBlockEngineering": "College of Engineering",
+  "mapBlockHumanities": "College of Humanities",
+  "mapBlockDesign": "College of Design",
+  "mapBlockSportsField": "Sports Field",
+  "desktopNoticeTitle": "YunTool is designed for mobile devices",
+  "desktopNoticeBody": "You are currently viewing the desktop web version.\n\nFor the best experience, we recommend using a mobile device,\nor tap the button below to continue.",
+  "desktopContinue": "Continue",
+  "devTriggerBgCheckTitle": "[Dev] Trigger a background check now",
+  "devTriggerBgCheckSubtitle": "Immediately starts one scheduled background task for testing",
+  "devTriggerBgCheckRegistered": "One-off background task registered — check your notifications!",
+  "languageZh": "中文",
+  "languageEn": "English",
+  "languageSystem": "Follow system"
 }
 

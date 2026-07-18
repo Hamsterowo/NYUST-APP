@@ -1,21 +1,22 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../models/schedule_event.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../repositories/refresh_outcome.dart';
 import '../services/server_time_service.dart';
+import '../theme/course_palette.dart';
+import '../utils/share_image/share_image.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/fade_in_card.dart';
+import '../widgets/triangle_painter.dart';
 import 'course_detail_screen.dart';
 import 'map_screen.dart';
 
@@ -30,7 +31,7 @@ class ScheduleScreen extends ConsumerStatefulWidget {
 class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   bool _isMapMode = false;
   // 課程方塊淡入的「世代」：每次進到課表分頁或切換學期時 +1，
-  // 讓所有方塊重新以隨機錯開的方式淡入一次（見 [_FadeInCard]）。
+  // 讓所有方塊重新以隨機錯開的方式淡入一次（見 [FadeInCard]）。
   int _fadeGen = 0;
   final GlobalKey _repaintKey = GlobalKey();
 
@@ -54,11 +55,19 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     'L': [1270, 1320],
   };
 
+  /// 課表在首頁 `_screens` 中的分頁索引。
+  static const int _scheduleTabIndex = 1;
+
+  /// 五個分頁常駐於首頁 Stack，非當前分頁也會收到計時器回呼；
+  /// 只有課表分頁被選中時才需要重繪時間線。
+  bool get _isVisibleTab =>
+      widget.embed || ref.read(navIndexProvider) == _scheduleTabIndex;
+
   @override
   void initState() {
     super.initState();
     _timeLineTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
-      if (mounted) {
+      if (mounted && _isVisibleTab) {
         setState(() {});
       }
     });
@@ -112,24 +121,15 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       if (byteData == null) return;
       final pngBytes = byteData.buffer.asUint8List();
 
-      if (kIsWeb) {
-        await Share.shareXFiles([
-          XFile.fromData(pngBytes, mimeType: 'image/png', name: 'schedule.png'),
-        ]);
-      } else {
-        final tempDir = await getTemporaryDirectory();
-        final file = await File('${tempDir.path}/schedule.png').create();
-        await file.writeAsBytes(pngBytes);
-
-        if (!mounted) return;
-        final box = context.findRenderObject() as RenderBox?;
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          sharePositionOrigin: box != null
-              ? box.localToGlobal(Offset.zero) & box.size
-              : null,
-        );
-      }
+      if (!mounted) return;
+      final box = context.findRenderObject() as RenderBox?;
+      await sharePngBytes(
+        pngBytes,
+        filename: 'schedule.png',
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : null,
+      );
     } catch (e) {
       if (kDebugMode) print("Share schedule error: $e");
       if (!mounted) return;
@@ -183,9 +183,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final auth = ref.watch(authProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    // 從其他分頁切回課表分頁（index 1）時：重播課程方塊淡入，並確保學期清單已載入。
+    // 從其他分頁切回課表分頁時：重播課程方塊淡入、確保學期清單已載入；
+    // 這次 setState 也會立即重算時間線（背景時計時器不重繪，見 initState）。
     ref.listen<int>(navIndexProvider, (prev, next) {
-      if (next == 1 && prev != 1 && mounted) {
+      if (next == _scheduleTabIndex && prev != _scheduleTabIndex && mounted) {
         setState(() => _fadeGen++);
         ref.read(dataProvider).ensureScheduleSemesters();
       }
@@ -1025,7 +1026,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
 
     // 每次進到課表分頁或切換學期時（_fadeGen 改變），方塊以隨機錯開的方式淡入。
-    return _FadeInCard(generation: _fadeGen, child: card);
+    return FadeInCard(generation: _fadeGen, child: card);
   }
 
   /// 格線下方的「無安排上課時間」區塊：標題 + 一疊左側色條小卡片。
@@ -1260,72 +1261,6 @@ class _SemesterChip extends StatelessWidget {
             color: selected ? cs.onPrimary : cs.onSurfaceVariant,
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// 課程方塊的「進場淡入」包裝：以隨機的小延遲錯開，讓一整批方塊淡入時
-/// 有一點自然的隨機感。[generation] 改變時會重新播放一次淡入。
-class _FadeInCard extends StatefulWidget {
-  final Widget child;
-  final int generation;
-  const _FadeInCard({required this.child, required this.generation});
-
-  @override
-  State<_FadeInCard> createState() => _FadeInCardState();
-}
-
-class _FadeInCardState extends State<_FadeInCard> {
-  bool _visible = false;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _schedule();
-  }
-
-  @override
-  void didUpdateWidget(_FadeInCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.generation != widget.generation) {
-      setState(() => _visible = false);
-      _schedule();
-    }
-  }
-
-  void _schedule() {
-    _timer?.cancel();
-    // 0–200ms 的隨機延遲：一點點就好，但足以有錯落感。
-    final delayMs = Random().nextInt(200);
-    _timer = Timer(Duration(milliseconds: delayMs), () {
-      if (mounted) setState(() => _visible = true);
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // 隱藏（重播前的重置）要瞬間完成，只有「淡入」才用動畫時間，
-    // 否則重播時會先從 1.0 縮到 0.94 再長回來（看起來像先縮小再變大）。
-    final duration = _visible
-        ? const Duration(milliseconds: 200)
-        : Duration.zero;
-    return AnimatedScale(
-      scale: _visible ? 1.0 : 0.94,
-      duration: duration,
-      curve: Curves.easeOut,
-      child: AnimatedOpacity(
-        opacity: _visible ? 1.0 : 0.0,
-        duration: duration,
-        curve: Curves.easeOut,
-        child: widget.child,
       ),
     );
   }
@@ -1785,256 +1720,4 @@ class _ShareScheduleCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class CourseColor {
-  final Color backgroundColor;
-  final Color textColor;
-  final Color borderColor;
-
-  const CourseColor({
-    required this.backgroundColor,
-    required this.textColor,
-    required this.borderColor,
-  });
-}
-
-CourseColor getCourseColor(BuildContext context, int index) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-
-  // 淺色模式調色盤 (16種和諧柔和的粉彩莫蘭迪配色)
-  final lightPalette = [
-    // 1. 藍色
-    const CourseColor(
-      backgroundColor: Color(0xFFE0F2FE),
-      textColor: Color(0xFF0369A1),
-      borderColor: Color(0xFFBAE6FD),
-    ),
-    // 2. 綠色
-    const CourseColor(
-      backgroundColor: Color(0xFFDCFCE7),
-      textColor: Color(0xFF15803D),
-      borderColor: Color(0xFFBBF7D0),
-    ),
-    // 3. 粉紅
-    const CourseColor(
-      backgroundColor: Color(0xFFFCE7F3),
-      textColor: Color(0xFFBE185D),
-      borderColor: Color(0xFFFBCFE8),
-    ),
-    // 4. 黃橘
-    const CourseColor(
-      backgroundColor: Color(0xFFFEF3C7),
-      textColor: Color(0xFFB45309),
-      borderColor: Color(0xFFFDE68A),
-    ),
-    // 5. 紫色
-    const CourseColor(
-      backgroundColor: Color(0xFFF3E8FF),
-      textColor: Color(0xFF6B21A8),
-      borderColor: Color(0xFFE9D5FF),
-    ),
-    // 6. 青色
-    const CourseColor(
-      backgroundColor: Color(0xFFE0F7FA),
-      textColor: Color(0xFF006064),
-      borderColor: Color(0xFFB2EBF2),
-    ),
-    // 7. 靛藍
-    const CourseColor(
-      backgroundColor: Color(0xFFE0E7FF),
-      textColor: Color(0xFF4338CA),
-      borderColor: Color(0xFFC7D2FE),
-    ),
-    // 8. 橙色
-    const CourseColor(
-      backgroundColor: Color(0xFFFFEED9),
-      textColor: Color(0xFFC2410C),
-      borderColor: Color(0xFFFFD8A8),
-    ),
-    // 9. 薄荷綠
-    const CourseColor(
-      backgroundColor: Color(0xFFECFDF5),
-      textColor: Color(0xFF047857),
-      borderColor: Color(0xFFD1FAE5),
-    ),
-    // 10. 玫瑰紅
-    const CourseColor(
-      backgroundColor: Color(0xFFFFF1F2),
-      textColor: Color(0xFFBE123C),
-      borderColor: Color(0xFFFFE4E6),
-    ),
-    // 11. 琥珀黃
-    const CourseColor(
-      backgroundColor: Color(0xFFFEF9C3),
-      textColor: Color(0xFF854D0E),
-      borderColor: Color(0xFFFEF08A),
-    ),
-    // 12. 翠青綠
-    const CourseColor(
-      backgroundColor: Color(0xFFCCFBF1),
-      textColor: Color(0xFF0F766E),
-      borderColor: Color(0xFF99F6E4),
-    ),
-    // 13. 珊瑚紅
-    const CourseColor(
-      backgroundColor: Color(0xFFFFE4E6),
-      textColor: Color(0xFF9F1239),
-      borderColor: Color(0xFFFECDD3),
-    ),
-    // 14. 丁香紫
-    const CourseColor(
-      backgroundColor: Color(0xFFFAE8FF),
-      textColor: Color(0xFF86198F),
-      borderColor: Color(0xFFF5D0FE),
-    ),
-    // 15. 石頭褐
-    const CourseColor(
-      backgroundColor: Color(0xFFF5F5F4),
-      textColor: Color(0xFF44403C),
-      borderColor: Color(0xFFE7E5E4),
-    ),
-    // 16. 藍板岩
-    const CourseColor(
-      backgroundColor: Color(0xFFF1F5F9),
-      textColor: Color(0xFF334155),
-      borderColor: Color(0xFFE2E8F0),
-    ),
-  ];
-
-  // 深色模式調色盤 (16種和諧明亮的深暗莫蘭迪配色)
-  final darkPalette = [
-    // 1. 藍色
-    const CourseColor(
-      backgroundColor: Color(0xFF082F49),
-      textColor: Color(0xFF38BDF8),
-      borderColor: Color(0xFF0C4A6E),
-    ),
-    // 2. 綠色
-    const CourseColor(
-      backgroundColor: Color(0xFF064E3B),
-      textColor: Color(0xFF4ADE80),
-      borderColor: Color(0xFF065F46),
-    ),
-    // 3. 粉紅
-    const CourseColor(
-      backgroundColor: Color(0xFF500724),
-      textColor: Color(0xFFF472B6),
-      borderColor: Color(0xFF701A40),
-    ),
-    // 4. 黃橘
-    const CourseColor(
-      backgroundColor: Color(0xFF451A03),
-      textColor: Color(0xFFFBBF24),
-      borderColor: Color(0xFF78350F),
-    ),
-    // 5. 紫色
-    const CourseColor(
-      backgroundColor: Color(0xFF3B0764),
-      textColor: Color(0xFFC084FC),
-      borderColor: Color(0xFF581C87),
-    ),
-    // 6. 青色
-    const CourseColor(
-      backgroundColor: Color(0xFF083344),
-      textColor: Color(0xFF22D3EE),
-      borderColor: Color(0xFF155E75),
-    ),
-    // 7. 靛藍
-    const CourseColor(
-      backgroundColor: Color(0xFF1E1B4B),
-      textColor: Color(0xFF818CF8),
-      borderColor: Color(0xFF312E81),
-    ),
-    // 8. 橙色
-    const CourseColor(
-      backgroundColor: Color(0xFF431407),
-      textColor: Color(0xFFFB923C),
-      borderColor: Color(0xFF7C2D12),
-    ),
-    // 9. 薄荷綠
-    const CourseColor(
-      backgroundColor: Color(0xFF022C22),
-      textColor: Color(0xFF34D399),
-      borderColor: Color(0xFF064E3B),
-    ),
-    // 10. 玫瑰紅
-    const CourseColor(
-      backgroundColor: Color(0xFF4C0519),
-      textColor: Color(0xFFFDA4AF),
-      borderColor: Color(0xFF881337),
-    ),
-    // 11. 琥珀黃
-    const CourseColor(
-      backgroundColor: Color(0xFF3F2F00),
-      textColor: Color(0xFFFDE047),
-      borderColor: Color(0xFF713F12),
-    ),
-    // 12. 翠青綠
-    const CourseColor(
-      backgroundColor: Color(0xFF042F2E),
-      textColor: Color(0xFF2DD4BF),
-      borderColor: Color(0xFF115E59),
-    ),
-    // 13. 珊瑚紅
-    const CourseColor(
-      backgroundColor: Color(0xFF3B100E),
-      textColor: Color(0xFFFB7185),
-      borderColor: Color(0xFF6F1D1B),
-    ),
-    // 14. 丁香紫
-    const CourseColor(
-      backgroundColor: Color(0xFF300B3B),
-      textColor: Color(0xFFE879F9),
-      borderColor: Color(0xFF4A1054),
-    ),
-    // 15. 石頭褐
-    const CourseColor(
-      backgroundColor: Color(0xFF292524),
-      textColor: Color(0xFFD6D3D1),
-      borderColor: Color(0xFF44403C),
-    ),
-    // 16. 藍板岩
-    const CourseColor(
-      backgroundColor: Color(0xFF1E293B),
-      textColor: Color(0xFF94A3B8),
-      borderColor: Color(0xFF334155),
-    ),
-  ];
-
-  final palette = isDark ? darkPalette : lightPalette;
-  if (index < 0) {
-    return palette[0];
-  }
-  return palette[index % palette.length];
-}
-
-class TrianglePainter extends CustomPainter {
-  final Color color;
-  final bool isRight;
-
-  TrianglePainter({required this.color, required this.isRight});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    if (isRight) {
-      path.moveTo(0, 0);
-      path.lineTo(size.width, size.height / 2);
-      path.lineTo(0, size.height);
-    } else {
-      path.moveTo(size.width, 0);
-      path.lineTo(0, size.height / 2);
-      path.lineTo(size.width, size.height);
-    }
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

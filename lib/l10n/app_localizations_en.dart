@@ -930,4 +930,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refresh => 'Refresh';
+
+  @override
+  String get mapBlockActivityCenter => 'Activity Center';
+
+  @override
+  String get mapBlockManagement => 'College of Management';
+
+  @override
+  String get mapBlockEngineering => 'College of Engineering';
+
+  @override
+  String get mapBlockHumanities => 'College of Humanities';
+
+  @override
+  String get mapBlockDesign => 'College of Design';
+
+  @override
+  String get mapBlockSportsField => 'Sports Field';
+
+  @override
+  String get desktopNoticeTitle => 'YunTool is designed for mobile devices';
+
+  @override
+  String get desktopNoticeBody =>
+      'You are currently viewing the desktop web version.\n\nFor the best experience, we recommend using a mobile device,\nor tap the button below to continue.';
+
+  @override
+  String get desktopContinue => 'Continue';
+
+  @override
+  String get devTriggerBgCheckTitle => '[Dev] Trigger a background check now';
+
+  @override
+  String get devTriggerBgCheckSubtitle =>
+      'Immediately starts one scheduled background task for testing';
+
+  @override
+  String get devTriggerBgCheckRegistered =>
+      'One-off background task registered — check your notifications!';
+
+  @override
+  String get languageZh => '中文';
+
+  @override
+  String get languageEn => 'English';
+
+  @override
+  String get languageSystem => 'Follow system';
 }

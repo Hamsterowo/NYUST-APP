@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:workmanager/workmanager.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/providers.dart';
 import 'router/app_router.dart';
 import 'screens/desktop_screen.dart';
 import 'services/background_service.dart';
 import 'services/notification_service.dart';
 import 'services/firebase_service.dart';
 import 'services/server_time_service.dart';
+import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,10 +34,13 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // App 內語言覆寫（null = 跟隨系統）。
+    final locale = ref.watch(localeProvider);
+
     final isDesktopWeb =
         kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||
@@ -51,8 +56,10 @@ class MyApp extends StatelessWidget {
 
     const supportedLocales = [Locale('zh'), Locale('en')];
 
+    // seed 用品牌 teal（同底部導覽列），避免 Material teal / Tailwind teal
+    // 兩種色相並存。
     final theme = ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.brandTeal),
       useMaterial3: true,
       fontFamily: 'SarasaGothic',
       visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -61,6 +68,10 @@ class MyApp extends StatelessWidget {
     if (isDesktopWeb) {
       return MaterialApp(
         title: '雲科工具箱',
+        // 與 go_router 共用同一把根 navigator key（同一時間只會有一個
+        // MaterialApp 存在），讓 showTopSnackBar 一律能從根 navigator 取 Overlay。
+        navigatorKey: rootNavigatorKey,
+        locale: locale,
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales,
         theme: theme,
@@ -70,6 +81,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp.router(
       title: '雲科工具箱',
+      locale: locale,
       localizationsDelegates: localizationsDelegates,
       supportedLocales: supportedLocales,
       theme: theme,

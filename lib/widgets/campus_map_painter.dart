@@ -15,6 +15,10 @@ class CampusMapPainter extends CustomPainter {
   final Animation<double> labelOpacityAnimation;
   final List<MapBuilding> buildings;
 
+  /// 區塊 id（block-*）→ 本地化標籤。CustomPainter 沒有 BuildContext，
+  /// 由呼叫端以 AppLocalizations 建好傳入。
+  final Map<String, String> blockLabels;
+
   CampusMapPainter({
     required this.paths,
     required this.selectedId,
@@ -26,6 +30,7 @@ class CampusMapPainter extends CustomPainter {
     required this.transformationController,
     required this.labelOpacityAnimation,
     required this.buildings,
+    required this.blockLabels,
   }) : super(
          repaint: Listenable.merge([
            transformationController,
@@ -136,12 +141,7 @@ class CampusMapPainter extends CustomPainter {
                 : building.name.substring(0, math.min(4, building.name.length));
           }
         } else if (isBlock) {
-          if (data.id == 'block-A') labelText = '活動中心區';
-          if (data.id == 'block-management') labelText = '管理學院';
-          if (data.id == 'block-engineering') labelText = '工程學院';
-          if (data.id == 'block-haas') labelText = '人文科學院';
-          if (data.id == 'block-design') labelText = '設計學院';
-          if (data.id == 'block-sports field') labelText = '體育場區';
+          labelText = blockLabels[data.id] ?? '';
         }
 
         if (labelText.isNotEmpty) {
@@ -216,6 +216,7 @@ class CampusMapPainter extends CustomPainter {
         oldDelegate.baseBackgroundColor != baseBackgroundColor ||
         oldDelegate.labelOpacityAnimation.value !=
             labelOpacityAnimation.value ||
-        oldDelegate.buildings != buildings;
+        oldDelegate.buildings != buildings ||
+        oldDelegate.blockLabels != blockLabels;
   }
 }

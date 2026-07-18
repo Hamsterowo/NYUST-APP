@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
+import '../theme/app_colors.dart';
 import '../providers/providers.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
@@ -53,22 +55,20 @@ class DesktopScreen extends ConsumerWidget {
                 const Icon(
                   Icons.desktop_windows_outlined,
                   size: 120,
-                  color: Colors.teal,
+                  color: AppColors.brandTeal,
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  '雲科工具箱 是為行動裝置設計的工具',
+                  AppLocalizations.of(context).desktopNoticeTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal.shade800,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  '您目前正在使用電腦版網頁\n\n'
-                  '建議您使用行動裝置以獲得更好的使用體驗\n'
-                  '或點擊下方按鈕繼續使用',
+                  AppLocalizations.of(context).desktopNoticeBody,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     height: 1.6,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -79,7 +79,7 @@ class DesktopScreen extends ConsumerWidget {
                 FilledButton.icon(
                   onPressed: () => _continueToApp(context, ref),
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('繼續前往'),
+                  label: Text(AppLocalizations.of(context).desktopContinue),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,

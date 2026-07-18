@@ -1759,6 +1759,96 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'重新整理'**
   String get refresh;
+
+  /// No description provided for @mapBlockActivityCenter.
+  ///
+  /// In zh, this message translates to:
+  /// **'活動中心區'**
+  String get mapBlockActivityCenter;
+
+  /// No description provided for @mapBlockManagement.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理學院'**
+  String get mapBlockManagement;
+
+  /// No description provided for @mapBlockEngineering.
+  ///
+  /// In zh, this message translates to:
+  /// **'工程學院'**
+  String get mapBlockEngineering;
+
+  /// No description provided for @mapBlockHumanities.
+  ///
+  /// In zh, this message translates to:
+  /// **'人文科學院'**
+  String get mapBlockHumanities;
+
+  /// No description provided for @mapBlockDesign.
+  ///
+  /// In zh, this message translates to:
+  /// **'設計學院'**
+  String get mapBlockDesign;
+
+  /// No description provided for @mapBlockSportsField.
+  ///
+  /// In zh, this message translates to:
+  /// **'體育場區'**
+  String get mapBlockSportsField;
+
+  /// No description provided for @desktopNoticeTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'雲科工具箱 是為行動裝置設計的工具'**
+  String get desktopNoticeTitle;
+
+  /// No description provided for @desktopNoticeBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'您目前正在使用電腦版網頁\n\n建議您使用行動裝置以獲得更好的使用體驗\n或點擊下方按鈕繼續使用'**
+  String get desktopNoticeBody;
+
+  /// No description provided for @desktopContinue.
+  ///
+  /// In zh, this message translates to:
+  /// **'繼續前往'**
+  String get desktopContinue;
+
+  /// No description provided for @devTriggerBgCheckTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'【開發者】立即觸發一次背景檢查'**
+  String get devTriggerBgCheckTitle;
+
+  /// No description provided for @devTriggerBgCheckSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'點擊後將會立刻在背景啟動一次排程任務進行測試'**
+  String get devTriggerBgCheckSubtitle;
+
+  /// No description provided for @devTriggerBgCheckRegistered.
+  ///
+  /// In zh, this message translates to:
+  /// **'已註冊立即執行的背景任務，請查看通知！'**
+  String get devTriggerBgCheckRegistered;
+
+  /// No description provided for @languageZh.
+  ///
+  /// In zh, this message translates to:
+  /// **'中文'**
+  String get languageZh;
+
+  /// No description provided for @languageEn.
+  ///
+  /// In zh, this message translates to:
+  /// **'English'**
+  String get languageEn;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'跟隨系統'**
+  String get languageSystem;
 }
 
 class _AppLocalizationsDelegate

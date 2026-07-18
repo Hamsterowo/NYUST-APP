@@ -483,6 +483,21 @@
       }
     }
   },
-  "refresh": "重新整理"
+  "refresh": "重新整理",
+  "mapBlockActivityCenter": "活動中心區",
+  "mapBlockManagement": "管理學院",
+  "mapBlockEngineering": "工程學院",
+  "mapBlockHumanities": "人文科學院",
+  "mapBlockDesign": "設計學院",
+  "mapBlockSportsField": "體育場區",
+  "desktopNoticeTitle": "雲科工具箱 是為行動裝置設計的工具",
+  "desktopNoticeBody": "您目前正在使用電腦版網頁\n\n建議您使用行動裝置以獲得更好的使用體驗\n或點擊下方按鈕繼續使用",
+  "desktopContinue": "繼續前往",
+  "devTriggerBgCheckTitle": "【開發者】立即觸發一次背景檢查",
+  "devTriggerBgCheckSubtitle": "點擊後將會立刻在背景啟動一次排程任務進行測試",
+  "devTriggerBgCheckRegistered": "已註冊立即執行的背景任務，請查看通知！",
+  "languageZh": "中文",
+  "languageEn": "English",
+  "languageSystem": "跟隨系統"
 }
 
