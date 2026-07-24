@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:io';
 
 class SecureCookieStorage implements Storage {
   final _secureStorage = const FlutterSecureStorage();
@@ -38,16 +36,10 @@ class SecureCookieStorage implements Storage {
 
 late PersistCookieJar _globalCookieJar;
 
-Future<void> setupCookieManager(Dio dio) async {
-  // Clear any legacy unencrypted cookie files stored on disk
-  try {
-    final appDocDir = await getApplicationDocumentsDirectory();
-    final legacyCookiesDir = Directory("${appDocDir.path}/.cookies");
-    if (await legacyCookiesDir.exists()) {
-      await legacyCookiesDir.delete(recursive: true);
-    }
-  } catch (_) {}
-
+/// 同步掛上 Cookie 管理。[PersistCookieJar] 為同步建構、cookie 於首次請求時
+/// 才從 secure storage 惰性載入，因此可在 [ApiClient] 建構子直接呼叫，
+/// 保證第一筆請求送出前 interceptor 已在位（不會發生「沒帶 cookie 被誤判登出」）。
+void attachCookieManager(Dio dio) {
   _globalCookieJar = PersistCookieJar(storage: SecureCookieStorage());
   dio.interceptors.add(CookieManager(_globalCookieJar));
 }

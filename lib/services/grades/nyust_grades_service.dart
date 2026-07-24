@@ -16,13 +16,11 @@ class NyustGradesService implements GradesService {
 
   @override
   Future<Map<String, dynamic>> getGrades() async {
-    await _client.ensureInit();
     return _gradesScraper.getGrades();
   }
 
   @override
   Future<Map<String, dynamic>> getGraduation() async {
-    await _client.ensureInit();
     return _graduationScraper.getGraduation();
   }
 }

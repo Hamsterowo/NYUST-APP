@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-Future<void> setupCookieManager(Dio dio) async {
+void attachCookieManager(Dio dio) {
   throw UnsupportedError(
     'Cannot create a cookie manager without dart:html or dart:io',
   );

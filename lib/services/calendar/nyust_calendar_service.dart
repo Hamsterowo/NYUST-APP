@@ -16,13 +16,11 @@ class NyustCalendarService implements CalendarService {
     String year, {
     String? lang,
   }) async {
-    await _client.ensureInit();
     return _calendarScraper.getCalendarEvents(year, languageCode: lang);
   }
 
   @override
   Future<Map<String, dynamic>> getHolidays(int year, {String? lang}) async {
-    await _client.ensureInit();
     return _calendarScraper.getHolidays(year, languageCode: lang);
   }
 

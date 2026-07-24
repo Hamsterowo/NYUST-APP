@@ -21,7 +21,6 @@ class NyustAuthService implements AuthService {
 
   @override
   Future<Map<String, dynamic>> loginInit() async {
-    await _client.ensureInit();
     try {
       return await _ssoScraper.loginInit();
     } catch (e) {
@@ -36,7 +35,6 @@ class NyustAuthService implements AuthService {
     String captcha,
     String verificationToken,
   ) async {
-    await _client.ensureInit();
     try {
       return await _ssoScraper.login(
         username: username,
@@ -55,7 +53,6 @@ class NyustAuthService implements AuthService {
     String code,
     String verificationToken,
   ) async {
-    await _client.ensureInit();
     try {
       return await _ssoScraper.submitTotp(
         code: code,
@@ -71,7 +68,6 @@ class NyustAuthService implements AuthService {
     String oldPassword,
     String newPassword,
   ) async {
-    await _client.ensureInit();
     try {
       return await _ssoScraper.changePassword(
         oldPassword: oldPassword,
@@ -84,7 +80,6 @@ class NyustAuthService implements AuthService {
 
   @override
   Future<Map<String, dynamic>> getUserInfo() async {
-    await _client.ensureInit();
     return _infoScraper.getUserInfo();
   }
 

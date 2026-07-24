@@ -37,8 +37,6 @@ class ApiService {
     appApi.setMockMode(v);
   }
 
-  Future<void> init() => _client.init();
-
   /// 檢查是否有儲存的學校 Cookies
   Future<bool> hasSavedCookies() => _client.hasSavedCookies();
 

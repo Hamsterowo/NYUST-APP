@@ -23,7 +23,6 @@ void callbackDispatcher() {
           print('BackgroundService: Started grades checking task...');
 
         final apiService = ApiService();
-        await apiService.init();
 
         // 檢查是否有儲存的 cookies
         final hasCookies = await apiService.hasSavedCookies();

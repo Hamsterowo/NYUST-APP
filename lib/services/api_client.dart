@@ -17,9 +17,6 @@ import 'server_time_service.dart';
 class ApiClient {
   late final Dio dio;
 
-  bool _initStarted = false;
-  bool _isInit = false;
-
   /// Session 過期時的回呼（保留給上層設定）。
   VoidCallback? onSessionExpired;
 
@@ -34,35 +31,11 @@ class ApiClient {
         headers: {'Content-Type': 'application/json'},
       ),
     );
+    // 順序固定為 [LanguageInterceptor, CookieManager]。Cookie 管理於建構時
+    // 同步掛上（見 [attachCookieManager]），因此 client 一 new 出來即完全可用，
+    // 不再有 init()/ensureInit() 的非同步初始化時序。
     dio.interceptors.add(LanguageInterceptor());
-  }
-
-  /// 初始化 Cookie 管理。冪等，並防止並行重複初始化。
-  Future<void> init() async {
-    if (_isInit) return;
-    if (_initStarted) {
-      while (!_isInit) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-      return;
-    }
-    _initStarted = true;
-
-    try {
-      await cookie_mgr.setupCookieManager(dio);
-      _isInit = true;
-    } catch (e) {
-      if (kDebugMode) print('ApiClient: Init failed: $e');
-      _initStarted = false;
-      rethrow;
-    }
-  }
-
-  /// 確保已初始化後再繼續。
-  Future<void> ensureInit() async {
-    if (!_isInit) {
-      await init();
-    }
+    cookie_mgr.attachCookieManager(dio);
   }
 
   /// 檢查是否有儲存的學校 Cookies

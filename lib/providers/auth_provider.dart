@@ -68,7 +68,7 @@ class AuthProvider with ChangeNotifier {
   bool get mfaRequired => _mfaRequired;
 
   Future<void> init() async {
-    await _apiService.init();
+    // ApiClient 於建構時即備妥（cookie 管理已掛上），無需額外初始化步驟。
     // 載入先前保存的 App 端點 Bearer token（供在學證明等 /api 服務使用）。
     await _apiService.appApi.loadPersisted();
 
@@ -195,7 +195,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _apiService.logout();
-      await _apiService.init();
 
       final data = await _apiService.loginInit();
       if (data['success'] == true) {

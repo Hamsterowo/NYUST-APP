@@ -13,7 +13,6 @@ class NyustCourseService implements CourseService {
 
   @override
   Future<Map<String, dynamic>> getSchedule({String? semester}) async {
-    await _client.ensureInit();
     return _scheduleScraper.getSchedule(semester: semester);
   }
 
@@ -23,7 +22,6 @@ class NyustCourseService implements CourseService {
     required String semester,
     required String courseNo,
   }) async {
-    await _client.ensureInit();
     return _scheduleScraper.getCourseDetail(
       year: year,
       semester: semester,

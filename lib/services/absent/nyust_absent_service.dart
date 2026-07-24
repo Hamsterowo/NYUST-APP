@@ -13,7 +13,6 @@ class NyustAbsentService implements AbsentService {
 
   @override
   Future<Map<String, dynamic>> getAbsentRecords({String? semester}) async {
-    await _client.ensureInit();
     return _scraper.getAbsentRecords(semester: semester);
   }
 }
