@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../models/grade_report.dart';
 import '../utils/status_colors.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
@@ -8,13 +9,13 @@ import 'course_detail_screen.dart';
 
 // 歷年學期成績詳細資訊頁面（與學期成績分頁排版完全一致）
 class SemesterGradesDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> semester;
+  final SemesterGrades semester;
   const SemesterGradesDetailScreen({super.key, required this.semester});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final courses = semester['courses'] as List;
+    final courses = semester.courses;
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
 
     // 計算統計數據
@@ -24,8 +25,8 @@ class SemesterGradesDetailScreen extends StatelessWidget {
     double earnedCredits = 0;
 
     for (var course in courses) {
-      final credit = double.tryParse(course['credits']?.toString() ?? '0') ?? 0;
-      final scoreStr = course['score']?.toString() ?? '';
+      final credit = double.tryParse(course.credits) ?? 0;
+      final scoreStr = course.score;
       final score = double.tryParse(scoreStr);
       totalCredits += credit;
       bool isPass = false;
@@ -54,17 +55,13 @@ class SemesterGradesDetailScreen extends StatelessWidget {
         '${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}';
 
     final displayAverage = calculatedAverage;
-    final displayRank =
-        (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
-        ? "-"
-        : semester["summary"]["rank"];
+    final displayRank = semester.rank.isEmpty ? "-" : semester.rank;
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: AppLocalizations.of(context).gradesSemesterTitle(
-          semester["academic_year"]?.toString() ?? '',
-          semester["semester"]?.toString() ?? '',
-        ),
+        title: AppLocalizations.of(
+          context,
+        ).gradesSemesterTitle(semester.academicYear, semester.semester),
       ),
       body: ListView(
         // 底部加上系統導覽列高度，避免最後一列被系統列遮擋。
@@ -88,9 +85,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
               const SizedBox(width: 8),
               GradeStatCard(
                 label: AppLocalizations.of(context).gradesGPA,
-                value: (semester['summary']?['gpa']?.toString().isEmpty ?? true)
-                    ? "-"
-                    : semester['summary']['gpa'].toString(),
+                value: semester.gpa.isEmpty ? "-" : semester.gpa,
                 icon: Icons.grade_outlined,
                 colorScheme: colorScheme,
               ),
@@ -119,7 +114,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: courses.map<Widget>((course) {
-                final scoreRaw = course['score']?.toString() ?? '';
+                final scoreRaw = course.score;
                 final isEmpty = scoreRaw.isEmpty;
                 final score = isEmpty ? null : double.tryParse(scoreRaw);
                 final isPass =
@@ -138,14 +133,11 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                   if (scoreRaw == '不通過') displayScore = 'Fail';
                 }
 
-                final cName =
-                    (isEnglish &&
-                        course['name_en'] != null &&
-                        course['name_en'].toString().trim().isNotEmpty)
-                    ? course['name_en']
-                    : (course['name'] ?? 'Unknown Course');
+                final cName = (isEnglish && course.nameEn.trim().isNotEmpty)
+                    ? course.nameEn
+                    : (course.name.isNotEmpty ? course.name : 'Unknown Course');
 
-                final typeZh = course['type'] ?? '';
+                final typeZh = course.type;
                 String type = typeZh;
                 if (isEnglish) {
                   if (typeZh == '必修') {
@@ -159,16 +151,15 @@ class SemesterGradesDetailScreen extends StatelessWidget {
 
                 return InkWell(
                   onTap: () {
-                    final courseNo = course['courseNo']?.toString();
-                    if (courseNo != null &&
-                        courseNo.isNotEmpty &&
-                        semester['academic_year'] != null) {
+                    final courseNo = course.courseNo;
+                    if (courseNo.isNotEmpty &&
+                        semester.academicYear.isNotEmpty) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => CourseDetailScreen(
-                            year: semester['academic_year'].toString(),
-                            semester: semester['semester'].toString(),
+                            year: semester.academicYear,
+                            semester: semester.semester,
                             courseNo: courseNo,
                             courseName: cName,
                           ),
@@ -241,9 +232,7 @@ class SemesterGradesDetailScreen extends StatelessWidget {
                                     Text(
                                       AppLocalizations.of(
                                         context,
-                                      ).courseCreditsFormat(
-                                        course["credits"]?.toString() ?? '0',
-                                      ),
+                                      ).courseCreditsFormat(course.credits),
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: colorScheme.onSurfaceVariant,

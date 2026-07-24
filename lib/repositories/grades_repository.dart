@@ -2,14 +2,16 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../database/database.dart';
+import '../models/grade_report.dart';
 import '../services/api_service.dart';
 import 'refresh_outcome.dart';
 
 /// 成績資料的 Repository：網路 → 正規化寫入 Drift → 由 Drift stream 推給 UI。
 ///
-/// - [watchGrades] 回傳 Stream，DB 一有變動就重建與 scraper 相同結構的 Map。
+/// - [watchGrades] 回傳 `Stream<GradeReport?>`，DB 一有變動就重建型別化模型。
 /// - [refresh] 依 TTL 決定是否重新抓取；成功後正規化寫入資料表，並同步更新
-///   `cache_grades`（給背景成績檢查 isolate 比對用）。
+///   `cache_grades`（給背景成績檢查 isolate 比對用，以 [GradeReport.toJson] 的
+///   wire 形狀持久化，維持與 `grades_comparator` 相容）。
 ///
 /// 透過 [ApiService] facade 取得資料，使 demo/除錯模式的切換（於執行期）
 /// 在每次呼叫時即時生效。
@@ -23,8 +25,11 @@ class GradesRepository {
 
   GradesRepository(this._db, this._api);
 
-  Stream<Map<String, dynamic>?> watchGrades() {
-    return _db.select(_db.gradesSemesters).watch().asyncMap((_) => _buildMap());
+  Stream<GradeReport?> watchGrades() {
+    return _db
+        .select(_db.gradesSemesters)
+        .watch()
+        .asyncMap((_) => _buildReport());
   }
 
   /// 依 TTL 抓取成績。回傳 [RefreshOutcome]，失敗時含原因分類（離線/服務異常）。
@@ -32,12 +37,16 @@ class GradesRepository {
   Future<RefreshOutcome> refresh({bool force = false}) async {
     if (!force && !await _isStale()) return RefreshOutcome.success;
 
-    final resp = await _api.getGrades();
-    if (resp['success'] != true) return classifyRefreshFailure(resp);
+    final result = await _api.getGrades();
+    if (!result.status.isSuccess) return result.status;
 
-    await _write(resp);
+    final report = result.data!;
+    await _write(report);
     try {
-      await _secureStorage.write(key: 'cache_grades', value: jsonEncode(resp));
+      await _secureStorage.write(
+        key: 'cache_grades',
+        value: jsonEncode(report.toJson()),
+      );
     } catch (_) {}
     return RefreshOutcome.success;
   }
@@ -64,7 +73,7 @@ class GradesRepository {
     return DateTime.now().difference(meta.updatedAt) > _ttl;
   }
 
-  Future<Map<String, dynamic>?> _buildMap() async {
+  Future<GradeReport?> _buildReport() async {
     final sems = await (_db.select(
       _db.gradesSemesters,
     )..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).get();
@@ -127,23 +136,23 @@ class GradesRepository {
       };
     }
 
-    return {'success': true, 'grades': grades, 'cumulative': cumulative};
+    return GradeReport.fromJson({
+      'success': true,
+      'grades': grades,
+      'cumulative': cumulative,
+    });
   }
 
-  Future<void> _write(Map<String, dynamic> resp) async {
-    final List grades = (resp['grades'] as List?) ?? [];
-    final cumulative = resp['cumulative'];
-
+  Future<void> _write(GradeReport report) async {
     await _db.transaction(() async {
       await _db.delete(_db.gradesCourses).go();
       await _db.delete(_db.gradesSemesters).go();
       await _db.delete(_db.gradesCumulative).go();
 
-      for (var i = 0; i < grades.length; i++) {
-        final g = grades[i] as Map;
-        final ay = _toInt(g['academic_year']);
-        final sem = _toInt(g['semester']);
-        final summary = (g['summary'] as Map?) ?? const {};
+      for (var i = 0; i < report.semesters.length; i++) {
+        final g = report.semesters[i];
+        final ay = _toInt(g.academicYear);
+        final sem = _toInt(g.semester);
 
         await _db
             .into(_db.gradesSemesters)
@@ -152,20 +161,19 @@ class GradesRepository {
                 academicYear: ay,
                 semester: sem,
                 sortOrder: Value(i),
-                semesterTitle: Value(_s(g['semester_title'])),
-                averageScore: Value(_s(summary['average_score'])),
-                rank: Value(_s(summary['rank'])),
-                gpa: Value(_s(summary['gpa'])),
-                conduct: Value(_s(summary['conduct'])),
-                attemptedCredits: Value(_s(summary['attempted_credits'])),
-                earnedCredits: Value(_s(summary['earned_credits'])),
+                semesterTitle: Value(g.semesterTitle),
+                averageScore: Value(g.averageScore),
+                rank: Value(g.rank),
+                gpa: Value(g.gpa),
+                conduct: Value(g.conduct),
+                attemptedCredits: Value(g.attemptedCredits),
+                earnedCredits: Value(g.earnedCredits),
               ),
               mode: InsertMode.insertOrReplace,
             );
 
-        final courses = (g['courses'] as List?) ?? const [];
-        for (var j = 0; j < courses.length; j++) {
-          final c = courses[j] as Map;
+        for (var j = 0; j < g.courses.length; j++) {
+          final c = g.courses[j];
           await _db
               .into(_db.gradesCourses)
               .insert(
@@ -173,31 +181,32 @@ class GradesRepository {
                   academicYear: ay,
                   semester: sem,
                   sortOrder: Value(j),
-                  code: Value(_s(c['code'])),
-                  courseNo: Value(_s(c['courseNo'])),
-                  name: Value(_s(c['name'])),
-                  nameEn: Value(_s(c['name_en'] ?? c['nameEn'])),
-                  type: Value(_s(c['type'])),
-                  credits: Value(_s(c['credits'])),
-                  score: Value(_s(c['score'])),
-                  syllabusUrl: Value(_s(c['syllabusUrl'])),
+                  code: Value(c.code),
+                  courseNo: Value(c.courseNo),
+                  name: Value(c.name),
+                  nameEn: Value(c.nameEn),
+                  type: Value(c.type),
+                  credits: Value(c.credits),
+                  score: Value(c.score),
+                  syllabusUrl: Value(c.syllabusUrl),
                 ),
               );
         }
       }
 
-      if (cumulative is Map) {
+      final cumulative = report.cumulative;
+      if (cumulative != null) {
         await _db
             .into(_db.gradesCumulative)
             .insert(
               GradesCumulativeCompanion.insert(
                 id: const Value(0),
-                attemptedCredits: Value(_s(cumulative['attempted_credits'])),
-                earnedCredits: Value(_s(cumulative['earned_credits'])),
-                average: Value(_s(cumulative['average'])),
-                rank: Value(_s(cumulative['rank'])),
-                totalStudents: Value(_s(cumulative['total_students'])),
-                gpa: Value(_s(cumulative['gpa'])),
+                attemptedCredits: Value(cumulative.attemptedCredits),
+                earnedCredits: Value(cumulative.earnedCredits),
+                average: Value(cumulative.average),
+                rank: Value(cumulative.rank),
+                totalStudents: Value(cumulative.totalStudents),
+                gpa: Value(cumulative.gpa),
               ),
               mode: InsertMode.insertOrReplace,
             );
@@ -215,10 +224,5 @@ class GradesRepository {
     });
   }
 
-  static int _toInt(dynamic v) {
-    if (v is int) return v;
-    return int.tryParse(v?.toString() ?? '') ?? 0;
-  }
-
-  static String _s(dynamic v) => v?.toString() ?? '';
+  static int _toInt(String v) => int.tryParse(v) ?? 0;
 }

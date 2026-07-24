@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:workmanager/workmanager.dart';
 import 'api_service.dart';
 import 'notification_service.dart';
+import 'scrape_result.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/grades_comparator.dart';
 
@@ -49,11 +50,8 @@ void callbackDispatcher() {
         final result = await apiService.getGrades();
 
         // 如果 Session 逾期，或者抓取失敗
-        if (result['success'] != true) {
-          final isExpired =
-              result['isExpired'] == true ||
-              result['message']?.toString().contains('Session expired') == true;
-          if (isExpired) {
+        if (!result.status.isSuccess) {
+          if (result.status == RefreshOutcome.sessionExpired) {
             // 登入已過期：根據使用者最新要求，靜默處理，不發通知直接結束
             if (kDebugMode)
               print('BackgroundService: Session expired. Exiting silently.');
@@ -61,10 +59,13 @@ void callbackDispatcher() {
           }
           if (kDebugMode)
             print(
-              'BackgroundService: Failed to fetch grades: ${result['message']}',
+              'BackgroundService: Failed to fetch grades: ${result.status}',
             );
           return false; // 回傳 false 使 Workmanager 依原則重試
         }
+
+        // 成功：轉成與 grades_comparator / cache_grades 相容的 wire 形狀。
+        final newData = result.data!.toJson();
 
         // 抓取成功，比對新舊成績
         const secureStorage = FlutterSecureStorage();
@@ -80,7 +81,11 @@ void callbackDispatcher() {
           );
           final l10n = lookupAppLocalizations(Locale(isEnglish ? 'en' : 'zh'));
 
-          final changes = GradesComparator.compare(oldData, result, l10n: l10n);
+          final changes = GradesComparator.compare(
+            oldData,
+            newData,
+            l10n: l10n,
+          );
 
           if (changes.isNotEmpty) {
             if (kDebugMode)
@@ -106,7 +111,7 @@ void callbackDispatcher() {
             // 更新本地快取成績資料，確保下次不會重複發送相同通知
             await secureStorage.write(
               key: 'cache_grades',
-              value: jsonEncode(result),
+              value: jsonEncode(newData),
             );
           } else {
             if (kDebugMode)
@@ -120,7 +125,7 @@ void callbackDispatcher() {
             );
           await secureStorage.write(
             key: 'cache_grades',
-            value: jsonEncode(result),
+            value: jsonEncode(newData),
           );
         }
       } catch (e) {

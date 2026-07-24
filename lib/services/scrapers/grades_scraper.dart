@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../../models/grade_report.dart';
 import '../../utils/network_error.dart';
+import '../scrape_result.dart';
 import 'base_scraper.dart';
 
 /// 處理成績資料爬取的類別
@@ -13,7 +15,7 @@ class GradesScraper extends BaseScraper {
       'https://webapp.yuntech.edu.tw/WebNewCAS/StudentFile/Score/StudScores.aspx?lang=zh-TW';
 
   /// 獲取歷年成績資料
-  Future<Map<String, dynamic>> getGrades() async {
+  Future<ScrapeResult<GradeReport>> getGrades() async {
     try {
       if (kDebugMode) print('GradesScraper: Fetching grades from $gradesUrl');
 
@@ -40,13 +42,7 @@ class GradesScraper extends BaseScraper {
         );
 
       if (response.data.toString().contains('Login.aspx')) {
-        // isExpired 保留給背景成績檢查 isolate（background_service）相容使用。
-        return {
-          'success': false,
-          'status': 'session_expired',
-          'message': 'Session expired',
-          'isExpired': true,
-        };
+        return ScrapeResult<GradeReport>.failure(RefreshOutcome.sessionExpired);
       }
 
       final List<Map<String, dynamic>> gradesData = [];
@@ -287,25 +283,22 @@ class GradesScraper extends BaseScraper {
       if (kDebugMode)
         print('GradesScraper: Found ${gradesData.length} semesters');
 
-      return {
-        'success': true,
-        'grades': gradesData,
-        'cumulative': cumulativeData.isNotEmpty ? cumulativeData : null,
-      };
+      return ScrapeResult.success(
+        GradeReport.fromJson({
+          'success': true,
+          'grades': gradesData,
+          'cumulative': cumulativeData.isNotEmpty ? cumulativeData : null,
+        }),
+      );
     } catch (e) {
-      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      // 先判離線再歸類其他錯誤；訊息僅供除錯 log，不進 UI。
       if (isNetworkError(e)) {
-        return {
-          'success': false,
-          'status': 'network_error',
-          'message': 'Network error fetching grades: $e',
-        };
+        if (kDebugMode)
+          print('GradesScraper: Network error fetching grades: $e');
+        return ScrapeResult<GradeReport>.failure(RefreshOutcome.networkError);
       }
-      return {
-        'success': false,
-        'status': 'error',
-        'message': 'Failed to fetch grades: $e',
-      };
+      if (kDebugMode) print('GradesScraper: Failed to fetch grades: $e');
+      return ScrapeResult<GradeReport>.failure(RefreshOutcome.serviceError);
     }
   }
 }

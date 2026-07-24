@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yun_tool/services/scrape_result.dart';
 import 'package:yun_tool/services/scrapers/grades_scraper.dart';
 
 import 'fake_adapter.dart';
@@ -24,44 +25,42 @@ void main() {
     test('parses semesters, courses and rank summary', () async {
       final result = await GradesScraper(fakeGradesDio()).getGrades();
 
-      expect(result['success'], isTrue);
-      final grades = result['grades'] as List;
-      expect(grades, hasLength(1));
+      expect(result.isSuccess, isTrue);
+      final report = result.data!;
+      expect(report.semesters, hasLength(1));
 
-      final semester = grades.first as Map;
-      expect(semester['academic_year'], 113);
-      expect(semester['semester'], 1);
+      final semester = report.semesters.first;
+      expect(semester.academicYear, '113');
+      expect(semester.semester, '1');
 
-      final courses = semester['courses'] as List;
-      expect(courses, hasLength(2));
-      final first = courses.first as Map;
-      expect(first['code'], 'CS101-01');
-      expect(first['name'], '資料結構');
-      expect(first['name_en'], 'Data Structures');
-      expect(first['type'], '必修');
-      expect(first['credits'], '3');
-      expect(first['score'], '92');
-      expect(first['courseNo'], 'CS101');
+      expect(semester.courses, hasLength(2));
+      final first = semester.courses.first;
+      expect(first.code, 'CS101-01');
+      expect(first.name, '資料結構');
+      expect(first.nameEn, 'Data Structures');
+      expect(first.type, '必修');
+      expect(first.credits, '3');
+      expect(first.score, '92');
+      expect(first.courseNo, 'CS101');
       expect(
-        first['syllabusUrl'],
+        first.syllabusUrl,
         startsWith('https://webapp.yuntech.edu.tw/WebNewCAS/'),
       );
 
-      final summary = semester['summary'] as Map;
-      expect(summary['average_score'], '85.2');
-      expect(summary['rank'], '5 / 50');
-      expect(summary['gpa'], '3.8');
-      expect(summary['conduct'], '90');
-      expect(summary['attempted_credits'], '20');
-      expect(summary['earned_credits'], '18');
+      expect(semester.averageScore, '85.2');
+      expect(semester.rank, '5 / 50');
+      expect(semester.gpa, '3.8');
+      expect(semester.conduct, '90');
+      expect(semester.attemptedCredits, '20');
+      expect(semester.earnedCredits, '18');
 
-      final cumulative = result['cumulative'] as Map;
-      expect(cumulative['attempted_credits'], '40');
-      expect(cumulative['earned_credits'], '38');
-      expect(cumulative['average'], '84.5');
-      expect(cumulative['rank'], '6');
-      expect(cumulative['total_students'], '50');
-      expect(cumulative['gpa'], '3.75');
+      final cumulative = report.cumulative!;
+      expect(cumulative.attemptedCredits, '40');
+      expect(cumulative.earnedCredits, '38');
+      expect(cumulative.average, '84.5');
+      expect(cumulative.rank, '6');
+      expect(cumulative.totalStudents, '50');
+      expect(cumulative.gpa, '3.75');
     });
 
     test('reports session_expired when redirected to the login page', () async {
@@ -72,9 +71,9 @@ void main() {
 
       final result = await GradesScraper(dio).getGrades();
 
-      expect(result['success'], isFalse);
-      expect(result['status'], 'session_expired');
-      expect(result['isExpired'], isTrue);
+      expect(result.isSuccess, isFalse);
+      expect(result.status, RefreshOutcome.sessionExpired);
+      expect(result.data, isNull);
     });
 
     test('reports network_error when the connection fails', () async {
@@ -88,8 +87,8 @@ void main() {
 
       final result = await GradesScraper(dio).getGrades();
 
-      expect(result['success'], isFalse);
-      expect(result['status'], 'network_error');
+      expect(result.isSuccess, isFalse);
+      expect(result.status, RefreshOutcome.networkError);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
+import '../models/grade_report.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../repositories/refresh_outcome.dart';
@@ -208,11 +209,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
     return _buildGradesList(data.gradesData!, colorScheme);
   }
 
-  Widget _buildGradesList(
-    Map<String, dynamic> gradesData,
-    ColorScheme colorScheme,
-  ) {
-    final List originalGrades = gradesData['grades'] ?? [];
+  Widget _buildGradesList(GradeReport gradesData, ColorScheme colorScheme) {
+    final List<SemesterGrades> originalGrades = gradesData.semesters;
 
     if (originalGrades.isEmpty) {
       return Center(
@@ -240,17 +238,15 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
 
     // 解析資料庫中最新一學期的學年與學期
     final latestSemester = originalGrades.last;
-    final int latestYear =
-        int.tryParse(latestSemester['academic_year']?.toString() ?? '0') ?? 0;
-    final int latestSem =
-        int.tryParse(latestSemester['semester']?.toString() ?? '0') ?? 0;
+    final int latestYear = int.tryParse(latestSemester.academicYear) ?? 0;
+    final int latestSem = int.tryParse(latestSemester.semester) ?? 0;
     final latestSemesterIndex = latestYear * 2 + latestSem;
 
     // 計算學期差距，如果差距大於 1，代表最新成績學期已經是過去的歷史（使用者可能已畢業或長期休學）
     final diff = currentSemesterIndex - latestSemesterIndex;
     final isGraduatedOrInactive = diff > 1;
 
-    List grades = [];
+    List<SemesterGrades> grades = [];
 
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     if (_selectedSegment == 0) {
@@ -283,7 +279,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
       } else {
         // 在學學生：學期成績分頁直接呈現「直觀成績儀表板」
         final semester = originalGrades.last;
-        final courses = semester['courses'] as List;
+        final courses = semester.courses;
 
         // 計算統計數據
         double totalWeightedScore = 0;
@@ -292,9 +288,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
         double earnedCredits = 0;
 
         for (var course in courses) {
-          final credit =
-              double.tryParse(course['credits']?.toString() ?? '0') ?? 0;
-          final scoreStr = course['score']?.toString() ?? '';
+          final credit = double.tryParse(course.credits) ?? 0;
+          final scoreStr = course.score;
           final score = double.tryParse(scoreStr);
           totalCredits += credit;
           bool isPass = false;
@@ -323,10 +318,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
             '${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}';
 
         final displayAverage = calculatedAverage;
-        final displayRank =
-            (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
-            ? "-"
-            : semester["summary"]["rank"];
+        final displayRank = semester.rank.isEmpty ? "-" : semester.rank;
 
         return ListView(
           key: const ValueKey('semester_grades_dashboard'),
@@ -348,8 +340,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                   const SizedBox(width: 8),
                   Text(
                     AppLocalizations.of(context).gradesSemesterTitle(
-                      semester["academic_year"]?.toString() ?? '',
-                      semester["semester"]?.toString() ?? '',
+                      semester.academicYear,
+                      semester.semester,
                     ),
                     style: TextStyle(
                       fontSize: 16,
@@ -373,10 +365,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                 const SizedBox(width: 8),
                 GradeStatCard(
                   label: AppLocalizations.of(context).gradesGPA,
-                  value:
-                      (semester['summary']?['gpa']?.toString().isEmpty ?? true)
-                      ? "-"
-                      : semester['summary']['gpa'].toString(),
+                  value: semester.gpa.isEmpty ? "-" : semester.gpa,
                   icon: Icons.grade_outlined,
                   colorScheme: colorScheme,
                 ),
@@ -405,7 +394,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
               clipBehavior: Clip.antiAlias,
               child: Column(
                 children: courses.map<Widget>((course) {
-                  final scoreRaw = course['score']?.toString() ?? '';
+                  final scoreRaw = course.score;
                   final isEmpty = scoreRaw.isEmpty;
                   final score = isEmpty ? null : double.tryParse(scoreRaw);
                   final isPass =
@@ -424,14 +413,13 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                     if (scoreRaw == '不通過') displayScore = 'Fail';
                   }
 
-                  final cName =
-                      (isEnglish &&
-                          course['name_en'] != null &&
-                          course['name_en'].toString().trim().isNotEmpty)
-                      ? course['name_en']
-                      : (course['name'] ?? 'Unknown Course');
+                  final cName = (isEnglish && course.nameEn.trim().isNotEmpty)
+                      ? course.nameEn
+                      : (course.name.isNotEmpty
+                            ? course.name
+                            : 'Unknown Course');
 
-                  final typeZh = course['type'] ?? '';
+                  final typeZh = course.type;
                   String type = typeZh;
                   if (isEnglish) {
                     if (typeZh == '必修') {
@@ -445,16 +433,15 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
 
                   return InkWell(
                     onTap: () {
-                      final courseNo = course['courseNo']?.toString();
-                      if (courseNo != null &&
-                          courseNo.isNotEmpty &&
-                          semester['academic_year'] != null) {
+                      final courseNo = course.courseNo;
+                      if (courseNo.isNotEmpty &&
+                          semester.academicYear.isNotEmpty) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CourseDetailScreen(
-                              year: semester['academic_year'].toString(),
-                              semester: semester['semester'].toString(),
+                              year: semester.academicYear,
+                              semester: semester.semester,
                               courseNo: courseNo,
                               courseName: cName,
                             ),
@@ -528,9 +515,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                                       Text(
                                         AppLocalizations.of(
                                           context,
-                                        ).courseCreditsFormat(
-                                          course["credits"]?.toString() ?? '0',
-                                        ),
+                                        ).courseCreditsFormat(course.credits),
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: colorScheme.onSurfaceVariant,
@@ -598,20 +583,22 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
       }
     }
 
-    final cumulative = gradesData['cumulative'] as Map<String, dynamic>?;
+    final cumulative = gradesData.cumulative;
     Widget? cumulativeDashboard;
     if (cumulative != null) {
-      final cumAverage = cumulative['average']?.toString() ?? '-';
-      final cumGPA = cumulative['gpa']?.toString() ?? '-';
-      final cumRank = cumulative['rank']?.toString() ?? '';
-      final cumTotal = cumulative['total_students']?.toString() ?? '';
+      final cumAverage = cumulative.average.isNotEmpty
+          ? cumulative.average
+          : '-';
+      final cumGPA = cumulative.gpa.isNotEmpty ? cumulative.gpa : '-';
+      final cumRank = cumulative.rank;
+      final cumTotal = cumulative.totalStudents;
       final cumRankText = cumRank.isNotEmpty && cumTotal.isNotEmpty
           ? '$cumRank / $cumTotal'
           : cumRank.isNotEmpty
           ? cumRank
           : '-';
-      final cumCredits = cumulative['earned_credits']?.toString() ?? '';
-      final cumAttempted = cumulative['attempted_credits']?.toString() ?? '';
+      final cumCredits = cumulative.earnedCredits;
+      final cumAttempted = cumulative.attemptedCredits;
       final cumCreditsText = cumCredits.isNotEmpty && cumAttempted.isNotEmpty
           ? '$cumCredits/$cumAttempted'
           : cumCredits.isNotEmpty
@@ -681,9 +668,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
 
         final semesterIndex = cumulativeDashboard != null ? index - 1 : index;
         final semester = grades[semesterIndex];
-        final courses = semester['courses'] as List;
-        final semesterKey =
-            '${semester["academic_year"]}-${semester["semester"]}';
+        final courses = semester.courses;
+        final semesterKey = '${semester.academicYear}-${semester.semester}';
 
         if (!_expandedStates.containsKey(semesterKey)) {
           final isLastSemester = _selectedSegment == 0;
@@ -696,9 +682,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
         double earnedCredits = 0;
 
         for (var course in courses) {
-          final credit =
-              double.tryParse(course['credits']?.toString() ?? '0') ?? 0;
-          final scoreStr = course['score']?.toString() ?? '';
+          final credit = double.tryParse(course.credits) ?? 0;
+          final scoreStr = course.score;
           final score = double.tryParse(scoreStr);
           totalCredits += credit;
           bool isPass = false;
@@ -726,24 +711,20 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
         final passRate =
             '${formatCredit(earnedCredits)}/${formatCredit(totalCredits)}';
 
-        final apiAverage = semester['summary']?['average_score']?.toString();
-        final displayAverage =
-            (apiAverage != null && apiAverage.isNotEmpty && apiAverage != 'N/A')
+        final apiAverage = semester.averageScore;
+        final displayAverage = (apiAverage.isNotEmpty && apiAverage != 'N/A')
             ? apiAverage
             : calculatedAverage;
 
-        final apiGPA = semester['summary']?['gpa']?.toString() ?? '';
-        final displayGPA = apiGPA.isNotEmpty ? apiGPA : '-';
+        final displayGPA = semester.gpa.isNotEmpty ? semester.gpa : '-';
 
         final avgText = AppLocalizations.of(
           context,
         ).gradesAverageShort(displayAverage);
         final gpaText = AppLocalizations.of(context).gradesGPAShort(displayGPA);
-        final rankText = AppLocalizations.of(context).gradesRankShort(
-          (semester["summary"]?["rank"]?.toString().isEmpty ?? true)
-              ? "-"
-              : semester["summary"]["rank"],
-        );
+        final rankText = AppLocalizations.of(
+          context,
+        ).gradesRankShort(semester.rank.isEmpty ? "-" : semester.rank);
         final creditsText = AppLocalizations.of(
           context,
         ).gradesCreditsShort(passRate);
@@ -764,10 +745,9 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
               );
             },
             title: Text(
-              AppLocalizations.of(context).gradesSemesterTitle(
-                semester["academic_year"]?.toString() ?? '',
-                semester["semester"]?.toString() ?? '',
-              ),
+              AppLocalizations.of(
+                context,
+              ).gradesSemesterTitle(semester.academicYear, semester.semester),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(

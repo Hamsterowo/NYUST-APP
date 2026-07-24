@@ -9,6 +9,7 @@ import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/course_detail_cache.dart';
 import '../services/calendar_cache_service.dart';
+import '../models/grade_report.dart';
 import '../models/schedule_event.dart';
 import 'auth_provider.dart';
 
@@ -25,7 +26,7 @@ class DataProvider with ChangeNotifier {
   late final GraduationRepository _graduationRepo;
   late final CourseRepository _courseRepo;
 
-  StreamSubscription<Map<String, dynamic>?>? _gradesSub;
+  StreamSubscription<GradeReport?>? _gradesSub;
   StreamSubscription<Map<String, dynamic>?>? _graduationSub;
   StreamSubscription<Map<String, dynamic>?>? _scheduleSub;
   StreamSubscription<bool>? _connSub;
@@ -36,7 +37,7 @@ class DataProvider with ChangeNotifier {
   bool _isCacheLoaded = false;
   bool get isCacheLoaded => _isCacheLoaded;
 
-  Map<String, dynamic>? gradesData;
+  GradeReport? gradesData;
   bool isLoadingGrades = false;
   bool gradesFailed = false;
 
@@ -100,8 +101,8 @@ class DataProvider with ChangeNotifier {
   /// 訂閱各 Repository 的 Drift stream。訂閱當下即會收到目前 DB 中的快取資料
   /// （離線也能顯示上次結果），之後 refresh 寫入 DB 時會自動再次推送。
   void _subscribe() {
-    _gradesSub = _gradesRepo.watchGrades().listen((map) {
-      gradesData = map;
+    _gradesSub = _gradesRepo.watchGrades().listen((report) {
+      gradesData = report;
       _markCacheLoaded();
       notifyListeners();
     });

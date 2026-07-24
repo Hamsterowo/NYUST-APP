@@ -1,4 +1,6 @@
+import '../../models/grade_report.dart';
 import '../api_client.dart';
+import '../scrape_result.dart';
 import '../scrapers/grades_scraper.dart';
 import '../scrapers/graduation_scraper.dart';
 import 'grades_service.dart';
@@ -15,7 +17,7 @@ class NyustGradesService implements GradesService {
   }
 
   @override
-  Future<Map<String, dynamic>> getGrades() async {
+  Future<ScrapeResult<GradeReport>> getGrades() async {
     return _gradesScraper.getGrades();
   }
 
