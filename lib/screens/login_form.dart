@@ -32,7 +32,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(authProvider).fetchCaptcha();
+      ref.read(authProvider).ensureCaptcha();
       _loadVersion();
     });
   }

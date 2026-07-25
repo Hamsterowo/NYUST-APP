@@ -218,6 +218,16 @@ class AuthProvider with ChangeNotifier {
   /// session 不相符。並行呼叫一律共用同一次請求。
   Future<void>? _captchaRequest;
 
+  /// 登入頁出現時呼叫：只有在還沒有驗證碼、且沒有進行中的請求時才抓。
+  ///
+  /// 登入頁可能因為上層重建而被重新掛載，若每次掛載都無條件重抓，就會有兩個
+  /// 請求各自清空 cookie、互相洗掉對方的 session。以「已經有就不抓」表達意圖，
+  /// 這個保證便與 widget 被掛載幾次無關。使用者按重整鈕仍走 [fetchCaptcha]。
+  Future<void> ensureCaptcha() {
+    if (_captchaUrl != null) return Future.value();
+    return fetchCaptcha();
+  }
+
   Future<void> fetchCaptcha() {
     return _captchaRequest ??= _fetchCaptcha().whenComplete(() {
       _captchaRequest = null;
@@ -487,6 +497,10 @@ class AuthProvider with ChangeNotifier {
     await _clearUserCache();
     _clearMfaState();
     _user = null;
+    // 丟掉上一個 session 的驗證碼與 token，否則登入頁重新出現時
+    // [ensureCaptcha] 會誤以為已經有驗證碼而沿用過期的那一張。
+    _captchaUrl = null;
+    _verificationToken = null;
     // 直接清除學業快取，不透過 onLogoutCallback —— DataProvider 是惰性建立的，
     // 回呼可能還沒接上。回呼仍保留，負責重置它自己的記憶體狀態。
     await AcademicCache.clearAll();

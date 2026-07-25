@@ -34,13 +34,22 @@ class SecureCookieStorage implements Storage {
   }
 }
 
-late PersistCookieJar _globalCookieJar;
+PersistCookieJar? _cookieJar;
+
+/// 全 App 共用的同一個 cookie jar。
+///
+/// **必須是單例**：App 內不只一個 [Dio]（[AuthProvider] 之外，行事曆頁與課程
+/// 詳情頁也各自建了 ApiService）。若每次掛載都新建一個 jar 並覆寫這個變數，
+/// 全域就會指向最後建立的那一個，而先前的 Dio 仍握著舊 jar —— [clearCookies]
+/// 於是清到錯的 jar，登出後主 client 仍帶著 `.YunTechSSO`，登入頁被判定為已
+/// 登入而轉址，頁面裡就沒有 `__RequestVerificationToken`（Token not found）。
+PersistCookieJar get _globalCookieJar =>
+    _cookieJar ??= PersistCookieJar(storage: SecureCookieStorage());
 
 /// 同步掛上 Cookie 管理。[PersistCookieJar] 為同步建構、cookie 於首次請求時
 /// 才從 secure storage 惰性載入，因此可在 [ApiClient] 建構子直接呼叫，
 /// 保證第一筆請求送出前 interceptor 已在位（不會發生「沒帶 cookie 被誤判登出」）。
 void attachCookieManager(Dio dio) {
-  _globalCookieJar = PersistCookieJar(storage: SecureCookieStorage());
   dio.interceptors.add(CookieManager(_globalCookieJar));
 }
 
