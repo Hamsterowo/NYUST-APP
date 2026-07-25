@@ -16,15 +16,26 @@ import 'scrapers/info_scraper.dart';
 /// 本身不再包辦 HTTP 細節，也不再有 mock 分支：而是持有一個 [ApiClient] 與一個
 /// [ServiceFactory]，並把呼叫委派給 factory 依 demo 模式選出的 Service 實作。
 /// 藉此保持既有的對外 API 不變（[AuthProvider] / [DataProvider] 等呼叫端不需修改）。
+///
+/// **全 App 唯一**：`ApiService()` 一律回傳同一個實例。這不只是慣例 ——
+/// session（cookie）、demo 模式開關、App 端點 token 都是 App 層級的狀態，
+/// 一旦有第二個實例，這些狀態就會分岔：曾經因為畫面各自 `ApiService()`，
+/// 登出只清掉其中一個 client 的 cookie，導致登出後拿不到登入頁的驗證 token。
+/// 靜態欄位是 per-isolate 的，因此背景 isolate 仍會取得屬於它自己的實例
+/// （那是正確的：跨 isolate 本來就無法共用）。
 class ApiService {
+  static final ApiService _shared = ApiService._();
+
+  factory ApiService() => _shared;
+
+  ApiService._();
+
   final ApiClient _client = ApiClient();
   late final ServiceFactory _factory = ServiceFactory(_client);
 
   /// 雲科 App 端點（MobileAppService，Bearer token）client。與 web 爬蟲的
   /// [ApiClient] 隔離，各用各的 session（見 [AppApiService]）。
   final AppApiService appApi = AppApiService();
-
-  ApiService();
 
   Dio get dio => _client.dio;
 
