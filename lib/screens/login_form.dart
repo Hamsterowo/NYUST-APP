@@ -243,10 +243,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                         border: Border.all(color: colorScheme.outline),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Image.memory(
-                        base64Decode(auth.captchaUrl!.split(',').last),
-                        fit: BoxFit.contain,
-                      ),
+                      child: _CaptchaImage(dataUri: auth.captchaUrl!),
                     ),
                   IconButton(
                     icon: Icon(Icons.refresh),
@@ -325,5 +322,56 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         ),
       ),
     );
+  }
+}
+
+/// 驗證碼圖片：把 data URI 解碼成一個固定的 [MemoryImage]，只在 payload
+/// 真的換人時才重新解碼。
+///
+/// 若在 build 裡解 base64，登入表單每次 setState（記住密碼、顯示密碼、按下
+/// 登入）都會產生新的 byte buffer；Flutter 以 buffer 辨識記憶體圖片，於是把
+/// 同一張驗證碼當成另一張圖重解一次，畫面就閃了一下。
+class _CaptchaImage extends StatefulWidget {
+  final String dataUri;
+
+  const _CaptchaImage({required this.dataUri});
+
+  @override
+  State<_CaptchaImage> createState() => _CaptchaImageState();
+}
+
+class _CaptchaImageState extends State<_CaptchaImage> {
+  MemoryImage? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    _image = _decode(widget.dataUri);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CaptchaImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.dataUri != widget.dataUri) {
+      _image = _decode(widget.dataUri);
+    }
+  }
+
+  /// 解不開（空字串、被截斷的 base64）就回 null，讓畫面留白而不是在 build 中拋錯。
+  static MemoryImage? _decode(String dataUri) {
+    try {
+      final bytes = base64Decode(dataUri.split(',').last);
+      return bytes.isEmpty ? null : MemoryImage(bytes);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = _image;
+    if (image == null) return const SizedBox.shrink();
+    // gaplessPlayback：換新驗證碼時舊圖留在畫面上，直到新圖解好才替換。
+    return Image(image: image, fit: BoxFit.contain, gaplessPlayback: true);
   }
 }
