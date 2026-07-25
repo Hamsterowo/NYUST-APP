@@ -35,12 +35,21 @@ final dataProvider = ChangeNotifierProvider<DataProvider>((ref) {
 /// 底部分頁索引（取代 NavigationProvider）。
 final navIndexProvider = StateProvider<int>((ref) => 0);
 
-/// App 內語言覆寫（`null` = 跟隨系統）。兩個 MaterialApp 都吃這個值。
-final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
+/// App 內語言設定。[locale] 為 `null` 表示跟隨系統。
+///
+/// [isResolved] 在儲存的設定讀進來之前是 false —— 此時 [locale] 只是「還沒讀到
+/// 設定，先跟隨系統」的**暫定值**。開機後畫面上的語系可能因此一次性改變，那不是
+/// 使用者在切換語言；會依語言重抓資料的畫面必須等 [isResolved] 才開始計較語系，
+/// 否則每次開機都會多打一輪重抓、並把已顯示的內容打回骨架。
+typedef LocaleSetting = ({Locale? locale, bool isResolved});
+
+/// App 內語言覆寫。兩個 MaterialApp 都吃這個值（取 [LocaleSetting.locale]）。
+final localeProvider = NotifierProvider<LocaleNotifier, LocaleSetting>(
   LocaleNotifier.new,
 );
 
-class LocaleNotifier extends Notifier<Locale?> with WidgetsBindingObserver {
+class LocaleNotifier extends Notifier<LocaleSetting>
+    with WidgetsBindingObserver {
   static const _prefKey = 'app_locale';
 
   /// Android 13+：語言覆寫交由系統的 per-app locale 儲存（與系統設定頁
@@ -48,11 +57,11 @@ class LocaleNotifier extends Notifier<Locale?> with WidgetsBindingObserver {
   bool _systemBacked = false;
 
   @override
-  Locale? build() {
+  LocaleSetting build() {
     WidgetsBinding.instance.addObserver(this);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(this));
     _load();
-    return null; // 讀到設定前先跟隨系統。
+    return (locale: null, isResolved: false); // 讀到設定前先跟隨系統。
   }
 
   /// 系統語系變更（含使用者從系統設定頁改 per-app 語言）時刷新鏡像，
@@ -62,10 +71,15 @@ class LocaleNotifier extends Notifier<Locale?> with WidgetsBindingObserver {
     if (_systemBacked) _refreshFromSystem();
   }
 
+  /// 套用語言覆寫並標記設定已讀完。同步更新 `Intl.defaultLocale`，
+  /// 讓以它判斷語系的邏輯（LanguageInterceptor、CalendarScraper 等）跟著走。
+  void _apply(Locale? locale) {
+    state = (locale: locale, isResolved: true);
+    Intl.defaultLocale = locale?.languageCode;
+  }
+
   Future<void> _refreshFromSystem() async {
-    final current = await PerAppLocale.current();
-    state = current;
-    Intl.defaultLocale = current?.languageCode;
+    _apply(await PerAppLocale.current());
   }
 
   Future<void> _load() async {
@@ -84,24 +98,22 @@ class LocaleNotifier extends Notifier<Locale?> with WidgetsBindingObserver {
       await _refreshFromSystem();
       return;
     }
+    Locale? saved;
     try {
       final prefs = await SharedPreferences.getInstance();
       final code = prefs.getString(_prefKey);
-      if (code != null && code.isNotEmpty) {
-        state = Locale(code);
-        Intl.defaultLocale = code;
-      }
+      if (code != null && code.isNotEmpty) saved = Locale(code);
     } catch (_) {}
+    // 沒有存過設定也要送出 isResolved：等著它的畫面才不會一直等不到。
+    _apply(saved);
   }
 
   /// 設定語言覆寫；`null` 表示清除覆寫、跟隨系統。
   ///
   /// Android 13+ 寫入系統 per-app 設定（系統設定頁會同步顯示），
-  /// 其他平台持久化到 SharedPreferences。同步更新 `Intl.defaultLocale`，
-  /// 讓以它判斷語系的邏輯（LanguageInterceptor、CalendarScraper 等）跟著走。
+  /// 其他平台持久化到 SharedPreferences。
   Future<void> setLocale(Locale? locale) async {
-    state = locale;
-    Intl.defaultLocale = locale?.languageCode;
+    _apply(locale);
     if (_systemBacked) {
       await PerAppLocale.set(locale);
       return;

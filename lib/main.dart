@@ -38,8 +38,9 @@ class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // App 內語言覆寫（null = 跟隨系統）。
-    final locale = ref.watch(localeProvider);
+    // App 內語言覆寫（null = 跟隨系統）。只看語言本身，設定「是否已讀完」
+    // 的變化不需要重建整個 App。
+    final locale = ref.watch(localeProvider.select((s) => s.locale));
 
     final isDesktopWeb =
         kIsWeb &&

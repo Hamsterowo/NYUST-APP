@@ -41,7 +41,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// 目前語言設定的顯示文字（跟隨系統／中文／English）。
   String _currentLanguageLabel(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final locale = ref.watch(localeProvider);
+    final locale = ref.watch(localeProvider.select((s) => s.locale));
     if (locale == null) return l10n.languageSystem;
     return locale.languageCode == 'en' ? l10n.languageEn : l10n.languageZh;
   }
@@ -51,7 +51,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// Android 12 以下也能單獨切換 App 語言。
   void _showLanguagePicker() {
     final l10n = AppLocalizations.of(context);
-    final current = ref.read(localeProvider);
+    final current = ref.read(localeProvider).locale;
 
     showModalBottomSheet(
       context: context,

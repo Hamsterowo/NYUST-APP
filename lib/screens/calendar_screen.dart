@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/providers.dart';
 import '../utils/network_error.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
@@ -12,28 +14,24 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
 
-class CalendarScreen extends StatefulWidget {
+class CalendarScreen extends ConsumerStatefulWidget {
   final bool embed;
   final ValueChanged<bool>? onLoadingChanged;
   const CalendarScreen({super.key, this.embed = false, this.onLoadingChanged});
 
   @override
-  State<CalendarScreen> createState() => CalendarScreenState();
+  ConsumerState<CalendarScreen> createState() => CalendarScreenState();
 }
 
-class CalendarScreenState extends State<CalendarScreen> {
+class CalendarScreenState extends ConsumerState<CalendarScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
-  String? _currentLanguageCode;
+
+  /// 目前這些年份的資料是用哪個語言碼抓的；null = 還沒抓過。
+  String? _calendarLanguageCode;
 
   bool get isLoading => _isLoading;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _currentLanguageCode = Localizations.localeOf(context).languageCode;
-  }
 
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
@@ -82,11 +80,8 @@ class CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     _selectedDay = _focusedDay;
     _currentYear = _focusedDay.year;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _fetchYearIfNeeded(_currentYear);
-      }
-    });
+    // 首次抓取由 build 內的 [_syncCalendarWithLocale] 觸發：要等語言設定讀完，
+    // 才不會先用暫定語系抓一次、讀完設定又整份重抓。
   }
 
   @override
@@ -282,8 +277,14 @@ class CalendarScreenState extends State<CalendarScreen> {
     _cachedHolidaysType[year] = newHolidaysType;
   }
 
-  Future<void> _fetchYearIfNeeded(int year, {bool foreground = true}) async {
-    if (_cachedGroupedEvents.containsKey(year)) {
+  /// [force] 用於換語言後就地換掉已快取的年份：略過「已有快取就不抓」的短路。
+  /// 搭配 `foreground: false` 便不會顯示骨架，畫面上的月份維持顯示到新資料到位。
+  Future<void> _fetchYearIfNeeded(
+    int year, {
+    bool foreground = true,
+    bool force = false,
+  }) async {
+    if (!force && _cachedGroupedEvents.containsKey(year)) {
       if (foreground && _isLoading && year == _currentYear) {
         _setLoading(false);
       }
@@ -299,8 +300,8 @@ class CalendarScreenState extends State<CalendarScreen> {
       _setLoading(true);
     }
 
+    final lang = _calendarLanguageCode ?? 'zh';
     try {
-      final lang = _currentLanguageCode ?? 'zh';
       final data = await CalendarCacheService.getOrFetch(
         year,
         lang,
@@ -308,6 +309,9 @@ class CalendarScreenState extends State<CalendarScreen> {
       );
 
       _fetchingYears.remove(year);
+
+      // 抓取期間又換了語言：這份是舊語言的結果，丟掉。
+      if (lang != _calendarLanguageCode) return;
 
       if (data != null) {
         _parseAndCacheData(year, data);
@@ -448,21 +452,41 @@ class CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  String? _lastLocale;
+  /// 讓行事曆的語言跟著 App 語言走：首次載入在此觸發，之後只有語言真的換了才重抓。
+  ///
+  /// 開機時語言設定是**非同步**讀進來的，讀完之前畫面上的語系只是「跟隨系統」的
+  /// 暫定值。以前這裡把那一次 settle 當成使用者換了語言，於是清空整份年份快取、
+  /// 把載入旗標打開重抓 —— 已經畫出來的月曆因此退回骨架閃一下。
+  void _syncCalendarWithLocale() {
+    if (!ref.watch(localeProvider.select((s) => s.isResolved))) return;
+
+    final lang = Localizations.localeOf(context).languageCode;
+    if (_calendarLanguageCode == lang) return;
+
+    final isFirstLoad = _calendarLanguageCode == null;
+    _calendarLanguageCode = lang;
+
+    if (!isFirstLoad) {
+      // 真的換語言：畫面上那一年就地換掉（不清、不顯示骨架），
+      // 其他年份丟掉快取，等使用者翻過去時自然會以新語言抓。
+      _cachedGroupedEvents.removeWhere((year, _) => year != _currentYear);
+      _cachedHolidaysType.removeWhere((year, _) => year != _currentYear);
+      _fetchingYears.clear();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _fetchYearIfNeeded(
+        _currentYear,
+        foreground: isFirstLoad,
+        force: !isFirstLoad,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final newLocale = Localizations.localeOf(context).toString();
-    if (_lastLocale != null && _lastLocale != newLocale) {
-      _cachedGroupedEvents.clear();
-      _cachedHolidaysType.clear();
-      _fetchingYears.clear();
-      _isLoading = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fetchYearIfNeeded(_currentYear);
-      });
-    }
-    _lastLocale = newLocale;
+    _syncCalendarWithLocale();
 
     final colorScheme = Theme.of(context).colorScheme;
     final selectedEvents = _selectedDay != null

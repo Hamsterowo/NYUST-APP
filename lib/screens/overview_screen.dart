@@ -26,7 +26,10 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   List<CalendarEvent>? _allEvents;
   List<String>? _holidays;
   bool _isLoadingCalendar = true;
-  String? _currentLanguageCode;
+
+  /// 目前這份行事曆是用哪個語言碼抓的；null = 還沒抓過。
+  /// 換語言時據此判斷要不要重抓，也用來丟棄舊語言的遲到結果。
+  String? _calendarLanguageCode;
 
   // 總覽頁的語意色：暖橘=需注意（放假倒數／重要行事曆／今日放假）、
   // 天藍=上課中、石板灰=錯誤。集中於此，避免同組色碼散落在多個 build 方法。
@@ -38,19 +41,23 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   static const Color _onAccent = Colors.white;
   static const Color _onAccentMuted = Colors.white70;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _currentLanguageCode = Localizations.localeOf(context).languageCode;
-  }
+  /// 讓行事曆的語言跟著 App 語言走：首次載入在此觸發，之後只有語言真的換了才重抓。
+  ///
+  /// 開機時語言設定是**非同步**讀進來的，讀完之前畫面上的語系只是「跟隨系統」的
+  /// 暫定值。以前這裡把那一次 settle 當成使用者換了語言，於是清掉已載入的行事曆、
+  /// 把載入旗標打開重抓 —— 兩張行事曆卡片因此在開機後退回骨架，就是那一下閃爍。
+  /// 首次抓取改成等設定讀完才開始，settle 本身便不再是一次「換語言」。
+  void _syncCalendarWithLocale() {
+    if (!ref.watch(localeProvider.select((s) => s.isResolved))) return;
 
-  @override
-  void initState() {
-    super.initState();
+    final lang = Localizations.localeOf(context).languageCode;
+    if (_calendarLanguageCode == lang) return;
+
+    // 先記下新語言：build 可能連續來好幾次，這裡要保證只排一次重抓。
+    // 真的換語言時也不清空既有內容，讓新資料直接就地換掉舊的。
+    _calendarLanguageCode = lang;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _fetchTodayCalendar();
-      }
+      if (mounted) _fetchTodayCalendar();
     });
   }
 
@@ -59,16 +66,19 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   }
 
   Future<void> _fetchTodayCalendar() async {
+    final lang = _calendarLanguageCode ?? 'zh';
     try {
       final now = DateTime.now();
       final api = ref.read(authProvider).api;
-      final lang = _currentLanguageCode ?? 'zh';
 
       final response = await CalendarCacheService.getOrFetch(
         now.year,
         lang,
         (year, {lang}) => api.getCalendar(year, lang: lang),
       );
+
+      // 抓取期間語言又換了：這份是舊語言的結果，丟掉，別蓋掉新語言的資料。
+      if (lang != _calendarLanguageCode) return;
 
       if (response != null && response['success'] == true && mounted) {
         final List<dynamic> data = response['events'] ?? [];
@@ -89,25 +99,26 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           _isLoadingCalendar = false;
         });
       } else {
-        if (mounted) {
-          setState(() {
-            _allEvents = [];
-            _holidays = [];
-            _isLoadingCalendar = false;
-            _upcomingEvents = [];
-          });
-        }
+        _markCalendarUnavailable(lang);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _allEvents = [];
-          _holidays = [];
-          _isLoadingCalendar = false;
-          _upcomingEvents = [];
-        });
-      }
+      _markCalendarUnavailable(lang);
     }
+  }
+
+  /// 抓不到行事曆：以空資料收尾（倒數卡顯示錯誤、近期行事曆顯示「無」）。
+  /// [lang] 是這次抓取所用的語言，與目前語言不符時代表結果已過期，不套用。
+  void _markCalendarUnavailable(String lang) {
+    if (!mounted || lang != _calendarLanguageCode) return;
+    setState(() {
+      _isLoadingCalendar = false;
+      // 已經有內容就留著：重整失敗（多半是離線）不該把好好的卡片換成錯誤狀態，
+      // 空資料只用在「本來就沒東西可顯示」的首次載入。
+      if (_allEvents != null) return;
+      _allEvents = [];
+      _holidays = [];
+      _upcomingEvents = [];
+    });
   }
 
   Map<String, dynamic> _getCountdownData(
@@ -314,7 +325,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     ColorScheme colorScheme,
     DateTime now,
   ) {
-    if (_isLoadingCalendar || _allEvents == null) {
+    // 只看「有沒有東西可顯示」，不看載入旗標：重抓時已在畫面上的內容留著，
+    // 等新資料到位才就地換掉，不會先退回骨架。
+    if (_allEvents == null) {
       return Container(
         height: 120,
         width: double.infinity,
@@ -531,20 +544,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     );
   }
 
-  String? _lastLocale;
-
   @override
   Widget build(BuildContext context) {
-    final newLocale = Localizations.localeOf(context).toString();
-    if (_lastLocale != null && _lastLocale != newLocale) {
-      _isLoadingCalendar = true;
-      _allEvents = null;
-      _upcomingEvents = null;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fetchTodayCalendar();
-      });
-    }
-    _lastLocale = newLocale;
+    _syncCalendarWithLocale();
 
     final colorScheme = Theme.of(context).colorScheme;
     final now = DateTime.now();

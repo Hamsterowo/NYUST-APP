@@ -328,22 +328,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  String? _lastLocale;
+  /// 目前資料是照哪個語系抓的；null = 語言設定還沒讀完。
+  String? _appliedLocale;
+
+  /// 換語言後重抓全部資料（成績、畢業審查等頁面是照語系從學校抓回來的）。
+  ///
+  /// 只在語言設定讀完之後才開始計較：開機時設定是非同步讀進來的，讀完前畫面上的
+  /// 語系只是「跟隨系統」的暫定值，把那一次 settle 當成使用者換語言，等於每次開機
+  /// 都多打一輪強制重抓（也是總覽頁三張卡片一起重畫的來源）。
+  void _refetchOnLanguageChange() {
+    if (!ref.watch(localeProvider.select((s) => s.isResolved))) return;
+
+    final newLocale = Localizations.localeOf(context).toString();
+    final previous = _appliedLocale;
+    _appliedLocale = newLocale;
+    if (previous == null || previous == newLocale) return;
+
+    if (kDebugMode) {
+      print(
+        'HomeScreen: Locale changed from $previous to $newLocale. Refreshing all data...',
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(dataProvider).forceFetchAll();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final newLocale = Localizations.localeOf(context).toString();
-    if (_lastLocale != null && _lastLocale != newLocale) {
-      if (kDebugMode) {
-        print(
-          'HomeScreen: Locale changed from $_lastLocale to $newLocale. Refreshing all data...',
-        );
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(dataProvider).forceFetchAll();
-      });
-    }
-    _lastLocale = newLocale;
+    _refetchOnLanguageChange();
 
     int currentIndex = ref.watch(navIndexProvider);
 
