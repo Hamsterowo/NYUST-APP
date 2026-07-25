@@ -31,7 +31,6 @@ class AcademicCache {
   /// 登出、以及發現快取屬於別的帳號時呼叫。任何一步失敗都不應阻斷其餘清除，
   /// 因此個別包覆例外。
   static Future<void> clearAll() async {
-    if (kDebugMode) print('AcademicCache: clearing all cached academic data');
     try {
       final db = AppDatabase.instance;
       await db.transaction(() async {
