@@ -336,9 +336,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         itemCount: sems.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
-          final value = sems[i]['value'] ?? '';
+          final value = sems[i].value;
           return _SemesterChip(
-            label: _shortSemester(value, sems[i]['label']),
+            label: _shortSemester(value, sems[i].label),
             selected: value == selected,
             onTap: () {
               if (value == selected) return;

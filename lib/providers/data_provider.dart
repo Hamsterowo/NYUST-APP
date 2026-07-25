@@ -29,7 +29,7 @@ class DataProvider with ChangeNotifier {
 
   StreamSubscription<GradeReport?>? _gradesSub;
   StreamSubscription<GraduationReport?>? _graduationSub;
-  StreamSubscription<Map<String, dynamic>?>? _scheduleSub;
+  StreamSubscription<List<ScheduleEvent>>? _scheduleSub;
   StreamSubscription<bool>? _connSub;
 
   /// 追蹤上一個已知的連線狀態,只在「離線→上線」的瞬間觸發重抓。
@@ -57,8 +57,8 @@ class DataProvider with ChangeNotifier {
   RefreshOutcome? scheduleFailReason;
 
   // ── 多學期課表 ──────────────────────────────────────────────
-  /// 可切換的學期選項（[{value,label}]），線上抓到才有值。
-  List<Map<String, String>> scheduleSemesters = [];
+  /// 可切換的學期選項，線上抓到才有值。
+  List<SemesterOption> scheduleSemesters = [];
 
   /// 學校目前的當前學期代碼（例：1142）。
   String? currentSemester;
@@ -112,8 +112,8 @@ class DataProvider with ChangeNotifier {
       _markCacheLoaded();
       notifyListeners();
     });
-    _scheduleSub = _courseRepo.watchSchedule().listen((map) {
-      scheduleData = _parseSchedule(map);
+    _scheduleSub = _courseRepo.watchSchedule().listen((courses) {
+      scheduleData = courses;
       _markCacheLoaded();
       notifyListeners();
     });
@@ -121,14 +121,6 @@ class DataProvider with ChangeNotifier {
 
   void _markCacheLoaded() {
     if (!_isCacheLoaded) _isCacheLoaded = true;
-  }
-
-  List<ScheduleEvent> _parseSchedule(Map<String, dynamic>? map) {
-    if (map == null) return [];
-    final raw = (map['data']?['schedule'] as List?) ?? const [];
-    return raw
-        .map((e) => ScheduleEvent.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
   }
 
   void _init() {
@@ -147,20 +139,12 @@ class DataProvider with ChangeNotifier {
     try {
       final cached = await _courseRepo.loadCachedSemesters();
       if (cached.isEmpty) return;
-      cached.forEach((key, rawList) {
-        _semesterCache[key] = _parseSchedule({
-          'data': {'schedule': rawList},
-        });
-      });
+      _semesterCache.addAll(cached);
       notifyListeners();
     } catch (_) {
       // 還原失敗不影響當前學期顯示。
     }
   }
-
-  /// 從課表回應取出原始課程陣列（供持久化）。
-  List<dynamic> _rawSchedule(Map<String, dynamic> resp) =>
-      (resp['data']?['schedule'] as List?) ?? const [];
 
   /// 監聽連線狀態:從「離線」恢復到「上線」時,若已登入就重新抓取一次。
   /// 這也會順帶重新驗證 session(prefetchAll → fetchUserInfo),
@@ -202,16 +186,16 @@ class DataProvider with ChangeNotifier {
       await ensureScheduleSemesters();
     }
     for (final s in scheduleSemesters) {
-      final value = s['value'] ?? '';
+      final value = s.value;
       if (value.isEmpty || value == currentSemester) continue;
       if (!force && _semesterCache.containsKey(value)) continue;
       try {
         await Future.delayed(const Duration(milliseconds: 200));
-        final resp = await _api.getSchedule(semester: value);
-        if (resp['status'] == 'success') {
-          final respMap = Map<String, dynamic>.from(resp);
-          _semesterCache[value] = _parseSchedule(respMap);
-          await _courseRepo.saveCachedSemester(value, _rawSchedule(respMap));
+        final result = await _api.getSchedule(semester: value);
+        if (result.isSuccess) {
+          final courses = result.data!.courses;
+          _semesterCache[value] = courses;
+          await _courseRepo.saveCachedSemester(value, courses);
         }
       } catch (_) {
         // 略過此學期，使用者實際切換時會再按需抓一次。
@@ -318,12 +302,12 @@ class DataProvider with ChangeNotifier {
     scheduleFailReason = null;
     notifyListeners();
     try {
-      final outcome = await _courseRepo.refresh(force: force);
-      if (!outcome.isSuccess && scheduleData.isEmpty) {
+      final result = await _courseRepo.refresh(force: force);
+      if (!result.outcome.isSuccess && scheduleData.isEmpty) {
         scheduleFailed = true;
-        scheduleFailReason = outcome;
+        scheduleFailReason = result.outcome;
       }
-      _captureSemesterMeta();
+      _captureSemesterMeta(result.snapshot);
     } catch (_) {
       if (scheduleData.isEmpty) {
         scheduleFailed = true;
@@ -335,13 +319,15 @@ class DataProvider with ChangeNotifier {
     }
   }
 
-  /// 從 repository 擷取學期清單（僅在剛完成一次線上抓取時有值）。
-  void _captureSemesterMeta() {
-    if (_courseRepo.semesters.isNotEmpty) {
-      scheduleSemesters = _courseRepo.semesters;
+  /// 擷取學期清單。[snapshot] 只在剛完成一次線上抓取時非 null
+  /// （TTL 命中快取時為 null，維持既有的學期清單不變）。
+  void _captureSemesterMeta(ScheduleSnapshot? snapshot) {
+    if (snapshot == null) return;
+    if (snapshot.semesters.isNotEmpty) {
+      scheduleSemesters = snapshot.semesters;
     }
-    if (_courseRepo.currentSemester.isNotEmpty) {
-      currentSemester = _courseRepo.currentSemester;
+    if (snapshot.currentSemester.isNotEmpty) {
+      currentSemester = snapshot.currentSemester;
       selectedSemester ??= currentSemester;
     }
   }
@@ -352,18 +338,11 @@ class DataProvider with ChangeNotifier {
     if (!await ConnectivityService.instance.checkOnline()) return;
     _loadingSemesterList = true;
     try {
-      final resp = await _api.getSchedule();
-      if (resp['status'] == 'success') {
-        final data = resp['data'] as Map?;
-        final raw = (data?['semesters'] as List?) ?? const [];
-        scheduleSemesters = raw
-            .map(
-              (e) => (e as Map).map(
-                (k, v) => MapEntry(k.toString(), v?.toString() ?? ''),
-              ),
-            )
-            .toList();
-        currentSemester = (data?['currentSemester'] ?? '').toString();
+      final result = await _api.getSchedule();
+      if (result.isSuccess) {
+        final snapshot = result.data!;
+        scheduleSemesters = snapshot.semesters;
+        currentSemester = snapshot.currentSemester;
         selectedSemester ??= currentSemester;
         notifyListeners();
       }
@@ -394,15 +373,15 @@ class DataProvider with ChangeNotifier {
     isLoadingScheduleSemester = true;
     notifyListeners();
     try {
-      final resp = await _api.getSchedule(semester: value);
-      if (resp['status'] == 'success') {
-        final respMap = Map<String, dynamic>.from(resp);
-        _semesterCache[value] = _parseSchedule(respMap);
-        await _courseRepo.saveCachedSemester(value, _rawSchedule(respMap));
+      final result = await _api.getSchedule(semester: value);
+      if (result.isSuccess) {
+        final courses = result.data!.courses;
+        _semesterCache[value] = courses;
+        await _courseRepo.saveCachedSemester(value, courses);
       } else if (selectedSemester == value) {
         // 記錄失敗讓 UI 顯示提示與重試（使用者已切走則不覆蓋）。
         semesterLoadFailed = true;
-        semesterLoadFailReason = classifyRefreshFailure(resp);
+        semesterLoadFailReason = result.status;
       }
     } catch (_) {
       if (selectedSemester == value) {

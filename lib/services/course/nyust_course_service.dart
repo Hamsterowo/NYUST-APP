@@ -1,4 +1,6 @@
+import '../../models/schedule_event.dart';
 import '../api_client.dart';
+import '../scrape_result.dart';
 import '../scrapers/schedule_scraper.dart';
 import 'course_service.dart';
 
@@ -12,7 +14,7 @@ class NyustCourseService implements CourseService {
   }
 
   @override
-  Future<Map<String, dynamic>> getSchedule({String? semester}) async {
+  Future<ScrapeResult<ScheduleSnapshot>> getSchedule({String? semester}) async {
     return _scheduleScraper.getSchedule(semester: semester);
   }
 

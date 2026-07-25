@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
+import '../../models/schedule_event.dart';
 import '../../utils/network_error.dart';
+import '../scrape_result.dart';
 import 'base_scraper.dart';
 
 /// 處理課表資料爬取的類別
@@ -18,7 +20,7 @@ class ScheduleScraper extends BaseScraper {
   ///
   /// [semester] 為學期代碼（例：`1142` = 114 學年第 2 學期）。傳 null 或當前
   /// 選中的學期時，直接解析當前頁面；否則以 ASP.NET postback 切換到指定學期。
-  Future<Map<String, dynamic>> getSchedule({String? semester}) async {
+  Future<ScrapeResult<ScheduleSnapshot>> getSchedule({String? semester}) async {
     try {
       if (kDebugMode)
         print('ScheduleScraper: Fetching schedule from $scheduleUrl');
@@ -41,10 +43,9 @@ class ScheduleScraper extends BaseScraper {
 
       if (response.data.toString().contains('Login.aspx') ||
           document.querySelector('form[action="./Login/Login.aspx"]') != null) {
-        return {
-          'status': 'session_expired',
-          'message': 'Session expired, please login again',
-        };
+        return ScrapeResult<ScheduleSnapshot>.failure(
+          RefreshOutcome.sessionExpired,
+        );
       }
 
       final semesters = _parseSemesters(document);
@@ -62,23 +63,27 @@ class ScheduleScraper extends BaseScraper {
 
       if (kDebugMode) print('ScheduleScraper: Found ${courses.length} courses');
 
-      return {
-        'status': 'success',
-        'data': {
+      return ScrapeResult.success(
+        ScheduleSnapshot.fromJson({
           'schedule': courses,
           'semesters': semesters,
           'currentSemester': currentSemester,
-        },
-      };
+        }),
+      );
     } catch (e) {
-      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      // 先判離線再歸類其他錯誤；訊息僅供除錯 log，不進 UI。
       if (isNetworkError(e)) {
-        return {
-          'status': 'network_error',
-          'message': 'Network error fetching schedule: $e',
-        };
+        if (kDebugMode) {
+          print('ScheduleScraper: Network error fetching schedule: $e');
+        }
+        return ScrapeResult<ScheduleSnapshot>.failure(
+          RefreshOutcome.networkError,
+        );
       }
-      return {'status': 'error', 'message': 'Failed to fetch schedule: $e'};
+      if (kDebugMode) print('ScheduleScraper: Failed to fetch schedule: $e');
+      return ScrapeResult<ScheduleSnapshot>.failure(
+        RefreshOutcome.serviceError,
+      );
     }
   }
 
