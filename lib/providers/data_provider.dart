@@ -210,9 +210,13 @@ class DataProvider with ChangeNotifier {
           final courses = result.data!.courses;
           _semesterCache[value] = courses;
           await _courseRepo.saveCachedSemester(value, courses);
+        } else if (kDebugMode) {
+          print('DataProvider: prefetch of semester $value → ${result.status}');
         }
-      } catch (_) {
+      } catch (e) {
         // 略過此學期，使用者實際切換時會再按需抓一次。
+        // 但不再完全靜默 —— 這類失敗曾讓「其他學期沒被快取」查不出原因。
+        if (kDebugMode) print('DataProvider: prefetch of semester $value: $e');
       }
     }
     notifyListeners();
@@ -350,7 +354,10 @@ class DataProvider with ChangeNotifier {
     if (scheduleSemesters.isEmpty) return;
     _courseRepo
         .saveSemesterList(scheduleSemesters, currentSemester ?? '')
-        .catchError((_) {});
+        .catchError((Object e) {
+          if (kDebugMode)
+            print('DataProvider: saving semester list failed: $e');
+        });
   }
 
   /// 課表畫面開啟時呼叫：若尚不知道學期清單且在線上，補抓一次以填入切換器。

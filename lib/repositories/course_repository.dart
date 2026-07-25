@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../models/schedule_event.dart';
@@ -109,6 +110,12 @@ class CourseRepository {
     String currentSemester,
   ) async {
     if (semesters.isEmpty) return;
+    if (kDebugMode) {
+      print(
+        'CourseRepository: saving ${semesters.length} semesters '
+        '(current=$currentSemester)',
+      );
+    }
     await _db
         .into(_db.semesterScheduleCacheTable)
         .insert(
@@ -130,7 +137,10 @@ class CourseRepository {
     final row = await (_db.select(
       _db.semesterScheduleCacheTable,
     )..where((t) => t.cacheKey.equals(_semesterListKey))).getSingleOrNull();
-    if (row == null) return null;
+    if (row == null) {
+      if (kDebugMode) print('CourseRepository: no stored semester list');
+      return null;
+    }
 
     try {
       final map = jsonDecode(row.dataJson) as Map<String, dynamic>;

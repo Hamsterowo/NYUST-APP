@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../database/database.dart';
@@ -30,6 +31,7 @@ class AcademicCache {
   /// 登出、以及發現快取屬於別的帳號時呼叫。任何一步失敗都不應阻斷其餘清除，
   /// 因此個別包覆例外。
   static Future<void> clearAll() async {
+    if (kDebugMode) print('AcademicCache: clearing all cached academic data');
     try {
       final db = AppDatabase.instance;
       await db.transaction(() async {
@@ -72,6 +74,12 @@ class AcademicCache {
     final current = await _owner();
     if (current == accountId) return;
 
+    if (kDebugMode) {
+      print(
+        'AcademicCache: cache owner ${current ?? "(none)"} != $accountId '
+        '→ wiping',
+      );
+    }
     await clearAll();
     try {
       await _secureStorage.write(key: _ownerKey, value: accountId);
