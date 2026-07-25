@@ -194,6 +194,9 @@ class DataProvider with ChangeNotifier {
   /// 預先載入「其他學期」的課表（當前學期已由 [fetchSchedule] 抓好），
   /// 讓使用者切換學期時無需等待。逐一抓取並加小延遲，避免 CookieJar 競爭；
   /// 任一學期失敗都不影響其他（切換時仍可按需重抓）。
+  ///
+  /// 這裡是「課表快取要備齊」的**唯一保證**：課表畫面切到該分頁時也會補抓一次
+  /// 學期清單，但那只是加速，使用者從未點進課表頁時整份快取仍必須完整。
   Future<void> _prefetchOtherSemesters({bool force = false}) async {
     // 先確保已知道學期清單（cache-hit 時 fetchSchedule 不會帶回清單）。
     if (scheduleSemesters.isEmpty) {
@@ -219,6 +222,12 @@ class DataProvider with ChangeNotifier {
         if (kDebugMode) print('DataProvider: prefetch of semester $value: $e');
       }
     }
+
+    // 預抓結束時一律把清單寫回快取。清單可能來自這次的網路抓取、也可能是啟動時
+    // 從快取還原的；後者若因故沒有落地（例如上一版還沒有這份持久化），這裡會補上，
+    // 使「離線也看得到學期切換器」不必等使用者點進課表頁。
+    _persistSemesterList();
+
     notifyListeners();
   }
 
@@ -360,10 +369,16 @@ class DataProvider with ChangeNotifier {
         });
   }
 
-  /// 課表畫面開啟時呼叫：若尚不知道學期清單且在線上，補抓一次以填入切換器。
+  /// 若尚不知道學期清單就補抓一次，以填入切換器。
+  /// 由預抓流程與「切到課表分頁」兩處呼叫。
+  ///
+  /// 這裡刻意**不**先問連線狀態：啟動當下 connectivity 往往還沒解析完，
+  /// 會回報離線而讓這唯一一次補抓被跳過，於是學期清單只剩「使用者點進課表頁」
+  /// 才會取得。連線旗標只反映網路介面、不代表真的連得到，依專案慣例只能當
+  /// UX 最佳化用；真正的判斷交給請求結果本身 —— 離線時請求會立刻失敗並被
+  /// 下面的 catch 靜默吃掉，成本極低。
   Future<void> ensureScheduleSemesters() async {
     if (scheduleSemesters.isNotEmpty || _loadingSemesterList) return;
-    if (!await ConnectivityService.instance.checkOnline()) return;
     _loadingSemesterList = true;
     try {
       final result = await _api.getSchedule();
