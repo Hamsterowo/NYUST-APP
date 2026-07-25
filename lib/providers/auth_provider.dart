@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../services/academic_cache.dart';
 import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/mock/mock_data.dart';
@@ -89,11 +90,15 @@ class AuthProvider with ChangeNotifier {
           _user = cachedUser;
           _isInitialized = true;
           notifyListeners();
-          onLoginSuccess?.call();
+          await _startSession();
           return;
         }
       }
+      // 沒有 cookie 也沒有 demo 快取 → 這台裝置已無有效 session。
+      // 連同上一個帳號的學業快取一併清掉（此時 DataProvider 尚未建立，
+      // 不能依賴它的登出回呼）。
       await _clearUserCache();
+      await AcademicCache.clearAll();
       _isInitialized = true;
       notifyListeners();
       return;
@@ -111,7 +116,7 @@ class AuthProvider with ChangeNotifier {
         _seedAppApiUserId();
         isAlreadyLoggedIn = true;
         notifyListeners();
-        onLoginSuccess?.call();
+        await _startSession();
       }
     } catch (_) {}
 
@@ -139,14 +144,17 @@ class AuthProvider with ChangeNotifier {
         _seedAppApiUserId();
         await _saveUserCache(info);
         if (!isAlreadyLoggedIn) {
-          onLoginSuccess?.call();
+          await _startSession();
         }
       } else if (status == 'session_expired' ||
           (info['success'] == true && !hasValidUser)) {
         // 連得到伺服器、但確認未登入 → 真正的 session 過期,登出。
+        // 學業快取一併清除：此時多半還沒有任何資料頁被開啟，DataProvider
+        // 尚未建立，登出回呼接不到人。
         _user = null;
         await _clearUserCache();
         await _apiService.logout();
+        await AcademicCache.clearAll();
       } else {
         // 其他不明錯誤(解析失敗等):無法確定 session 是否還有效,
         // 保守起見保留快取,不要把使用者踢出去。
@@ -154,7 +162,7 @@ class AuthProvider with ChangeNotifier {
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
           if (!isAlreadyLoggedIn) {
-            onLoginSuccess?.call();
+            await _startSession();
           }
         }
       }
@@ -164,7 +172,7 @@ class AuthProvider with ChangeNotifier {
         if (cachedStr != null) {
           _user = jsonDecode(cachedStr);
           if (!isAlreadyLoggedIn) {
-            onLoginSuccess?.call();
+            await _startSession();
           }
         }
       } catch (_) {}
@@ -172,6 +180,23 @@ class AuthProvider with ChangeNotifier {
       _isInitialized = true;
       notifyListeners();
     }
+  }
+
+  /// 目前登入者的學號。無法判定時回傳空字串。
+  String _currentAccountId() {
+    final userMap = _user?['user'];
+    final id = (userMap is Map ? userMap['學號'] : null) ?? _user?['username'];
+    return id?.toString().trim() ?? '';
+  }
+
+  /// 建立 session 後的統一收尾：先確保本機快取確實屬於這個帳號
+  /// （不符就整份清掉），再通知資料層開始載入。
+  ///
+  /// 所有登入路徑都走這裡，而不是各自呼叫 [onLoginSuccess] —— 這樣新增路徑時
+  /// 不會又漏掉快取歸屬檢查。
+  Future<void> _startSession() async {
+    await AcademicCache.claimFor(_currentAccountId());
+    onLoginSuccess?.call();
   }
 
   /// Feeds the app-endpoint client the student ID from the authoritative web
@@ -238,7 +263,7 @@ class AuthProvider with ChangeNotifier {
         await _saveUserCache(_user!);
         _isLoading = false;
         notifyListeners();
-        onLoginSuccess?.call();
+        await _startSession();
         return true;
       }
 
@@ -329,7 +354,7 @@ class AuthProvider with ChangeNotifier {
 
     _clearMfaState();
     notifyListeners();
-    onLoginSuccess?.call();
+    await _startSession();
   }
 
   void _clearMfaState() {
@@ -451,6 +476,9 @@ class AuthProvider with ChangeNotifier {
     await _clearUserCache();
     _clearMfaState();
     _user = null;
+    // 直接清除學業快取，不透過 onLogoutCallback —— DataProvider 是惰性建立的，
+    // 回呼可能還沒接上。回呼仍保留，負責重置它自己的記憶體狀態。
+    await AcademicCache.clearAll();
     onLogoutCallback?.call();
     notifyListeners();
   }

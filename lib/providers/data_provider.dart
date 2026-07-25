@@ -7,8 +7,7 @@ import '../repositories/course_repository.dart';
 import '../repositories/refresh_outcome.dart';
 import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
-import '../services/course_detail_cache.dart';
-import '../services/calendar_cache_service.dart';
+import '../services/academic_cache.dart';
 import '../models/grade_report.dart';
 import '../models/graduation_report.dart';
 import '../models/schedule_event.dart';
@@ -242,11 +241,9 @@ class DataProvider with ChangeNotifier {
     _isPrefetching = false;
     notifyListeners();
 
-    await _gradesRepo.clear();
-    await _graduationRepo.clear();
-    await _courseRepo.clear();
-    await CourseDetailCache.clearAll();
-    await CalendarCacheService.clearAllCache();
+    // 實際的資料清除交給 [AcademicCache]（不依賴任何 provider，登出時
+    // AuthProvider 也會直接呼叫）。這裡只負責重置自己的記憶體狀態。
+    await AcademicCache.clearAll();
   }
 
   Future<void> fetchGrades({bool force = false}) async {

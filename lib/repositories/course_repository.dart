@@ -51,16 +51,6 @@ class CourseRepository {
     return (outcome: RefreshOutcome.success, snapshot: snapshot);
   }
 
-  Future<void> clear() async {
-    await _db.transaction(() async {
-      await _db.delete(_db.scheduleCourses).go();
-      await _db.delete(_db.semesterScheduleCacheTable).go();
-      await (_db.delete(
-        _db.cacheMeta,
-      )..where((t) => t.datasetKey.equals(_datasetKey))).go();
-    });
-  }
-
   /// 載入所有已持久化的「其他學期」課表（key = 學期下拉選單 value）。
   /// 啟動時用來還原記憶體快取，使歷史學期跨重啟仍可離線顯示。
   Future<Map<String, List<ScheduleEvent>>> loadCachedSemesters() async {

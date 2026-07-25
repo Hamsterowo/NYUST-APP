@@ -51,20 +51,6 @@ class GradesRepository {
     return RefreshOutcome.success;
   }
 
-  Future<void> clear() async {
-    await _db.transaction(() async {
-      await _db.delete(_db.gradesCourses).go();
-      await _db.delete(_db.gradesSemesters).go();
-      await _db.delete(_db.gradesCumulative).go();
-      await (_db.delete(
-        _db.cacheMeta,
-      )..where((t) => t.datasetKey.equals(_datasetKey))).go();
-    });
-    try {
-      await _secureStorage.delete(key: 'cache_grades');
-    } catch (_) {}
-  }
-
   Future<bool> _isStale() async {
     final meta = await (_db.select(
       _db.cacheMeta,

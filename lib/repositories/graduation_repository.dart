@@ -39,16 +39,6 @@ class GraduationRepository {
     return RefreshOutcome.success;
   }
 
-  Future<void> clear() async {
-    await _db.transaction(() async {
-      await _db.delete(_db.graduationCredits).go();
-      await _db.delete(_db.graduationInfo).go();
-      await (_db.delete(
-        _db.cacheMeta,
-      )..where((t) => t.datasetKey.equals(_datasetKey))).go();
-    });
-  }
-
   Future<bool> _isStale() async {
     final meta = await (_db.select(
       _db.cacheMeta,
