@@ -124,10 +124,6 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
       });
     }
 
-    if (_splashDone) {
-      return auth.isLoggedIn ? const HomeScreen() : LoginScreen();
-    }
-
     if (_goingToLogin == null) {
       return Scaffold(
         backgroundColor: colorScheme.surface,
@@ -137,17 +133,28 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
       );
     }
 
-    final destination = _goingToLogin!
-        ? LoginScreen(showIcon: false)
+    // 動畫進行中先用啟動當下的快照，結束後才跟隨即時的登入狀態
+    // （這樣登入成功後才會換到 HomeScreen）。
+    final goingToLogin = _splashDone ? !auth.isLoggedIn : _goingToLogin!;
+
+    // 登入頁的圖示在動畫期間隱藏、結束後出現——維持原本的視覺。
+    final destination = goingToLogin
+        ? LoginScreen(showIcon: _splashDone)
         : const HomeScreen();
 
+    // 動畫前後一律回傳同樣形狀的 Stack，只有覆蓋層會消失。
+    // 若像以往那樣在動畫結束時改回「直接回傳 destination」，根節點型別就會
+    // 從 Stack 變成 LoginScreen，Flutter 會拆掉整棵子樹重建 —— 登入頁因此被
+    // 掛載兩次，initState 也就抓了兩次驗證碼（兩次都會清 cookie，互相把對方的
+    // session 洗掉，導致第一次登入失敗）。
     return Stack(
       children: [
         destination,
-        AnimatedBuilder(
-          animation: _controller,
-          builder: (context, _) => _buildOverlay(context, colorScheme),
-        ),
+        if (!_splashDone)
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) => _buildOverlay(context, colorScheme),
+          ),
       ],
     );
   }

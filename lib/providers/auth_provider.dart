@@ -213,7 +213,18 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchCaptcha() async {
+  /// 進行中的驗證碼請求。取驗證碼會先清空 cookie 再建立新的登入 session，
+  /// 兩個請求並行時後者會把前者的 session 洗掉，導致畫面上的驗證碼與實際
+  /// session 不相符。並行呼叫一律共用同一次請求。
+  Future<void>? _captchaRequest;
+
+  Future<void> fetchCaptcha() {
+    return _captchaRequest ??= _fetchCaptcha().whenComplete(() {
+      _captchaRequest = null;
+    });
+  }
+
+  Future<void> _fetchCaptcha() async {
     _isLoading = true;
     _error = null;
     _errorDetail = null;
