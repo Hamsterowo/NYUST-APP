@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../../models/graduation_report.dart';
 import '../../utils/network_error.dart';
+import '../scrape_result.dart';
 import 'base_scraper.dart';
 
 /// 處理畢業審核資料爬取的類別
@@ -11,7 +13,7 @@ class GraduationScraper extends BaseScraper {
       'https://webapp.yuntech.edu.tw/WebNewCAS/Graduation/Score/StudGradCour.aspx';
 
   /// 獲取畢業審核資料
-  Future<Map<String, dynamic>> getGraduation() async {
+  Future<ScrapeResult<GraduationReport>> getGraduation() async {
     try {
       if (kDebugMode)
         print(
@@ -36,11 +38,9 @@ class GraduationScraper extends BaseScraper {
         );
 
       if (response.data.toString().contains('Login.aspx')) {
-        return {
-          'success': false,
-          'status': 'session_expired',
-          'message': 'Session expired',
-        };
+        return ScrapeResult<GraduationReport>.failure(
+          RefreshOutcome.sessionExpired,
+        );
       }
 
       String getTextSafely(String id) {
@@ -103,21 +103,25 @@ class GraduationScraper extends BaseScraper {
       if (kDebugMode)
         print('GraduationScraper: Successfully extracted graduation info');
 
-      return {'success': true, 'graduation_info': data};
+      return ScrapeResult.success(
+        GraduationReport.fromJson({'success': true, 'graduation_info': data}),
+      );
     } catch (e) {
-      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      // 先判離線再歸類其他錯誤；訊息僅供除錯 log，不進 UI。
       if (isNetworkError(e)) {
-        return {
-          'success': false,
-          'status': 'network_error',
-          'message': 'Network error fetching graduation info: $e',
-        };
+        if (kDebugMode) {
+          print('GraduationScraper: Network error fetching graduation: $e');
+        }
+        return ScrapeResult<GraduationReport>.failure(
+          RefreshOutcome.networkError,
+        );
       }
-      return {
-        'success': false,
-        'status': 'error',
-        'message': 'Failed to fetch graduation info: $e',
-      };
+      if (kDebugMode) {
+        print('GraduationScraper: Failed to fetch graduation info: $e');
+      }
+      return ScrapeResult<GraduationReport>.failure(
+        RefreshOutcome.serviceError,
+      );
     }
   }
 }

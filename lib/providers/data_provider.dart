@@ -10,6 +10,7 @@ import '../services/connectivity_service.dart';
 import '../services/course_detail_cache.dart';
 import '../services/calendar_cache_service.dart';
 import '../models/grade_report.dart';
+import '../models/graduation_report.dart';
 import '../models/schedule_event.dart';
 import 'auth_provider.dart';
 
@@ -27,7 +28,7 @@ class DataProvider with ChangeNotifier {
   late final CourseRepository _courseRepo;
 
   StreamSubscription<GradeReport?>? _gradesSub;
-  StreamSubscription<Map<String, dynamic>?>? _graduationSub;
+  StreamSubscription<GraduationReport?>? _graduationSub;
   StreamSubscription<Map<String, dynamic>?>? _scheduleSub;
   StreamSubscription<bool>? _connSub;
 
@@ -45,7 +46,7 @@ class DataProvider with ChangeNotifier {
   /// 「無法連線至成績系統」或通用載入失敗。成功或未失敗時為 null。
   RefreshOutcome? gradesFailReason;
 
-  Map<String, dynamic>? graduationData;
+  GraduationReport? graduationData;
   bool isLoadingGraduation = false;
   bool graduationFailed = false;
   RefreshOutcome? graduationFailReason;
@@ -106,8 +107,8 @@ class DataProvider with ChangeNotifier {
       _markCacheLoaded();
       notifyListeners();
     });
-    _graduationSub = _graduationRepo.watchGraduation().listen((map) {
-      graduationData = map;
+    _graduationSub = _graduationRepo.watchGraduation().listen((report) {
+      graduationData = report;
       _markCacheLoaded();
       notifyListeners();
     });

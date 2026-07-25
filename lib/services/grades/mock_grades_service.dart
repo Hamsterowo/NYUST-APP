@@ -1,4 +1,5 @@
 import '../../models/grade_report.dart';
+import '../../models/graduation_report.dart';
 import '../scrape_result.dart';
 import 'grades_service.dart';
 import '../mock/mock_data.dart';
@@ -10,5 +11,6 @@ class MockGradesService implements GradesService {
       ScrapeResult.success(GradeReport.fromJson(MockData.grades));
 
   @override
-  Future<Map<String, dynamic>> getGraduation() async => MockData.graduation;
+  Future<ScrapeResult<GraduationReport>> getGraduation() async =>
+      ScrapeResult.success(GraduationReport.fromJson(MockData.graduation));
 }

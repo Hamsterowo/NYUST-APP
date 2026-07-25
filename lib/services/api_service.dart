@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../models/grade_report.dart';
+import '../models/graduation_report.dart';
 import 'api_client.dart';
 import 'demo_mode.dart';
 import 'scrape_result.dart';
@@ -100,7 +101,7 @@ class ApiService {
   Future<ScrapeResult<GradeReport>> getGrades() =>
       _factory.gradesService.getGrades();
 
-  Future<Map<String, dynamic>> getGraduation() =>
+  Future<ScrapeResult<GraduationReport>> getGraduation() =>
       _factory.gradesService.getGraduation();
 
   // ---- Course ----

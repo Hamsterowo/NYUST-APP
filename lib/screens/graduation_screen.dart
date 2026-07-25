@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
+import '../models/graduation_report.dart';
 import '../providers/providers.dart';
 import '../repositories/refresh_outcome.dart';
 import '../widgets/custom_app_bar.dart';
@@ -68,22 +69,10 @@ class GraduationContent extends ConsumerWidget {
       return _buildGraduationSkeleton(context, colorScheme);
     }
 
-    final info = data.graduationData?['graduation_info'];
+    final info = data.graduationData;
     if (info == null) {
       return Center(child: Text(AppLocalizations.of(context).gradNoData));
     }
-
-    final breakdown =
-        info['credits_breakdown'] ??
-        {
-          "pe": "0",
-          "civilization": "0",
-          "literature": "0",
-          "general": "0",
-          "dept_required": "0",
-          "elective": "0",
-          "total": "0",
-        };
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -100,7 +89,7 @@ class GraduationContent extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildCreditTable(context, breakdown),
+          _buildCreditTable(context, info),
           const SizedBox(height: 6),
           Text(
             AppLocalizations.of(context).gradTotalNotice,
@@ -108,8 +97,7 @@ class GraduationContent extends ConsumerWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          if (info['missing_courses_text'] != null &&
-              info['missing_courses_text'].isNotEmpty) ...[
+          if (info.missingCoursesText.isNotEmpty) ...[
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context).gradMissingRequiredCourses,
@@ -125,10 +113,7 @@ class GraduationContent extends ConsumerWidget {
               color: colorScheme.errorContainer,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: _buildMissingCoursesList(
-                  context,
-                  info['missing_courses_text'],
-                ),
+                child: _buildMissingCoursesList(context, info.missingCourses),
               ),
             ),
           ],
@@ -198,7 +183,7 @@ class GraduationContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, Map info) {
+  Widget _buildSummaryCard(BuildContext context, GraduationReport info) {
     final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 2,
@@ -213,7 +198,7 @@ class GraduationContent extends ConsumerWidget {
               style: Theme.of(context).textTheme.labelLarge,
             ),
             Text(
-              _formatCreditsText(context, info["total_credits"]?.toString()),
+              _formatCreditsText(context, info.totalCredits),
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -228,12 +213,14 @@ class GraduationContent extends ConsumerWidget {
                 _buildBadge(
                   context,
                   AppLocalizations.of(context).gradEnglishThreshold,
-                  info['english_threshold'],
+                  info.englishThreshold,
                 ),
                 _buildBadge(
                   context,
                   AppLocalizations.of(context).gradInternshipThreshold,
-                  info['internship_threshold'] ?? "N/A",
+                  info.internshipThreshold.isNotEmpty
+                      ? info.internshipThreshold
+                      : "N/A",
                 ),
               ],
             ),
@@ -302,25 +289,46 @@ class GraduationContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildCreditTable(BuildContext context, Map breakdown) {
-    final rows = [
-      'pe',
-      'civilization',
-      'literature',
-      'general',
-      'dept_required',
-      'elective',
-      'total',
-    ];
-    final labels = {
-      'pe': AppLocalizations.of(context).gradLabelPE,
-      'civilization': AppLocalizations.of(context).gradLabelCivilization,
-      'literature': AppLocalizations.of(context).gradLabelLiterature,
-      'general': AppLocalizations.of(context).gradLabelGeneral,
-      'dept_required': AppLocalizations.of(context).gradLabelDeptRequired,
-      'elective': AppLocalizations.of(context).gradLabelElective,
-      'total': AppLocalizations.of(context).gradLabelTotal,
-    };
+  Widget _buildCreditTable(BuildContext context, GraduationReport info) {
+    // 每一列 = 標籤 + 從各分組取出該類別的具名選取器（順序即畫面列順序）。
+    final rows =
+        <({String label, String Function(CreditGroup) value, bool isTotal})>[
+          (
+            label: AppLocalizations.of(context).gradLabelPE,
+            value: (g) => g.pe,
+            isTotal: false,
+          ),
+          (
+            label: AppLocalizations.of(context).gradLabelCivilization,
+            value: (g) => g.civilization,
+            isTotal: false,
+          ),
+          (
+            label: AppLocalizations.of(context).gradLabelLiterature,
+            value: (g) => g.literature,
+            isTotal: false,
+          ),
+          (
+            label: AppLocalizations.of(context).gradLabelGeneral,
+            value: (g) => g.general,
+            isTotal: false,
+          ),
+          (
+            label: AppLocalizations.of(context).gradLabelDeptRequired,
+            value: (g) => g.deptRequired,
+            isTotal: false,
+          ),
+          (
+            label: AppLocalizations.of(context).gradLabelElective,
+            value: (g) => g.elective,
+            isTotal: false,
+          ),
+          (
+            label: AppLocalizations.of(context).gradLabelTotal,
+            value: (g) => g.total,
+            isTotal: true,
+          ),
+        ];
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
@@ -361,8 +369,9 @@ class GraduationContent extends ConsumerWidget {
                     )
                     .toList(),
           ),
-          ...rows.map((key) {
-            final isTotal = key == 'total';
+          ...rows.map((row) {
+            final isTotal = row.isTotal;
+            final missingValue = row.value(info.missing);
             return TableRow(
               decoration: isTotal
                   ? BoxDecoration(
@@ -375,7 +384,7 @@ class GraduationContent extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    labels[key] ?? key,
+                    row.label,
                     style: TextStyle(
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -384,10 +393,7 @@ class GraduationContent extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    _formatCreditsText(
-                      context,
-                      breakdown['required_goal'][key],
-                    ),
+                    _formatCreditsText(context, row.value(info.requiredGoal)),
                     style: TextStyle(
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -396,7 +402,7 @@ class GraduationContent extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    _formatCreditsText(context, breakdown['earned'][key]),
+                    _formatCreditsText(context, row.value(info.earned)),
                     style: TextStyle(
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -405,17 +411,13 @@ class GraduationContent extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    _formatCreditsText(context, breakdown['missing'][key]),
+                    _formatCreditsText(context, missingValue),
                     style: TextStyle(
                       color:
-                          (() {
-                            final val =
-                                breakdown['missing'][key]?.toString() ?? '';
-                            return val == "0" ||
-                                val.startsWith('0') ||
-                                val == "Pass" ||
-                                val.isEmpty;
-                          })()
+                          (missingValue == "0" ||
+                              missingValue.startsWith('0') ||
+                              missingValue == "Pass" ||
+                              missingValue.isEmpty)
                           ? colorScheme.onSurface
                           : colorScheme.error,
                       fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
@@ -430,29 +432,18 @@ class GraduationContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildMissingCoursesList(BuildContext context, String raw) {
+  Widget _buildMissingCoursesList(
+    BuildContext context,
+    List<MissingCourse> items,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    final regex = RegExp(r'^([A-Z]+\d+)(.+?)\[(\d+)\]$');
-
-    final items = raw.split('、').map((entry) {
-      final match = regex.firstMatch(entry.trim());
-      if (match != null) {
-        return {
-          'code': match.group(1)!,
-          'name': match.group(2)!,
-          'year': int.tryParse(match.group(3)!) ?? 0,
-        };
-      }
-      return {'code': '', 'name': entry.trim(), 'year': 0};
-    }).toList()..sort((a, b) => (a['year'] as int).compareTo(b['year'] as int));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: items.map((item) {
-        final year = item['year'] as int;
+        final year = item.year;
         final label =
-            '${year > 0 ? AppLocalizations.of(context).gradYearFormat(year.toString()) : '??'} - ${item['code']} ${item['name']}';
+            '${year > 0 ? AppLocalizations.of(context).gradYearFormat(year.toString()) : '??'} - ${item.code} ${item.name}';
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 2.0),
           child: Row(
