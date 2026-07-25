@@ -1,3 +1,4 @@
+import '../../models/course_detail_model.dart';
 import '../../models/schedule_event.dart';
 import '../scrape_result.dart';
 import 'course_service.dart';
@@ -14,10 +15,17 @@ class MockCourseService implements CourseService {
   }
 
   @override
-  Future<Map<String, dynamic>> getCourseDetail({
+  Future<ScrapeResult<CourseDetail>> getCourseDetail({
     required String year,
     required String semester,
     required String courseNo,
-  }) async =>
-      MockData.courseDetail(year: year, semester: semester, courseNo: courseNo);
+  }) async {
+    final response = MockData.courseDetail(
+      year: year,
+      semester: semester,
+      courseNo: courseNo,
+    );
+    // MockData 回的是舊式完整信封，[CourseDetail.fromJson] 會自行解開。
+    return ScrapeResult.success(CourseDetail.fromJson(response));
+  }
 }

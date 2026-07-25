@@ -1,3 +1,4 @@
+import '../../models/course_detail_model.dart';
 import '../../models/schedule_event.dart';
 import '../scrape_result.dart';
 
@@ -7,8 +8,8 @@ abstract interface class CourseService {
   /// [semester] 為學期代碼（null = 當前學期）。
   Future<ScrapeResult<ScheduleSnapshot>> getSchedule({String? semester});
 
-  /// 取得單一課程的詳細資訊。（尚未型別化，見票 04 的後續項目。）
-  Future<Map<String, dynamic>> getCourseDetail({
+  /// 取得單一課程的詳細資訊（課綱）。
+  Future<ScrapeResult<CourseDetail>> getCourseDetail({
     required String year,
     required String semester,
     required String courseNo,

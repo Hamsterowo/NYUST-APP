@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
+import '../../models/course_detail_model.dart';
 import '../../models/schedule_event.dart';
 import '../../utils/network_error.dart';
 import '../course/course_service.dart';
@@ -252,7 +253,8 @@ class ScheduleScraper extends BaseScraper implements CourseService {
   }
 
   /// 獲取課程詳細資訊 (大綱)
-  Future<Map<String, dynamic>> getCourseDetail({
+  @override
+  Future<ScrapeResult<CourseDetail>> getCourseDetail({
     required String year,
     required String semester,
     required String courseNo,
@@ -333,19 +335,18 @@ class ScheduleScraper extends BaseScraper implements CourseService {
         }
       }
 
-      return {'status': 'success', 'data': courseDetail};
+      return ScrapeResult.success(CourseDetail.fromJson(courseDetail));
     } catch (e) {
-      // 先判離線再歸類其他錯誤；message 僅供除錯 log，不進 UI。
+      // 先判離線再歸類其他錯誤；訊息僅供除錯 log，不進 UI。
       if (isNetworkError(e)) {
-        return {
-          'status': 'network_error',
-          'message': 'Network error fetching course detail: $e',
-        };
+        if (kDebugMode) {
+          print('ScheduleScraper: Network error fetching course detail: $e');
+        }
+        return ScrapeResult<CourseDetail>.failure(RefreshOutcome.networkError);
       }
-      return {
-        'status': 'error',
-        'message': 'Failed to fetch course detail: $e',
-      };
+      if (kDebugMode)
+        print('ScheduleScraper: Failed to fetch course detail: $e');
+      return ScrapeResult<CourseDetail>.failure(RefreshOutcome.serviceError);
     }
   }
 

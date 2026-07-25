@@ -7,6 +7,7 @@ import '../models/course_detail_model.dart';
 import '../models/map_building_model.dart';
 import '../services/api_service.dart';
 import '../services/course_detail_cache.dart';
+import '../services/scrape_result.dart';
 import '../utils/network_error.dart';
 import '../utils/top_snack_bar.dart';
 import 'map_screen.dart';
@@ -57,19 +58,18 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
       if (!mounted) return;
 
-      if (response != null && response['status'] == 'success') {
+      if (response.isSuccess) {
         setState(() {
-          _courseDetail = CourseDetail.fromJson(response['data']);
+          _courseDetail = response.data;
           _isLoading = false;
         });
       } else {
-        // 依 scraper 分類顯示具名「無法連線至課程大綱系統」或通用載入失敗;
-        // scraper 的 message 僅供除錯,不直接顯示給使用者。
+        // 依失敗分類顯示具名「無法連線至課程大綱系統」或通用載入失敗。
         if (kDebugMode) {
-          print('CourseDetailScreen: fetch failed: ${response?['message']}');
+          print('CourseDetailScreen: fetch failed: ${response.status}');
         }
         setState(() {
-          _errorMessage = response?['status'] == 'network_error'
+          _errorMessage = response.status == RefreshOutcome.networkError
               ? AppLocalizations.of(context).serviceUnavailable(
                   AppLocalizations.of(context).serviceCourseDetail,
                 )

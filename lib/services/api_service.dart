@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../models/course_detail_model.dart';
 import '../models/grade_report.dart';
 import '../models/graduation_report.dart';
 import '../models/schedule_event.dart';
@@ -121,7 +122,7 @@ class ApiService {
   Future<ScrapeResult<ScheduleSnapshot>> getSchedule({String? semester}) =>
       _factory.courseService.getSchedule(semester: semester);
 
-  Future<Map<String, dynamic>> getCourseDetail({
+  Future<ScrapeResult<CourseDetail>> getCourseDetail({
     required String year,
     required String semester,
     required String courseNo,

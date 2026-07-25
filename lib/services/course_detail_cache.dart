@@ -1,19 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';
+import '../models/course_detail_model.dart';
+import 'scrape_result.dart';
 
 /// 課程詳細資料的本地快取服務
 /// 使用 Drift (SQLite) 持久化，快取有效期 7 天
 /// 同時具備 in-flight 去重，避免同一門課被並行請求多次
 ///
-/// 註：對外方法簽章與過去（SharedPreferences 版本）完全相同，呼叫端無需修改。
+/// 快取內容為型別化的 [CourseDetail]；舊版存的是整個回應信封，
+/// [CourseDetail.fromJson] 會自動解開，因此升級後既有快取仍可離線使用，
+/// 並在下次重抓時自然被新格式覆蓋。
+///
 /// 所有 DB 存取都有防護，任何錯誤都會被視為「快取未命中」，確保即使資料庫
 /// 不可用（例如 Web 缺少 sqlite3.wasm）App 仍能正常運作。
 class CourseDetailCache {
   static const _cacheDuration = Duration(days: 7);
 
   /// 正在進行中的請求（courseKey → Future），用於去重
-  static final Map<String, Future<Map<String, dynamic>?>> _inFlight = {};
+  static final Map<String, Future<ScrapeResult<CourseDetail>>> _inFlight = {};
 
   static AppDatabase get _db => AppDatabase.instance;
 
@@ -22,7 +27,7 @@ class CourseDetailCache {
       '${year}_${semester}_$courseNo';
 
   /// 讀取快取，若不存在或超過有效期則回傳 null
-  static Future<Map<String, dynamic>?> get(
+  static Future<CourseDetail?> get(
     String year,
     String semester,
     String courseNo,
@@ -41,7 +46,9 @@ class CourseDetailCache {
         return null;
       }
 
-      return jsonDecode(row.dataJson) as Map<String, dynamic>;
+      return CourseDetail.fromJson(
+        Map<String, dynamic>.from(jsonDecode(row.dataJson) as Map),
+      );
     } catch (e) {
       if (kDebugMode) print('CourseDetailCache.get error: $e');
       return null;
@@ -53,7 +60,7 @@ class CourseDetailCache {
     String year,
     String semester,
     String courseNo,
-    Map<String, dynamic> data,
+    CourseDetail detail,
   ) async {
     final key = _key(year, semester, courseNo);
     try {
@@ -62,7 +69,7 @@ class CourseDetailCache {
           .insertOnConflictUpdate(
             CourseDetailCacheTableCompanion.insert(
               cacheKey: key,
-              dataJson: jsonEncode(data),
+              dataJson: jsonEncode(detail.toJson()),
               updatedAt: DateTime.now(),
             ),
           );
@@ -82,14 +89,15 @@ class CourseDetailCache {
   }
 
   /// 讀快取 → miss 則呼叫 [fetcher] → 寫快取，並行呼叫自動去重
-  static Future<Map<String, dynamic>?> getOrFetch(
+  static Future<ScrapeResult<CourseDetail>> getOrFetch(
     String year,
     String semester,
     String courseNo,
-    Future<Map<String, dynamic>> Function() fetcher,
+    Future<ScrapeResult<CourseDetail>> Function() fetcher,
   ) {
     final key = _key(year, semester, courseNo);
-    if (_inFlight.containsKey(key)) return _inFlight[key]!;
+    final inFlight = _inFlight[key];
+    if (inFlight != null) return inFlight;
 
     final future = _doGetOrFetch(year, semester, courseNo, fetcher);
     _inFlight[key] = future;
@@ -97,20 +105,19 @@ class CourseDetailCache {
     return future;
   }
 
-  static Future<Map<String, dynamic>?> _doGetOrFetch(
+  static Future<ScrapeResult<CourseDetail>> _doGetOrFetch(
     String year,
     String semester,
     String courseNo,
-    Future<Map<String, dynamic>> Function() fetcher,
+    Future<ScrapeResult<CourseDetail>> Function() fetcher,
   ) async {
     final cached = await get(year, semester, courseNo);
-    if (cached != null) return cached;
+    if (cached != null) return ScrapeResult.success(cached);
 
-    final data = await fetcher();
-    if (data['status'] == 'success') {
-      await save(year, semester, courseNo, data);
-      return data;
+    final result = await fetcher();
+    if (result.isSuccess) {
+      await save(year, semester, courseNo, result.data!);
     }
-    return data;
+    return result;
   }
 }
