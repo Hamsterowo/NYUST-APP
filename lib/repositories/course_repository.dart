@@ -25,6 +25,13 @@ class CourseRepository {
   static const String _datasetKey = 'schedule';
   static const Duration _ttl = Duration(hours: 1);
 
+  /// 學期清單在 [SemesterScheduleCacheTable] 中的保留 key。
+  ///
+  /// 學期清單與「其他學期課表」同生共死（一起寫、一起清、一起還原），因此共用
+  /// 同一張表；用底線包夾避免與學期代碼（如 `1142`）相撞，並在
+  /// [loadCachedSemesters] 明確排除。
+  static const String _semesterListKey = '__semesters__';
+
   CourseRepository(this._db, this._api);
 
   Stream<List<ScheduleEvent>> watchSchedule() {
@@ -57,6 +64,7 @@ class CourseRepository {
     final rows = await _db.select(_db.semesterScheduleCacheTable).get();
     final result = <String, List<ScheduleEvent>>{};
     for (final r in rows) {
+      if (r.cacheKey == _semesterListKey) continue;
       try {
         final raw = jsonDecode(r.dataJson) as List<dynamic>;
         result[r.cacheKey] = raw
@@ -89,6 +97,56 @@ class CourseRepository {
           ),
           mode: InsertMode.insertOrReplace,
         );
+  }
+
+  /// 持久化學期切換器所需的中繼資料。
+  ///
+  /// 各學期的課程本來就有快取，但清單本身過去只存在記憶體、且只有在真的發出
+  /// 網路請求時才會有值 —— 於是離線冷啟動時切換器不會出現，看起來就像「其他
+  /// 學期沒被快取」，即使課程其實都在。
+  Future<void> saveSemesterList(
+    List<SemesterOption> semesters,
+    String currentSemester,
+  ) async {
+    if (semesters.isEmpty) return;
+    await _db
+        .into(_db.semesterScheduleCacheTable)
+        .insert(
+          SemesterScheduleCacheTableCompanion.insert(
+            cacheKey: _semesterListKey,
+            dataJson: jsonEncode({
+              'semesters': semesters.map((s) => s.toJson()).toList(),
+              'currentSemester': currentSemester,
+            }),
+            updatedAt: DateTime.now(),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+  }
+
+  /// 讀回上次存下的學期清單。沒有紀錄（或毀損）時回傳 null。
+  Future<({List<SemesterOption> semesters, String currentSemester})?>
+  loadSemesterList() async {
+    final row = await (_db.select(
+      _db.semesterScheduleCacheTable,
+    )..where((t) => t.cacheKey.equals(_semesterListKey))).getSingleOrNull();
+    if (row == null) return null;
+
+    try {
+      final map = jsonDecode(row.dataJson) as Map<String, dynamic>;
+      final raw = (map['semesters'] as List?) ?? const [];
+      return (
+        semesters: raw
+            .map(
+              (e) =>
+                  SemesterOption.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList(),
+        currentSemester: map['currentSemester']?.toString() ?? '',
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<bool> _isStale() async {

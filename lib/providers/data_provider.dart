@@ -136,9 +136,24 @@ class DataProvider with ChangeNotifier {
   /// 使歷史學期在網路預抓完成前、甚至離線時也能立即切換顯示。
   Future<void> _hydrateSemesterCache() async {
     try {
+      // 學期清單：離線／TTL 命中時不會有網路抓取，只能靠這份還原，
+      // 否則切換器不會出現，其他學期的課即使有快取也到不了。
+      final meta = await _courseRepo.loadSemesterList();
+      if (meta != null && meta.semesters.isNotEmpty) {
+        if (scheduleSemesters.isEmpty) scheduleSemesters = meta.semesters;
+        if (currentSemester == null && meta.currentSemester.isNotEmpty) {
+          currentSemester = meta.currentSemester;
+          selectedSemester ??= currentSemester;
+        }
+      }
+
+      // 這支與 prefetchAll 併行執行：只補上還沒有的學期，
+      // 避免比較舊的快取蓋掉剛抓回來的資料。
       final cached = await _courseRepo.loadCachedSemesters();
-      if (cached.isEmpty) return;
-      _semesterCache.addAll(cached);
+      for (final entry in cached.entries) {
+        _semesterCache.putIfAbsent(entry.key, () => entry.value);
+      }
+
       notifyListeners();
     } catch (_) {
       // 還原失敗不影響當前學期顯示。
@@ -327,6 +342,15 @@ class DataProvider with ChangeNotifier {
       currentSemester = snapshot.currentSemester;
       selectedSemester ??= currentSemester;
     }
+    _persistSemesterList();
+  }
+
+  /// 把學期清單存進快取，供離線／TTL 命中時的冷啟動還原（失敗不影響顯示）。
+  void _persistSemesterList() {
+    if (scheduleSemesters.isEmpty) return;
+    _courseRepo
+        .saveSemesterList(scheduleSemesters, currentSemester ?? '')
+        .catchError((_) {});
   }
 
   /// 課表畫面開啟時呼叫：若尚不知道學期清單且在線上，補抓一次以填入切換器。
@@ -341,6 +365,7 @@ class DataProvider with ChangeNotifier {
         scheduleSemesters = snapshot.semesters;
         currentSemester = snapshot.currentSemester;
         selectedSemester ??= currentSemester;
+        _persistSemesterList();
         notifyListeners();
       }
     } catch (_) {
