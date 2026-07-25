@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../../models/graduation_report.dart';
 import '../../utils/network_error.dart';
+import '../grades/graduation_service.dart';
 import '../scrape_result.dart';
 import 'base_scraper.dart';
 
 /// 處理畢業審核資料爬取的類別
-class GraduationScraper extends BaseScraper {
+class GraduationScraper extends BaseScraper implements GraduationService {
   GraduationScraper(super.dio);
 
   static const String graduationUrl =

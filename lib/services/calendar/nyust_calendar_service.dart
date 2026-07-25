@@ -1,9 +1,9 @@
 import '../api_client.dart';
 import '../scrapers/calendar_scraper.dart';
-import 'calendar_service.dart';
 
-/// 以 YunTech 網頁為後端的 [CalendarService] 實作。
-class NyustCalendarService implements CalendarService {
+/// 學校行事曆與假日。全校共用、與帳號無關，因此 demo 模式也用這一個實作，
+/// 不需要介面（只有一個 adapter，沒有可換的第二個來源）。
+class NyustCalendarService {
   final ApiClient _client;
   late final CalendarScraper _calendarScraper;
 
@@ -11,7 +11,6 @@ class NyustCalendarService implements CalendarService {
     _calendarScraper = CalendarScraper(_client.dio);
   }
 
-  @override
   Future<Map<String, dynamic>> getCalendarEvents(
     String year, {
     String? lang,
@@ -19,12 +18,10 @@ class NyustCalendarService implements CalendarService {
     return _calendarScraper.getCalendarEvents(year, languageCode: lang);
   }
 
-  @override
   Future<Map<String, dynamic>> getHolidays(int year, {String? lang}) async {
     return _calendarScraper.getHolidays(year, languageCode: lang);
   }
 
-  @override
   Future<Map<String, dynamic>> getCalendarCombined(
     String year, {
     String? lang,

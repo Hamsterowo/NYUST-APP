@@ -103,7 +103,7 @@ class ApiService {
       _factory.gradesService.getGrades();
 
   Future<ScrapeResult<GraduationReport>> getGraduation() =>
-      _factory.gradesService.getGraduation();
+      _factory.graduationService.getGraduation();
 
   // ---- Course ----
 

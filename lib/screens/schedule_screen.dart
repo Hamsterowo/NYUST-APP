@@ -13,6 +13,7 @@ import '../repositories/refresh_outcome.dart';
 import '../services/server_time_service.dart';
 import '../theme/course_palette.dart';
 import '../utils/share_image/share_image.dart';
+import '../utils/timetable_layout.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/fade_in_card.dart';
@@ -511,60 +512,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     const minCellWidth = 46.0;
     const minCellHeight = 28.0;
 
-    final uniqueCourseNames =
-        courses
-            .map((c) => c.name)
-            .where((name) => name.isNotEmpty)
-            .toSet()
-            .toList()
-          ..sort();
-
-    int minDayIndex = 0;
-    int maxDayIndex = 4;
-    int minPeriodIndex = 1;
-    int maxPeriodIndex = 9;
-
-    if (courses.isNotEmpty) {
-      int minDay = 6;
-      int maxDay = 0;
-      int minP = _periods.length;
-      int maxP = 0;
-      bool hasClass = false;
-
-      for (var course in courses) {
-        if (course.name.isNotEmpty) {
-          hasClass = true;
-          int d = int.tryParse(course.weekday ?? '') ?? 1;
-          int dIndex = d - 1;
-          if (dIndex < minDay) minDay = dIndex;
-          if (dIndex > maxDay) maxDay = dIndex;
-
-          for (var t in course.times) {
-            int pIndex = _periods.indexOf(t);
-            if (pIndex != -1) {
-              if (pIndex < minP) minP = pIndex;
-              if (pIndex > maxP) maxP = pIndex;
-            }
-          }
-        }
-      }
-
-      if (hasClass) {
-        minDayIndex = min(minDay, 0).clamp(0, 6);
-        maxDayIndex = max(maxDay, 4).clamp(minDayIndex, 6);
-        minPeriodIndex = min(minP, 1).clamp(0, _periods.length - 1);
-        maxPeriodIndex = max(
-          maxP,
-          8,
-        ).clamp(minPeriodIndex, _periods.length - 1);
-      }
-    }
-
-    final activeDayIndices = List.generate(
-      maxDayIndex - minDayIndex + 1,
-      (i) => minDayIndex + i,
-    );
-    final activePeriods = _periods.sublist(minPeriodIndex, maxPeriodIndex + 1);
+    // 擺位規則（顯示哪幾天/哪幾節、每格放什麼課、跨節合併幾格）全部由
+    // TimetableLayout 這個純模組決定；這裡只負責畫。
+    final layout = TimetableLayout.from(courses, allPeriods: _periods);
+    final uniqueCourseNames = layout.courseNames;
+    final activeDayIndices = layout.dayIndices;
+    final activePeriods = layout.periods;
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -609,47 +562,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               : Expanded(child: label);
         }
 
-        ScheduleEvent getEventFor(int dayIndex, String period) {
-          final weekdayStr = (dayIndex + 1).toString();
-          return courses.firstWhere(
-            (c) => c.weekday == weekdayStr && c.times.contains(period),
-            orElse: () => ScheduleEvent(
-              semesterCourseNo: '',
-              deptCourseNo: '',
-              name: '',
-              courseClass: '',
-              classType: '',
-              requiredType: '',
-              credits: '',
-              timeRoomStr: '',
-              teacher: '',
-              remark: '',
-              times: [],
-            ),
-          );
-        }
-
         Widget buildColumnForDay(int dayIndex) {
           List<Widget> cells = [];
 
-          for (int i = 0; i < activePeriods.length; i++) {
-            final period = activePeriods[i];
-            final event = getEventFor(dayIndex, period);
-
-            int span = 1;
-            if (event.name.isNotEmpty) {
-              while (i + span < activePeriods.length) {
-                final nextPeriod = activePeriods[i + span];
-                final nextEvent = getEventFor(dayIndex, nextPeriod);
-
-                if (nextEvent.name == event.name &&
-                    nextEvent.semesterCourseNo == event.semesterCourseNo) {
-                  span++;
-                } else {
-                  break;
-                }
-              }
-            }
+          for (final cell in layout.column(dayIndex)) {
+            final event = cell.event;
+            final span = cell.span;
 
             final decoration = BoxDecoration(
               border: Border(
@@ -662,7 +580,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               ),
             );
 
-            final child = isLoading || !event.name.isNotEmpty
+            final child = isLoading || event == null
                 ? null
                 : _buildCourseCard(event, uniqueCourseNames);
 
@@ -674,7 +592,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
             );
 
             cells.add(cellWidget);
-            i += span - 1;
           }
 
           Widget columnWidget = Column(children: cells);

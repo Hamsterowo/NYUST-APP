@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
 import '../../utils/network_error.dart';
+import '../absent/absent_service.dart';
 import 'base_scraper.dart';
 
 /// 請假記錄查詢（WebASXASG/StudAbsentApp/DeepQry）。
@@ -9,7 +10,7 @@ import 'base_scraper.dart';
 /// 此頁為 ASP.NET WebForms：學年期以 DropDownList（AutoPostBack）切換，
 /// 資料在 `GridView1`。作法比照 [ScheduleScraper]：GET 拿到當前學期頁面，
 /// 若要看其他學期則帶 `__VIEWSTATE` 等 hidden 欄位做一次 postback。
-class AbsentScraper extends BaseScraper {
+class AbsentScraper extends BaseScraper implements AbsentService {
   AbsentScraper(super.dio);
 
   static const String absentUrl =

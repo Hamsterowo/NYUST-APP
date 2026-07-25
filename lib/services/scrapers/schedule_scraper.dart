@@ -3,11 +3,12 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
 import '../../models/schedule_event.dart';
 import '../../utils/network_error.dart';
+import '../course/course_service.dart';
 import '../scrape_result.dart';
 import 'base_scraper.dart';
 
 /// 處理課表資料爬取的類別
-class ScheduleScraper extends BaseScraper {
+class ScheduleScraper extends BaseScraper implements CourseService {
   ScheduleScraper(super.dio);
 
   static const String scheduleUrl =

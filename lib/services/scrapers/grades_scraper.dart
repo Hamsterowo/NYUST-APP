@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../../models/grade_report.dart';
 import '../../utils/network_error.dart';
+import '../grades/grades_service.dart';
 import '../scrape_result.dart';
 import 'base_scraper.dart';
 
 /// 處理成績資料爬取的類別
-class GradesScraper extends BaseScraper {
+class GradesScraper extends BaseScraper implements GradesService {
   GradesScraper(super.dio);
 
   // 固定 lang=zh-TW：學年/學期標題正則（第X學年第Y學期）與課名解析依賴中文頁面，
