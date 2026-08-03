@@ -74,6 +74,27 @@ class NotificationService {
     return (androidGranted == true) || (iosGranted == true);
   }
 
+  /// 目前是否被允許發通知。**不會**跳出授權視窗，純查詢。
+  ///
+  /// 與 [requestPermissions] 的差別在於這個可以隨時呼叫 —— 例如每次進前景時
+  /// 確認使用者有沒有中途去系統設定把通知關掉或打開。
+  Future<bool> areNotificationsEnabled() async {
+    final android = _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android != null) {
+      return await android.areNotificationsEnabled() ?? false;
+    }
+
+    final ios = _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    final options = await ios?.checkPermissions();
+    return options?.isEnabled ?? false;
+  }
+
   /// 先行建立（或更新）一個 Android channel。
   ///
   /// channel 要等到第一則通知發出後才會出現在系統通知設定裡；使用者剛打開某類

@@ -9,6 +9,7 @@ import 'info_screen.dart';
 import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import '../utils/pwa_interop.dart';
+import '../services/calendar_reminder_service.dart';
 import '../services/update_service.dart';
 import '../theme/app_colors.dart';
 
@@ -38,7 +39,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _maybeShowInstallDialog();
       // 進到主畫面後檢查 Play 是否有新版（非 Android/非 Play 來源會靜默略過）。
       UpdateService.checkForUpdate(context);
+      // 冷啟動也算一次「進前景」：跨年後第一次開 App 的次年補齊靠這一趟。
+      _refreshCalendarReminders();
     });
+  }
+
+  /// 行事曆內容或設定變了才重排（沒變就完全不動系統排程）。
+  ///
+  /// 觸發時機：冷啟動、回到前景、換語言、以及設定頁自己的變更。前三者都在這裡，
+  /// 因為 HomeScreen 已經是生命週期觀察者、也已經在盯語系。
+  void _refreshCalendarReminders() {
+    if (!CalendarReminderService.isSupported || !mounted) return;
+    CalendarReminderService.refreshIfNeeded(AppLocalizations.of(context));
   }
 
   @override
@@ -53,6 +65,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     // 下載完成後關閉 app 的情況）。
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.resumeCheck(context);
+      // 使用者可能剛從系統設定回來（改了通知權限），或學校更新了行事曆。
+      _refreshCalendarReminders();
     }
   }
 
@@ -351,6 +365,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(dataProvider).forceFetchAll();
+      // 排進系統的是固定字串，語言換了就得整批換掉。
+      _refreshCalendarReminders();
     });
   }
 

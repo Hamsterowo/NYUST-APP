@@ -37,6 +37,7 @@ class CalendarReminderService {
   static const _categoriesKey = 'calendar_reminder_categories';
   static const _rulesKey = 'calendar_reminder_rules';
   static const _scheduledIdsKey = 'calendar_reminder_scheduled_ids';
+  static const _fingerprintKey = 'calendar_reminder_fingerprint';
 
   /// 一次最多排入系統的通知數。
   ///
@@ -169,29 +170,70 @@ class CalendarReminderService {
 
   // -------------------------------------------------------------- 排程
 
-  /// 取消所有既有排程，再依目前設定重新排入。
-  ///
-  /// 取消的是「上次排進去的那些 id」而不是 `cancelAll()` —— 後者會連帶清掉
-  /// 成績通知已經顯示在通知欄的內容。
+  /// 依目前設定重排，不論內容有沒有變。設定頁改動後走這一條。
   static Future<void> reschedule(AppLocalizations l10n) async {
     if (!isSupported) return;
 
-    await _cancelScheduled();
+    final planned = await _buildPlan();
+    if (planned == null) return; // 取不到行事曆，保留既有排程。
+    await _apply(planned, l10n);
+  }
 
+  /// 只有在「排出來的東西會不一樣」時才重排。App 進前景時走這一條。
+  ///
+  /// 行事曆一年才變一次，每次開 App 都把排程翻一遍是白工；而且取消與重新排入
+  /// 之間真的有一段空窗，那段時間鬧鐘不在系統裡。所以先比指紋，一樣就不動。
+  static Future<void> refreshIfNeeded(AppLocalizations l10n) async {
+    if (!isSupported) return;
+
+    final planned = await _buildPlan();
+    if (planned == null) return; // 取不到行事曆，保留既有排程。
+
+    if (await _fingerprint(planned, l10n) == await _loadFingerprint()) return;
+
+    if (kDebugMode) {
+      print('CalendarReminderService: schedule changed, reapplying');
+    }
+    await _apply(planned, l10n);
+  }
+
+  /// 算出這一刻該排哪些通知。
+  ///
+  /// 回傳 `null` 表示**取不到行事曆**（離線、學校網站掛了）—— 那不代表既有的
+  /// 提醒不該發，只代表這一趟沒有新資料可以算，呼叫端應該原封不動地放著。
+  /// 回傳空清單則是真的沒東西要排（沒訂閱任何分類）。
+  static Future<List<PlannedReminder>?> _buildPlan() async {
     final categories = await loadCategories();
-    final rules = await loadRules();
-    if (categories.isEmpty || rules.isEmpty) return;
+    if (categories.isEmpty) return const [];
 
     final events = await _loadClassificationEvents();
-    if (events.isEmpty) return;
+    if (events.isEmpty) {
+      if (kDebugMode) {
+        print(
+          'CalendarReminderService: no calendar data, keeping existing schedule',
+        );
+      }
+      return null;
+    }
 
-    final planned = CalendarReminderPlanner.plan(
+    return CalendarReminderPlanner.plan(
       events: events,
       categories: categories,
-      rules: rules,
+      rules: await loadRules(),
       now: ServerTimeService.instance.now(),
       limit: scheduleLimit,
     );
+  }
+
+  /// 把一份規劃結果套進系統：取消舊的、排入新的、記下指紋。
+  ///
+  /// 取消的是「上次排進去的那些 id」而不是 `cancelAll()` —— 後者會連帶清掉
+  /// 成績通知已經顯示在通知欄的內容。
+  static Future<void> _apply(
+    List<PlannedReminder> planned,
+    AppLocalizations l10n,
+  ) async {
+    await _cancelScheduled();
 
     // 先記下要排哪些 id，再真的去排：中途被系統砍掉時，已排入的通知仍在追蹤
     // 清單裡、下次還取消得掉。反過來（排完才記）會留下取消不掉的孤兒排程。
@@ -208,9 +250,63 @@ class CalendarReminderService {
       }
     }
 
+    await _saveFingerprint(await _fingerprint(planned, l10n));
+
     if (kDebugMode) {
       print('CalendarReminderService: scheduled ${planned.length} reminders');
     }
+  }
+
+  /// 「排進系統的東西會長什麼樣」的指紋。
+  ///
+  /// 指紋算的是**規劃結果**而不是原始輸入。原因是規劃會截斷到 [scheduleLimit]
+  /// 則：拿行事曆內容當指紋的話，那 64 則陸續發完之後行事曆並沒有變，指紋也就
+  /// 不變，剩下的事件永遠等不到空出來的名額。改用規劃結果，某一則發過去、下一
+  /// 則遞補進來時指紋自然就變了。行事曆更新、分類與提醒清單變動也都會反映在
+  /// 規劃結果上，不必另外列。
+  ///
+  /// 另外納入兩個不影響規劃、但影響「排進去的內容」的東西：顯示語言（排進系統
+  /// 的是固定字串），以及通知權限（使用者可能剛去系統設定把它打開）。
+  static Future<String> _fingerprint(
+    List<PlannedReminder> planned,
+    AppLocalizations l10n,
+  ) async {
+    final buffer = StringBuffer()
+      ..write(l10n.localeName)
+      ..write('|')
+      ..write(await NotificationService().areNotificationsEnabled())
+      ..write('|');
+    for (final reminder in planned) {
+      buffer.write(
+        '${reminder.id}@${reminder.triggerTime.toIso8601String()}'
+        ':${reminder.eventNames.join(',')};',
+      );
+    }
+
+    // FNV-1a，與通知 id 同一套理由：String.hashCode 不保證跨版本／跨執行穩定，
+    // 存起來下次比對就對不上，會變成每次開 App 都重排一輪。
+    var hash = 0x811c9dc5;
+    for (final unit in buffer.toString().codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+    }
+    return hash.toRadixString(16);
+  }
+
+  static Future<String?> _loadFingerprint() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_fingerprintKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> _saveFingerprint(String fingerprint) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_fingerprintKey, fingerprint);
+    } catch (_) {}
   }
 
   static Future<void> _schedule(
@@ -234,19 +330,10 @@ class CalendarReminderService {
   // -------------------------------------------------------------- 除錯
 
   /// 除錯用：依目前設定重算一次規劃結果，不排程、不改動任何狀態。
-  static Future<List<PlannedReminder>> debugPlan() async {
-    final categories = await loadCategories();
-    final rules = await loadRules();
-    if (categories.isEmpty || rules.isEmpty) return const [];
-
-    return CalendarReminderPlanner.plan(
-      events: await _loadClassificationEvents(),
-      categories: categories,
-      rules: rules,
-      now: ServerTimeService.instance.now(),
-      limit: scheduleLimit,
-    );
-  }
+  ///
+  /// 走與正式排程同一條 [_buildPlan]，看到的就是實際會排進去的那一份。
+  static Future<List<PlannedReminder>> debugPlan() async =>
+      await _buildPlan() ?? const [];
 
   /// 除錯用：外掛回報的待發通知中，屬於行事曆提醒的那些 id。
   ///
@@ -312,13 +399,24 @@ class CalendarReminderService {
 
   // --------------------------------------------------------- 行事曆資料
 
-  /// 取分類判斷用的行事曆事件。
+  /// 取分類判斷用的行事曆事件，涵蓋**當年與次年**。
+  ///
+  /// 只排當年的話，空窗期正好落在寒假前後 —— 12 月時 1 月的「學期考試開始」與
+  /// 「寒假開始」都排不進來，而那是行事曆最密集的時段之一。次年行事曆在年中就
+  /// 已部分公告、之後會陸續補齊，搭配前景重排就會自然收斂。
   ///
   /// 一律取**中文**版，與目前 UI 語言無關：中文版是這份資料的正本，英文是翻譯
   /// 產物。走既有的行事曆快取層（[CalendarCacheService]），不另開第二套抓取邏輯。
   static Future<List<CalendarEvent>> _loadClassificationEvents() async {
     final year = ServerTimeService.instance.now().year;
-    return _loadYear(year);
+    final thisYear = await _loadYear(year);
+    // 當年抓不到就整趟放棄 —— 呼叫端會據此保留既有排程。若還硬帶著次年那半份
+    // 資料往下走，會變成「用不完整的行事曆重排」，把當年剩下的提醒全部清掉。
+    if (thisYear.isEmpty) return const [];
+
+    // 次年不存在、為空或抓取失敗都靜默跳過，不影響當年排程。
+    final nextYear = await _loadYear(year + 1);
+    return [...thisYear, ...nextYear];
   }
 
   static Future<List<CalendarEvent>> _loadYear(
@@ -338,8 +436,6 @@ class CalendarReminderService {
           .map((e) => CalendarEvent.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      // 抓不到行事曆就不排程，但既有的排程不受影響（已在 reschedule 前取消，
-      // 這一趟就是空的）。下次進 App 會再試一次。
       if (kDebugMode) {
         print('CalendarReminderService: load calendar $year failed: $e');
       }
