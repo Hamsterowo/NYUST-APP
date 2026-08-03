@@ -508,9 +508,7 @@
     "description": "Android system notification channel description for calendar reminders"
   },
   "calendarReminderTitle": "行事曆提醒",
-  "calendarReminderSettingsSub": "在重要日期前收到通知",
   "calendarReminderCategoriesTitle": "提醒分類",
-  "calendarReminderCategoriesHint": "打開想被提醒的分類。四個全部關閉時不會發出任何提醒。",
   "calendarReminderCategoryCourseSelection": "選課",
   "calendarReminderCategoryCourseSelectionSub": "預選、加退選、退選",
   "calendarReminderCategoryExam": "考試",
@@ -520,7 +518,24 @@
   "calendarReminderCategorySemester": "學期起訖",
   "calendarReminderCategorySemesterSub": "學期開始與結束、上課開始、寒暑假",
   "calendarReminderTimingTitle": "提醒時機",
-  "calendarReminderTimingFixed": "事件前 1 天上午 8:00",
+  "calendarReminderRuleAdd": "新增提醒",
+  "calendarReminderRuleDelete": "刪除這筆提醒",
+  "calendarReminderRuleDuplicate": "這筆提醒已經在清單裡了",
+  "calendarReminderRuleDaysLabel": "提前天數",
+  "calendarReminderRuleTimeLabel": "提醒時刻",
+  "calendarReminderRuleDayOf": "事件當天",
+  "@calendarReminderRuleDayOf": {
+    "description": "Label for a reminder with zero days before — it fires on the event day itself"
+  },
+  "calendarReminderRuleDaysBefore": "{days, plural, other{{days} 天前}}",
+  "@calendarReminderRuleDaysBefore": {
+    "description": "Label for a reminder that fires a number of days before the event",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "calendarReminderCollapsedBody": "{date} · {events}",
   "@calendarReminderCollapsedBody": {
     "description": "The notification's collapsed one-line preview: the event date, then either the single event's name or a count of that day's events",

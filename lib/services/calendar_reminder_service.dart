@@ -35,6 +35,7 @@ class CalendarReminderService {
   CalendarReminderService._();
 
   static const _categoriesKey = 'calendar_reminder_categories';
+  static const _rulesKey = 'calendar_reminder_rules';
   static const _scheduledIdsKey = 'calendar_reminder_scheduled_ids';
 
   /// 一次最多排入系統的通知數。
@@ -81,12 +82,52 @@ class CalendarReminderService {
     } catch (_) {}
   }
 
-  /// 目前的提醒清單。
+  /// 目前的提醒清單。四個分類共用同一組。
   ///
-  /// 此階段固定為「前 1 天 08:00」，尚不提供自訂（那是後續的自訂提醒清單）。
-  static Future<List<ReminderRule>> loadRules() async => const [
-    ReminderRule.defaultRule,
-  ];
+  /// 分類開關已經表達了「我在意什麼」，提醒密度是另一個獨立偏好（「我是健忘的
+  /// 人」）；兩者交叉相乘會讓設定成本與狀態複雜度都翻好幾倍，所以不做每分類
+  /// 各一組。
+  static Future<List<ReminderRule>> loadRules() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_rulesKey);
+      if (raw == null) return const [ReminderRule.defaultRule];
+
+      return _atLeastOne(
+        ReminderRule.normalizeList(
+          (jsonDecode(raw) as List).map(
+            (e) => ReminderRule.fromJson(e as Map<String, dynamic>),
+          ),
+        ),
+      );
+    } catch (_) {
+      return const [ReminderRule.defaultRule];
+    }
+  }
+
+  /// 換掉整份提醒清單並立即重排。
+  static Future<void> setRules(
+    List<ReminderRule> rules,
+    AppLocalizations l10n,
+  ) async {
+    final normalized = _atLeastOne(ReminderRule.normalizeList(rules));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _rulesKey,
+        jsonEncode(normalized.map((r) => r.toJson()).toList()),
+      );
+    } catch (_) {}
+    await reschedule(l10n);
+  }
+
+  /// 清單至少保留一筆提醒。
+  ///
+  /// 空清單的分類開關會全部亮著卻永遠不發通知 —— 那個狀態看起來像壞掉而不像
+  /// 設定。要完全靜音就把分類關掉，那才是表達「我不想被提醒」的地方。
+  /// 設定頁擋住刪到最後一筆，這裡再擋一次舊資料與程式化呼叫。
+  static List<ReminderRule> _atLeastOne(List<ReminderRule> rules) =>
+      rules.isEmpty ? const [ReminderRule.defaultRule] : rules;
 
   // ------------------------------------------------------------ 分類開關
 

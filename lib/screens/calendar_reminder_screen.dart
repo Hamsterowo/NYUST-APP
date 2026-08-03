@@ -10,10 +10,10 @@ import '../utils/calendar_reminder_planner.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 
-/// 行事曆提醒的設定頁：訂閱哪些分類，以及（之後）什麼時候提醒。
+/// 行事曆提醒的設定頁：訂閱哪些分類，以及要在事件前多久提醒。
 ///
 /// 設定頁與行事曆頁的鈴鐺都導到這裡，兩邊看到的是同一份狀態
-/// （[calendarReminderCategoriesProvider]）。
+/// （[calendarReminderCategoriesProvider]、[calendarReminderRulesProvider]）。
 class CalendarReminderScreen extends ConsumerStatefulWidget {
   const CalendarReminderScreen({super.key});
 
@@ -75,6 +75,69 @@ class _CalendarReminderScreenState
         ReminderCategory.semester => l10n.calendarReminderCategorySemesterSub,
       };
 
+  /// 一筆提醒在清單上的文字，例如「1 天前  08:00」。
+  ///
+  /// 時刻交給 [TimeOfDay.format]，12／24 小時制跟著系統設定走。
+  String _ruleLabel(
+    BuildContext context,
+    AppLocalizations l10n,
+    ReminderRule rule,
+  ) {
+    final days = rule.daysBefore == 0
+        ? l10n.calendarReminderRuleDayOf
+        : l10n.calendarReminderRuleDaysBefore(rule.daysBefore);
+    final time = TimeOfDay(
+      hour: rule.hour,
+      minute: rule.minute,
+    ).format(context);
+    return '$days  $time';
+  }
+
+  Future<void> _addRule() async {
+    final l10n = AppLocalizations.of(context);
+    final rule = await showModalBottomSheet<ReminderRule>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (_) => const _ReminderRuleSheet(),
+    );
+    if (rule == null || !mounted) return;
+
+    final current = ref.read(calendarReminderRulesProvider);
+    // 重複的提醒會算出同一個通知 id，排第二次只會覆蓋第一次 —— 與其讓它看起來
+    // 像憑空消失，不如當場說清楚。
+    if (current.contains(rule)) {
+      showTopSnackBar(
+        context,
+        l10n.calendarReminderRuleDuplicate,
+        type: SnackBarType.info,
+      );
+      return;
+    }
+    await _applyRules([...current, rule]);
+  }
+
+  Future<void> _removeRule(ReminderRule rule) async {
+    final current = ref.read(calendarReminderRulesProvider);
+    await _applyRules(current.where((r) => r != rule).toList());
+  }
+
+  Future<void> _applyRules(List<ReminderRule> rules) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    final l10n = AppLocalizations.of(context);
+    await ref
+        .read(calendarReminderRulesProvider.notifier)
+        .setRules(rules, l10n);
+
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _debugRefreshToken++;
+    });
+  }
+
   IconData _icon(ReminderCategory category) => switch (category) {
     ReminderCategory.courseSelection => Icons.playlist_add_check_rounded,
     ReminderCategory.exam => Icons.edit_note_rounded,
@@ -88,6 +151,7 @@ class _CalendarReminderScreenState
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final enabled = ref.watch(calendarReminderCategoriesProvider);
+    final rules = ref.watch(calendarReminderRulesProvider);
 
     return Scaffold(
       appBar: CustomAppBar(title: l10n.calendarReminderTitle),
@@ -120,14 +184,6 @@ class _CalendarReminderScreenState
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.calendarReminderCategoriesHint,
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              height: 1.5,
-            ),
-          ),
           const SizedBox(height: 24),
 
           Text(l10n.calendarReminderTimingTitle, style: textTheme.titleSmall),
@@ -135,12 +191,35 @@ class _CalendarReminderScreenState
           Card(
             elevation: 0,
             color: colorScheme.surfaceContainerHighest,
-            child: ListTile(
-              leading: Icon(
-                Icons.schedule_rounded,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              title: Text(l10n.calendarReminderTimingFixed),
+            child: Column(
+              children: [
+                for (final rule in rules)
+                  ListTile(
+                    leading: Icon(
+                      Icons.schedule_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(_ruleLabel(context, l10n, rule)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: l10n.calendarReminderRuleDelete,
+                      // 最後一筆不給刪：分類全開著卻永遠不發通知的狀態看起來
+                      // 像壞掉而不像設定。要完全靜音是把分類關掉。
+                      onPressed: _busy || rules.length <= 1
+                          ? null
+                          : () => _removeRule(rule),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _busy ? null : _addRule,
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: Text(l10n.calendarReminderRuleAdd),
             ),
           ),
 
@@ -149,6 +228,124 @@ class _CalendarReminderScreenState
             _DebugScheduleInspector(refreshToken: _debugRefreshToken),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// 新增一筆提醒的底部面板。回傳新的 [ReminderRule]，取消則回傳 null。
+class _ReminderRuleSheet extends StatefulWidget {
+  const _ReminderRuleSheet();
+
+  @override
+  State<_ReminderRuleSheet> createState() => _ReminderRuleSheetState();
+}
+
+class _ReminderRuleSheetState extends State<_ReminderRuleSheet> {
+  /// 提前天數的可選範圍。從 0（事件當天）起跳 —— 選單裡根本沒有負數，
+  /// 所以「事件之後的提醒」在介面上就不可能設得出來。
+  static const _maxDaysBefore = 30;
+
+  int _daysBefore = ReminderRule.defaultRule.daysBefore;
+  TimeOfDay _time = TimeOfDay(
+    hour: ReminderRule.defaultRule.hour,
+    minute: ReminderRule.defaultRule.minute,
+  );
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _time);
+    if (picked != null && mounted) setState(() => _time = picked);
+  }
+
+  String _dayLabel(AppLocalizations l10n, int days) => days == 0
+      ? l10n.calendarReminderRuleDayOf
+      : l10n.calendarReminderRuleDaysBefore(days);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.calendarReminderRuleAdd,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Icon(
+                  Icons.today_rounded,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Text(l10n.calendarReminderRuleDaysLabel)),
+                DropdownButton<int>(
+                  value: _daysBefore,
+                  onChanged: (value) {
+                    if (value != null) setState(() => _daysBefore = value);
+                  },
+                  items: [
+                    for (var d = 0; d <= _maxDaysBefore; d++)
+                      DropdownMenuItem(
+                        value: d,
+                        child: Text(_dayLabel(l10n, d)),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule_rounded,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Text(l10n.calendarReminderRuleTimeLabel)),
+                TextButton(
+                  onPressed: _pickTime,
+                  child: Text(_time.format(context)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                context,
+                ReminderRule(
+                  daysBefore: _daysBefore,
+                  hour: _time.hour,
+                  minute: _time.minute,
+                ),
+              ),
+              child: Text(l10n.confirm),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel),
+            ),
+          ],
+        ),
       ),
     );
   }

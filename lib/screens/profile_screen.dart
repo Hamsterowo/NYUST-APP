@@ -441,13 +441,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     Icons.language,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  title: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).languageSetting,
-                                  ),
-                                  subtitle: Text(
-                                    _currentLanguageLabel(context),
+                                  // 目前語言接在標題右邊而不是放 subtitle：這一列
+                                  // 因此與卡片內其他列同高，不會單獨長一截。
+                                  title: Row(
+                                    // 兩段字級不同（標題 bodyLarge、語言
+                                    // bodyMedium），置中會讓小字浮在半空中。
+                                    // 對齊基線讓它像坐在同一行字上。
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).languageSetting,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Flexible(
+                                        child: Text(
+                                          _currentLanguageLabel(context),
+                                          overflow: TextOverflow.ellipsis,
+                                          // ListTile 的 subtitle 預設樣式：
+                                          // bodyMedium 配 onSurfaceVariant。
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   trailing: Icon(
                                     Icons.chevron_right,
@@ -535,11 +558,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       AppLocalizations.of(
                                         context,
                                       ).calendarReminderTitle,
-                                    ),
-                                    subtitle: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).calendarReminderSettingsSub,
                                     ),
                                     trailing: Icon(
                                       Icons.chevron_right,

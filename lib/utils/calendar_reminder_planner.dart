@@ -77,6 +77,21 @@ class ReminderRule {
     minute: (json['minute'] as num?)?.toInt() ?? 0,
   );
 
+  /// 正規化一份提醒清單：丟掉無效的、去重，並由遠到近排序。
+  ///
+  /// 去重是必要的而不是整潔：兩筆相同的提醒會算出**同一個通知 id**，排第二次
+  /// 只會覆蓋第一次，看起來像其中一筆憑空消失。
+  static List<ReminderRule> normalizeList(Iterable<ReminderRule> rules) {
+    final unique = rules.where((r) => r.isValid).toSet().toList();
+    unique.sort((a, b) {
+      final byDays = b.daysBefore.compareTo(a.daysBefore);
+      if (byDays != 0) return byDays;
+      final byHour = a.hour.compareTo(b.hour);
+      return byHour != 0 ? byHour : a.minute.compareTo(b.minute);
+    });
+    return unique;
+  }
+
   @override
   bool operator ==(Object other) =>
       other is ReminderRule &&

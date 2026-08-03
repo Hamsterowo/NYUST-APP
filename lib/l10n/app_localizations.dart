@@ -1868,23 +1868,11 @@ abstract class AppLocalizations {
   /// **'行事曆提醒'**
   String get calendarReminderTitle;
 
-  /// No description provided for @calendarReminderSettingsSub.
-  ///
-  /// In zh, this message translates to:
-  /// **'在重要日期前收到通知'**
-  String get calendarReminderSettingsSub;
-
   /// No description provided for @calendarReminderCategoriesTitle.
   ///
   /// In zh, this message translates to:
   /// **'提醒分類'**
   String get calendarReminderCategoriesTitle;
-
-  /// No description provided for @calendarReminderCategoriesHint.
-  ///
-  /// In zh, this message translates to:
-  /// **'打開想被提醒的分類。四個全部關閉時不會發出任何提醒。'**
-  String get calendarReminderCategoriesHint;
 
   /// No description provided for @calendarReminderCategoryCourseSelection.
   ///
@@ -1940,11 +1928,47 @@ abstract class AppLocalizations {
   /// **'提醒時機'**
   String get calendarReminderTimingTitle;
 
-  /// No description provided for @calendarReminderTimingFixed.
+  /// No description provided for @calendarReminderRuleAdd.
   ///
   /// In zh, this message translates to:
-  /// **'事件前 1 天上午 8:00'**
-  String get calendarReminderTimingFixed;
+  /// **'新增提醒'**
+  String get calendarReminderRuleAdd;
+
+  /// No description provided for @calendarReminderRuleDelete.
+  ///
+  /// In zh, this message translates to:
+  /// **'刪除這筆提醒'**
+  String get calendarReminderRuleDelete;
+
+  /// No description provided for @calendarReminderRuleDuplicate.
+  ///
+  /// In zh, this message translates to:
+  /// **'這筆提醒已經在清單裡了'**
+  String get calendarReminderRuleDuplicate;
+
+  /// No description provided for @calendarReminderRuleDaysLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'提前天數'**
+  String get calendarReminderRuleDaysLabel;
+
+  /// No description provided for @calendarReminderRuleTimeLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'提醒時刻'**
+  String get calendarReminderRuleTimeLabel;
+
+  /// Label for a reminder with zero days before — it fires on the event day itself
+  ///
+  /// In zh, this message translates to:
+  /// **'事件當天'**
+  String get calendarReminderRuleDayOf;
+
+  /// Label for a reminder that fires a number of days before the event
+  ///
+  /// In zh, this message translates to:
+  /// **'{days, plural, other{{days} 天前}}'**
+  String calendarReminderRuleDaysBefore(int days);
 
   /// The notification's collapsed one-line preview: the event date, then either the single event's name or a count of that day's events
   ///

@@ -507,4 +507,54 @@ void main() {
       expect(ReminderRule.defaultRule.minute, 0);
     });
   });
+
+  group('ReminderRule.normalizeList', () {
+    test('orders the list from the furthest ahead to the nearest', () {
+      final result = ReminderRule.normalizeList(const [
+        ReminderRule(daysBefore: 0, hour: 8, minute: 0),
+        ReminderRule(daysBefore: 7, hour: 9, minute: 0),
+        ReminderRule(daysBefore: 1, hour: 8, minute: 0),
+      ]);
+
+      expect(result.map((r) => r.daysBefore), [7, 1, 0]);
+    });
+
+    test('breaks a same-day tie by time of day', () {
+      final result = ReminderRule.normalizeList(const [
+        ReminderRule(daysBefore: 1, hour: 20, minute: 0),
+        ReminderRule(daysBefore: 1, hour: 8, minute: 30),
+        ReminderRule(daysBefore: 1, hour: 8, minute: 0),
+      ]);
+
+      expect(result.map((r) => '${r.hour}:${r.minute}'), [
+        '8:0',
+        '8:30',
+        '20:0',
+      ]);
+    });
+
+    test('drops duplicates, which would collide on the same id', () {
+      final result = ReminderRule.normalizeList(const [
+        ReminderRule(daysBefore: 1, hour: 8, minute: 0),
+        ReminderRule(daysBefore: 1, hour: 8, minute: 0),
+      ]);
+
+      expect(result, hasLength(1));
+    });
+
+    test('drops rules pointing after the event or outside a day', () {
+      final result = ReminderRule.normalizeList(const [
+        ReminderRule(daysBefore: -1, hour: 8, minute: 0),
+        ReminderRule(daysBefore: 1, hour: 24, minute: 0),
+        ReminderRule(daysBefore: 1, hour: 8, minute: 60),
+        ReminderRule(daysBefore: 1, hour: 8, minute: 0),
+      ]);
+
+      expect(result, [const ReminderRule(daysBefore: 1, hour: 8, minute: 0)]);
+    });
+
+    test('an empty list stays empty rather than falling back to a default', () {
+      expect(ReminderRule.normalizeList(const []), isEmpty);
+    });
+  });
 }

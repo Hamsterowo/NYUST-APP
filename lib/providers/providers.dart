@@ -197,6 +197,32 @@ class CalendarReminderCategoriesNotifier
   }
 }
 
+/// 行事曆提醒的提醒清單（提前 N 天 + 時刻）。四個分類共用同一組。
+final calendarReminderRulesProvider =
+    NotifierProvider<CalendarReminderRulesNotifier, List<ReminderRule>>(
+      CalendarReminderRulesNotifier.new,
+    );
+
+class CalendarReminderRulesNotifier extends Notifier<List<ReminderRule>> {
+  @override
+  List<ReminderRule> build() {
+    _load();
+    // 讀到偏好設定前先顯示預設值 —— 絕大多數使用者的實際設定就是它，
+    // 從空清單開始反而會讓每次進頁面都閃一下「尚未設定任何提醒」。
+    return const [ReminderRule.defaultRule];
+  }
+
+  Future<void> _load() async {
+    state = await CalendarReminderService.loadRules();
+  }
+
+  /// 換掉整份清單並立即重排。
+  Future<void> setRules(List<ReminderRule> rules, AppLocalizations l10n) async {
+    await CalendarReminderService.setRules(rules, l10n);
+    state = await CalendarReminderService.loadRules();
+  }
+}
+
 /// 目前是否在線上（`true` = 有網路介面）。用於離線橫幅等 UX。
 ///
 /// 初值先給 `true`，避免 App 一啟動、串流尚未回報前就閃現離線橫幅。

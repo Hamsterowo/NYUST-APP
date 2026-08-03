@@ -990,15 +990,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendarReminderTitle => 'Calendar reminders';
 
   @override
-  String get calendarReminderSettingsSub =>
-      'Get notified before important dates';
-
-  @override
   String get calendarReminderCategoriesTitle => 'Categories';
-
-  @override
-  String get calendarReminderCategoriesHint =>
-      'Turn on the categories you want to be reminded about. With all four off, no reminders are sent.';
 
   @override
   String get calendarReminderCategoryCourseSelection => 'Course selection';
@@ -1031,7 +1023,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendarReminderTimingTitle => 'When to remind';
 
   @override
-  String get calendarReminderTimingFixed => '1 day before, at 8:00 AM';
+  String get calendarReminderRuleAdd => 'Add reminder';
+
+  @override
+  String get calendarReminderRuleDelete => 'Delete this reminder';
+
+  @override
+  String get calendarReminderRuleDuplicate =>
+      'That reminder is already in the list';
+
+  @override
+  String get calendarReminderRuleDaysLabel => 'Days before';
+
+  @override
+  String get calendarReminderRuleTimeLabel => 'Time';
+
+  @override
+  String get calendarReminderRuleDayOf => 'On the day';
+
+  @override
+  String calendarReminderRuleDaysBefore(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days before',
+      one: '1 day before',
+    );
+    return '$_temp0';
+  }
 
   @override
   String calendarReminderCollapsedBody(String date, String events) {

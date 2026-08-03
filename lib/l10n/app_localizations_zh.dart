@@ -958,13 +958,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calendarReminderTitle => '行事曆提醒';
 
   @override
-  String get calendarReminderSettingsSub => '在重要日期前收到通知';
-
-  @override
   String get calendarReminderCategoriesTitle => '提醒分類';
-
-  @override
-  String get calendarReminderCategoriesHint => '打開想被提醒的分類。四個全部關閉時不會發出任何提醒。';
 
   @override
   String get calendarReminderCategoryCourseSelection => '選課';
@@ -994,7 +988,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calendarReminderTimingTitle => '提醒時機';
 
   @override
-  String get calendarReminderTimingFixed => '事件前 1 天上午 8:00';
+  String get calendarReminderRuleAdd => '新增提醒';
+
+  @override
+  String get calendarReminderRuleDelete => '刪除這筆提醒';
+
+  @override
+  String get calendarReminderRuleDuplicate => '這筆提醒已經在清單裡了';
+
+  @override
+  String get calendarReminderRuleDaysLabel => '提前天數';
+
+  @override
+  String get calendarReminderRuleTimeLabel => '提醒時刻';
+
+  @override
+  String get calendarReminderRuleDayOf => '事件當天';
+
+  @override
+  String calendarReminderRuleDaysBefore(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days 天前',
+    );
+    return '$_temp0';
+  }
 
   @override
   String calendarReminderCollapsedBody(String date, String events) {
