@@ -997,6 +997,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calendarReminderTimingFixed => '事件前 1 天上午 8:00';
 
   @override
+  String calendarReminderCollapsedBody(String date, String events) {
+    return '$date · $events';
+  }
+
+  @override
+  String calendarReminderEventCount(int count) {
+    return '$count 個事項';
+  }
+
+  @override
+  String get calendarReminderLeadToday => '今天';
+
+  @override
+  String get calendarReminderLeadTomorrow => '明天';
+
+  @override
+  String calendarReminderLeadDays(int days) {
+    return '$days 天後';
+  }
+
+  @override
   String get devCalendarReminderSection => '【開發者】排程檢視';
 
   @override

@@ -1946,6 +1946,36 @@ abstract class AppLocalizations {
   /// **'事件前 1 天上午 8:00'**
   String get calendarReminderTimingFixed;
 
+  /// The notification's collapsed one-line preview: the event date, then either the single event's name or a count of that day's events
+  ///
+  /// In zh, this message translates to:
+  /// **'{date} · {events}'**
+  String calendarReminderCollapsedBody(String date, String events);
+
+  /// Stands in for the event names on the collapsed preview when a day has more than one event. Never used for a count of 1 — a single event shows its own name instead.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 個事項'**
+  String calendarReminderEventCount(int count);
+
+  /// Notification sub-text (Android subText / iOS subtitle) when the events are on the same day
+  ///
+  /// In zh, this message translates to:
+  /// **'今天'**
+  String get calendarReminderLeadToday;
+
+  /// No description provided for @calendarReminderLeadTomorrow.
+  ///
+  /// In zh, this message translates to:
+  /// **'明天'**
+  String get calendarReminderLeadTomorrow;
+
+  /// No description provided for @calendarReminderLeadDays.
+  ///
+  /// In zh, this message translates to:
+  /// **'{days} 天後'**
+  String calendarReminderLeadDays(int days);
+
   /// No description provided for @devCalendarReminderSection.
   ///
   /// In zh, this message translates to:

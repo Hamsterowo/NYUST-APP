@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
@@ -8,6 +9,7 @@ import '../models/calendar_event.dart';
 import '../utils/calendar_reminder_planner.dart';
 import 'api_service.dart';
 import 'calendar_cache_service.dart';
+import 'calendar_reminder_notification_text.dart';
 import 'notification_channel.dart';
 import 'notification_service.dart';
 import 'server_time_service.dart';
@@ -174,15 +176,17 @@ class CalendarReminderService {
     PlannedReminder reminder,
     AppLocalizations l10n,
   ) async {
-    final channel = NotificationChannelSpec.calendarReminders(l10n);
-    final body = reminder.eventNames.join('\n');
+    final text = ReminderNotificationText.from(reminder, l10n);
 
     await NotificationService().zonedSchedule(
       id: reminder.id,
-      title: l10n.notificationChannelCalendarName,
-      body: body,
+      title: text.title,
+      body: text.collapsed,
       scheduledDate: reminder.triggerTime,
-      channel: channel,
+      channel: NotificationChannelSpec.calendarReminders(l10n),
+      styleInformation: BigTextStyleInformation(text.expanded),
+      subText: text.lead,
+      iosSubtitle: text.lead,
     );
   }
 
@@ -220,14 +224,19 @@ class CalendarReminderService {
         .toList();
   }
 
-  /// 除錯用的固定 id，落在行事曆提醒的區間尾端。
+  /// 除錯用的固定 id，落在行事曆提醒區間的尾端。
   ///
   /// 不進追蹤清單，所以 [reschedule] 不會把它取消掉 —— 重開機驗證要的就是
   /// 「排下去之後不再碰它」。
-  static const int debugTestId =
+  static const int debugTestIdMulti =
       CalendarReminderPlanner.idNamespace | 0x0FFFFFFF;
+  static const int debugTestIdSingle =
+      CalendarReminderPlanner.idNamespace | 0x0FFFFFFE;
 
-  /// 除錯用：[delay] 之後發一則內容固定的行事曆提醒。
+  /// 除錯用：[delay] 之後發兩則測試提醒 —— 一則多事件、一則單一事件。
+  ///
+  /// 刻意走與正式排程同一條 [_schedule]，所以看到的版面就是實際會發出的版面；
+  /// 兩則一起發是為了讓「一天多件事」與「一天只有一件事」兩種呈現一次看完。
   static Future<void> debugScheduleTest(
     AppLocalizations l10n,
     Duration delay,
@@ -235,12 +244,28 @@ class CalendarReminderService {
     await NotificationService().ensureChannel(
       NotificationChannelSpec.calendarReminders(l10n),
     );
-    await NotificationService().zonedSchedule(
-      id: debugTestId,
-      title: l10n.calendarReminderTitle,
-      body: 'debug test · ${DateTime.now().add(delay)}',
-      scheduledDate: DateTime.now().add(delay),
-      channel: NotificationChannelSpec.calendarReminders(l10n),
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    await _schedule(
+      PlannedReminder(
+        id: debugTestIdMulti,
+        triggerTime: now.add(delay),
+        eventDate: today.add(const Duration(days: 1)),
+        daysBefore: 1,
+        eventNames: const ['上課開始', '第1學期開始', '全校加退選開始'],
+      ),
+      l10n,
+    );
+    await _schedule(
+      PlannedReminder(
+        id: debugTestIdSingle,
+        triggerTime: now.add(delay + const Duration(seconds: 2)),
+        eventDate: today.add(const Duration(days: 3)),
+        daysBefore: 3,
+        eventNames: const ['期中考開始'],
+      ),
+      l10n,
     );
   }
 

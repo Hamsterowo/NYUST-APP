@@ -1034,6 +1034,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendarReminderTimingFixed => '1 day before, at 8:00 AM';
 
   @override
+  String calendarReminderCollapsedBody(String date, String events) {
+    return '$date · $events';
+  }
+
+  @override
+  String calendarReminderEventCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get calendarReminderLeadToday => 'Today';
+
+  @override
+  String get calendarReminderLeadTomorrow => 'Tomorrow';
+
+  @override
+  String calendarReminderLeadDays(int days) {
+    return 'In $days days';
+  }
+
+  @override
   String get devCalendarReminderSection => '[Dev] Schedule inspector';
 
   @override
