@@ -180,6 +180,81 @@ class CalendarReminderPlanner {
     return categories.any((c) => c.matches(normalized));
   }
 
+  /// 把顯示語言的事件名稱配對到中文事件的識別碼上。
+  ///
+  /// 識別碼是 `{行事曆項目 id}-{子事件序號}`，序號由爬蟲切分子事件時產生 ——
+  /// 而**兩種語言用的分隔符不一樣**：中文以 `；` 分隔，英文以 `, ` 分隔。多數
+  /// 情況兩邊切出來的筆數剛好一致，逐筆比序號也就看似可行；但只要某一筆中文
+  /// 子事件內部又含一個 `，`（例如「上課開始，註冊」），英文那一刀也會切下去，
+  /// 於是該項目底下從那裡開始整排序號錯開一格 —— 配出來的是**前一個事件的
+  /// 翻譯**，而不是配不到。逐筆比對擋得住「配不到」，擋不住「配錯」。
+  ///
+  /// 所以這裡照結構配：中文每一筆該吃掉幾個英文片段，由它自己含幾個 `，` 決定。
+  /// 加總對得起來才配，對不起來就整組沿用中文原名 —— 寧可顯示中文，也不要顯示
+  /// 錯的英文。以 2026／2027 兩年實測，這樣配的覆蓋率比逐筆比對更高（44/48 與
+  /// 25/27），而且沒有任何一筆配錯。
+  ///
+  /// 只計全形 `，`：頓號 `、` 是名稱內部的並列（「輔系、雙主修、抵免申請」），
+  /// 英文不會在那裡切開，把它算進去反而會讓整組對不齊。
+  static Map<String, String> pairDisplayNames(
+    List<CalendarEvent> events,
+    List<CalendarEvent>? displayEvents,
+  ) {
+    if (displayEvents == null || displayEvents.isEmpty) return const {};
+
+    final zhGroups = _groupById(events);
+    final displayGroups = _groupById(displayEvents);
+
+    final paired = <String, String>{};
+    zhGroups.forEach((groupId, zhItems) {
+      final displayItems = displayGroups[groupId];
+      if (displayItems == null) return;
+
+      // 中文每一筆該吃掉幾個英文片段。
+      final widths = [
+        for (final e in zhItems) '，'.allMatches(e.name).length + 1,
+      ];
+      if (widths.fold(0, (sum, w) => sum + w) != displayItems.length) return;
+
+      var cursor = 0;
+      for (var i = 0; i < zhItems.length; i++) {
+        // 用 ', ' 接回去，還原爬蟲切開前的原文。
+        paired[zhItems[i].id] = displayItems
+            .sublist(cursor, cursor + widths[i])
+            .map((e) => e.name)
+            .join(', ');
+        cursor += widths[i];
+      }
+    });
+    return paired;
+  }
+
+  /// 依識別碼的項目部分分組，組內按子事件序號排序；重複的識別碼只留第一筆。
+  static Map<String, List<CalendarEvent>> _groupById(
+    List<CalendarEvent> events,
+  ) {
+    final seen = <String>{};
+    final groups = <String, List<CalendarEvent>>{};
+    for (final event in events) {
+      if (!seen.add(event.id)) continue;
+      groups.putIfAbsent(_groupIdOf(event.id), () => []).add(event);
+    }
+    for (final items in groups.values) {
+      items.sort((a, b) => _subIndexOf(a.id).compareTo(_subIndexOf(b.id)));
+    }
+    return groups;
+  }
+
+  static String _groupIdOf(String id) {
+    final dash = id.lastIndexOf('-');
+    return dash <= 0 ? id : id.substring(0, dash);
+  }
+
+  static int _subIndexOf(String id) {
+    final dash = id.lastIndexOf('-');
+    return dash < 0 ? 0 : int.tryParse(id.substring(dash + 1)) ?? 0;
+  }
+
   /// 行事曆提醒專用的通知 id 區間起點。
   ///
   /// 成績通知用時間戳當 id，散佈在整個 32 位元正整數空間；把行事曆提醒收進一段
@@ -231,9 +306,7 @@ class CalendarReminderPlanner {
     final validRules = rules.where((r) => r.isValid).toList();
     if (validRules.isEmpty) return const [];
 
-    final displayNames = <String, String>{
-      for (final e in displayEvents ?? const <CalendarEvent>[]) e.id: e.name,
-    };
+    final displayNames = pairDisplayNames(events, displayEvents);
 
     // 同一天合併成一則通知。同一個事件即使同時命中多個分類也只會進來一次
     // （這裡只問「有沒有命中任一已訂閱分類」，不逐分類展開）；行事曆本身重複

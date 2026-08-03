@@ -175,7 +175,7 @@ class CalendarReminderService {
   static Future<void> reschedule(AppLocalizations l10n) async {
     if (!isSupported) return;
 
-    final planned = await _buildPlan();
+    final planned = await _buildPlan(l10n);
     if (planned == null) return; // 取不到行事曆，保留既有排程。
     await _apply(planned, l10n);
   }
@@ -187,7 +187,7 @@ class CalendarReminderService {
   static Future<void> refreshIfNeeded(AppLocalizations l10n) async {
     if (!isSupported) return;
 
-    final planned = await _buildPlan();
+    final planned = await _buildPlan(l10n);
     if (planned == null) return; // 取不到行事曆，保留既有排程。
 
     if (await _fingerprint(planned, l10n) == await _loadFingerprint()) return;
@@ -203,7 +203,9 @@ class CalendarReminderService {
   /// 回傳 `null` 表示**取不到行事曆**（離線、學校網站掛了）—— 那不代表既有的
   /// 提醒不該發，只代表這一趟沒有新資料可以算，呼叫端應該原封不動地放著。
   /// 回傳空清單則是真的沒東西要排（沒訂閱任何分類）。
-  static Future<List<PlannedReminder>?> _buildPlan() async {
+  static Future<List<PlannedReminder>?> _buildPlan(
+    AppLocalizations l10n,
+  ) async {
     final categories = await loadCategories();
     if (categories.isEmpty) return const [];
 
@@ -219,6 +221,7 @@ class CalendarReminderService {
 
     return CalendarReminderPlanner.plan(
       events: events,
+      displayEvents: await _loadDisplayEvents(l10n.localeName),
       categories: categories,
       rules: await loadRules(),
       now: ServerTimeService.instance.now(),
@@ -339,8 +342,8 @@ class CalendarReminderService {
   /// 除錯用：依目前設定重算一次規劃結果，不排程、不改動任何狀態。
   ///
   /// 走與正式排程同一條 [_buildPlan]，看到的就是實際會排進去的那一份。
-  static Future<List<PlannedReminder>> debugPlan() async =>
-      await _buildPlan() ?? const [];
+  static Future<List<PlannedReminder>> debugPlan(AppLocalizations l10n) async =>
+      await _buildPlan(l10n) ?? const [];
 
   /// 除錯用：外掛回報的待發通知中，屬於行事曆提醒的那些 id。
   ///
@@ -424,6 +427,26 @@ class CalendarReminderService {
     // 次年不存在、為空或抓取失敗都靜默跳過，不影響當年排程。
     final nextYear = await _loadYear(year + 1);
     return [...thisYear, ...nextYear];
+  }
+
+  /// 顯示語言那一份行事曆，供通知內文使用；UI 是中文時回傳 `null`。
+  ///
+  /// 中文時回 `null` 而不是回中文那一份：規劃模組配不到就沿用中文原名，結果
+  /// 一模一樣，多抓一次只是白費一趟請求。
+  ///
+  /// 抓失敗時回傳的是空清單而不是中止 —— 名稱配不到就退回中文，通知照發。
+  /// 這裡刻意**不**沿用 [_loadClassificationEvents] 那條「當年抓不到就整趟放棄」
+  /// 的規則：那條規則是為了分類判斷，而顯示名稱缺了只是少一層翻譯。
+  static Future<List<CalendarEvent>?> _loadDisplayEvents(
+    String localeName,
+  ) async {
+    if (!localeName.toLowerCase().startsWith('en')) return null;
+
+    final year = ServerTimeService.instance.now().year;
+    return [
+      ...await _loadYear(year, lang: 'en'),
+      ...await _loadYear(year + 1, lang: 'en'),
+    ];
   }
 
   static Future<List<CalendarEvent>> _loadYear(

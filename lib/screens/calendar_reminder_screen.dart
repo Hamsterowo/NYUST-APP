@@ -372,6 +372,12 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
   List<int> _pendingIds = const [];
   bool _loading = true;
 
+  /// 上一次讀取時的錯誤訊息；`null` = 沒出錯。
+  String? _error;
+
+  /// 目前這份清單是用哪個語系算的，用來偵測換語言。
+  Locale? _loadedLocale;
+
   @override
   void initState() {
     super.initState();
@@ -384,16 +390,36 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
     if (oldWidget.refreshToken != widget.refreshToken) _load();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 換語言後事件名稱會換成另一份，重讀一次才不會停在舊語言的清單上。
+    final locale = Localizations.localeOf(context);
+    if (_loadedLocale != null && _loadedLocale != locale) _load();
+    _loadedLocale = locale;
+  }
+
   Future<void> _load() async {
     setState(() => _loading = true);
-    final planned = await CalendarReminderService.debugPlan();
-    final pending = await CalendarReminderService.debugPendingIds();
-    if (!mounted) return;
-    setState(() {
-      _planned = planned;
-      _pendingIds = pending;
-      _loading = false;
-    });
+    try {
+      final planned = await CalendarReminderService.debugPlan(
+        AppLocalizations.of(context),
+      );
+      final pending = await CalendarReminderService.debugPendingIds();
+      if (!mounted) return;
+      setState(() {
+        _planned = planned;
+        _pendingIds = pending;
+        _error = null;
+      });
+    } catch (e) {
+      // 沒有這個 catch 的話，任何一次失敗都會把 _loading 永遠留在 true，
+      // 面板就變成一個轉不停的圈圈，而且看不出是壞了還是還在抓。
+      if (!mounted) return;
+      setState(() => _error = '$e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   Future<void> _scheduleTest(Duration delay) async {
@@ -439,57 +465,70 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
           color: colorScheme.surfaceContainerHighest,
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.devCalendarReminderCounts(
-                          _planned.length,
-                          _pendingIds.length,
-                        ),
-                        style: textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 12),
-                      if (_planned.isEmpty)
-                        Text(
-                          l10n.devCalendarReminderEmpty,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      else
-                        for (final reminder in _planned)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${_pendingIds.contains(reminder.id) ? '✓' : '✗'} '
-                                  '${DateFormat('MM/dd HH:mm').format(reminder.triggerTime)}'
-                                  '  ·  #${reminder.id}',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: Text(
-                                    reminder.eventNames.join(' / '),
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 讀取中只在最上面顯示一條細線，下面照樣留著上一次的結果。
+                // 整塊換成轉圈圈的話，慢一點就會看起來像卡住。
+                if (_loading) ...[
+                  const LinearProgressIndicator(minHeight: 2),
+                  const SizedBox(height: 12),
+                ],
+                if (_error != null) ...[
+                  Text(
+                    _error!,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                Text(
+                  l10n.devCalendarReminderCounts(
+                    _planned.length,
+                    _pendingIds.length,
+                  ),
+                  style: textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                if (_planned.isEmpty)
+                  Text(
+                    l10n.devCalendarReminderEmpty,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  for (final reminder in _planned)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${_pendingIds.contains(reminder.id) ? '✓' : '✗'} '
+                            '${DateFormat('MM/dd HH:mm').format(reminder.triggerTime)}'
+                            '  ·  #${reminder.id}',
+                            style: textTheme.bodySmall?.copyWith(
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
                               ],
                             ),
                           ),
-                    ],
-                  ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Text(
+                              reminder.eventNames.join(' / '),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 8),

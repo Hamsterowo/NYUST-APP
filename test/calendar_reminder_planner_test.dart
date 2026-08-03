@@ -444,20 +444,100 @@ void main() {
       expect(result.single.eventNames, ['Classes begin']);
     });
 
-    test(
-      'an id with no display counterpart falls back to the Chinese name',
-      () {
-        final result = plan(
-          [
-            event('2026-09-07', '上課開始', id: '9001-0'),
-            event('2026-09-07', '第1學期開始', id: '9001-1'),
-          ],
-          displayEvents: [event('2026-09-07', 'Classes begin', id: '9001-0')],
-        );
+    test('a Chinese item holding two clauses consumes two English pieces', () {
+      // The scraper splits Chinese on ；but English on ", ", so 「上課開始，註冊」
+      // stays one Chinese item while becoming two English ones. Pairing by
+      // index alone would shift every later item onto the previous one's
+      // translation.
+      final result = plan(
+        [
+          event('2026-09-07', '上課開始，註冊', id: '10411-0'),
+          event('2026-09-07', '全校加退選(網路選課)開始', id: '10411-1'),
+        ],
+        displayEvents: [
+          event('2026-09-07', 'Spring semester classes begins', id: '10411-0'),
+          event('2026-09-07', 'Enrollment', id: '10411-1'),
+          event('2026-09-07', 'On-line course add/drop begins', id: '10411-2'),
+        ],
+      );
 
-        expect(result.single.eventNames, ['Classes begin', '第1學期開始']);
-      },
-    );
+      expect(result.single.eventNames, [
+        'Spring semester classes begins, Enrollment',
+        'On-line course add/drop begins',
+      ]);
+    });
+
+    test('an ideographic comma is not a split point', () {
+      // 「輔系、雙主修、抵免申請」 is one item in both languages — English does
+      // not split there, so counting 、 would make the group fail to line up.
+      final result = plan(
+        [
+          event('2026-09-07', '上課開始', id: '10411-0'),
+          event('2026-09-07', '註冊、加退選截止', id: '10411-1'),
+        ],
+        displayEvents: [
+          event('2026-09-07', 'Classes begin', id: '10411-0'),
+          event(
+            '2026-09-07',
+            'Enrollment, course add/drop deadline',
+            id: '10411-1',
+          ),
+        ],
+      );
+
+      expect(result.single.eventNames, [
+        'Classes begin',
+        'Enrollment, course add/drop deadline',
+      ]);
+    });
+
+    test('a group whose pieces do not add up falls back entirely', () {
+      // The English feed merged two items, so nothing in this group lines up —
+      // showing Chinese beats showing the previous event's translation.
+      final result = plan(
+        [
+          event('2026-09-07', '第2學期結束', id: '10461-0'),
+          event('2026-09-07', '學期考試結束', id: '10461-1'),
+          event('2026-09-07', '暑假開始', id: '10461-2'),
+        ],
+        displayEvents: [
+          event('2026-09-07', 'End of the spring semester', id: '10461-0'),
+          event(
+            '2026-09-07',
+            'Exams ends.Summer vacation begins.',
+            id: '10461-1',
+          ),
+        ],
+      );
+
+      expect(result.single.eventNames, ['第2學期結束', '學期考試結束', '暑假開始']);
+    });
+
+    test('one group falling back does not affect another that lines up', () {
+      final result = plan(
+        [
+          event('2026-09-07', '上課開始', id: '10411-0'),
+          event('2026-09-08', '寒假結束', id: '10037-0'),
+          event('2026-09-08', '暑假開始', id: '10037-1'),
+        ],
+        displayEvents: [
+          event('2026-09-07', 'Classes begin', id: '10411-0'),
+          event('2026-09-08', 'Winter vacation ends', id: '10037-0'),
+        ],
+      );
+
+      expect(result.first.eventNames, ['Classes begin']);
+      expect(result.last.eventNames, ['寒假結束', '暑假開始']);
+    });
+
+    test('a group missing from the display feed falls back to Chinese', () {
+      final result = plan(
+        [event('2026-09-07', '上課開始', id: '9001-0')],
+        displayEvents: [event('2026-09-08', 'Something else', id: '9002-0')],
+      );
+
+      expect(result.single.eventNames, ['上課開始']);
+    });
 
     test('no display feed at all leaves every name in Chinese', () {
       final result = plan([event('2026-09-07', '上課開始', id: '9001-0')]);
