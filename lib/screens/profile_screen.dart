@@ -6,6 +6,7 @@ import '../providers/providers.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
+import 'calendar_reminder_screen.dart';
 import 'credential_screen.dart';
 import 'change_password_screen.dart';
 import '../utils/pwa_interop.dart';
@@ -15,6 +16,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:workmanager/workmanager.dart';
 import '../services/background_service.dart';
+import '../services/calendar_reminder_service.dart';
 import '../services/grade_notification_service.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -520,6 +522,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     onTap: () => _toggleGradeNotification(
                                       !gradeNotifEnabled,
                                     ),
+                                  ),
+                                ],
+                                if (CalendarReminderService.isSupported) ...[
+                                  const Divider(height: 1, indent: 56),
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.event_note_outlined,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    title: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).calendarReminderTitle,
+                                    ),
+                                    subtitle: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).calendarReminderSettingsSub,
+                                    ),
+                                    trailing: Icon(
+                                      Icons.chevron_right,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const CalendarReminderScreen(),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                                 if (kDebugMode && !kIsWeb) ...[

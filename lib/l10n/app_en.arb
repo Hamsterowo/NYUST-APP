@@ -500,6 +500,27 @@
   "languageEn": "English",
   "languageSystem": "Follow system",
   "notificationChannelCalendarName": "Calendar reminders",
-  "notificationChannelCalendarDescription": "Reminders before important calendar dates such as course selection and exams"
+  "notificationChannelCalendarDescription": "Reminders before important calendar dates such as course selection and exams",
+  "calendarReminderTitle": "Calendar reminders",
+  "calendarReminderSettingsSub": "Get notified before important dates",
+  "calendarReminderCategoriesTitle": "Categories",
+  "calendarReminderCategoriesHint": "Turn on the categories you want to be reminded about. With all four off, no reminders are sent.",
+  "calendarReminderCategoryCourseSelection": "Course selection",
+  "calendarReminderCategoryCourseSelectionSub": "Pre-registration, add/drop, withdrawal",
+  "calendarReminderCategoryExam": "Exams",
+  "calendarReminderCategoryExamSub": "Midterms and semester exams",
+  "calendarReminderCategoryRegistration": "Registration & fees",
+  "calendarReminderCategoryRegistrationSub": "Registration, tuition, student loans, refunds",
+  "calendarReminderCategorySemester": "Semester dates",
+  "calendarReminderCategorySemesterSub": "Term start and end, first day of class, vacations",
+  "calendarReminderTimingTitle": "When to remind",
+  "calendarReminderTimingFixed": "1 day before, at 8:00 AM",
+  "devCalendarReminderSection": "[Dev] Schedule inspector",
+  "devCalendarReminderCounts": "{planned} planned, {pending} pending in the plugin",
+  "devCalendarReminderEmpty": "Nothing scheduled",
+  "devCalendarReminderPendingNote": "\"Pending in the plugin\" is the plugin's own list. It survives a reboot regardless, so it cannot prove that boot rescheduling works — use the 3-minute test below for that.",
+  "devCalendarReminderTestNow": "Schedule a test reminder 15 seconds out",
+  "devCalendarReminderTestReboot": "Schedule a test reminder 3 minutes out (reboot right after)",
+  "devCalendarReminderTestScheduled": "Test reminder scheduled"
 }
 

@@ -7,11 +7,14 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../services/per_app_locale.dart';
 import 'data_provider.dart';
+import '../services/calendar_reminder_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/server_time_service.dart';
 import '../services/grade_notification_service.dart';
+import '../utils/calendar_reminder_planner.dart';
 
 /// Stage 5：DI 由 `provider` 套件全面改吃 Riverpod。
 ///
@@ -151,6 +154,45 @@ class GradeNotificationEnabledNotifier extends Notifier<bool> {
   Future<GradeNotificationResult> setEnabled(bool value) async {
     final result = await GradeNotificationService.setEnabled(value);
     state = result == GradeNotificationResult.permissionDenied ? false : value;
+    return result;
+  }
+}
+
+/// 目前已訂閱的行事曆提醒分類。預設全部關閉。
+///
+/// 設定頁與（之後的）行事曆頁鈴鐺共用此狀態，從任一入口變更後另一入口看到的
+/// 都是同一份。
+final calendarReminderCategoriesProvider =
+    NotifierProvider<CalendarReminderCategoriesNotifier, Set<ReminderCategory>>(
+      CalendarReminderCategoriesNotifier.new,
+    );
+
+class CalendarReminderCategoriesNotifier
+    extends Notifier<Set<ReminderCategory>> {
+  @override
+  Set<ReminderCategory> build() {
+    _load();
+    return const {}; // 讀到偏好設定前先當作全部關閉。
+  }
+
+  Future<void> _load() async {
+    state = await CalendarReminderService.loadCategories();
+  }
+
+  /// 開啟／關閉一個分類並立即重排；回傳結果供 UI 顯示提示（例如權限被拒）。
+  Future<CalendarReminderResult> setEnabled(
+    ReminderCategory category,
+    bool enabled,
+    AppLocalizations l10n,
+  ) async {
+    final result = await CalendarReminderService.setCategoryEnabled(
+      category,
+      enabled,
+      l10n,
+    );
+    if (result == CalendarReminderResult.applied) {
+      state = await CalendarReminderService.loadCategories();
+    }
     return result;
   }
 }

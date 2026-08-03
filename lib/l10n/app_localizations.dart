@@ -1861,6 +1861,132 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'在行事曆上的選課、考試等重要日期前提醒'**
   String get notificationChannelCalendarDescription;
+
+  /// No description provided for @calendarReminderTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'行事曆提醒'**
+  String get calendarReminderTitle;
+
+  /// No description provided for @calendarReminderSettingsSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'在重要日期前收到通知'**
+  String get calendarReminderSettingsSub;
+
+  /// No description provided for @calendarReminderCategoriesTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'提醒分類'**
+  String get calendarReminderCategoriesTitle;
+
+  /// No description provided for @calendarReminderCategoriesHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'打開想被提醒的分類。四個全部關閉時不會發出任何提醒。'**
+  String get calendarReminderCategoriesHint;
+
+  /// No description provided for @calendarReminderCategoryCourseSelection.
+  ///
+  /// In zh, this message translates to:
+  /// **'選課'**
+  String get calendarReminderCategoryCourseSelection;
+
+  /// No description provided for @calendarReminderCategoryCourseSelectionSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'預選、加退選、退選'**
+  String get calendarReminderCategoryCourseSelectionSub;
+
+  /// No description provided for @calendarReminderCategoryExam.
+  ///
+  /// In zh, this message translates to:
+  /// **'考試'**
+  String get calendarReminderCategoryExam;
+
+  /// No description provided for @calendarReminderCategoryExamSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'期中考、學期考試'**
+  String get calendarReminderCategoryExamSub;
+
+  /// No description provided for @calendarReminderCategoryRegistration.
+  ///
+  /// In zh, this message translates to:
+  /// **'註冊繳費'**
+  String get calendarReminderCategoryRegistration;
+
+  /// No description provided for @calendarReminderCategoryRegistrationSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'註冊、學雜費、就學貸款、退費'**
+  String get calendarReminderCategoryRegistrationSub;
+
+  /// No description provided for @calendarReminderCategorySemester.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期起訖'**
+  String get calendarReminderCategorySemester;
+
+  /// No description provided for @calendarReminderCategorySemesterSub.
+  ///
+  /// In zh, this message translates to:
+  /// **'學期開始與結束、上課開始、寒暑假'**
+  String get calendarReminderCategorySemesterSub;
+
+  /// No description provided for @calendarReminderTimingTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'提醒時機'**
+  String get calendarReminderTimingTitle;
+
+  /// No description provided for @calendarReminderTimingFixed.
+  ///
+  /// In zh, this message translates to:
+  /// **'事件前 1 天上午 8:00'**
+  String get calendarReminderTimingFixed;
+
+  /// No description provided for @devCalendarReminderSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'【開發者】排程檢視'**
+  String get devCalendarReminderSection;
+
+  /// No description provided for @devCalendarReminderCounts.
+  ///
+  /// In zh, this message translates to:
+  /// **'規劃 {planned} 則，外掛待發 {pending} 則'**
+  String devCalendarReminderCounts(int planned, int pending);
+
+  /// No description provided for @devCalendarReminderEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前沒有任何排程'**
+  String get devCalendarReminderEmpty;
+
+  /// No description provided for @devCalendarReminderPendingNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'「外掛待發」是外掛自己記的清單，重開機後一定還在，不能用來證明開機重排有效。要驗證重開機請用下面的 3 分鐘測試。'**
+  String get devCalendarReminderPendingNote;
+
+  /// No description provided for @devCalendarReminderTestNow.
+  ///
+  /// In zh, this message translates to:
+  /// **'排一則 15 秒後的測試提醒'**
+  String get devCalendarReminderTestNow;
+
+  /// No description provided for @devCalendarReminderTestReboot.
+  ///
+  /// In zh, this message translates to:
+  /// **'排一則 3 分鐘後的測試提醒（排完立刻重開機）'**
+  String get devCalendarReminderTestReboot;
+
+  /// No description provided for @devCalendarReminderTestScheduled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已排入測試提醒'**
+  String get devCalendarReminderTestScheduled;
 }
 
 class _AppLocalizationsDelegate

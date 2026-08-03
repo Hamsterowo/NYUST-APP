@@ -985,4 +985,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationChannelCalendarDescription =>
       'Reminders before important calendar dates such as course selection and exams';
+
+  @override
+  String get calendarReminderTitle => 'Calendar reminders';
+
+  @override
+  String get calendarReminderSettingsSub =>
+      'Get notified before important dates';
+
+  @override
+  String get calendarReminderCategoriesTitle => 'Categories';
+
+  @override
+  String get calendarReminderCategoriesHint =>
+      'Turn on the categories you want to be reminded about. With all four off, no reminders are sent.';
+
+  @override
+  String get calendarReminderCategoryCourseSelection => 'Course selection';
+
+  @override
+  String get calendarReminderCategoryCourseSelectionSub =>
+      'Pre-registration, add/drop, withdrawal';
+
+  @override
+  String get calendarReminderCategoryExam => 'Exams';
+
+  @override
+  String get calendarReminderCategoryExamSub => 'Midterms and semester exams';
+
+  @override
+  String get calendarReminderCategoryRegistration => 'Registration & fees';
+
+  @override
+  String get calendarReminderCategoryRegistrationSub =>
+      'Registration, tuition, student loans, refunds';
+
+  @override
+  String get calendarReminderCategorySemester => 'Semester dates';
+
+  @override
+  String get calendarReminderCategorySemesterSub =>
+      'Term start and end, first day of class, vacations';
+
+  @override
+  String get calendarReminderTimingTitle => 'When to remind';
+
+  @override
+  String get calendarReminderTimingFixed => '1 day before, at 8:00 AM';
+
+  @override
+  String get devCalendarReminderSection => '[Dev] Schedule inspector';
+
+  @override
+  String devCalendarReminderCounts(int planned, int pending) {
+    return '$planned planned, $pending pending in the plugin';
+  }
+
+  @override
+  String get devCalendarReminderEmpty => 'Nothing scheduled';
+
+  @override
+  String get devCalendarReminderPendingNote =>
+      '\"Pending in the plugin\" is the plugin\'s own list. It survives a reboot regardless, so it cannot prove that boot rescheduling works — use the 3-minute test below for that.';
+
+  @override
+  String get devCalendarReminderTestNow =>
+      'Schedule a test reminder 15 seconds out';
+
+  @override
+  String get devCalendarReminderTestReboot =>
+      'Schedule a test reminder 3 minutes out (reboot right after)';
+
+  @override
+  String get devCalendarReminderTestScheduled => 'Test reminder scheduled';
 }

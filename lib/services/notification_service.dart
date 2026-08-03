@@ -1,6 +1,17 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 import '../router/app_router.dart';
 import 'notification_channel.dart';
+
+/// [DateTime]（當地時間）轉成通知外掛要的 [tz.TZDateTime]。
+///
+/// 一律掛在 `tz.UTC` 這個 Location 上：外掛把 TZDateTime 換算成 epoch 毫秒再交給
+/// AlarmManager／UNCalendarNotificationTrigger，決定觸發時機的是**時刻**而不是
+/// 牆上時間，而 Dart 的 [DateTime] 已經用作業系統真正的時區規則（含日光節約）
+/// 算好了那個時刻。因此不需要 `initializeTimeZones()` 載入整份時區資料庫，也
+/// 不需要額外的裝置時區外掛去查 IANA 時區名稱。
+tz.TZDateTime toScheduleTime(DateTime localTime) =>
+    tz.TZDateTime.from(localTime, tz.UTC);
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -107,6 +118,58 @@ class NotificationService {
       payload: payload,
     );
   }
+
+  /// 排定一則在 [scheduledDate]（當地時間）發出的通知。
+  ///
+  /// Android 使用**非精確**鬧鐘：這是提前一天的提醒不是鬧鐘，20 分鐘誤差沒有
+  /// 意義，不值得換一個使用者八成不會完成的 `SCHEDULE_EXACT_ALARM` 授權跳轉，
+  /// 或 `USE_EXACT_ALARM` 帶來的 Google Play 送審風險。`allowWhileIdle` 讓它在
+  /// 手機整夜閒置進入 Doze 時仍會發出 —— 早上八點的提醒正是這個情境。
+  Future<void> zonedSchedule({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    required NotificationChannelSpec channel,
+    String? payload,
+    StyleInformation? styleInformation,
+    String? subText,
+    String? iosSubtitle,
+  }) async {
+    final DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+          subtitle: iosSubtitle,
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: channel.toAndroidDetails(
+        styleInformation: styleInformation,
+        subText: subText,
+      ),
+      iOS: darwinNotificationDetails,
+    );
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: toScheduleTime(scheduledDate),
+      notificationDetails: notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: payload,
+    );
+  }
+
+  /// 取消一則已排定（或已顯示）的通知。
+  Future<void> cancel(int id) =>
+      _flutterLocalNotificationsPlugin.cancel(id: id);
+
+  /// 目前還沒發出的排程，供除錯與驗證使用。
+  Future<List<PendingNotificationRequest>> pendingRequests() =>
+      _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
   void _navigateToGrades() {
     // 透過 go_router 導航（背景通知點擊為 App 外部進入點）。

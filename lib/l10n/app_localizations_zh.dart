@@ -953,4 +953,70 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationChannelCalendarDescription => '在行事曆上的選課、考試等重要日期前提醒';
+
+  @override
+  String get calendarReminderTitle => '行事曆提醒';
+
+  @override
+  String get calendarReminderSettingsSub => '在重要日期前收到通知';
+
+  @override
+  String get calendarReminderCategoriesTitle => '提醒分類';
+
+  @override
+  String get calendarReminderCategoriesHint => '打開想被提醒的分類。四個全部關閉時不會發出任何提醒。';
+
+  @override
+  String get calendarReminderCategoryCourseSelection => '選課';
+
+  @override
+  String get calendarReminderCategoryCourseSelectionSub => '預選、加退選、退選';
+
+  @override
+  String get calendarReminderCategoryExam => '考試';
+
+  @override
+  String get calendarReminderCategoryExamSub => '期中考、學期考試';
+
+  @override
+  String get calendarReminderCategoryRegistration => '註冊繳費';
+
+  @override
+  String get calendarReminderCategoryRegistrationSub => '註冊、學雜費、就學貸款、退費';
+
+  @override
+  String get calendarReminderCategorySemester => '學期起訖';
+
+  @override
+  String get calendarReminderCategorySemesterSub => '學期開始與結束、上課開始、寒暑假';
+
+  @override
+  String get calendarReminderTimingTitle => '提醒時機';
+
+  @override
+  String get calendarReminderTimingFixed => '事件前 1 天上午 8:00';
+
+  @override
+  String get devCalendarReminderSection => '【開發者】排程檢視';
+
+  @override
+  String devCalendarReminderCounts(int planned, int pending) {
+    return '規劃 $planned 則，外掛待發 $pending 則';
+  }
+
+  @override
+  String get devCalendarReminderEmpty => '目前沒有任何排程';
+
+  @override
+  String get devCalendarReminderPendingNote =>
+      '「外掛待發」是外掛自己記的清單，重開機後一定還在，不能用來證明開機重排有效。要驗證重開機請用下面的 3 分鐘測試。';
+
+  @override
+  String get devCalendarReminderTestNow => '排一則 15 秒後的測試提醒';
+
+  @override
+  String get devCalendarReminderTestReboot => '排一則 3 分鐘後的測試提醒（排完立刻重開機）';
+
+  @override
+  String get devCalendarReminderTestScheduled => '已排入測試提醒';
 }

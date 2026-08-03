@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- 行事曆提醒是預先排入 AlarmManager 的，重開機會把所有 alarm 清掉。
+         flutter_local_notifications 的 boot receiver 會在開機後把已排程的通知
+         重新排入，但它需要這個權限才收得到 BOOT_COMPLETED。
+         注意這裡刻意**不宣告** SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM：提醒用的
+         是非精確鬧鐘（見 NotificationService.zonedSchedule）。 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
@@ -35,6 +41,24 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- flutter_local_notifications 的排程接收器。外掛自己的 manifest 沒有
+             宣告它們，必須由 App 這一側宣告，否則排程的通知永遠不會發出。
+             ScheduledNotificationReceiver 是鬧鐘到點時真正發出通知的那一個；
+             ScheduledNotificationBootReceiver 在重開機／App 更新後把還沒發出的
+             排程重新排回 AlarmManager。 -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

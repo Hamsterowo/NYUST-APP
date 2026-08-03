@@ -506,6 +506,37 @@
   "notificationChannelCalendarDescription": "在行事曆上的選課、考試等重要日期前提醒",
   "@notificationChannelCalendarDescription": {
     "description": "Android system notification channel description for calendar reminders"
-  }
+  },
+  "calendarReminderTitle": "行事曆提醒",
+  "calendarReminderSettingsSub": "在重要日期前收到通知",
+  "calendarReminderCategoriesTitle": "提醒分類",
+  "calendarReminderCategoriesHint": "打開想被提醒的分類。四個全部關閉時不會發出任何提醒。",
+  "calendarReminderCategoryCourseSelection": "選課",
+  "calendarReminderCategoryCourseSelectionSub": "預選、加退選、退選",
+  "calendarReminderCategoryExam": "考試",
+  "calendarReminderCategoryExamSub": "期中考、學期考試",
+  "calendarReminderCategoryRegistration": "註冊繳費",
+  "calendarReminderCategoryRegistrationSub": "註冊、學雜費、就學貸款、退費",
+  "calendarReminderCategorySemester": "學期起訖",
+  "calendarReminderCategorySemesterSub": "學期開始與結束、上課開始、寒暑假",
+  "calendarReminderTimingTitle": "提醒時機",
+  "calendarReminderTimingFixed": "事件前 1 天上午 8:00",
+  "devCalendarReminderSection": "【開發者】排程檢視",
+  "devCalendarReminderCounts": "規劃 {planned} 則，外掛待發 {pending} 則",
+  "@devCalendarReminderCounts": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "devCalendarReminderEmpty": "目前沒有任何排程",
+  "devCalendarReminderPendingNote": "「外掛待發」是外掛自己記的清單，重開機後一定還在，不能用來證明開機重排有效。要驗證重開機請用下面的 3 分鐘測試。",
+  "devCalendarReminderTestNow": "排一則 15 秒後的測試提醒",
+  "devCalendarReminderTestReboot": "排一則 3 分鐘後的測試提醒（排完立刻重開機）",
+  "devCalendarReminderTestScheduled": "已排入測試提醒"
 }
 
