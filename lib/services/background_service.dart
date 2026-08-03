@@ -5,12 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:workmanager/workmanager.dart';
 import 'api_service.dart';
+import 'notification_payload.dart';
 import 'notification_service.dart';
 import 'scrape_result.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/grades_comparator.dart';
 
 const String checkGradesTask = "tw.hamster.yuntool.checkGradesTask";
+
+/// 成績通知的點擊目的地。與行事曆提醒共用同一套 payload 格式，之後新增通知
+/// 類型時不必再多一條字串比對。
+final String _gradesPayload = const NotificationPayload(
+  type: NotificationPayload.typeGrades,
+).encode();
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -42,7 +49,7 @@ void callbackDispatcher() {
             id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
             title: '背景檢查執行中 (Debug Mode)',
             body: '最後檢查時間：$nowStr',
-            payload: 'grades',
+            payload: _gradesPayload,
           );
         }
 
@@ -104,7 +111,7 @@ void callbackDispatcher() {
                 id: (baseId + i) & 0x7FFFFFFF,
                 title: change.title,
                 body: change.body,
-                payload: 'grades',
+                payload: _gradesPayload,
               );
             }
 

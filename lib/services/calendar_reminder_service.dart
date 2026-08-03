@@ -11,6 +11,7 @@ import 'api_service.dart';
 import 'calendar_cache_service.dart';
 import 'calendar_reminder_notification_text.dart';
 import 'notification_channel.dart';
+import 'notification_payload.dart';
 import 'notification_service.dart';
 import 'server_time_service.dart';
 
@@ -324,6 +325,12 @@ class CalendarReminderService {
       styleInformation: BigTextStyleInformation(text.expanded),
       subText: text.lead,
       iosSubtitle: text.lead,
+      // 通知本文已經列了那天有什麼，點下去就是想看那天還有別的嗎 —— 帶上事件
+      // 日期，讓行事曆直接停在那一天。
+      payload: NotificationPayload(
+        type: NotificationPayload.typeCalendar,
+        date: reminder.eventDate,
+      ).encode(),
     );
   }
 

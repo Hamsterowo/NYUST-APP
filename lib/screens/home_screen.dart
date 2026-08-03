@@ -8,8 +8,11 @@ import 'schedule_screen.dart';
 import 'info_screen.dart';
 import 'calendar_screen.dart';
 import 'profile_screen.dart';
+import '../router/app_router.dart';
 import '../utils/pwa_interop.dart';
 import '../services/calendar_reminder_service.dart';
+import '../services/notification_navigator.dart';
+import '../services/notification_payload.dart';
 import '../services/update_service.dart';
 import '../theme/app_colors.dart';
 
@@ -34,6 +37,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    NotificationNavigator.pending.addListener(_consumeNotificationTap);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowInstallDialog();
@@ -41,7 +45,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       UpdateService.checkForUpdate(context);
       // 冷啟動也算一次「進前景」：跨年後第一次開 App 的次年補齊靠這一趟。
       _refreshCalendarReminders();
+      // 冷啟動時目的地在 main() 就放好了，這裡是它唯一的取件時機。
+      _consumeNotificationTap();
     });
+  }
+
+  /// 取走待處理的通知目的地並導航過去。
+  ///
+  /// 冷啟動與「App 已在執行時點通知」共用這一段：兩者都只是把目的地放進
+  /// [NotificationNavigator]，差別僅在放進去的時間點。
+  void _consumeNotificationTap() {
+    if (!mounted) return;
+    final payload = NotificationNavigator.take();
+    if (payload == null) return;
+
+    switch (payload.type) {
+      case NotificationPayload.typeGrades:
+        appRouter.push('/grades');
+      case NotificationPayload.typeCalendar:
+        final date = payload.date;
+        if (date == null) return;
+        // 先收掉疊在上面的詳情頁：分頁切過去了但被課程詳情蓋著，等於沒切。
+        rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+        ref.read(navIndexProvider.notifier).state = navIndexCalendar;
+        ref.read(calendarFocusDateProvider.notifier).state = date;
+      // 不認得的類型（例如舊版排下、新版已移除的通知）就只開啟 App。
+    }
   }
 
   /// 行事曆內容或設定變了才重排（沒變就完全不動系統排程）。
@@ -55,6 +84,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   void dispose() {
+    NotificationNavigator.pending.removeListener(_consumeNotificationTap);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

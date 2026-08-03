@@ -38,6 +38,18 @@ final dataProvider = ChangeNotifierProvider<DataProvider>((ref) {
 /// 底部分頁索引（取代 NavigationProvider）。
 final navIndexProvider = StateProvider<int>((ref) => 0);
 
+/// 行事曆分頁在 [navIndexProvider] 裡的索引。
+///
+/// 具名而不是散在各處寫 `3`：分頁順序改一次就得全部跟著改，而漏掉的那一處
+/// 會安靜地跳到別的分頁。
+const int navIndexCalendar = 3;
+
+/// 要行事曆頁跳到並選中的日期；`null` = 沒有待處理的請求。
+///
+/// 由點擊通知觸發（見 [NotificationNavigator]）。行事曆頁把日期套用完之後會
+/// 把它清回 `null`，所以同一個日期再送一次仍然有效。
+final calendarFocusDateProvider = StateProvider<DateTime?>((ref) => null);
+
 /// App 內語言設定。[locale] 為 `null` 表示跟隨系統。
 ///
 /// [isResolved] 在儲存的設定讀進來之前是 false —— 此時 [locale] 只是「還沒讀到

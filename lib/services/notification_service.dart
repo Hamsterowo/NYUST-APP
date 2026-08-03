@@ -1,7 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import '../router/app_router.dart';
 import 'notification_channel.dart';
+import 'notification_navigator.dart';
+import 'notification_payload.dart';
 
 /// [DateTime]（當地時間）轉成通知外掛要的 [tz.TZDateTime]。
 ///
@@ -43,11 +44,30 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse details) {
-        if (details.payload == 'grades') {
-          _navigateToGrades();
-        }
+        final payload = NotificationPayload.decode(details.payload);
+        if (payload != null) NotificationNavigator.submit(payload);
       },
     );
+  }
+
+  /// App 是被點通知啟動的嗎？是的話把目的地交給 [NotificationNavigator]。
+  ///
+  /// [init] 註冊的點擊 callback **不會**為「啟動 App 的那一則通知」觸發（外掛
+  /// 文件明說了），冷啟動只能在這裡主動問啟動來源。少了這一步，App 完全關閉時
+  /// 點通知就只會開啟 App、停在首頁。
+  Future<void> handleAppLaunchNotification() async {
+    try {
+      final details = await _flutterLocalNotificationsPlugin
+          .getNotificationAppLaunchDetails();
+      if (details?.didNotificationLaunchApp != true) return;
+
+      final payload = NotificationPayload.decode(
+        details!.notificationResponse?.payload,
+      );
+      if (payload != null) NotificationNavigator.submit(payload);
+    } catch (_) {
+      // 取不到啟動來源就當成一般啟動，不影響 App 開啟。
+    }
   }
 
   /// 請求發送通知的權限
@@ -191,11 +211,4 @@ class NotificationService {
   /// 目前還沒發出的排程，供除錯與驗證使用。
   Future<List<PendingNotificationRequest>> pendingRequests() =>
       _flutterLocalNotificationsPlugin.pendingNotificationRequests();
-
-  void _navigateToGrades() {
-    // 透過 go_router 導航（背景通知點擊為 App 外部進入點）。
-    if (rootNavigatorKey.currentState != null) {
-      appRouter.push('/grades');
-    }
-  }
 }

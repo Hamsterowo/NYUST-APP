@@ -26,6 +26,10 @@ Future<void> main() async {
     // 初始化本地通知服務
     final notificationService = NotificationService();
     await notificationService.init();
+    // App 若是被點通知啟動的，導航目的地只能在這裡取得 —— 外掛註冊的點擊
+    // callback 不會為「啟動 App 的那一則通知」觸發。目的地會先擱著，等畫面
+    // 掛好之後由 HomeScreen 取走。
+    await notificationService.handleAppLaunchNotification();
 
     // 初始化背景排程 Workmanager
     await Workmanager().initialize(callbackDispatcher);

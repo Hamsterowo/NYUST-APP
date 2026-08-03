@@ -364,6 +364,23 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     return _cachedGroupedEvents[_currentYear]?[formattedDate] ?? [];
   }
 
+  /// 跳到並選中 [day]（點擊行事曆提醒通知時走這裡）。
+  ///
+  /// 跨年時一併切換 [_currentYear] 並補抓那一年 —— 事件是照年份快取的，只改
+  /// 選取日期會停在一個沒有資料的月份上。
+  void _focusOnDay(DateTime day) {
+    final target = DateTime(day.year, day.month, day.day);
+    final needsFetch = _currentYear != target.year;
+
+    setState(() {
+      _selectedDay = target;
+      _focusedDay = target;
+      if (needsFetch) _currentYear = target.year;
+    });
+
+    if (needsFetch) _fetchYearIfNeeded(target.year);
+  }
+
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
@@ -487,6 +504,17 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     _syncCalendarWithLocale();
+
+    // 點擊行事曆提醒通知後，HomeScreen 會把目標日期放進這個 provider。
+    // 套用完就清回 null（延到 frame 之後，避免在 build 期間改 provider），
+    // 這樣同一個日期再送一次仍然有效。
+    ref.listen<DateTime?>(calendarFocusDateProvider, (_, next) {
+      if (next == null) return;
+      _focusOnDay(next);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(calendarFocusDateProvider.notifier).state = null;
+      });
+    });
 
     final colorScheme = Theme.of(context).colorScheme;
     final selectedEvents = _selectedDay != null
