@@ -508,6 +508,10 @@
     "description": "Android system notification channel description for calendar reminders"
   },
   "calendarReminderTitle": "行事曆提醒",
+  "calendarReminderTooltip": "行事曆提醒設定",
+  "@calendarReminderTooltip": {
+    "description": "Tooltip and screen-reader label for the bell button in the calendar screen's app bar"
+  },
   "calendarReminderCategoriesTitle": "提醒分類",
   "calendarReminderCategoryCourseSelection": "選課",
   "calendarReminderCategoryCourseSelectionSub": "預選、加退選、退選",

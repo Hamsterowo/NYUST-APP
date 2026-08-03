@@ -958,6 +958,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calendarReminderTitle => '行事曆提醒';
 
   @override
+  String get calendarReminderTooltip => '行事曆提醒設定';
+
+  @override
   String get calendarReminderCategoriesTitle => '提醒分類';
 
   @override

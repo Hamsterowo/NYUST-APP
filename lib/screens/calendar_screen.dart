@@ -9,7 +9,9 @@ import '../utils/network_error.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
+import '../services/calendar_reminder_service.dart';
 import '../services/server_time_service.dart';
+import 'calendar_reminder_screen.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
@@ -364,6 +366,25 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     return _cachedGroupedEvents[_currentYear]?[formattedDate] ?? [];
   }
 
+  /// 跳回今天並選中它；跨年時一併切換年份並補抓那一年的事件。
+  ///
+  /// 用校正後的伺服器時間，避免裝置時鐘錯誤時跳到錯的日子。
+  void _goToToday() {
+    final now = ServerTimeService.instance.now();
+    setState(() {
+      _focusedDay = now;
+      _selectedDay = now;
+    });
+    if (_currentYear != now.year) {
+      final hasCached = _cachedGroupedEvents.containsKey(now.year);
+      setState(() {
+        _currentYear = now.year;
+        _isLoading = !hasCached;
+      });
+      _fetchYearIfNeeded(now.year);
+    }
+  }
+
   /// 跳到並選中 [day]（點擊行事曆提醒通知時走這裡）。
   ///
   /// 跨年時一併切換 [_currentYear] 並補抓那一年 —— 事件是照年份快取的，只改
@@ -579,7 +600,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                               ),
                             ),
                             const Spacer(),
-                            if (widget.embed) ...[
+                            if (widget.embed)
                               IconButton(
                                 icon: const Icon(Icons.info_outline, size: 20),
                                 tooltip: AppLocalizations.of(
@@ -587,29 +608,15 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 ).legendTooltip,
                                 onPressed: _showLegendDialog,
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.today, size: 20),
-                                tooltip: AppLocalizations.of(
-                                  context,
-                                ).backToTodayTooltip,
-                                onPressed: () {
-                                  final now = ServerTimeService.instance.now();
-                                  setState(() {
-                                    _focusedDay = now;
-                                    _selectedDay = now;
-                                  });
-                                  if (_currentYear != now.year) {
-                                    final hasCached = _cachedGroupedEvents
-                                        .containsKey(now.year);
-                                    setState(() {
-                                      _currentYear = now.year;
-                                      _isLoading = !hasCached;
-                                    });
-                                    _fetchYearIfNeeded(now.year);
-                                  }
-                                },
-                              ),
-                            ],
+                            // 回今天緊鄰左右翻頁：三顆都是「換到哪個月」的操作，
+                            // 放在一起比散在 AppBar 上更好按。
+                            IconButton(
+                              icon: const Icon(Icons.today, size: 20),
+                              tooltip: AppLocalizations.of(
+                                context,
+                              ).backToTodayTooltip,
+                              onPressed: _goToToday,
+                            ),
                             IconButton(
                               icon: const Icon(Icons.chevron_left),
                               onPressed: () {
@@ -996,25 +1003,20 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
             tooltip: AppLocalizations.of(context).legendTooltip,
             onPressed: _showLegendDialog,
           ),
-          IconButton(
-            icon: const Icon(Icons.today),
-            tooltip: AppLocalizations.of(context).backToTodayTooltip,
-            onPressed: () {
-              final now = ServerTimeService.instance.now();
-              setState(() {
-                _focusedDay = now;
-                _selectedDay = now;
-              });
-              if (_currentYear != now.year) {
-                final hasCached = _cachedGroupedEvents.containsKey(now.year);
-                setState(() {
-                  _currentYear = now.year;
-                  _isLoading = !hasCached;
-                });
-                _fetchYearIfNeeded(now.year);
-              }
-            },
-          ),
+          // 想開通知的時機通常就發生在看行事曆的當下，設定頁那個入口太遠；
+          // 兩個入口導到同一頁、讀同一份狀態。平台條件與設定頁入口一致。
+          if (CalendarReminderService.isSupported)
+            IconButton(
+              icon: const Icon(Icons.notifications_none_rounded),
+              tooltip: AppLocalizations.of(context).calendarReminderTooltip,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const CalendarReminderScreen(),
+                  ),
+                );
+              },
+            ),
         ],
       ),
       body: bodyContent,

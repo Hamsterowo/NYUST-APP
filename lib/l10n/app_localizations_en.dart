@@ -990,6 +990,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendarReminderTitle => 'Calendar reminders';
 
   @override
+  String get calendarReminderTooltip => 'Calendar reminder settings';
+
+  @override
   String get calendarReminderCategoriesTitle => 'Categories';
 
   @override

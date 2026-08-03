@@ -1868,6 +1868,12 @@ abstract class AppLocalizations {
   /// **'行事曆提醒'**
   String get calendarReminderTitle;
 
+  /// Tooltip and screen-reader label for the bell button in the calendar screen's app bar
+  ///
+  /// In zh, this message translates to:
+  /// **'行事曆提醒設定'**
+  String get calendarReminderTooltip;
+
   /// No description provided for @calendarReminderCategoriesTitle.
   ///
   /// In zh, this message translates to:
