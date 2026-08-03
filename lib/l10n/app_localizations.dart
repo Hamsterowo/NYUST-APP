@@ -1849,6 +1849,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'跟隨系統'**
   String get languageSystem;
+
+  /// Android system notification channel name for calendar reminders
+  ///
+  /// In zh, this message translates to:
+  /// **'行事曆提醒'**
+  String get notificationChannelCalendarName;
+
+  /// Android system notification channel description for calendar reminders
+  ///
+  /// In zh, this message translates to:
+  /// **'在行事曆上的選課、考試等重要日期前提醒'**
+  String get notificationChannelCalendarDescription;
 }
 
 class _AppLocalizationsDelegate

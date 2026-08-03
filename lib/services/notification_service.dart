@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../router/app_router.dart';
+import 'notification_channel.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -62,23 +63,30 @@ class NotificationService {
     return (androidGranted == true) || (iosGranted == true);
   }
 
+  /// 先行建立（或更新）一個 Android channel。
+  ///
+  /// channel 要等到第一則通知發出後才會出現在系統通知設定裡；使用者剛打開某類
+  /// 通知時往往想先去調整音效／重要性，所以啟用當下就把 channel 建起來。
+  /// 非 Android 平台為 no-op。
+  Future<void> ensureChannel(NotificationChannelSpec channel) async {
+    final android = _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    await android?.createNotificationChannel(channel.toAndroidChannel());
+  }
+
   /// 顯示通知
+  ///
+  /// [channel] 決定這則通知掛在哪一個系統 channel 底下 —— 使用者可在系統通知
+  /// 設定裡分別關閉成績與行事曆兩類通知，互不影響。
   Future<void> showNotification({
     required int id,
     required String title,
     required String body,
     String? payload,
+    NotificationChannelSpec channel = NotificationChannelSpec.gradeUpdates,
   }) async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-          'grade_updates_channel_id',
-          '學期成績更新通知',
-          channelDescription: '當期末/學期成績有更新時發出通知',
-          importance: Importance.max,
-          priority: Priority.high,
-          ticker: 'ticker',
-        );
-
     const DarwinNotificationDetails darwinNotificationDetails =
         DarwinNotificationDetails(
           presentAlert: true,
@@ -86,8 +94,8 @@ class NotificationService {
           presentSound: true,
         );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: channel.toAndroidDetails(),
       iOS: darwinNotificationDetails,
     );
 

@@ -498,6 +498,14 @@
   "devTriggerBgCheckRegistered": "已註冊立即執行的背景任務，請查看通知！",
   "languageZh": "中文",
   "languageEn": "English",
-  "languageSystem": "跟隨系統"
+  "languageSystem": "跟隨系統",
+  "notificationChannelCalendarName": "行事曆提醒",
+  "@notificationChannelCalendarName": {
+    "description": "Android system notification channel name for calendar reminders"
+  },
+  "notificationChannelCalendarDescription": "在行事曆上的選課、考試等重要日期前提醒",
+  "@notificationChannelCalendarDescription": {
+    "description": "Android system notification channel description for calendar reminders"
+  }
 }
 

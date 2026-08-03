@@ -978,4 +978,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSystem => 'Follow system';
+
+  @override
+  String get notificationChannelCalendarName => 'Calendar reminders';
+
+  @override
+  String get notificationChannelCalendarDescription =>
+      'Reminders before important calendar dates such as course selection and exams';
 }

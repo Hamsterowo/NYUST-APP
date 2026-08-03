@@ -947,4 +947,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get languageSystem => '跟隨系統';
+
+  @override
+  String get notificationChannelCalendarName => '行事曆提醒';
+
+  @override
+  String get notificationChannelCalendarDescription => '在行事曆上的選課、考試等重要日期前提醒';
 }
