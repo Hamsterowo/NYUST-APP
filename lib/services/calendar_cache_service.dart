@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../database/database.dart';
@@ -41,7 +42,15 @@ class CalendarCacheService {
     return languageCode == 'en' ? 'en' : 'zh-tw';
   }
 
-  static String _key(int year, String langCode) => '${year}_$langCode';
+  /// 解析器版號。**改動 [CalendarScraper] 的切分規則時要一起加一。**
+  ///
+  /// 快取存的是已經切分好的事件，不是原始網頁 —— 改了切分規則而不換 key，既有
+  /// 使用者最多 30 天還是拿到舊規則的結果，等於修了但看不到。版號進 key 之後，
+  /// 舊資料自然 miss、重抓一次就好，不必寫一次性遷移程式。
+  static const _parserVersion = 2;
+
+  static String _key(int year, String langCode) =>
+      '${year}_${langCode}_v$_parserVersion';
 
   /// 儲存行事曆資料（合併端點的完整回應）
   static Future<void> saveCalendarData(
@@ -51,6 +60,15 @@ class CalendarCacheService {
   }) async {
     final langCode = _getCurrentLanguageCode(lang);
     try {
+      // 順手清掉同一年份／語言在舊版號下留下的列。不清的話它們永遠不會再被讀到
+      // （key 對不上）也永遠不會過期（過期判斷發生在讀取時），會一直佔著空間。
+      await (_db.delete(_db.calendarCacheTable)..where(
+            (t) =>
+                t.cacheKey.like('${year}_$langCode%') &
+                t.cacheKey.equals(_key(year, langCode)).not(),
+          ))
+          .go();
+
       await _db
           .into(_db.calendarCacheTable)
           .insertOnConflictUpdate(
@@ -113,7 +131,7 @@ class CalendarCacheService {
     Future<Map<String, dynamic>> Function(int year, {String? lang}) apiFetcher,
   ) {
     final langCode = _getCurrentLanguageCode(lang);
-    final key = '${year}_$langCode';
+    final key = _key(year, langCode);
     if (_inFlight.containsKey(key)) return _inFlight[key]!;
 
     final future = _doGetOrFetch(year, lang, apiFetcher);

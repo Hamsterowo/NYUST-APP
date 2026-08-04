@@ -1,0 +1,4304 @@
+{
+ "2022": [
+  {
+   "id": "8067",
+   "date": "2022-01-01",
+   "zh": "開國紀念日；研究生指導教授提報系統開放",
+   "en": "開國紀念日；研究生指導教授提報系統開放"
+  },
+  {
+   "id": "8068",
+   "date": "2022-01-03",
+   "zh": "第1次預選截止（在校生預選110學年度第2學期課程）；校外賃居學生訪視結束；本學期辦理休退學截止日",
+   "en": "第1次預選截止（在校生預選110學年度第2學期課程）；校外賃居學生訪視結束；本學期辦理休退學截止日"
+  },
+  {
+   "id": "8069",
+   "date": "2022-01-07",
+   "zh": "缺曠課處理截止",
+   "en": "缺曠課處理截止"
+  },
+  {
+   "id": "8070",
+   "date": "2022-01-10",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "學期考試開始；成績登錄系統開放"
+  },
+  {
+   "id": "8071",
+   "date": "2022-01-11",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日"
+  },
+  {
+   "id": "8072",
+   "date": "2022-01-15",
+   "zh": "宿舍離宿",
+   "en": "宿舍離宿"
+  },
+  {
+   "id": "8073",
+   "date": "2022-01-16",
+   "zh": "學期操行成績計算截止；學期考試結束",
+   "en": "學期操行成績計算截止；學期考試結束"
+  },
+  {
+   "id": "8074",
+   "date": "2022-01-17",
+   "zh": "寒假開始；110-2身分別學雜費減免第2梯次申請開始；就學貸款「學校聯」受理繳件",
+   "en": "寒假開始；110-2身分別學雜費減免第2梯次申請開始；就學貸款「學校聯」受理繳件"
+  },
+  {
+   "id": "8285",
+   "date": "2022-01-22",
+   "zh": "補行上班(依人事行政總處公告為準)",
+   "en": "補行上班(依人事行政總處公告為準)"
+  },
+  {
+   "id": "8076",
+   "date": "2022-01-23",
+   "zh": "教師送交學期成績截止；成績登錄系統至24:00關閉",
+   "en": "教師送交學期成績截止；成績登錄系統至24:00關閉"
+  },
+  {
+   "id": "8077",
+   "date": "2022-01-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "研究生指導教授提報系統關閉"
+  },
+  {
+   "id": "8078",
+   "date": "2022-01-28",
+   "zh": "博士、碩士學位考試結束",
+   "en": "博士、碩士學位考試結束"
+  },
+  {
+   "id": "8079",
+   "date": "2022-01-31",
+   "zh": "除夕、農曆春節假期開始；第1學期結束",
+   "en": "除夕、農曆春節假期開始；第1學期結束"
+  },
+  {
+   "id": "8081",
+   "date": "2022-02-01",
+   "zh": "第2學期開始",
+   "en": "第2學期開始"
+  },
+  {
+   "id": "8082",
+   "date": "2022-02-04",
+   "zh": "農曆春節彈性放假一天",
+   "en": "農曆春節彈性放假一天"
+  },
+  {
+   "id": "8083",
+   "date": "2022-02-06",
+   "zh": "農曆春節假期結束",
+   "en": "農曆春節假期結束"
+  },
+  {
+   "id": "8084",
+   "date": "2022-02-07",
+   "zh": "英檢提報開始；學生居住情形登錄作業開始",
+   "en": "英檢提報開始；學生居住情形登錄作業開始"
+  },
+  {
+   "id": "8085",
+   "date": "2022-02-08",
+   "zh": "新生預選開始（含新交換生及轉、復學生）",
+   "en": "新生預選開始（含新交換生及轉、復學生）"
+  },
+  {
+   "id": "8086",
+   "date": "2022-02-10",
+   "zh": "新生預選截止（含新交換生及轉、復學生）",
+   "en": "新生預選截止（含新交換生及轉、復學生）"
+  },
+  {
+   "id": "8087",
+   "date": "2022-02-11",
+   "zh": "研究生、大學部延修生領取畢業證書截止日",
+   "en": "研究生、大學部延修生領取畢業證書截止日"
+  },
+  {
+   "id": "8089",
+   "date": "2022-02-14",
+   "zh": "第2次預選開始（全校學生）；110-2身分別學雜費減免第2梯次申請截止",
+   "en": "第2次預選開始（全校學生）；110-2身分別學雜費減免第2梯次申請截止"
+  },
+  {
+   "id": "8090",
+   "date": "2022-02-16",
+   "zh": "國際新生（含新交換生）報到",
+   "en": "國際新生（含新交換生）報到"
+  },
+  {
+   "id": "8091",
+   "date": "2022-02-17",
+   "zh": "第2次預選截止（全校學生）；國際新生（含新交換生）報到",
+   "en": "第2次預選截止（全校學生）；國際新生（含新交換生）報到"
+  },
+  {
+   "id": "8092",
+   "date": "2022-02-18",
+   "zh": "國際新生入學說明會；就學貸款對保結束",
+   "en": "國際新生入學說明會；就學貸款對保結束"
+  },
+  {
+   "id": "8093",
+   "date": "2022-02-19",
+   "zh": "宿舍住宿生入住",
+   "en": "宿舍住宿生入住"
+  },
+  {
+   "id": "8094",
+   "date": "2022-02-20",
+   "zh": "宿舍住宿生入住；寒假結束",
+   "en": "宿舍住宿生入住；寒假結束"
+  },
+  {
+   "id": "8095",
+   "date": "2022-02-21",
+   "zh": "註冊，上課開始；博士、碩士學位考試申請開始；輔系、雙主修、抵免申請（含英/華語抵免）開始；英檢提報結束；就學貸款「學校聯」繳件及辦理截止",
+   "en": "註冊，上課開始；博士、碩士學位考試申請開始；輔系、雙主修、抵免申請（含英/華語抵免）開始；英檢提報結束；就學貸款「學校聯」繳件及辦理截止"
+  },
+  {
+   "id": "8097",
+   "date": "2022-02-21",
+   "zh": "友善校園週暨防制藥物濫用反毒宣導；學生辦休退學免學雜費截止日；班級幹部系統登錄開始；校內獎助學金申請開始、提早入學者入學優異獎學金申請開始",
+   "en": "友善校園週暨防制藥物濫用反毒宣導；學生辦休退學免學雜費截止日；班級幹部系統登錄開始；校內獎助學金申請開始、提早入學者入學優異獎學金申請開始"
+  },
+  {
+   "id": "8098",
+   "date": "2022-02-23",
+   "zh": "導師會議",
+   "en": "導師會議"
+  },
+  {
+   "id": "8099",
+   "date": "2022-02-28",
+   "zh": "和平紀念日；全校加退選開始",
+   "en": "和平紀念日；全校加退選開始"
+  },
+  {
+   "id": "8100",
+   "date": "2022-03-01",
+   "zh": "輔系、雙主修、抵免申請（含英/華語抵免）截止；學生社團活動開始",
+   "en": "輔系、雙主修、抵免申請（含英/華語抵免）截止；學生社團活動開始"
+  },
+  {
+   "id": "8101",
+   "date": "2022-03-03",
+   "zh": "學生社團活動開始",
+   "en": "學生社團活動開始"
+  },
+  {
+   "id": "8102",
+   "date": "2022-03-04",
+   "zh": "全校加退選截止（含校際選課）；提早入學者入學成績優異獎學金申請截止",
+   "en": "全校加退選截止（含校際選課）；提早入學者入學成績優異獎學金申請截止"
+  },
+  {
+   "id": "8103",
+   "date": "2022-03-08",
+   "zh": "校內獎助學金申請截止",
+   "en": "校內獎助學金申請截止"
+  },
+  {
+   "id": "8104",
+   "date": "2022-03-11",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "學生居住情形登錄作業截止"
+  },
+  {
+   "id": "8105",
+   "date": "2022-03-12",
+   "zh": "新生服務學習志工特殊訓練（第1、2梯次）",
+   "en": "新生服務學習志工特殊訓練（第1、2梯次）"
+  },
+  {
+   "id": "8106",
+   "date": "2022-03-13",
+   "zh": "新生服務學習志工特殊訓練（第3、4梯次）",
+   "en": "新生服務學習志工特殊訓練（第3、4梯次）"
+  },
+  {
+   "id": "8107",
+   "date": "2022-03-18",
+   "zh": "班級幹部系統登錄截止；師生創新圓夢計畫活動結束",
+   "en": "班級幹部系統登錄截止；師生創新圓夢計畫活動結束"
+  },
+  {
+   "id": "8108",
+   "date": "2022-03-19",
+   "zh": "全校師生運動會",
+   "en": "全校師生運動會"
+  },
+  {
+   "id": "8109",
+   "date": "2022-03-22",
+   "zh": "師生創新圓夢計畫活動開始",
+   "en": "師生創新圓夢計畫活動開始"
+  },
+  {
+   "id": "8110",
+   "date": "2022-03-23",
+   "zh": "全校一年級週會",
+   "en": "全校一年級週會"
+  },
+  {
+   "id": "8111",
+   "date": "2022-03-30",
+   "zh": "賃居安全評核協調會；房東座談會",
+   "en": "賃居安全評核協調會；房東座談會"
+  },
+  {
+   "id": "8112",
+   "date": "2022-04-01",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "學生辦休退學學雜費退2/3截止日"
+  },
+  {
+   "id": "8113",
+   "date": "2022-04-04",
+   "zh": "兒童節；民族掃墓節",
+   "en": "兒童節；民族掃墓節"
+  },
+  {
+   "id": "8114",
+   "date": "2022-04-05",
+   "zh": "調整彈性放假一天（依人事行政總處公告為準）",
+   "en": "調整彈性放假一天（依人事行政總處公告為準）"
+  },
+  {
+   "id": "8115",
+   "date": "2022-04-06",
+   "zh": "全校教職員工生運動會補假一天",
+   "en": "全校教職員工生運動會補假一天"
+  },
+  {
+   "id": "8116",
+   "date": "2022-04-07",
+   "zh": "教師及學生校慶日補假一天",
+   "en": "教師及學生校慶日補假一天"
+  },
+  {
+   "id": "8117",
+   "date": "2022-04-11",
+   "zh": "期中考前一週退選申請開始；轉系(所)申請開始",
+   "en": "期中考前一週退選申請開始；轉系(所)申請開始"
+  },
+  {
+   "id": "8118",
+   "date": "2022-04-13",
+   "zh": "全校三年級週會",
+   "en": "全校三年級週會"
+  },
+  {
+   "id": "8119",
+   "date": "2022-04-15",
+   "zh": "期中考前一週退選申請截止",
+   "en": "期中考前一週退選申請截止"
+  },
+  {
+   "id": "8120",
+   "date": "2022-04-18",
+   "zh": "期中考試開始；轉系(所)申請截止",
+   "en": "期中考試開始；轉系(所)申請截止"
+  },
+  {
+   "id": "8121",
+   "date": "2022-04-24",
+   "zh": "期中考試結束",
+   "en": "期中考試結束"
+  },
+  {
+   "id": "8122",
+   "date": "2022-04-27",
+   "zh": "校園安全暨交通安全宣導",
+   "en": "校園安全暨交通安全宣導"
+  },
+  {
+   "id": "8123",
+   "date": "2022-05-01",
+   "zh": "勞動節；英檢提報開始",
+   "en": "勞動節；英檢提報開始"
+  },
+  {
+   "id": "8124",
+   "date": "2022-05-13",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "學生辦休退學學雜費退1/3截止日，日後不予退費"
+  },
+  {
+   "id": "8125",
+   "date": "2022-05-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "博士、碩士學位考試申請截止"
+  },
+  {
+   "id": "8126",
+   "date": "2022-05-16",
+   "zh": "校外表現傑出獎勵申請開始；學生校外賃居安全評核開始；111-1身分別學雜費減免第1梯次(舊生)申請開始",
+   "en": "校外表現傑出獎勵申請開始；學生校外賃居安全評核開始；111-1身分別學雜費減免第1梯次(舊生)申請開始"
+  },
+  {
+   "id": "8127",
+   "date": "2022-05-18",
+   "zh": "全校二年級週會",
+   "en": "全校二年級週會"
+  },
+  {
+   "id": "8128",
+   "date": "2022-05-27",
+   "zh": "校外表現傑出獎勵申請截止；英檢提報結束",
+   "en": "校外表現傑出獎勵申請截止；英檢提報結束"
+  },
+  {
+   "id": "8129",
+   "date": "2022-06-01",
+   "zh": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始",
+   "en": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始"
+  },
+  {
+   "id": "8130",
+   "date": "2022-06-02",
+   "zh": "學生獎懲建議案申請截止",
+   "en": "學生獎懲建議案申請截止"
+  },
+  {
+   "id": "8131",
+   "date": "2022-06-03",
+   "zh": "端午節",
+   "en": "端午節"
+  },
+  {
+   "id": "8132",
+   "date": "2022-06-08",
+   "zh": "全校教師教學會議",
+   "en": "全校教師教學會議"
+  },
+  {
+   "id": "8133",
+   "date": "2022-06-10",
+   "zh": "學生社團活動結束",
+   "en": "學生社團活動結束"
+  },
+  {
+   "id": "8134",
+   "date": "2022-06-11",
+   "zh": "畢業典禮",
+   "en": "畢業典禮"
+  },
+  {
+   "id": "8135",
+   "date": "2022-06-13",
+   "zh": "第1次預選開始（在校生預選111學年度第1學期課程）；本學期辦理休退學截止日",
+   "en": "第1次預選開始（在校生預選111學年度第1學期課程）；本學期辦理休退學截止日"
+  },
+  {
+   "id": "8136",
+   "date": "2022-06-15",
+   "zh": "召開校教評會",
+   "en": "召開校教評會"
+  },
+  {
+   "id": "8137",
+   "date": "2022-06-17",
+   "zh": "學生社團活動結束；缺曠課處理截止；111-1身分別學雜費減免第1梯次(舊生)申請截止",
+   "en": "學生社團活動結束；缺曠課處理截止；111-1身分別學雜費減免第1梯次(舊生)申請截止"
+  },
+  {
+   "id": "8138",
+   "date": "2022-06-19",
+   "zh": "第1次預選截止（在校生預選111學年度第1學期課程）",
+   "en": "第1次預選截止（在校生預選111學年度第1學期課程）"
+  },
+  {
+   "id": "8139",
+   "date": "2022-06-20",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "學期考試開始；成績登錄系統開放"
+  },
+  {
+   "id": "8140",
+   "date": "2022-06-21",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日"
+  },
+  {
+   "id": "8141",
+   "date": "2022-06-25",
+   "zh": "宿舍離宿",
+   "en": "宿舍離宿"
+  },
+  {
+   "id": "8142",
+   "date": "2022-06-26",
+   "zh": "學期考試結束；學期操行成績計算截止",
+   "en": "學期考試結束；學期操行成績計算截止"
+  },
+  {
+   "id": "8143",
+   "date": "2022-06-27",
+   "zh": "暑假開始",
+   "en": "暑假開始"
+  },
+  {
+   "id": "8144",
+   "date": "2022-07-01",
+   "zh": "學生校外賃居安全評核結束",
+   "en": "學生校外賃居安全評核結束"
+  },
+  {
+   "id": "8145",
+   "date": "2022-07-03",
+   "zh": "教師送交學期成績截止；成績登錄系統24:00關閉",
+   "en": "教師送交學期成績截止；成績登錄系統24:00關閉"
+  },
+  {
+   "id": "8146",
+   "date": "2022-07-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "研究生指導教授提報系統關閉"
+  },
+  {
+   "id": "8147",
+   "date": "2022-07-29",
+   "zh": "博士、碩士學位考試結束【依教育部來函，學位考試彈性措施：舉行及成績送繳自動延長至111年9月30日截止】",
+   "en": "博士、碩士學位考試結束【依教育部來函，學位考試彈性措施：舉行及成績送繳自動延長至111年9月30日截止】"
+  },
+  {
+   "id": "8148",
+   "date": "2022-07-31",
+   "zh": "第2學期結束；教學傑出及優良教師票選結束",
+   "en": "第2學期結束；教學傑出及優良教師票選結束"
+  },
+  {
+   "id": "8524",
+   "date": "2022-08-01",
+   "zh": "第1學期開始；學生居住情形登錄作業開始；英檢提報開始",
+   "en": "Fall semester begins,Registration of students' housing begins,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "8525",
+   "date": "2022-08-08",
+   "zh": "父親節",
+   "en": "Father's day"
+  },
+  {
+   "id": "8526",
+   "date": "2022-08-15",
+   "zh": "111-1身分別學雜費減免第2梯次（新生）申請開始",
+   "en": "Application for tuition and fee waivers based on student status for the second round (new students) begins."
+  },
+  {
+   "id": "8527",
+   "date": "2022-08-16",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins"
+  },
+  {
+   "id": "8528",
+   "date": "2022-08-28",
+   "zh": "祖父母節",
+   "en": "Grandparents day"
+  },
+  {
+   "id": "8529",
+   "date": "2022-08-31",
+   "zh": "研究生、大學部畢業生領取學位證書截止日",
+   "en": "Deadline for graduates of colleges and research institutes to receive diplomas."
+  },
+  {
+   "id": "8530",
+   "date": "2022-09-02",
+   "zh": "英檢提報結束；新生預選開始（含新交換生及轉、復學生）",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends,Advance course registration for new students begins (including new exchange, transfer, and readmitted students)."
+  },
+  {
+   "id": "8531",
+   "date": "2022-09-03",
+   "zh": "國際新生（學位生）報到；宿舍新生入住；新生家長座談會；住宿生體檢",
+   "en": "New international students check in (for degree students),New students check in at the dormitory,parents of new students Orientation,dorm students physical examination"
+  },
+  {
+   "id": "8532",
+   "date": "2022-09-04",
+   "zh": "宿舍新生入住；新生家長座談會；國際新生（學位生）報到；住宿生體檢",
+   "en": "New students check in at the dormitory,parents of new students Orientation,New international students check in (for degree students),dorm students physical examination"
+  },
+  {
+   "id": "8533",
+   "date": "2022-09-05",
+   "zh": "新生學涯開展營；111-1身分別學雜費減免第2梯次（新生）申請截止；新生預選截止（含新交換生及轉、復學生）",
+   "en": "Orientation Camp for new students,Application for tuition and fee waivers based on student status (111-1) for the second round (new students) ends,Advance course registration for new students ends(including new exchange, transfer, and readmitted students)"
+  },
+  {
+   "id": "8534",
+   "date": "2022-09-06",
+   "zh": "新生學涯開展營",
+   "en": "Orientation Camp for new students."
+  },
+  {
+   "id": "8535",
+   "date": "2022-09-07",
+   "zh": "新生學涯開展營；國際新生（交換生）報到；第2次預選（全校學生）【因應中秋連假，本次僅開放1天】",
+   "en": "Orientation Camp for new students,New international students check in (including exchange students),Advance course registration for the second round (for all students)."
+  },
+  {
+   "id": "8536",
+   "date": "2022-09-08",
+   "zh": "國家防災日防災演練；住宿生講習； 國際新生（交換生）報到",
+   "en": "Disaster prevention drill on National Disaster Preparedness Day,Lecture for dorm students,New international students check in (including exchange students)."
+  },
+  {
+   "id": "8537",
+   "date": "2022-09-09",
+   "zh": "調整彈性放假一天(依人事行政總處公告為準)；就學貸款對保結束；國際新生（學位生、交換生）入學說明會",
+   "en": "Adjusted holiday(in accordance with announcements from Directorate-General of Personnel Administration),Identity verification for student loans ends,New international students(for degree students, transfer students) Admissions Orientation"
+  },
+  {
+   "id": "8538",
+   "date": "2022-09-10",
+   "zh": "中秋節；宿舍舊生入住",
+   "en": "Moon Festival,Old students check in at the dormitory."
+  },
+  {
+   "id": "8539",
+   "date": "2022-09-11",
+   "zh": "暑假結束；宿舍舊生入住",
+   "en": "Last day of summer vacation,Old students check in at the dormitory."
+  },
+  {
+   "id": "8540",
+   "date": "2022-09-12",
+   "zh": "上課開始；大學部、研究所新生註冊；博士、碩士學位考試申請開始；舊生、復學生註冊；輔系、雙主修、抵免申請(含英/華語抵免)開始；就學貸款「學校聯」繳件及辦理截止；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Fall semester classes begin,Enrollment of new students for colleges and graduate schools,Application for doctoral and master’s exams begins,Enrollment of old and readmitted students,Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins,Delivery of school acceptance of student loan payments ends,Friendly Campus Week & drug abuse prevention and anti-drug campaign"
+  },
+  {
+   "id": "8541",
+   "date": "2022-09-12",
+   "zh": "學生辦休學退學免學雜費截止日；弱勢學生助學金申請開始；班級幹部系統登錄開始；校內獎助學金申請開始；入學成績優異獎學金申請開始；研究所新生體檢",
+   "en": "Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students,Application for grants of the disadvantaged students begins,Registration of class officers begins,Application for internal scholarships and grants begins,Application for scholarships of outstanding entrance performance begins,Institute new students physical examination"
+  },
+  {
+   "id": "8542",
+   "date": "2022-09-14",
+   "zh": "導師會議",
+   "en": "Guidance Counselors' Meeting"
+  },
+  {
+   "id": "8543",
+   "date": "2022-09-19",
+   "zh": "全校加退選開始；輔系、雙主修、抵免申請（含英/華語抵免）截止",
+   "en": "On-line course add/drop begins,Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends."
+  },
+  {
+   "id": "8544",
+   "date": "2022-09-21",
+   "zh": "英文抵修複審考試；學期制校外實習甄選開始；學生社團活動開始",
+   "en": "Review exam for English exemption,Selection of semester-based off-campus internship begins,Students' extracurricular activities begin."
+  },
+  {
+   "id": "8545",
+   "date": "2022-09-23",
+   "zh": "全校加退選截止（含校際選課）；入學成績優異獎學金申請截止；班級幹部系統登錄結束",
+   "en": "Last day to add/drop courses(Application for inter-university course selection),Application for scholarships of outstanding entrance performance ends,Registration of class officers ends."
+  },
+  {
+   "id": "8546",
+   "date": "2022-09-24",
+   "zh": "社團幹部訓練",
+   "en": "Student club leaders' training"
+  },
+  {
+   "id": "8547",
+   "date": "2022-09-25",
+   "zh": "社團幹部訓練",
+   "en": "Student club leaders' training"
+  },
+  {
+   "id": "8548",
+   "date": "2022-09-30",
+   "zh": "弱勢學生助學金申請截止；【依教育部彈性措施：限110-2申請者】博士、碩士學位考試結束",
+   "en": "Application for grants for disadvantaged students ends,Doctoral and master’s degree exams end(Restricted to those applying for 110-2)"
+  },
+  {
+   "id": "8549",
+   "date": "2022-10-05",
+   "zh": "一年級全校週會；校內獎助學金申請截止",
+   "en": "Weekly assembly for all freshmen,Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "8550",
+   "date": "2022-10-10",
+   "zh": "國慶日",
+   "en": "The National Day"
+  },
+  {
+   "id": "8551",
+   "date": "2022-10-12",
+   "zh": "校園安全暨交通安全教育講習",
+   "en": "On-campus security and traffic safety lecture"
+  },
+  {
+   "id": "8552",
+   "date": "2022-10-14",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students' housing ends."
+  },
+  {
+   "id": "8553",
+   "date": "2022-10-19",
+   "zh": "二年級全校週會",
+   "en": "Weekly assembly for all sophomores"
+  },
+  {
+   "id": "8554",
+   "date": "2022-10-21",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "8555",
+   "date": "2022-10-31",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "8556",
+   "date": "2022-11-04",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "8557",
+   "date": "2022-11-07",
+   "zh": "期中考開始",
+   "en": "Midterm examinations begin"
+  },
+  {
+   "id": "8558",
+   "date": "2022-11-13",
+   "zh": "期中考結束",
+   "en": "Midterm examinations end"
+  },
+  {
+   "id": "8559",
+   "date": "2022-11-14",
+   "zh": "校外賃居學生訪視開始",
+   "en": "Visitation of students living outside school begins."
+  },
+  {
+   "id": "8560",
+   "date": "2022-11-16",
+   "zh": "三年級全校週會；英檢提報開始",
+   "en": "Weekly assembly for all juniors,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "8561",
+   "date": "2022-11-30",
+   "zh": "雲科路跑活動",
+   "en": "YunTech's road running activity"
+  },
+  {
+   "id": "8562",
+   "date": "2022-12-01",
+   "zh": "弱勢學生生活助學金申請開始",
+   "en": "Application for living grants for disadvantaged students begins."
+  },
+  {
+   "id": "8563",
+   "date": "2022-12-02",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "8564",
+   "date": "2022-12-03",
+   "zh": "校慶大會、園遊會",
+   "en": "School's anniversary celebration,School fair"
+  },
+  {
+   "id": "8565",
+   "date": "2022-12-05",
+   "zh": "111-2身分別學雜費減免第1梯次(舊生及身障類)申請開始",
+   "en": "Application for tuition and fee waivers based on student status (111-2) for the first round (old and disabled students) begins."
+  },
+  {
+   "id": "8566",
+   "date": "2022-12-07",
+   "zh": "四年級全校週會",
+   "en": "Weekly assembly for all seniors"
+  },
+  {
+   "id": "8567",
+   "date": "2022-12-09",
+   "zh": "學期制校外實習甄選結束",
+   "en": "Selection of semester-based off-campus internship ends."
+  },
+  {
+   "id": "8568",
+   "date": "2022-12-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester"
+  },
+  {
+   "id": "8569",
+   "date": "2022-12-16",
+   "zh": "英檢提報結束",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "8570",
+   "date": "2022-12-21",
+   "zh": "弱勢學生生活助學金申請截止",
+   "en": "Application for living grants of the disadvantaged students ends."
+  },
+  {
+   "id": "8571",
+   "date": "2022-12-23",
+   "zh": "111-2身分別學雜費減免第1梯次(舊生及身障類)申請截止；學生獎懲建議案申請截止",
+   "en": "Advance course registration for the first round begins (for courses of second semester of academic year 111),Application for student’s reward and punishment proposal ends."
+  },
+  {
+   "id": "8572",
+   "date": "2022-12-26",
+   "zh": "第1次預選開始（在校生預選111學年度第2學期課程）",
+   "en": "Advance course registration for the first round begins (for courses of second semester of academic year 111)."
+  },
+  {
+   "id": "8785",
+   "date": "2022-12-28",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers"
+  },
+  {
+   "id": "8574",
+   "date": "2022-12-30",
+   "zh": "學生社團活動結束",
+   "en": "Students' extracurricular activities end."
+  }
+ ],
+ "2023": [
+  {
+   "id": "8575",
+   "date": "2023-01-01",
+   "zh": "開國紀念日；研究生指導教授提報系統開放；第1次預選截止（在校生預選111學年度第2學期課程）",
+   "en": "National Founding Day,Advisor login system for graduate students opens,Advance course registration for the first round ends (for courses of second semester of academic year 111)."
+  },
+  {
+   "id": "8576",
+   "date": "2023-01-02",
+   "zh": "開國紀念日補假一天(依人事行政總處公告為準)",
+   "en": "Make-up holiday for the National Founding Day"
+  },
+  {
+   "id": "8577",
+   "date": "2023-01-03",
+   "zh": "校外賃居學生訪視結束；本學期辦理休退學截止日",
+   "en": "Visitation of students living outside school ends,Application for suspension ends"
+  },
+  {
+   "id": "8578",
+   "date": "2023-01-06",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  },
+  {
+   "id": "8763",
+   "date": "2023-01-07",
+   "zh": "補行上班(依人事行政總處公告為準)",
+   "en": "Make-up work day(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8579",
+   "date": "2023-01-09",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begin,Grades registry system opens."
+  },
+  {
+   "id": "8580",
+   "date": "2023-01-10",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts,Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "8581",
+   "date": "2023-01-14",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes"
+  },
+  {
+   "id": "8582",
+   "date": "2023-01-15",
+   "zh": "學期操行成績計算截止；學期考試結束",
+   "en": "Reckoning of semester-based conduct grade ends,Final examinations end"
+  },
+  {
+   "id": "8583",
+   "date": "2023-01-16",
+   "zh": "寒假開始；111-2身分別學雜費減免第2梯次申請開始；就學貸款申請開始受理「學校聯」繳件",
+   "en": "Winter vacation begins,Application for tuition and fee waivers based on student status (111-2) for the first round  begins,School acceptance of student loan payments begins."
+  },
+  {
+   "id": "8584",
+   "date": "2023-01-20",
+   "zh": "除夕前一日功能性調整放假(依人事行政總處公告為準)",
+   "en": "the day before Chinese New Year's Eve adjust the holiday(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8585",
+   "date": "2023-01-21",
+   "zh": "除夕、農曆春節假期開始",
+   "en": "Chinese New Year's Eve、Chinese New Year holiday"
+  },
+  {
+   "id": "8586",
+   "date": "2023-01-22",
+   "zh": "教師送交學期成績截止；成績登錄系統至24:00關閉",
+   "en": "Final course grades due from faculty,Grades registry system closes at 24:00."
+  },
+  {
+   "id": "8587",
+   "date": "2023-01-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "8588",
+   "date": "2023-01-29",
+   "zh": "農曆春節假期結束",
+   "en": "Lunar New Year vacation ends."
+  },
+  {
+   "id": "8589",
+   "date": "2023-01-31",
+   "zh": "第1學期結束；博士、碩士學位考試結束",
+   "en": "End of the fall semester,Doctoral and master’s degree exams end."
+  },
+  {
+   "id": "8590",
+   "date": "2023-02-01",
+   "zh": "第2學期開始；英檢提報開始",
+   "en": "Spring semester classes begin,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "8764",
+   "date": "2023-02-04",
+   "zh": "補行上班(依人事行政總處公告為準)",
+   "en": "Make-up work day(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8591",
+   "date": "2023-02-06",
+   "zh": "學生居住情形登錄作業開始",
+   "en": "Registration of students' housing begins."
+  },
+  {
+   "id": "8592",
+   "date": "2023-02-07",
+   "zh": "新生預選開始（含新交換生及轉、復學生）",
+   "en": "Advance course registration for new students begins (including new exchange, transfer, and readmitted students)."
+  },
+  {
+   "id": "8593",
+   "date": "2023-02-09",
+   "zh": "新生預選截止（含新交換生及轉、復學生）",
+   "en": "Advance course registration for new students deadline (including new exchange, transfer, and readmitted students)"
+  },
+  {
+   "id": "8594",
+   "date": "2023-02-10",
+   "zh": "研究生、大學部延修生領取畢業證書截止日",
+   "en": "Deadline for delay graduates of colleges and research institutes to receive diplomas"
+  },
+  {
+   "id": "8595",
+   "date": "2023-02-13",
+   "zh": "第2次預選開始（全校學生）；111-2身分別學雜費減免第2梯次申請截止",
+   "en": "Advance course registration for the second round begins (for all students),Application for tuition and fee waivers based on student status (111-2) for the second round ends"
+  },
+  {
+   "id": "8596",
+   "date": "2023-02-15",
+   "zh": "國際新生（含新交換生）報到",
+   "en": "New international students check in (including new exchange students)."
+  },
+  {
+   "id": "8597",
+   "date": "2023-02-16",
+   "zh": "第2次預選截止（全校學生）；國際新生（含新交換生）報到",
+   "en": "Advance course registration for the second round ends (for all students),New international students check in (including new exchange students)"
+  },
+  {
+   "id": "8598",
+   "date": "2023-02-17",
+   "zh": "國際新生入學說明會；就學貸款對保結束",
+   "en": "Orientation for new international students,Identity verification for student loans ends."
+  },
+  {
+   "id": "8599",
+   "date": "2023-02-18",
+   "zh": "宿舍住宿生入住；補行上班(依人事行政總處公告為準)",
+   "en": "dorm students check in at the dormitory,Make-up work day(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8600",
+   "date": "2023-02-19",
+   "zh": "宿舍住宿生入住；寒假結束",
+   "en": "dorm students check in at the dormitory；Last day of winter vacation"
+  },
+  {
+   "id": "8601",
+   "date": "2023-02-20",
+   "zh": "註冊，上課開始；博士、碩士學位考試申請開始；輔系、雙主修、抵免申請（含英/華語抵免）開始；英檢提報結束；就學貸款「學校聯」繳件及辦理截止；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Enrollment and Spring semester classes begin,Doctoral and master's degree exams begin,Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begin,Reporting/uploading of GEPT/TOEIC scores ends,Delivery of school acceptance of student loan payments ends,Friendly Campus Week & drug abuse prevention and anti-drug campaign"
+  },
+  {
+   "id": "8602",
+   "date": "2023-02-20",
+   "zh": "學生辦休退學免學雜費截止日；班級幹部系統登錄開始；校內獎助學金申請開始、提早入學者入學優異獎學金申請開始",
+   "en": "Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students,Registration of class officers begins,Application for internal scholarships and grants begins,Application for scholarships of outstanding entrance performance begins"
+  },
+  {
+   "id": "8603",
+   "date": "2023-02-22",
+   "zh": "導師會議",
+   "en": "Guidance Counselors' Meeting"
+  },
+  {
+   "id": "8604",
+   "date": "2023-02-27",
+   "zh": "調整彈性放假一天(依人事行政總處公告為準)；全校加退選開始",
+   "en": "adjust the holiday(in accordance with announcements from Directorate-General of Personnel Administration),On-line course add/drop begins"
+  },
+  {
+   "id": "8605",
+   "date": "2023-02-28",
+   "zh": "和平紀念日",
+   "en": "Peace Memorial Day"
+  },
+  {
+   "id": "8606",
+   "date": "2023-03-01",
+   "zh": "輔系、雙主修、抵免申請（含英/華語抵免）截止；學生社團活動開始",
+   "en": "Application for minor/double majors, credit waivers, and transference (including English/Mandarin) deadline,Students' extracurricular activities begin"
+  },
+  {
+   "id": "8607",
+   "date": "2023-03-03",
+   "zh": "全校加退選截止（含校際選課）；提早入學者入學成績優異獎學金申請截止",
+   "en": "Last day to add/drop courses(Application for inter-university course selection),Application for scholarships for outstanding entrance performance of head starters ends."
+  },
+  {
+   "id": "8608",
+   "date": "2023-03-08",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "8609",
+   "date": "2023-03-10",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students' housing ends."
+  },
+  {
+   "id": "8612",
+   "date": "2023-03-17",
+   "zh": "班級幹部系統登錄截止；師生創新圓夢計畫活動結束",
+   "en": "Registration of class officers ends,YunTech Dream Program starts."
+  },
+  {
+   "id": "8613",
+   "date": "2023-03-18",
+   "zh": "全校師生運動會",
+   "en": "Sports Games"
+  },
+  {
+   "id": "8614",
+   "date": "2023-03-21",
+   "zh": "師生創新圓夢計畫活動開始",
+   "en": "YunTech Dream Program ends."
+  },
+  {
+   "id": "8615",
+   "date": "2023-03-22",
+   "zh": "全校一年級週會",
+   "en": "Weekly assembly for all freshmen"
+  },
+  {
+   "id": "8616",
+   "date": "2023-03-25",
+   "zh": "補行上班上課(依人事行政總處公告為準)",
+   "en": "Make-up work day and class day (in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8617",
+   "date": "2023-03-29",
+   "zh": "賃居安全評核協調會；房東座談會",
+   "en": "Student rental safety evaluation and coordination meeting,Meeting with landlords"
+  },
+  {
+   "id": "8618",
+   "date": "2023-03-31",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "8619",
+   "date": "2023-04-03",
+   "zh": "調整彈性放假一天(依人事行政總處公告為準)",
+   "en": "adjust the holiday(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8620",
+   "date": "2023-04-04",
+   "zh": "兒童節",
+   "en": "Children's Day"
+  },
+  {
+   "id": "8621",
+   "date": "2023-04-05",
+   "zh": "民族掃墓節",
+   "en": "Tomb Sweeping Day"
+  },
+  {
+   "id": "8622",
+   "date": "2023-04-06",
+   "zh": "全校教職員工生運動會補假一天",
+   "en": "One makeup holiday for all school faculty and staff due to sports day"
+  },
+  {
+   "id": "8623",
+   "date": "2023-04-07",
+   "zh": "教師及學生校慶日補假一天",
+   "en": "One makeup holiday for all teachers and students due to the school's anniversary celebration"
+  },
+  {
+   "id": "8624",
+   "date": "2023-04-10",
+   "zh": "期中考前一週退選申請開始；轉系(所)申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam,Department (graduate school) transfer application starts."
+  },
+  {
+   "id": "8625",
+   "date": "2023-04-12",
+   "zh": "全校三年級週會",
+   "en": "Weekly assembly for all juniors"
+  },
+  {
+   "id": "8626",
+   "date": "2023-04-14",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "8627",
+   "date": "2023-04-17",
+   "zh": "期中考試開始；轉系(所)申請截止",
+   "en": "Midterm examinations begin,Department (graduate school) transfer application ends."
+  },
+  {
+   "id": "8628",
+   "date": "2023-04-23",
+   "zh": "期中考試結束",
+   "en": "Midterm examinations end"
+  },
+  {
+   "id": "8629",
+   "date": "2023-04-26",
+   "zh": "校園安全暨交通安全宣導",
+   "en": "On-campus security and traffic safety lecture"
+  },
+  {
+   "id": "8630",
+   "date": "2023-05-01",
+   "zh": "勞動節；英檢提報開始",
+   "en": "Labor day,Reporting/uploading of GEPT/TOEIC scores begins"
+  },
+  {
+   "id": "8631",
+   "date": "2023-05-12",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "8632",
+   "date": "2023-05-15",
+   "zh": "博士、碩士學位考試申請截止；校外表現傑出獎勵申請開始；學生校外賃居安全評核開始；112-1身分別學雜費減免第1梯次(舊生)申請開始",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester,Application for off-campus outstanding performance grant begins,Student off-campus rental safety evaluation begins,Application for tuition and fee waivers based on student status (112-1) for the first round (old students) begins."
+  },
+  {
+   "id": "8633",
+   "date": "2023-05-17",
+   "zh": "全校二年級週會",
+   "en": "Weekly assembly for all sophomores"
+  },
+  {
+   "id": "8634",
+   "date": "2023-05-26",
+   "zh": "校外表現傑出獎勵申請截止；英檢提報結束",
+   "en": "Application for off-campus outstanding performance grant ends,Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "8637",
+   "date": "2023-05-31",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers"
+  },
+  {
+   "id": "8635",
+   "date": "2023-06-01",
+   "zh": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始",
+   "en": "Advisor login system for graduate students opens,Voting for outstanding teaching & excellent teacher starts."
+  },
+  {
+   "id": "8636",
+   "date": "2023-06-02",
+   "zh": "學生獎懲建議案申請截止",
+   "en": "Application for student's reward and punishment proposal ends."
+  },
+  {
+   "id": "8638",
+   "date": "2023-06-09",
+   "zh": "學生社團活動結束",
+   "en": "Students' extracurricular activities end."
+  },
+  {
+   "id": "8639",
+   "date": "2023-06-10",
+   "zh": "畢業典禮",
+   "en": "Graduation ceremony"
+  },
+  {
+   "id": "8640",
+   "date": "2023-06-12",
+   "zh": "第1次預選開始（在校生預選112學年度第1學期課程）；本學期辦理休退學截止日",
+   "en": "Advance course registration for the first round begins (for courses of first semester of academic year 112),Application for suspension ends"
+  },
+  {
+   "id": "8641",
+   "date": "2023-06-16",
+   "zh": "缺曠課處理截止；112-1身分別學雜費減免第1梯次(舊生)申請截止",
+   "en": "Handling of skipping/absence from class ends,Application for tuition and fee waivers based on student status (112-1) for the first round (old students) begins."
+  },
+  {
+   "id": "8642",
+   "date": "2023-06-17",
+   "zh": "補行上班上課(依人事行政總處公告為準)",
+   "en": "Make-up work day and class day (in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8643",
+   "date": "2023-06-18",
+   "zh": "第1次預選截止（在校生預選112學年度第1學期課程）",
+   "en": "Advance course registration for the first round ends (for courses of first semester of academic year 112)."
+  },
+  {
+   "id": "8644",
+   "date": "2023-06-19",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begin,Grades registry system opens."
+  },
+  {
+   "id": "8645",
+   "date": "2023-06-20",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts,Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "8646",
+   "date": "2023-06-22",
+   "zh": "端午節",
+   "en": "Dragon Boat Festival"
+  },
+  {
+   "id": "8647",
+   "date": "2023-06-23",
+   "zh": "調整彈性放假一天(依人事行政總處公告為準)",
+   "en": "adjust the holiday(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "8648",
+   "date": "2023-06-24",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "8649",
+   "date": "2023-06-25",
+   "zh": "學期考試結束；學期操行成績計算截止",
+   "en": "Final examinations end,Reckoning of semester-based conduct grade ends."
+  },
+  {
+   "id": "8650",
+   "date": "2023-06-26",
+   "zh": "暑假開始",
+   "en": "First day of summer vacation"
+  },
+  {
+   "id": "8651",
+   "date": "2023-06-30",
+   "zh": "學生校外賃居安全評核結束",
+   "en": "Student off-campus rental safety evaluation ends."
+  },
+  {
+   "id": "8652",
+   "date": "2023-07-02",
+   "zh": "教師送交學期成績截止；成績登錄系統24:00關閉",
+   "en": "Final course grades due from faculty,Grades registry system closes at 24:00."
+  },
+  {
+   "id": "8653",
+   "date": "2023-07-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "8654",
+   "date": "2023-07-31",
+   "zh": "第2學期結束；博士、碩士學位考試結束；教學傑出及優良教師票選結束",
+   "en": "End of the spring semester,Doctoral and master’s degree exams end,Voting for outstanding teaching & excellent teacher ends."
+  },
+  {
+   "id": "9071",
+   "date": "2023-08-01",
+   "zh": "第1學期開始；學生居住情形登錄作業開始；英檢提報開始",
+   "en": "Fall semester begins,Registration of students’ housing begins,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9072",
+   "date": "2023-08-08",
+   "zh": "父親節",
+   "en": "Father's day"
+  },
+  {
+   "id": "9073",
+   "date": "2023-08-14",
+   "zh": "112-1身分別學雜費減免第2梯次（新生）申請開始",
+   "en": "Application for tuition and fee waivers based on student status for the second round (new students) begins."
+  },
+  {
+   "id": "9074",
+   "date": "2023-08-16",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins"
+  },
+  {
+   "id": "9075",
+   "date": "2023-08-27",
+   "zh": "祖父母節",
+   "en": "Grandparents day"
+  },
+  {
+   "id": "9076",
+   "date": "2023-08-31",
+   "zh": "研究生、大學部畢業生領取學位證書截止日",
+   "en": "Deadline for graduates of colleges and research institutes to receive diplomas."
+  },
+  {
+   "id": "9077",
+   "date": "2023-09-01",
+   "zh": "英檢提報結束；新生預選開始（含新交換生及轉、復學生）",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends,Advance course registration for new students begins (including new exchange, transfer, and readmitted students)."
+  },
+  {
+   "id": "9078",
+   "date": "2023-09-02",
+   "zh": "國際新生（學位生）報到；宿舍新生入住；新生家長座談會；住宿生體檢",
+   "en": "New international students check in (for degree students),New students check in at the dormitory,Freshman Parent Symposium,physical examination for dorm students"
+  },
+  {
+   "id": "9079",
+   "date": "2023-09-03",
+   "zh": "宿舍新生入住；新生家長座談會；國際新生（學位生）報到；住宿生體檢",
+   "en": "New students check in at the dormitory,Freshman Parent Symposium,New international students check in (for degree students),Boarding Student Physical Examination"
+  },
+  {
+   "id": "9080",
+   "date": "2023-09-04",
+   "zh": "新生學涯開展營；112-1身分別學雜費減免第2梯次（新生）申請截止",
+   "en": "Orientation Camp for new students.,Application for tuition and fee waivers based on student status (112-1) for the second round (new students) ends"
+  },
+  {
+   "id": "9081",
+   "date": "2023-09-05",
+   "zh": "新生學涯開展營；新生預選截止（含新交換生及轉、復學生）",
+   "en": "Orientation Camp for new students.Advance course registration for new students ends."
+  },
+  {
+   "id": "9082",
+   "date": "2023-09-06",
+   "zh": "新生學涯開展營；國際新生（交換生）報到；全校社團博覽會",
+   "en": "Orientation Camp for new students,New international students check in,Whole School Clubs Fair"
+  },
+  {
+   "id": "9083",
+   "date": "2023-09-07",
+   "zh": "國家防災日防災演練；住宿生講習； 國際新生（交換生）報到；第2次預選開始（全校學生）",
+   "en": "Disaster prevention drill on National Disaster Preparedness Day,Lecture for dorm students,New international students check in.Advance course registration for the second round begins (for all students)"
+  },
+  {
+   "id": "9084",
+   "date": "2023-09-08",
+   "zh": "就學貸款對保結束；國際新生（學位生、交換生）入學說明會；第2次預選截止（全校學生）；社團幹部訓練",
+   "en": "Identity verification for student loans ends,New international students OrientationAdvance course registration for the second round ends (for all students),Student club leaders’ training"
+  },
+  {
+   "id": "9085",
+   "date": "2023-09-09",
+   "zh": "宿舍舊生入住；社團幹部訓練",
+   "en": "Old students check in at the dormitory,Student club leaders’ training"
+  },
+  {
+   "id": "9086",
+   "date": "2023-09-10",
+   "zh": "暑假結束；宿舍舊生入住；社團幹部訓練",
+   "en": "Last day of summer vacation,Old students check in at the dormitory,Student club leaders’ training"
+  },
+  {
+   "id": "9087",
+   "date": "2023-09-11",
+   "zh": "上課開始；大學部、研究所新生註冊；博士、碩士學位考試申請開始；舊生、復學生註冊；輔系、雙主修、抵免申請(含英/華語抵免)開始；就學貸款「學校聯」繳件及辦理截止；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Fall semester classes begin,Enrollment of new students for colleges and graduate schools,Application for doctoral and master’s exams begins,Enrollment of old and readmitted students,Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins,Delivery of school acceptance of student loan payments ends,Friendly Campus Week & drug abuse prevention and anti-drug campaign"
+  },
+  {
+   "id": "9088",
+   "date": "2023-09-11",
+   "zh": "學生辦休學退學免學雜費截止日；弱勢學生助學金申請開始；班級幹部系統登錄開始；校內獎助學金申請開始；入學成績優異獎學金申請開始",
+   "en": "Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students,Application for grants of the disadvantaged students begins,Registration of class officers begins,Application for internal scholarships and grants begins,Application for scholarships of outstanding entrance performance begins,Institute new students physical examination"
+  },
+  {
+   "id": "9089",
+   "date": "2023-09-13",
+   "zh": "導師會議",
+   "en": "Guidance Counselors' Meeting"
+  },
+  {
+   "id": "9090",
+   "date": "2023-09-18",
+   "zh": "全校加退選開始；輔系、雙主修、抵免申請（含英/華語抵免）截止",
+   "en": "On-line course add/drop begins,Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends"
+  },
+  {
+   "id": "9091",
+   "date": "2023-09-20",
+   "zh": "英文抵修複審考試；學期制校外實習甄選開始",
+   "en": "Review exam for English exemption,Selection of semester-based off-campus internship begins."
+  },
+  {
+   "id": "9092",
+   "date": "2023-09-22",
+   "zh": "全校加退選截止（含校際選課）；入學成績優異獎學金申請截止；班級幹部系統登錄結束",
+   "en": "Last day to add/drop courses(Application for inter-university course selection),Application for scholarships of outstanding,Registration of class officers ends."
+  },
+  {
+   "id": "9093",
+   "date": "2023-09-23",
+   "zh": "補行上班上課(依人事行政總處公告為準)",
+   "en": "Make-up work day(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "9094",
+   "date": "2023-09-28",
+   "zh": "弱勢學生助學金申請截止",
+   "en": "Application for grants for disadvantaged students ends."
+  },
+  {
+   "id": "9095",
+   "date": "2023-09-29",
+   "zh": "中秋節",
+   "en": "Moon Festival"
+  },
+  {
+   "id": "9096",
+   "date": "2023-10-04",
+   "zh": "一年級全校週會",
+   "en": "Weekly assembly for all freshmen"
+  },
+  {
+   "id": "9097",
+   "date": "2023-10-05",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "9098",
+   "date": "2023-10-09",
+   "zh": "調整彈性放假一天(依人事行政總處公告為準)",
+   "en": "Adjusted holiday(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "9099",
+   "date": "2023-10-10",
+   "zh": "國慶日",
+   "en": "The National Day"
+  },
+  {
+   "id": "9100",
+   "date": "2023-10-13",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends."
+  },
+  {
+   "id": "9101",
+   "date": "2023-10-18",
+   "zh": "校園安全暨交通安全教育講習",
+   "en": "On-campus security and traffic safety lecture"
+  },
+  {
+   "id": "9102",
+   "date": "2023-10-20",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "9103",
+   "date": "2023-10-25",
+   "zh": "二年級全校週會",
+   "en": "Weekly assembly for all sophomores"
+  },
+  {
+   "id": "9104",
+   "date": "2023-10-30",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "9105",
+   "date": "2023-11-03",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "9106",
+   "date": "2023-11-06",
+   "zh": "期中考開始",
+   "en": "Midterm examinations begin"
+  },
+  {
+   "id": "9107",
+   "date": "2023-11-12",
+   "zh": "期中考結束",
+   "en": "Midterm examinations end"
+  },
+  {
+   "id": "9108",
+   "date": "2023-11-13",
+   "zh": "校外賃居學生訪視開始",
+   "en": "Visitation of students living outside school begins"
+  },
+  {
+   "id": "9109",
+   "date": "2023-11-15",
+   "zh": "三年級全校週會；英檢提報開始",
+   "en": "Weekly assembly for all juniors,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9110",
+   "date": "2023-11-22",
+   "zh": "雲科路跑活動",
+   "en": "YunTech’s road running activity"
+  },
+  {
+   "id": "9111",
+   "date": "2023-11-25",
+   "zh": "校慶大會、園遊會",
+   "en": "School’s anniversary celebration,School fair"
+  },
+  {
+   "id": "9112",
+   "date": "2023-12-01",
+   "zh": "弱勢學生生活助學金申請開始；學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Application for living grants for disadvantaged students begins,Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "9113",
+   "date": "2023-12-04",
+   "zh": "112-2身分別學雜費減免第1梯次(舊生及身障類)申請開始",
+   "en": "Application for tuition and fee waivers based on student status (112-2) for the first round (old and disabled students) begins."
+  },
+  {
+   "id": "9114",
+   "date": "2023-12-06",
+   "zh": "四年級全校週會",
+   "en": "Weekly assembly for all seniors"
+  },
+  {
+   "id": "9115",
+   "date": "2023-12-08",
+   "zh": "學期制校外實習甄選結束",
+   "en": "Selection of semester-based off-campus internship ends."
+  },
+  {
+   "id": "9116",
+   "date": "2023-12-15",
+   "zh": "博士、碩士學位考試申請截止；英檢提報結束；英文必修課程重(補)修登記開始",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester,Reporting/uploading of GEPT/TOEIC scores ends,Registration for English compulsory courses re-(supplementary) courses begins"
+  },
+  {
+   "id": "9117",
+   "date": "2023-12-21",
+   "zh": "弱勢學生生活助學金申請截止",
+   "en": "Application for grants for disadvantaged students ends."
+  },
+  {
+   "id": "9118",
+   "date": "2023-12-22",
+   "zh": "112-2身分別學雜費減免第1梯次(舊生及身障類)申請截止；學生獎懲建議案申請截止；研究生提前領證申請截止日",
+   "en": "Application for tuition and fee waivers based on student status (112-2) for the first round (old and disabled students) ends,Application for student’s reward and punishment proposal ends,Deadline for graduate students applicate graduation in advance."
+  },
+  {
+   "id": "9119",
+   "date": "2023-12-25",
+   "zh": "第1次預選開始（在校生預選112學年度第2學期課程）",
+   "en": "Advance course registration for the first round begins (for courses of second semester of academic year 112)."
+  },
+  {
+   "id": "9120",
+   "date": "2023-12-27",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers"
+  }
+ ],
+ "2024": [
+  {
+   "id": "9121",
+   "date": "2024-01-01",
+   "zh": "開國紀念日；研究生指導教授提報系統開放；第1次預選截止（在校生預選112學年度第2學期課程）",
+   "en": "National Founding Day,Advisor login system for graduate students opens,Advance course registration for the first round ends (for courses of second semester of academic year 112)."
+  },
+  {
+   "id": "9122",
+   "date": "2024-01-02",
+   "zh": "校外賃居學生訪視結束；本學期辦理休退學截止日",
+   "en": "Visitation of students living outside school ends,Application for suspension ends"
+  },
+  {
+   "id": "9123",
+   "date": "2024-01-05",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  },
+  {
+   "id": "9124",
+   "date": "2024-01-08",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begin,Grades registry system opens."
+  },
+  {
+   "id": "9125",
+   "date": "2024-01-09",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts,Receiving diplomas for graduates of colleges and research institutes begins"
+  },
+  {
+   "id": "9294",
+   "date": "2024-01-12",
+   "zh": "學期考試結束（因應中央選舉委員會公告113年1月13日（六）舉行第16任總統、副總統與第11屆立法委員選舉投票，本學期全校學期考試彈性調整於113年1月12日（五）前結束，以避免影響學生投票權益。）",
+   "en": "Final examinations end (In response to the announcement of the Central Election Commission on January 13, 2013 (Sat), the election of the 16th president, vice president and 11th legislator will be held, the adjustment of semester examinations for the yuntech  in this semester by 12 Jan 113 (Fri).)"
+  },
+  {
+   "id": "9126",
+   "date": "2024-01-13",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "9127",
+   "date": "2024-01-14",
+   "zh": "學期操行成績計算截止；英文必修課程重(補)修登記結束",
+   "en": "Reckoning of semester-based conduct grade ends, Registration for English compulsory courses re-(supplementary) courses begins"
+  },
+  {
+   "id": "9128",
+   "date": "2024-01-15",
+   "zh": "寒假開始；112-2身分別學雜費減免第2梯次(不含身障類)申請開始；就學貸款申請開始受理「學校聯」繳件",
+   "en": "Winter vacation begins,112-2 The application for the second tier of tuition and miscellaneous fee reduction (excluding those with disabilities) starts,School acceptance of student loan payments begins"
+  },
+  {
+   "id": "9129",
+   "date": "2024-01-21",
+   "zh": "教師送交學期成績截止；成績登錄系統至24:00關閉",
+   "en": "Final course grades due from faculty,Grades registry system closes at 24:00."
+  },
+  {
+   "id": "9130",
+   "date": "2024-01-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "9131",
+   "date": "2024-01-31",
+   "zh": "第1學期結束；博士、碩士學位考試結束",
+   "en": "End of the fall semester,Doctoral and master’s degree exams end."
+  },
+  {
+   "id": "9132",
+   "date": "2024-02-01",
+   "zh": "第2學期開始；英檢提報開始",
+   "en": "Spring semester classes begin,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9133",
+   "date": "2024-02-02",
+   "zh": "新生預選開始（含新交換生及轉、復學生）；研究生、大學部延修生領取畢業證書截止日；112-2身分別學雜費減免第2梯次(不含身障類)申請截止",
+   "en": "Advance course registration for new students begins (including new exchange, transfer, and readmitted students),Receiving diplomas for graduates of colleges and research institutes ends ,112-2 The application deadline for the second echelon of tuition and miscellaneous fee reduction (excluding those with disabilities)"
+  },
+  {
+   "id": "9135",
+   "date": "2024-02-05",
+   "zh": "學生居住情形登錄作業開始；新生預選截止（含新交換生及轉、復學生）",
+   "en": "Student residence status registration assignment begins,Deadline for pre-selection of new students (including new exchange students and transfer and returning students)"
+  },
+  {
+   "id": "9136",
+   "date": "2024-02-08",
+   "zh": "除夕前一日功能性調整放假(依人事行政總處公告為準)",
+   "en": "Adjusted holiday"
+  },
+  {
+   "id": "9137",
+   "date": "2024-02-09",
+   "zh": "除夕、農曆春節假期開始",
+   "en": "Chinese New Year's Eve、Chinese New Year holiday"
+  },
+  {
+   "id": "9138",
+   "date": "2024-02-14",
+   "zh": "農曆春節假期結束",
+   "en": "Lunar New Year holiday ends"
+  },
+  {
+   "id": "9139",
+   "date": "2024-02-15",
+   "zh": "第2次預選開始（全校學生）",
+   "en": "Advance course registration for the second round begins (for all students)."
+  },
+  {
+   "id": "9140",
+   "date": "2024-02-16",
+   "zh": "國際新生（含新交換生）報到；第2次預選截止（全校學生）；就學貸款對保結束",
+   "en": "New international students check in,Advance course registration for the second round ends (for all students),Identity verification for student loans ends."
+  },
+  {
+   "id": "9141",
+   "date": "2024-02-17",
+   "zh": "國際新生（含新交換生）報到；國際新生入學說明會；國際新生宿舍住宿生入住；宿舍住宿生入住；補行上班(依人事行政總處公告為準)",
+   "en": "New international students check in,Orientation for International Freshmen,students check in at the dormitory,Make-up work day(in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "9142",
+   "date": "2024-02-18",
+   "zh": "宿舍住宿生入住；寒假結束",
+   "en": "students check in at the dormitory,Last day of winter vacation"
+  },
+  {
+   "id": "9143",
+   "date": "2024-02-19",
+   "zh": "註冊，上課開始；博士、碩士學位考試申請開始；輔系、雙主修、抵免申請（含英/華語抵免）開始；英檢提報結束；就學貸款「學校聯」繳件及辦理截止；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students,Registration of class officers begins,Application for internal scholarships and grants begins,Application for scholarships of outstanding entrance performance begins"
+  },
+  {
+   "id": "9144",
+   "date": "2024-02-19",
+   "zh": "學生辦休退學免學雜費截止日；班級幹部系統登錄開始；校內獎助學金申請開始、提早入學者入學優異獎學金申請開始；校外表現傑出獎勵申請開始",
+   "en": "Enrollment and Spring semester classes begin,Doctoral and master's degree exams begin,Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begin,Reporting/uploading of GEPT/TOEIC scores ends,Delivery of school acceptance of student loan payments ends,Friendly Campus Week & drug abuse prevention and anti-drug campaign,Application for off-campus outstanding performance grant begins"
+  },
+  {
+   "id": "9145",
+   "date": "2024-02-21",
+   "zh": "導師會議",
+   "en": "Guidance Counselors' Meeting"
+  },
+  {
+   "id": "9146",
+   "date": "2024-02-26",
+   "zh": "全校加退選開始",
+   "en": "On-line course add/drop begins"
+  },
+  {
+   "id": "9147",
+   "date": "2024-02-28",
+   "zh": "和平紀念日",
+   "en": "Peace Memorial Day"
+  },
+  {
+   "id": "9148",
+   "date": "2024-03-01",
+   "zh": "輔系、雙主修、抵免申請（含英/華語抵免）截止；全校加退選截止（含校際選課）；提早入學者入學成績優異獎學金申請截止",
+   "en": "Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends,Last day to add/drop courses(Application for inter-university course selection),Application for scholarships of outstanding entrance performance ends."
+  },
+  {
+   "id": "9149",
+   "date": "2024-03-08",
+   "zh": "學生居住情形登錄作業截止；校內獎助學金申請截止",
+   "en": "Registration of students’ housing ends,Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "9150",
+   "date": "2024-03-13",
+   "zh": "全校一年級週會",
+   "en": "Weekly assembly for all freshmen"
+  },
+  {
+   "id": "9151",
+   "date": "2024-03-15",
+   "zh": "班級幹部系統登錄截止；師生創新圓夢計畫活動結束",
+   "en": "Registration of class officers ends,YunTech Dream Program starts."
+  },
+  {
+   "id": "9152",
+   "date": "2024-03-23",
+   "zh": "全校師生運動會",
+   "en": "Sports Games"
+  },
+  {
+   "id": "9153",
+   "date": "2024-03-25",
+   "zh": "師生創新圓夢計畫活動開始",
+   "en": "YunTech Dream Program ends."
+  },
+  {
+   "id": "9154",
+   "date": "2024-03-27",
+   "zh": "賃居安全評核協調會；房東座談會",
+   "en": "Student rental safety evaluation and coordination meeting,Meeting with landlords"
+  },
+  {
+   "id": "9155",
+   "date": "2024-03-29",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "9156",
+   "date": "2024-04-02",
+   "zh": "教師及學生校慶日補假一天",
+   "en": "One makeup holiday for all teachers and students due to the school’s anniversary celebration"
+  },
+  {
+   "id": "9157",
+   "date": "2024-04-03",
+   "zh": "全校教職員工生運動會補假一天",
+   "en": "One makeup holiday for all school faculty and staff due to sports day"
+  },
+  {
+   "id": "9158",
+   "date": "2024-04-04",
+   "zh": "兒童節",
+   "en": "Children's Day"
+  },
+  {
+   "id": "9159",
+   "date": "2024-04-05",
+   "zh": "民族掃墓節",
+   "en": "Tomb Sweeping Day"
+  },
+  {
+   "id": "9160",
+   "date": "2024-04-08",
+   "zh": "期中考前一週退選申請開始；轉系(所)申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam,Department (graduate school) transfer application starts."
+  },
+  {
+   "id": "9161",
+   "date": "2024-04-10",
+   "zh": "全校三年級週會",
+   "en": "Weekly assembly for all juniors"
+  },
+  {
+   "id": "9162",
+   "date": "2024-04-12",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "9163",
+   "date": "2024-04-15",
+   "zh": "期中考試開始；轉系(所)申請截止",
+   "en": "Midterm examinations begin,Department (graduate school) transfer application ends."
+  },
+  {
+   "id": "9164",
+   "date": "2024-04-21",
+   "zh": "期中考試結束",
+   "en": "Midterm examinations end"
+  },
+  {
+   "id": "9166",
+   "date": "2024-04-24",
+   "zh": "校園安全暨交通安全宣導",
+   "en": "Campus Safety and Traffic Safety Publicity"
+  },
+  {
+   "id": "9167",
+   "date": "2024-05-01",
+   "zh": "勞動節；英檢提報開始",
+   "en": "Dragon Boat Festival,Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9168",
+   "date": "2024-05-10",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "9169",
+   "date": "2024-05-13",
+   "zh": "學生校外賃居安全評核開始；113-1身分別學雜費減免第1梯次(舊生)申請開始",
+   "en": "Student off-campus rental safety evaluation begins,Application for tuition and fee waivers based on student status (113-1) for the first round (old students) begins."
+  },
+  {
+   "id": "9170",
+   "date": "2024-05-15",
+   "zh": "博士、碩士學位考試申請截止；全校二年級週會",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester,Weekly assembly for all sophomores"
+  },
+  {
+   "id": "9171",
+   "date": "2024-05-22",
+   "zh": "英文必修課程重(補)修登記開始",
+   "en": "Registration for English compulsory courses re-(supplementary) courses begins"
+  },
+  {
+   "id": "9172",
+   "date": "2024-05-24",
+   "zh": "英檢提報結束",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "9173",
+   "date": "2024-05-31",
+   "zh": "學生獎懲建議案申請截止；研究生提前領證申請截止日；校外表現傑出獎勵申請截止",
+   "en": "Application Deadline for Student Award and Punishment Proposals,Postgraduate application deadline,Application for off-campus outstanding performance grant ends"
+  },
+  {
+   "id": "9174",
+   "date": "2024-06-01",
+   "zh": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始；畢業典禮",
+   "en": "Advisor login system for graduate students open,Voting for outstanding teaching & excellent teacher starts,Graduation ceremony"
+  },
+  {
+   "id": "9175",
+   "date": "2024-06-05",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers"
+  },
+  {
+   "id": "9176",
+   "date": "2024-06-10",
+   "zh": "端午節",
+   "en": "Dragon Boat Festival"
+  },
+  {
+   "id": "9177",
+   "date": "2024-06-11",
+   "zh": "第1次預選開始（在校生預選113學年度第1學期課程）；本學期辦理休退學截止日",
+   "en": "The 1st pre-selection begins (current students pre-select the 1st semester course of 113 academic year),Application for suspension ends"
+  },
+  {
+   "id": "9178",
+   "date": "2024-06-14",
+   "zh": "缺曠課處理截止；113-1身分別學雜費減免第1梯次(舊生)申請截止",
+   "en": "Handling of skipping/absence from class ends,Application for tuition and fee waivers based on student status (113-1) for the first round (old students) ends."
+  },
+  {
+   "id": "9179",
+   "date": "2024-06-16",
+   "zh": "第1次預選截止（在校生預選113學年度第1學期課程）",
+   "en": "Advance course registration for the first round ends (for courses of second semester of academic year 113)."
+  },
+  {
+   "id": "9180",
+   "date": "2024-06-17",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begin,Grades registry system opens."
+  },
+  {
+   "id": "9181",
+   "date": "2024-06-18",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "Graduates start to leave school,Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "9182",
+   "date": "2024-06-22",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "9183",
+   "date": "2024-06-23",
+   "zh": "學期考試結束；學期操行成績計算截止；英文必修課程重(補)修登記結束",
+   "en": "Final examinations end ,Reckoning of semester-based conduct grade ends,The registration of English compulsory course repeat (make-up) is over"
+  },
+  {
+   "id": "9184",
+   "date": "2024-06-24",
+   "zh": "暑假開始",
+   "en": "First day of summer vacation"
+  },
+  {
+   "id": "9185",
+   "date": "2024-06-28",
+   "zh": "學生校外賃居安全評核結束",
+   "en": "Student off-campus rental safety evaluation ends."
+  },
+  {
+   "id": "9186",
+   "date": "2024-06-30",
+   "zh": "教師送交學期成績截止；成績登錄系統24:00關閉",
+   "en": "Final course grades due from faculty,Grades registry system closes at 24:00."
+  },
+  {
+   "id": "9187",
+   "date": "2024-07-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "9188",
+   "date": "2024-07-31",
+   "zh": "第2學期結束；博士、碩士學位考試結束；教學傑出及優良教師票選結束",
+   "en": "End of the spring semester,Doctoral and master’s degree exams end,Voting for outstanding teaching & excellent teacher ends."
+  },
+  {
+   "id": "9570",
+   "date": "2024-08-01",
+   "zh": "第1學期開始；學生居住情形登錄作業開始；英檢提報開始",
+   "en": "Fall semester begins, Registration of students’ housing begins, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9571",
+   "date": "2024-08-08",
+   "zh": "父親節",
+   "en": "Father's day"
+  },
+  {
+   "id": "9572",
+   "date": "2024-08-12",
+   "zh": "113-1身分別學雜費減免第2梯次（新生）申請開始",
+   "en": "Application for tuition and fee waivers based on student status for the second round (new students) begins."
+  },
+  {
+   "id": "9573",
+   "date": "2024-08-15",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins."
+  },
+  {
+   "id": "9574",
+   "date": "2024-08-25",
+   "zh": "祖父母節",
+   "en": "Grandparents day"
+  },
+  {
+   "id": "9575",
+   "date": "2024-08-30",
+   "zh": "研究生、大學部畢業生領取學位證書截止日",
+   "en": "Deadline for graduates of colleges and research institutes to receive diplomas."
+  },
+  {
+   "id": "9576",
+   "date": "2024-08-31",
+   "zh": "宿舍新生入住；新生家長座談會；新生體檢；國際新生（學位生）報到",
+   "en": "New students check in at the dormitory, Freshman Parent Symposium, Freshman Physical Examination, New international students check in (for degree students)."
+  },
+  {
+   "id": "9577",
+   "date": "2024-09-01",
+   "zh": "宿舍新生入住；新生家長座談會；新生體檢；國際新生（學位生）報到",
+   "en": "New students check in at the dormitory, Freshman Parent Symposium, Freshman Physical Examination, New international students check in (for degree students)."
+  },
+  {
+   "id": "9578",
+   "date": "2024-09-02",
+   "zh": "英檢提報結束；新生預選開始（含新交換生及轉、復學生）；新生學涯開展營；113-1身分別學雜費減免第2梯次（新生）申請截止",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends, Advance course registration for new students begins (including new exchange, transfer, and readmitted students), Orientation Camp for new students, Application for tuition and fee waivers based on student status (113-1) for the second round (new students) ends."
+  },
+  {
+   "id": "9579",
+   "date": "2024-09-03",
+   "zh": "新生學涯開展營；新生預選截止（含新交換生及轉、復學生）",
+   "en": "Orientation Camp for new students, Advance course registration for new students ends."
+  },
+  {
+   "id": "9580",
+   "date": "2024-09-04",
+   "zh": "新生學涯開展營；國際新生（交換生）報到",
+   "en": "Orientation Camp for new students, New international students check in."
+  },
+  {
+   "id": "9581",
+   "date": "2024-09-05",
+   "zh": "國家防災日防災演練；住宿生講習； 國際新生（交換生）報到；第2次預選開始（全校學生）",
+   "en": "Disaster prevention drill on National Disaster Preparedness Day, Lecture for dorm students, New international students check in, Advance course registration for the second round begins (for all students)."
+  },
+  {
+   "id": "9582",
+   "date": "2024-09-06",
+   "zh": "就學貸款對保結束；國際新生（學位生、交換生）入學說明會；第2次預選截止（全校學生）；ACT社團幹部研習營",
+   "en": "Identity verification for student loans ends, New international students Orientation, Advance course registration for the second round ends (for all students), ACT Student club leaders’ training camp,"
+  },
+  {
+   "id": "9583",
+   "date": "2024-09-07",
+   "zh": "宿舍舊生入住；ACT社團幹部研習營",
+   "en": "Old students check in at the dormitory, ACT Student club leaders’ training camp."
+  },
+  {
+   "id": "9584",
+   "date": "2024-09-08",
+   "zh": "暑假結束；宿舍舊生入住；ACT社團幹部研習營",
+   "en": "Last day of summer vacation, Old students check in at the dormitory, ACT Student club leaders’ training camp."
+  },
+  {
+   "id": "9586",
+   "date": "2024-09-09",
+   "zh": "上課開始；大學部、研究所新生註冊；博士、碩士學位考試申請開始；舊生、復學生註冊；輔系、雙主修、抵免申請(含英/華語抵免)開始；就學貸款「學校聯」繳件及辦理截止；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Fall semester classes begin, Enrollment of new students for colleges and graduate schools, Application for doctoral and master’s exams begins, Enrollment of old and readmitted students, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins, Delivery of school acceptance of student loan payments ends, Friendly Campus Week & drug abuse prevention and anti-drug campaign."
+  },
+  {
+   "id": "9587",
+   "date": "2024-09-09",
+   "zh": "學生辦休學退學免學雜費截止日；弱勢學生助學金申請開始；班級幹部系統登錄開始；校內獎助學金申請開始；入學成績優異獎學金申請開始；新生體檢",
+   "en": "Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students, Application for grants of the disadvantaged students begins, Registration of class officers begins, Application for internal scholarships and grants begins, Application for scholarships of outstanding entrance performance begins, Freshman Physical Examination."
+  },
+  {
+   "id": "9585",
+   "date": "2024-09-11",
+   "zh": "導師會議；全校社團博覽會",
+   "en": "Guidance Counselors' Meeting, Whole School Clubs Fair."
+  },
+  {
+   "id": "9589",
+   "date": "2024-09-16",
+   "zh": "全校加退選開始；輔系、雙主修、抵免申請（含英/華語抵免）截止",
+   "en": "On-line course add/drop begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends."
+  },
+  {
+   "id": "9590",
+   "date": "2024-09-17",
+   "zh": "中秋節",
+   "en": "Moon Festival."
+  },
+  {
+   "id": "9591",
+   "date": "2024-09-18",
+   "zh": "英文抵修複審考試；學期制校外實習甄選開始",
+   "en": "Review exam for English exemption, Selection of semester-based off-campus internship begins."
+  },
+  {
+   "id": "9592",
+   "date": "2024-09-20",
+   "zh": "全校加退選截止（含校際選課）；入學成績優異獎學金申請截止；班級幹部系統登錄結束",
+   "en": "Last day to add/drop courses(Application for inter-university course selection), Application for scholarships of outstanding entrance performance ends, Registration of class officers ends."
+  },
+  {
+   "id": "9593",
+   "date": "2024-09-30",
+   "zh": "弱勢學生助學金申請截止",
+   "en": "Application for grants for disadvantaged students ends."
+  },
+  {
+   "id": "9594",
+   "date": "2024-10-02",
+   "zh": "一年級全校週會",
+   "en": "Weekly assembly for all freshmen"
+  },
+  {
+   "id": "9595",
+   "date": "2024-10-07",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "9596",
+   "date": "2024-10-10",
+   "zh": "國慶日",
+   "en": "The National Day"
+  },
+  {
+   "id": "9597",
+   "date": "2024-10-11",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends."
+  },
+  {
+   "id": "9598",
+   "date": "2024-10-16",
+   "zh": "校園安全暨交通安全教育講習",
+   "en": "On-campus security and traffic safety lecture"
+  },
+  {
+   "id": "9599",
+   "date": "2024-10-18",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "9600",
+   "date": "2024-10-23",
+   "zh": "二年級全校週會",
+   "en": "Weekly assembly for all sophomores"
+  },
+  {
+   "id": "9601",
+   "date": "2024-10-28",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "9602",
+   "date": "2024-11-01",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "9603",
+   "date": "2024-11-04",
+   "zh": "期中考開始",
+   "en": "Midterm examinations begin."
+  },
+  {
+   "id": "9604",
+   "date": "2024-11-10",
+   "zh": "期中考結束",
+   "en": "Midterm examinations end."
+  },
+  {
+   "id": "9605",
+   "date": "2024-11-11",
+   "zh": "校外賃居學生訪視開始",
+   "en": "Visitation of students living outside school begins."
+  },
+  {
+   "id": "9606",
+   "date": "2024-11-13",
+   "zh": "三年級全校週會；英檢提報開始",
+   "en": "Weekly assembly for all juniors, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9607",
+   "date": "2024-11-27",
+   "zh": "雲科路跑活動",
+   "en": "YunTech’s road running activity."
+  },
+  {
+   "id": "9608",
+   "date": "2024-11-29",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "9609",
+   "date": "2024-12-02",
+   "zh": "弱勢學生生活助學金申請開始；113-2身分別學雜費減免第1梯次（舊生及身障類）申請開始",
+   "en": "Application for living grants for disadvantaged students begins, Application for tuition and fee waivers based on student status (113-2) for the first round (old and disabled students) begins."
+  },
+  {
+   "id": "9610",
+   "date": "2024-12-06",
+   "zh": "學期制校外實習甄選結束",
+   "en": "Selection of semester-based off-campus internship ends."
+  },
+  {
+   "id": "9611",
+   "date": "2024-12-07",
+   "zh": "校慶大會、園遊會",
+   "en": "School’s anniversary celebration, School fair."
+  },
+  {
+   "id": "9612",
+   "date": "2024-12-11",
+   "zh": "四年級全校週會",
+   "en": "Weekly assembly for all seniors."
+  },
+  {
+   "id": "9613",
+   "date": "2024-12-13",
+   "zh": "英檢提報結束；英文必修課程重(補)修登記開始",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends, Registration for English compulsory courses re-(supplementary) courses begins."
+  },
+  {
+   "id": "9614",
+   "date": "2024-12-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester"
+  },
+  {
+   "id": "9615",
+   "date": "2024-12-18",
+   "zh": "應屆畢業生團拍（非在職）",
+   "en": "Group photo of new graduates (Non-working students)."
+  },
+  {
+   "id": "9616",
+   "date": "2024-12-20",
+   "zh": "113-2身分別學雜費減免第1梯次（舊生及身障類）申請截止；學生獎懲建議案申請截止；研究生提前領證申請截止日",
+   "en": "Application for tuition and fee waivers based on student status (113-2) for the first round (old and disabled students) ends, Application for student’s reward and punishment proposal ends, Deadline for graduate students applicate graduation in advance."
+  },
+  {
+   "id": "9617",
+   "date": "2024-12-23",
+   "zh": "第1次預選開始（在校生預選113學年度第2學期課程）；弱勢學生生活助學金申請截止",
+   "en": "Advance course registration for the first round begins (for courses of second semester of academic year 113), Application for living grants of the disadvantaged students ends."
+  },
+  {
+   "id": "9618",
+   "date": "2024-12-25",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers."
+  },
+  {
+   "id": "9619",
+   "date": "2024-12-29",
+   "zh": "第1次預選截止（在校生預選113學年度第2學期課程）",
+   "en": "Advance course registration for the first round ends (for courses of second semester of academic year 113)."
+  },
+  {
+   "id": "9620",
+   "date": "2024-12-30",
+   "zh": "本學期辦理休退學截止日；校外賃居學生訪視結束",
+   "en": "Application for suspension ends, Visitation of students living outside school ends."
+  }
+ ],
+ "2025": [
+  {
+   "id": "9621",
+   "date": "2025-01-01",
+   "zh": "開國紀念日；研究生指導教授提報系統開放",
+   "en": "National Founding Day, Advisor login system for graduate students opens."
+  },
+  {
+   "id": "9622",
+   "date": "2025-01-03",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  },
+  {
+   "id": "9623",
+   "date": "2025-01-06",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begin, Grades registry system opens."
+  },
+  {
+   "id": "9624",
+   "date": "2025-01-07",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts, Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "9625",
+   "date": "2025-01-11",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "9627",
+   "date": "2025-01-12",
+   "zh": "學期考試結束；英文必修課程重(補)修登記結束；學期操行成績計算截止",
+   "en": "Final examinations end, Registration for English compulsory courses re-(supplementary) courses end, Reckoning of semester-based conduct grade ends."
+  },
+  {
+   "id": "9628",
+   "date": "2025-01-13",
+   "zh": "寒假開始；113-2身分別學雜費減免第2梯次（不含身障類）申請開始",
+   "en": "Winter vacation begins, 113-2 The application for the second tier of tuition and miscellaneous fee reduction (excluding those with disabilities) begins."
+  },
+  {
+   "id": "9629",
+   "date": "2025-01-15",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins."
+  },
+  {
+   "id": "9630",
+   "date": "2025-01-19",
+   "zh": "教師送交學期成績截止；成績登錄系統至24:00關閉",
+   "en": "Final course grades due from faculty, Grades registry system closes at 24:00."
+  },
+  {
+   "id": "9631",
+   "date": "2025-01-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "9632",
+   "date": "2025-01-27",
+   "zh": "除夕前一日調整放假（依人事行政總處公告）",
+   "en": "Adjusted holiday (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "9633",
+   "date": "2025-01-28",
+   "zh": "除夕及農曆春節假期開始",
+   "en": "Chinese New Year's Eve and Chinese New Year holiday"
+  },
+  {
+   "id": "9634",
+   "date": "2025-01-31",
+   "zh": "第1學期結束；博士、碩士學位考試結束",
+   "en": "End of the fall semester, Doctoral and master’s degree exams end."
+  },
+  {
+   "id": "9635",
+   "date": "2025-02-01",
+   "zh": "第2學期開始；英檢提報開始",
+   "en": "Spring semester classes begin, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9636",
+   "date": "2025-02-02",
+   "zh": "農曆春節假期結束",
+   "en": "Lunar New Year vacation ends."
+  },
+  {
+   "id": "9637",
+   "date": "2025-02-03",
+   "zh": "學生居住情形登錄作業開始",
+   "en": "Registration of students’ housing begins."
+  },
+  {
+   "id": "9638",
+   "date": "2025-02-05",
+   "zh": "新生預選開始（含新交換生及轉、復學生）",
+   "en": "Advance course registration for new students begins (including new exchange, transfer, and readmitted students)."
+  },
+  {
+   "id": "9639",
+   "date": "2025-02-07",
+   "zh": "新生預選截止（含新交換生及轉、復學生）；研究生、大學部延修生領取畢業證書截止日",
+   "en": "Advance course registration for new students ends, Receiving diplomas for graduates of colleges and research institutes ends."
+  },
+  {
+   "id": "9640",
+   "date": "2025-02-08",
+   "zh": "補行上班（依人事行政總處公告為準）",
+   "en": "Make-up work day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "9641",
+   "date": "2025-02-10",
+   "zh": "第2次預選開始（全校學生）；113-2身分別學雜費減免第2梯次（不含身障類）申請截止",
+   "en": "Advance course registration for the second round begins (for all students), 113-2 The application for the second tier of tuition and miscellaneous fee reduction (excluding those with disabilities) ends."
+  },
+  {
+   "id": "9642",
+   "date": "2025-02-13",
+   "zh": "第2次預選截止（全校學生）",
+   "en": "Advance course registration for the second round ends (for all students)."
+  },
+  {
+   "id": "9643",
+   "date": "2025-02-14",
+   "zh": "國際新生（含新交換生）報到；就學貸款對保結束",
+   "en": "New international students check in (including new exchange students), Identity verification for student loans ends."
+  },
+  {
+   "id": "9644",
+   "date": "2025-02-15",
+   "zh": "國際新生（含新交換生）報到；國際新生入學說明會；國際新生宿舍住宿生入住；宿舍住宿生入住",
+   "en": "New international students check in (including new exchange students), Orientation for new international students, Students check in at the dormitory."
+  },
+  {
+   "id": "9645",
+   "date": "2025-02-16",
+   "zh": "宿舍住宿生入住；寒假結束",
+   "en": "Students check in at the dormitory, Last day of winter vacation."
+  },
+  {
+   "id": "9646",
+   "date": "2025-02-17",
+   "zh": "註冊，上課開始；博士、碩士學位考試申請開始；輔系、雙主修、抵免申請（含英/華語抵免）開始；英檢提報結束；就學貸款「學校聯」繳件及辦理截止；友善校園週暨防制藥物濫用反毒宣導；",
+   "en": "Enrollment, Spring semester classes begin, Application for doctoral and master’s exams begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins, Reporting/uploading of GEPT/TOEIC scores ends, Delivery of school acceptance of student loan payments ends, Friendly Campus Week & drug abuse prevention and anti-drug campaign."
+  },
+  {
+   "id": "9647",
+   "date": "2025-02-17",
+   "zh": "學生辦休退學免學雜費截止日；班級幹部系統登錄開始；校內獎助學金申請開始、提早入學者入學優異獎學金申請開始；校外表現傑出獎勵申請開始",
+   "en": "Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students, Registration of class officers begins, Application for internal scholarships and grants and scholarships for outstanding entrance performance of head starters begins, Application for off-campus outstanding performance grant begins."
+  },
+  {
+   "id": "9648",
+   "date": "2025-02-19",
+   "zh": "導師會議",
+   "en": "Guidance Counselors' Meeting."
+  },
+  {
+   "id": "9649",
+   "date": "2025-02-24",
+   "zh": "全校加退選開始；輔系、雙主修、抵免申請（含英/華語抵免）截止",
+   "en": "On-line course add/drop begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends."
+  },
+  {
+   "id": "9650",
+   "date": "2025-02-28",
+   "zh": "和平紀念日",
+   "en": "Peace Memorial Day"
+  },
+  {
+   "id": "9651",
+   "date": "2025-03-03",
+   "zh": "全校加退選截止（含校際選課）；提早入學者入學成績優異獎學金申請截止",
+   "en": "Last day to add/drop courses(Application for inter-university course selection), Application for scholarships for outstanding entrance performance of head starters ends."
+  },
+  {
+   "id": "9652",
+   "date": "2025-03-07",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends."
+  },
+  {
+   "id": "9653",
+   "date": "2025-03-10",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "9655",
+   "date": "2025-03-14",
+   "zh": "班級幹部系統登錄截止；師生創新圓夢計畫活動開始",
+   "en": "Registration of class officers ends, YunTech Dream Program starts."
+  },
+  {
+   "id": "9656",
+   "date": "2025-03-22",
+   "zh": "全校師生運動會",
+   "en": "Sports Games."
+  },
+  {
+   "id": "9657",
+   "date": "2025-03-24",
+   "zh": "師生創新圓夢計畫活動結束",
+   "en": "YunTech Dream Program ends."
+  },
+  {
+   "id": "9658",
+   "date": "2025-03-26",
+   "zh": "賃居安全評核協調會；房東座談會；全校一年級週會",
+   "en": "Student rental safety evaluation and coordination meeting, Meeting with landlords, Weekly assembly for all freshmen."
+  },
+  {
+   "id": "9659",
+   "date": "2025-03-28",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends"
+  },
+  {
+   "id": "9660",
+   "date": "2025-04-01",
+   "zh": "教師及學生校慶日補假一天",
+   "en": "One makeup holiday for all teachers and students due to the school’s anniversary celebration."
+  },
+  {
+   "id": "9661",
+   "date": "2025-04-02",
+   "zh": "全校教職員工生運動會補假一天",
+   "en": "One makeup holiday for all school faculty and staff due to sports day."
+  },
+  {
+   "id": "9662",
+   "date": "2025-04-03",
+   "zh": "兒童節及民族掃墓節前一日放假（依人事行政總處公告）",
+   "en": "Adjusted holiday (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "9663",
+   "date": "2025-04-04",
+   "zh": "兒童節及民族掃墓節（依人事行政總處公告）",
+   "en": "Children's Day and Tomb Sweeping Day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "9664",
+   "date": "2025-04-07",
+   "zh": "期中考前一週退選申請開始；轉系(所)申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam, Department (graduate school) transfer application starts."
+  },
+  {
+   "id": "9665",
+   "date": "2025-04-09",
+   "zh": "全校三年級週會",
+   "en": "Weekly assembly for all juniors."
+  },
+  {
+   "id": "9666",
+   "date": "2025-04-11",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "9667",
+   "date": "2025-04-14",
+   "zh": "期中考試開始；轉系(所)申請截止",
+   "en": "Midterm examinations begin, Department (graduate school) transfer application ends."
+  },
+  {
+   "id": "9668",
+   "date": "2025-04-20",
+   "zh": "期中考試結束",
+   "en": "Midterm examinations end."
+  },
+  {
+   "id": "9669",
+   "date": "2025-04-23",
+   "zh": "校園安全暨交通安全宣導",
+   "en": "On-campus security and traffic safety lecture"
+  },
+  {
+   "id": "9670",
+   "date": "2025-05-01",
+   "zh": "勞動節；英檢提報開始",
+   "en": "Labor Day, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9671",
+   "date": "2025-05-06",
+   "zh": "學生校外賃居安全評核開始",
+   "en": "Student off-campus rental safety evaluation begins."
+  },
+  {
+   "id": "9672",
+   "date": "2025-05-09",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "9673",
+   "date": "2025-05-12",
+   "zh": "114-1身分別學雜費減免第1梯次(舊生)申請開始",
+   "en": "Application for tuition and fee waivers based on student status (114-1) for the first round (old students) begins."
+  },
+  {
+   "id": "9674",
+   "date": "2025-05-14",
+   "zh": "全校二年級週會",
+   "en": "Weekly assembly for all sophomores."
+  },
+  {
+   "id": "9675",
+   "date": "2025-05-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester."
+  },
+  {
+   "id": "9676",
+   "date": "2025-05-21",
+   "zh": "英文必修課程重(補)修登記開始",
+   "en": "Registration for English compulsory courses re-(supplementary) courses begins."
+  },
+  {
+   "id": "9677",
+   "date": "2025-05-23",
+   "zh": "英檢提報結束",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "9678",
+   "date": "2025-05-29",
+   "zh": "學生獎懲建議案申請截止；研究生提前領證申請截止日；校外表現傑出獎勵申請截止",
+   "en": "Application for student’s reward and punishment proposal ends, Deadline for graduate students applicate graduation in advance, Application for off-campus outstanding performance grant ends."
+  },
+  {
+   "id": "9679",
+   "date": "2025-05-30",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Make-up holiday for the Dragon Boat Festival (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "9680",
+   "date": "2025-05-31",
+   "zh": "端午節",
+   "en": "Dragon Boat Festival"
+  },
+  {
+   "id": "9681",
+   "date": "2025-06-01",
+   "zh": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始",
+   "en": "Advisor login system for graduate students opens, Voting for outstanding teaching & excellent teacher starts."
+  },
+  {
+   "id": "9682",
+   "date": "2025-06-04",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers."
+  },
+  {
+   "id": "9683",
+   "date": "2025-06-07",
+   "zh": "畢業典禮",
+   "en": "Graduation ceremony."
+  },
+  {
+   "id": "9684",
+   "date": "2025-06-09",
+   "zh": "本學期辦理休退學截止日",
+   "en": "Application for suspension ends."
+  },
+  {
+   "id": "9685",
+   "date": "2025-06-13",
+   "zh": "缺曠課處理截止；114-1身分別學雜費減免第1梯次(舊生)申請截止",
+   "en": "Handling of skipping/absence from class ends, Application for tuition and fee waivers based on student status (114-1) for the first round (old students) ends."
+  },
+  {
+   "id": "9687",
+   "date": "2025-06-16",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begin, Grades registry system opens."
+  },
+  {
+   "id": "9688",
+   "date": "2025-06-17",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts, Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "9689",
+   "date": "2025-06-21",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "9690",
+   "date": "2025-06-22",
+   "zh": "學期考試結束；學期操行成績計算截止；英文必修課程重(補)修登記結束",
+   "en": "Final examinations end, Reckoning of semester-based conduct grade ends, Registration for English compulsory courses re-(supplementary) courses end."
+  },
+  {
+   "id": "9691",
+   "date": "2025-06-23",
+   "zh": "暑假開始",
+   "en": "First day of summer vacation."
+  },
+  {
+   "id": "9692",
+   "date": "2025-06-27",
+   "zh": "學生校外賃居安全評核結束",
+   "en": "Student off-campus rental safety evaluation ends."
+  },
+  {
+   "id": "9693",
+   "date": "2025-06-29",
+   "zh": "教師送交學期成績截止；成績登錄系統24:00關閉",
+   "en": "Final course grades due from faculty, Grades registry system closes at 24:00."
+  },
+  {
+   "id": "9694",
+   "date": "2025-07-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "9695",
+   "date": "2025-07-31",
+   "zh": "第2學期結束；博士、碩士學位考試結束；教學傑出及優良教師票選結束",
+   "en": "End of the spring semester, Doctoral and master’s degree exams end, Voting for outstanding teaching & excellent teacher ends."
+  },
+  {
+   "id": "9952",
+   "date": "2025-08-01",
+   "zh": "第1學期開始；學生居住情形登錄作業開始；英檢提報開始",
+   "en": "Fall semester begins, Registration of students’ housing begins, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "9959",
+   "date": "2025-08-08",
+   "zh": "父親節",
+   "en": "Father's day"
+  },
+  {
+   "id": "9960",
+   "date": "2025-08-11",
+   "zh": "114-1身分別學雜費減免第2梯次（新生）申請開始",
+   "en": "Application for tuition and fee waivers based on student status (114-1) for the second round (freshman) begins."
+  },
+  {
+   "id": "9961",
+   "date": "2025-08-18",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins."
+  },
+  {
+   "id": "9962",
+   "date": "2025-08-21",
+   "zh": "全校學生第1次預選(網路選課)開始",
+   "en": "The first advance course registration (Course selection online) for all students begins."
+  },
+  {
+   "id": "9963",
+   "date": "2025-08-24",
+   "zh": "祖父母節",
+   "en": "Grandparents day"
+  },
+  {
+   "id": "9964",
+   "date": "2025-08-26",
+   "zh": "全校學生第1次預選(網路選課)截止",
+   "en": "The first advance course registration (Course selection online) for all students ends."
+  },
+  {
+   "id": "9965",
+   "date": "2025-08-28",
+   "zh": "全校學生第2次預選(網路選課)開始",
+   "en": "The second advance course registration (Course selection online) for all students begins."
+  },
+  {
+   "id": "9966",
+   "date": "2025-08-29",
+   "zh": "研究生、大學部畢業生領取學位證書截止日；國際新生報到；國際新生宿舍入住",
+   "en": "Deadline for graduates of colleges and research institutes to receive diplomas, New international students check in, New international students check in at the dormitory."
+  },
+  {
+   "id": "9967",
+   "date": "2025-08-30",
+   "zh": "宿舍新生入住；新生家長座談會；新生體檢",
+   "en": "Freshman check in at the dormitory, Freshman Parent Symposium, Freshman physical examination."
+  },
+  {
+   "id": "9968",
+   "date": "2025-08-31",
+   "zh": "宿舍新生入住；新生家長座談會；新生體檢",
+   "en": "Freshman check in at the dormitory, Freshman Parent Symposium, Freshman physical examination."
+  },
+  {
+   "id": "9969",
+   "date": "2025-09-01",
+   "zh": "新生學涯開展營；114-1身分別學雜費減免第2梯次（新生）申請截止；英檢提報結束",
+   "en": "Orientation Camp for Freshman, Application for tuition and fee waivers based on student status (114-1) for the second round (freshman) ends, Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "9970",
+   "date": "2025-09-02",
+   "zh": "新生學涯開展營；全校學生第2次預選(網路選課)截止；國際新生報到",
+   "en": "Orientation Camp for Freshman, The second advance course registration (Course selection online) for all students ends, New international students check in."
+  },
+  {
+   "id": "9971",
+   "date": "2025-09-03",
+   "zh": "新生學涯開展營",
+   "en": "Orientation Camp for Freshman."
+  },
+  {
+   "id": "9972",
+   "date": "2025-09-04",
+   "zh": "國家防災日防災演練；住宿生講習",
+   "en": "Disaster prevention drill on National Disaster Preparedness Day, Lecture for dorm students."
+  },
+  {
+   "id": "9973",
+   "date": "2025-09-05",
+   "zh": "就學貸款對保結束；國際新生入學說明會",
+   "en": "Identity verification for student loans ends, New international students orientation."
+  },
+  {
+   "id": "9974",
+   "date": "2025-09-06",
+   "zh": "宿舍舊生入住",
+   "en": "College students check in at the dormitory."
+  },
+  {
+   "id": "9975",
+   "date": "2025-09-07",
+   "zh": "暑假結束；宿舍舊生入住",
+   "en": "Last day of summer vacation, College students check in at the dormitory."
+  },
+  {
+   "id": "9976",
+   "date": "2025-09-08",
+   "zh": "上課開始；大學部、研究所新生註冊；舊生、復學生註冊；入學成績優異獎學金申請開始； 輔系、雙主修、抵免申請（含英/華語抵免）開始；學生辦休學退學免學雜費截止日； 全校加退選(網路選課)開始；",
+   "en": "Fall semester classes begin, Enrollment of freshman for colleges and graduate schools, Enrollment of college students and readmitted students, Application for scholarships of outstanding entrance performance begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins, Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students, On-line course add/drop begins."
+  },
+  {
+   "id": "9979",
+   "date": "2025-09-08",
+   "zh": "博士、碩士學位考試申請開始； 就學貸款「學校聯」繳件及辦理截止；班級幹部系統登錄開始；新生體檢； 校內獎助學金申請開始；弱勢學生助學金申請開始；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Application for doctoral and master’s exams begins, Delivery of school acceptance of student loan payments ends, Registration of class officers begins, Freshman physical examination, Application for internal scholarships and grants begins, Application for grants of the disadvantaged students begins, Friendly Campus Week & drug abuse prevention and anti-drug campaign."
+  },
+  {
+   "id": "9980",
+   "date": "2025-09-10",
+   "zh": "全校社團博覽會；導師會議",
+   "en": "Whole School Clubs Fair, Guidance Counselors' Meeting."
+  },
+  {
+   "id": "9981",
+   "date": "2025-09-15",
+   "zh": "輔系、雙主修、抵免申請（含英/華語抵免）截止",
+   "en": "Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends"
+  },
+  {
+   "id": "9982",
+   "date": "2025-09-17",
+   "zh": "學期制校外實習甄選開始；英文抵修複審考試",
+   "en": "Selection of semester-based off-campus internship begins, Review exam for English exemption."
+  },
+  {
+   "id": "9983",
+   "date": "2025-09-19",
+   "zh": "全校加退選(網路選課)截止（含校際選課）；入學成績優異獎學金申請截止；班級幹部系統登錄結束",
+   "en": "On-line course add/drop ends (Application for inter-university course selection), Application for scholarships of outstanding entrance performance ends, Registration of class officers ends."
+  },
+  {
+   "id": "9984",
+   "date": "2025-09-20",
+   "zh": "ACT全校社團幹部研習營",
+   "en": "ACT Student club leaders’ training camp."
+  },
+  {
+   "id": "9985",
+   "date": "2025-09-21",
+   "zh": "ACT全校社團幹部研習營",
+   "en": "ACT Student club leaders’ training camp."
+  },
+  {
+   "id": "10158",
+   "date": "2025-09-28",
+   "zh": "孔子誕辰紀念日/教師節",
+   "en": "Confucius’ Birthday (Teachers’ Day)"
+  },
+  {
+   "id": "10159",
+   "date": "2025-09-29",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Make-up holiday for Teachers’ Day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "9986",
+   "date": "2025-09-30",
+   "zh": "弱勢學生助學金申請截止",
+   "en": "Application for grants for disadvantaged students ends."
+  },
+  {
+   "id": "9988",
+   "date": "2025-10-01",
+   "zh": "一年級全校週會",
+   "en": "Weekly assembly for all freshmen"
+  },
+  {
+   "id": "9989",
+   "date": "2025-10-06",
+   "zh": "中秋節",
+   "en": "Moon Festival"
+  },
+  {
+   "id": "9990",
+   "date": "2025-10-07",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "9991",
+   "date": "2025-10-09",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends."
+  },
+  {
+   "id": "9992",
+   "date": "2025-10-10",
+   "zh": "國慶日",
+   "en": "The National Day"
+  },
+  {
+   "id": "9993",
+   "date": "2025-10-15",
+   "zh": "校園安全暨交通安全教育講習",
+   "en": "On-campus security and traffic safety lecture."
+  },
+  {
+   "id": "9994",
+   "date": "2025-10-17",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "9995",
+   "date": "2025-10-22",
+   "zh": "二年級全校週會",
+   "en": "Weekly assembly for all sophomores."
+  },
+  {
+   "id": "10161",
+   "date": "2025-10-24",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Make-up holiday for Taiwan Retrocession Day and the Anniversary of the Battle of Guningtou (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10160",
+   "date": "2025-10-25",
+   "zh": "臺灣光復暨金門古寧頭大捷紀念日",
+   "en": "Taiwan Retrocession Day and the Anniversary of the Battle of Guningtou"
+  },
+  {
+   "id": "9996",
+   "date": "2025-10-27",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "9997",
+   "date": "2025-10-31",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "9998",
+   "date": "2025-11-03",
+   "zh": "期中考開始",
+   "en": "Midterm examinations begins"
+  },
+  {
+   "id": "9999",
+   "date": "2025-11-09",
+   "zh": "期中考結束",
+   "en": "Midterm examinations ends"
+  },
+  {
+   "id": "10000",
+   "date": "2025-11-10",
+   "zh": "校外賃居學生訪視開始",
+   "en": "Visitation of students living outside school begins."
+  },
+  {
+   "id": "10001",
+   "date": "2025-11-12",
+   "zh": "三年級全校週會；英檢提報開始",
+   "en": "Weekly assembly for all juniors, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "10002",
+   "date": "2025-11-26",
+   "zh": "雲科路跑活動",
+   "en": "YunTech’s road running activity."
+  },
+  {
+   "id": "10003",
+   "date": "2025-11-28",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10004",
+   "date": "2025-12-01",
+   "zh": "弱勢學生生活助學金申請開始；114-2身分別學雜費減免第1梯次（舊生及身障類）申請開始",
+   "en": "Application for living grants for disadvantaged students begins, Application for tuition and fee waivers based on student status (114-2) for the first round (college and disabled students) begins."
+  },
+  {
+   "id": "10005",
+   "date": "2025-12-05",
+   "zh": "學期制校外實習甄選結束",
+   "en": "Selection of semester-based off-campus internship ends."
+  },
+  {
+   "id": "10006",
+   "date": "2025-12-06",
+   "zh": "校慶大會、園遊會",
+   "en": "University anniversary celebration, University fair."
+  },
+  {
+   "id": "10007",
+   "date": "2025-12-10",
+   "zh": "四年級全校週會",
+   "en": "Weekly assembly for all seniors."
+  },
+  {
+   "id": "10008",
+   "date": "2025-12-12",
+   "zh": "英檢提報結束；英文必修課程重(補)修登記開始",
+   "en": "Reporting/uploading of GEPT/TOEIC scores ends, Registration for English compulsory courses re-(supplementary) courses begins."
+  },
+  {
+   "id": "10009",
+   "date": "2025-12-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester."
+  },
+  {
+   "id": "10010",
+   "date": "2025-12-17",
+   "zh": "應屆畢業生團拍（非在職）",
+   "en": "Group photo of new graduates (Non-working students)."
+  },
+  {
+   "id": "10011",
+   "date": "2025-12-19",
+   "zh": "研究生提前領證申請截止日； 學生獎懲建議案申請截止；114-2身分別學雜費減免第1梯次（舊生及身障類）申請截止",
+   "en": "Deadline for graduate students applicate graduation in advance, Application for student’s reward and punishment proposal ends, Application for tuition and fee waivers based on student status (114-2) for the first round (college and disabled students) ends."
+  },
+  {
+   "id": "10012",
+   "date": "2025-12-22",
+   "zh": "弱勢學生生活助學金申請截止",
+   "en": "Application for living grants of the disadvantaged students ends"
+  },
+  {
+   "id": "10013",
+   "date": "2025-12-24",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers."
+  },
+  {
+   "id": "10162",
+   "date": "2025-12-25",
+   "zh": "行憲紀念日",
+   "en": "Constitution Day"
+  },
+  {
+   "id": "10014",
+   "date": "2025-12-29",
+   "zh": "本學期辦理休退學截止日；校外賃居學生訪視結束",
+   "en": "Application for suspension ends, Visitation of students living outside school ends."
+  }
+ ],
+ "2026": [
+  {
+   "id": "10015",
+   "date": "2026-01-01",
+   "zh": "開國紀念日；研究生指導教授提報系統開放",
+   "en": "National Founding Day, Advisor login system for graduate students opens."
+  },
+  {
+   "id": "10016",
+   "date": "2026-01-02",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  },
+  {
+   "id": "10017",
+   "date": "2026-01-05",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begins, Grades registry system opens."
+  },
+  {
+   "id": "10018",
+   "date": "2026-01-06",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts, Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "10019",
+   "date": "2026-01-10",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes"
+  },
+  {
+   "id": "10020",
+   "date": "2026-01-11",
+   "zh": "學期考試結束；學期操行成績計算截止；英文必修課程重(補)修登記結束",
+   "en": "Final examinations ends, Reckoning of semester-based conduct grade ends, 英文必修課程重(補)修登記結束\tRegistration for English compulsory courses re-(supplementary) courses ends."
+  },
+  {
+   "id": "10021",
+   "date": "2026-01-12",
+   "zh": "寒假開始；114-2身分別學雜費減免第2梯次（不含身障類）申請開始",
+   "en": "Winter vacation begins, Application for tuition and fee waivers based on student status (114-2) for the second round (excluding those with disabilities) begins."
+  },
+  {
+   "id": "10022",
+   "date": "2026-01-15",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins."
+  },
+  {
+   "id": "10023",
+   "date": "2026-01-18",
+   "zh": "教師送交學期成績截止；成績登錄系統至24:00關閉",
+   "en": "Final course grades due from faculty, Grades registry system closes at 24:00."
+  },
+  {
+   "id": "10024",
+   "date": "2026-01-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "10025",
+   "date": "2026-01-30",
+   "zh": "博士、碩士學位考試結束",
+   "en": "Doctoral and master’s degree exams ends."
+  },
+  {
+   "id": "10026",
+   "date": "2026-01-31",
+   "zh": "第1學期結束",
+   "en": "End of the fall semester."
+  },
+  {
+   "id": "10027",
+   "date": "2026-02-01",
+   "zh": "第2學期開始；英檢提報開始",
+   "en": "Spring semester classes begins, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "10028",
+   "date": "2026-02-02",
+   "zh": "學生居住情形登錄作業開始",
+   "en": "Registration of students’ housing begins"
+  },
+  {
+   "id": "10029",
+   "date": "2026-02-04",
+   "zh": "全校學生第1次預選(網路選課)開始",
+   "en": "The first advance course registration (Course selection online) for all students begins"
+  },
+  {
+   "id": "10030",
+   "date": "2026-02-06",
+   "zh": "全校學生第1次預選(網路選課)截止",
+   "en": "The first advance course registration (Course selection online) for all students ends"
+  },
+  {
+   "id": "10031",
+   "date": "2026-02-09",
+   "zh": "全校學生第2次預選(網路選課)開始；114-2身分別學雜費減免第2梯次（不含身障類）申請截止",
+   "en": "The second advance course registration (Course selection online) for all students begins, Application for tuition and fee waivers based on student status (114-2) for the second round (excluding those with disabilities) ends."
+  },
+  {
+   "id": "10032",
+   "date": "2026-02-12",
+   "zh": "全校學生第2次預選(網路選課)截止",
+   "en": "The second advance course registration (Course selection online) for all students ends"
+  },
+  {
+   "id": "10033",
+   "date": "2026-02-13",
+   "zh": "研究生、大學部延修生領取畢業證書截止日；就學貸款對保結束",
+   "en": "Receiving diplomas for graduates of colleges and research institutes ends, Identity verification for student loans ends."
+  },
+  {
+   "id": "10034",
+   "date": "2026-02-14",
+   "zh": "除夕及農曆春節假期開始（依人事行政總處公告）",
+   "en": "Chinese New Year's Eve and Chinese New Year holiday (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10163",
+   "date": "2026-02-15",
+   "zh": "小年夜",
+   "en": "Little New Year"
+  },
+  {
+   "id": "10164",
+   "date": "2026-02-20",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Make-up holiday for Little New Year (in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "10036",
+   "date": "2026-02-21",
+   "zh": "宿舍住宿生入住",
+   "en": "Students check in at the dormitory."
+  },
+  {
+   "id": "10037",
+   "date": "2026-02-22",
+   "zh": "農曆春節假期結束；寒假結束；宿舍住宿生入住；國際新生報到；國際新生宿舍入住",
+   "en": "Lunar New Year vacation ends, Last day of winter vacation, Students check in at the dormitory, New international students check in."
+  },
+  {
+   "id": "10038",
+   "date": "2026-02-23",
+   "zh": "上課開始，註冊；提早入學者入學優異獎學金申請開始；校外表現傑出獎勵申請開始； 輔系、雙主修、抵免申請（含英/華語抵免）開始；學生辦休退學免學雜費截止日； 全校加退選(網路選課)開始；",
+   "en": "Spring semester classes begins, Enrollment, Scholarships for outstanding entrance performance of head starters begins, Application for off-campus outstanding performance grant begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins, Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students, On-line course add/drop begins."
+  },
+  {
+   "id": "10039",
+   "date": "2026-02-23",
+   "zh": "博士、碩士學位考試申請開始； 英檢提報結束；就學貸款「學校聯」繳件及辦理截止； 班級幹部系統登錄開始；校內獎助學金申請開始；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Application for doctoral and master’s exams begins, Reporting/uploading of GEPT/TOEIC scores ends, Delivery of school acceptance of student loan payments ends, Registration of class officers begins, Application for internal scholarships and grants begins, Friendly Campus Week & drug abuse prevention and anti-drug campaign."
+  },
+  {
+   "id": "10040",
+   "date": "2026-02-25",
+   "zh": "導師會議；國際新生入學說明會",
+   "en": "Guidance Counselors' Meeting, Orientation for new international students."
+  },
+  {
+   "id": "10041",
+   "date": "2026-02-27",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Make-up holiday for Peace Memorial Day (in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "10042",
+   "date": "2026-02-28",
+   "zh": "和平紀念日",
+   "en": "Peace Memorial Day"
+  },
+  {
+   "id": "10046",
+   "date": "2026-03-02",
+   "zh": "輔系、雙主修、抵免申請（含英/華語抵免）截止",
+   "en": "Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends."
+  },
+  {
+   "id": "10045",
+   "date": "2026-03-06",
+   "zh": "全校加退選(網路選課)截止（含校際選課）；提早入學者入學成績優異獎學金申請截止",
+   "en": "On-line course add/drop ends (Application for inter-university course selection), Scholarships for outstanding entrance performance of head starters ends."
+  },
+  {
+   "id": "10047",
+   "date": "2026-03-09",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "10048",
+   "date": "2026-03-11",
+   "zh": "全校一年級週會",
+   "en": "Weekly assembly for all freshmen."
+  },
+  {
+   "id": "10049",
+   "date": "2026-03-13",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends."
+  },
+  {
+   "id": "10050",
+   "date": "2026-03-18",
+   "zh": "學生校外賃居安全處所安全務工作推動小組會議暨賃居安全評核協調會及房東座談會",
+   "en": "Student rental safety evaluation and coordination meeting and meeting with landlords."
+  },
+  {
+   "id": "10051",
+   "date": "2026-03-20",
+   "zh": "班級幹部系統登錄截止；師生創新圓夢計畫活動開始",
+   "en": "Registration of class officers ends, YunTech Dream Program starts."
+  },
+  {
+   "id": "10052",
+   "date": "2026-03-28",
+   "zh": "全校師生運動會",
+   "en": "Sports Day."
+  },
+  {
+   "id": "10053",
+   "date": "2026-03-30",
+   "zh": "師生創新圓夢計畫活動結束",
+   "en": "YunTech Dream Program ends."
+  },
+  {
+   "id": "10054",
+   "date": "2026-03-31",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10055",
+   "date": "2026-04-01",
+   "zh": "教師及學生校慶日補假一天",
+   "en": "One makeup holiday for all teachers and students due to the university anniversary celebration."
+  },
+  {
+   "id": "10056",
+   "date": "2026-04-02",
+   "zh": "全校教職員工生運動會補假一天",
+   "en": "One makeup holiday for all school faculty and staff due to sports day."
+  },
+  {
+   "id": "10057",
+   "date": "2026-04-03",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Adjusted holiday (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10058",
+   "date": "2026-04-04",
+   "zh": "兒童節",
+   "en": "Children's Day"
+  },
+  {
+   "id": "10059",
+   "date": "2026-04-05",
+   "zh": "民族掃墓節",
+   "en": "Tomb Sweeping Day"
+  },
+  {
+   "id": "10060",
+   "date": "2026-04-06",
+   "zh": "補假一天（依人事行政總處公告）",
+   "en": "Adjusted holiday (in accordance with announcements from Directorate-General of Personnel Administration)"
+  },
+  {
+   "id": "10061",
+   "date": "2026-04-07",
+   "zh": "轉系(所)申請開始",
+   "en": "Department (graduate school) transfer application starts."
+  },
+  {
+   "id": "10062",
+   "date": "2026-04-13",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "10063",
+   "date": "2026-04-14",
+   "zh": "轉系(所)申請截止",
+   "en": "Department (graduate school) transfer application ends."
+  },
+  {
+   "id": "10064",
+   "date": "2026-04-15",
+   "zh": "全校三年級週會",
+   "en": "Weekly assembly for all juniors."
+  },
+  {
+   "id": "10065",
+   "date": "2026-04-17",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "10066",
+   "date": "2026-04-20",
+   "zh": "期中考試開始",
+   "en": "Midterm examinations begins."
+  },
+  {
+   "id": "10067",
+   "date": "2026-04-26",
+   "zh": "期中考試結束",
+   "en": "Midterm examinations ends."
+  },
+  {
+   "id": "10068",
+   "date": "2026-04-29",
+   "zh": "校園安全暨交通安全宣導",
+   "en": "On-campus security and traffic safety lecture."
+  },
+  {
+   "id": "10069",
+   "date": "2026-05-01",
+   "zh": "勞動節；英檢提報開始",
+   "en": "Labor Day, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "10070",
+   "date": "2026-05-12",
+   "zh": "學生校外賃居安全評核開始",
+   "en": "Student off-campus rental safety evaluation begins."
+  },
+  {
+   "id": "10071",
+   "date": "2026-05-15",
+   "zh": "博士、碩士學位考試申請截止；學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester, Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10072",
+   "date": "2026-05-18",
+   "zh": "115-1身分別學雜費減免第1梯次（舊生）申請開始",
+   "en": "Application for tuition and fee waivers based on student status (115-1) for the first round (college students) begins."
+  },
+  {
+   "id": "10073",
+   "date": "2026-05-20",
+   "zh": "全校二年級週會",
+   "en": "Weekly assembly for all sophomores."
+  },
+  {
+   "id": "10074",
+   "date": "2026-05-27",
+   "zh": "英文必修課程重(補)修登記開始",
+   "en": "Registration for English compulsory courses re-(supplementary) courses begins."
+  },
+  {
+   "id": "10075",
+   "date": "2026-05-29",
+   "zh": "校外表現傑出獎勵申請截止；英檢提報結束",
+   "en": "Application for off-campus outstanding performance grant ends, Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "10076",
+   "date": "2026-06-01",
+   "zh": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始",
+   "en": "Advisor login system for graduate students opens, Voting for outstanding teaching & excellent teacher starts."
+  },
+  {
+   "id": "10078",
+   "date": "2026-06-03",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers."
+  },
+  {
+   "id": "10077",
+   "date": "2026-06-05",
+   "zh": "研究生提前領證申請截止日；學生獎懲建議案申請截止",
+   "en": "Deadline for graduate students applicate graduation in advance, Application for student’s reward and punishment proposal ends."
+  },
+  {
+   "id": "10079",
+   "date": "2026-06-12",
+   "zh": "115-1身分別學雜費減免第1梯次(舊生)申請截止",
+   "en": "Application for tuition and fee waivers based on student status (115-1) for the first round (college students) ends."
+  },
+  {
+   "id": "10080",
+   "date": "2026-06-13",
+   "zh": "畢業典禮",
+   "en": "Graduation Ceremony."
+  },
+  {
+   "id": "10081",
+   "date": "2026-06-15",
+   "zh": "本學期辦理休退學截止日",
+   "en": "Application for suspension ends"
+  },
+  {
+   "id": "10082",
+   "date": "2026-06-18",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  },
+  {
+   "id": "10083",
+   "date": "2026-06-19",
+   "zh": "端午節",
+   "en": "Dragon Boat Festival"
+  },
+  {
+   "id": "10084",
+   "date": "2026-06-22",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begins, Grades registry system opens."
+  },
+  {
+   "id": "10085",
+   "date": "2026-06-23",
+   "zh": "畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "School leaving procedure for future graduates starts, Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "10086",
+   "date": "2026-06-27",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "10087",
+   "date": "2026-06-28",
+   "zh": "學期考試結束；學期操行成績計算截止；英文必修課程重(補)修登記結束",
+   "en": "Final examinations ends, Reckoning of semester-based conduct grade ends, Registration for English compulsory courses re-(supplementary) courses ends."
+  },
+  {
+   "id": "10088",
+   "date": "2026-06-29",
+   "zh": "暑假開始",
+   "en": "First day of summer vacation."
+  },
+  {
+   "id": "10089",
+   "date": "2026-07-03",
+   "zh": "學生校外賃居安全評核結束",
+   "en": "Student off-campus rental safety evaluation ends."
+  },
+  {
+   "id": "10090",
+   "date": "2026-07-05",
+   "zh": "教師送交學期成績截止；成績登錄系統24:00關閉",
+   "en": "Final course grades due from faculty, Grades registry system closes at 24:00."
+  },
+  {
+   "id": "10091",
+   "date": "2026-07-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "10092",
+   "date": "2026-07-31",
+   "zh": "第2學期結束；博士、碩士學位考試結束；教學傑出及優良教師票選結束",
+   "en": "End of the spring semester, Doctoral and master’s degree exams ends, Voting for outstanding teaching & excellent teacher ends."
+  },
+  {
+   "id": "10332",
+   "date": "2026-08-01",
+   "zh": "第1學期開始；學生居住情形登錄作業開始；英檢提報開始",
+   "en": "Fall semester begins, Registration of students’ housing begins, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "10333",
+   "date": "2026-08-10",
+   "zh": "115-1身分別學雜費減免第2梯次(新生)申請開始",
+   "en": "Application for tuition and fee waivers based on student status (115-1) for the second round (freshman) begins."
+  },
+  {
+   "id": "10334",
+   "date": "2026-08-17",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins."
+  },
+  {
+   "id": "10335",
+   "date": "2026-08-24",
+   "zh": "全校學生第1次預選(網路選課)開始",
+   "en": "The first advance course registration (Course selection online) for all students begins."
+  },
+  {
+   "id": "10336",
+   "date": "2026-08-26",
+   "zh": "全校學生第1次預選(網路選課)截止",
+   "en": "The first advance course registration (Course selection online) for all students ends."
+  },
+  {
+   "id": "10337",
+   "date": "2026-08-28",
+   "zh": "全校學生第2次預選(網路選課)開始；國際新生報到、國際新生宿舍入住",
+   "en": "The second advance course registration (Course selection online) for all students begins, New international students check in, New international students check in at the dormitory."
+  },
+  {
+   "id": "10338",
+   "date": "2026-08-29",
+   "zh": "宿舍新生入住、新生家長座談會、新生體檢",
+   "en": "Freshman check in at the dormitory, Freshman Parent Symposium, Freshman physical examination."
+  },
+  {
+   "id": "10339",
+   "date": "2026-08-30",
+   "zh": "宿舍新生入住",
+   "en": "Freshman check in at the dormitory."
+  },
+  {
+   "id": "10340",
+   "date": "2026-08-31",
+   "zh": "研究生、大學部畢業生領取學位證書截止日；新生學涯開展營；115-1身分別學雜費減免第2梯次 (新生)申請截止",
+   "en": "Deadline for graduates of colleges and research institutes to receive diplomas, Orientation Camp for Freshman, Application for tuition and fee waivers based on student status (115-1) for the second round (freshman) ends."
+  },
+  {
+   "id": "10341",
+   "date": "2026-09-01",
+   "zh": "全校學生第2次預選(網路選課)截止；新生學涯開展營",
+   "en": "The second advance course registration (Course selection online) for all students ends, Orientation Camp for Freshman."
+  },
+  {
+   "id": "10342",
+   "date": "2026-09-02",
+   "zh": "新生學涯開展營",
+   "en": "Orientation Camp for Freshman."
+  },
+  {
+   "id": "10343",
+   "date": "2026-09-03",
+   "zh": "國家防災日防災演練；住宿生講習",
+   "en": "Disaster prevention drill on National Disaster Preparedness Day, Lecture for dorm students."
+  },
+  {
+   "id": "10344",
+   "date": "2026-09-04",
+   "zh": "就學貸款對保結束；國際新生入學說明會",
+   "en": "Identity verification for student loans ends, New international students orientation."
+  },
+  {
+   "id": "10345",
+   "date": "2026-09-05",
+   "zh": "宿舍舊生入住",
+   "en": "College students check in at the dormitory."
+  },
+  {
+   "id": "10346",
+   "date": "2026-09-06",
+   "zh": "暑假結束；宿舍舊生入住",
+   "en": "Last day of summer vacation, College students check in at the dormitory."
+  },
+  {
+   "id": "10347",
+   "date": "2026-09-07",
+   "zh": "上課開始；大學部、研究所新生註冊；舊生、復學生註冊；入學成績優異獎學金申請開始； 輔系、雙主修、抵免申請(含英/華語抵免)開始；學生辦休退學免學雜費截止日； 全校加退選(網路選課)開始；",
+   "en": "Fall semester classes begin, Enrollment of freshman for colleges and graduate schools, Enrollment of college students and readmitted students, Application for scholarships of outstanding entrance performance begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins, Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students, On-line course add/drop begins,"
+  },
+  {
+   "id": "10348",
+   "date": "2026-09-07",
+   "zh": "博士、碩士學位考試申請開始； 就學貸款「學校聯」繳件及辦理截止；班級幹部系統登錄開始；新生體檢； 校內獎助學金申請開始；弱勢學生助學金申請開始；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Application for doctoral and master’s exams begins, Delivery of school acceptance of student loan payments ends, Registration of class officers begins, Freshman physical examination, Application for internal scholarships and grants begins, Application for grants of the disadvantaged students begins, Friendly Campus Week & drug abuse prevention and anti-drug campaign."
+  },
+  {
+   "id": "10349",
+   "date": "2026-09-09",
+   "zh": "全校社團博覽會；導師會議",
+   "en": "Whole University Clubs Fair, Guidance Counselors' Meeting."
+  },
+  {
+   "id": "10350",
+   "date": "2026-09-14",
+   "zh": "輔系、雙主修、抵免申請(含英/華語抵免)截止",
+   "en": "Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends."
+  },
+  {
+   "id": "10351",
+   "date": "2026-09-16",
+   "zh": "學期制校外實習甄選開始；英文抵修複審考試",
+   "en": "Selection of semester-based off-campus internship begins, Review exam for English exemption."
+  },
+  {
+   "id": "10352",
+   "date": "2026-09-18",
+   "zh": "全校加退選(網路選課)截止(含校際選課)；入學成績優異獎學金申請截止；班級幹部系統登錄結束",
+   "en": "On-line course add/drop ends (Application for inter-university course selection), Application for scholarships of outstanding entrance performance ends, Registration of class officers ends."
+  },
+  {
+   "id": "10353",
+   "date": "2026-09-19",
+   "zh": "ACT全校社團幹部研習營",
+   "en": "ACT Student club leaders’ training camp."
+  },
+  {
+   "id": "10354",
+   "date": "2026-09-20",
+   "zh": "ACT全校社團幹部研習營",
+   "en": "ACT Student club leaders’ training camp."
+  },
+  {
+   "id": "10355",
+   "date": "2026-09-25",
+   "zh": "中秋節",
+   "en": "Moon Festival."
+  },
+  {
+   "id": "10356",
+   "date": "2026-09-28",
+   "zh": "孔子誕辰紀念日(教師節)",
+   "en": "Confucius’ Birthday (Teachers’ Day)"
+  },
+  {
+   "id": "10357",
+   "date": "2026-09-30",
+   "zh": "弱勢學生助學金申請截止；全校一年級週會",
+   "en": "Application for grants for disadvantaged students ends, Weekly assembly for all freshmen."
+  },
+  {
+   "id": "10358",
+   "date": "2026-10-05",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "10359",
+   "date": "2026-10-08",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends"
+  },
+  {
+   "id": "10361",
+   "date": "2026-10-09",
+   "zh": "補假一日(依人事行政總處公告)",
+   "en": "Make-up holiday for the National Day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10360",
+   "date": "2026-10-10",
+   "zh": "國慶日",
+   "en": "The National Day."
+  },
+  {
+   "id": "10362",
+   "date": "2026-10-14",
+   "zh": "校園安全暨交通安全教育講習",
+   "en": "On-campus security and traffic safety lecture."
+  },
+  {
+   "id": "10363",
+   "date": "2026-10-16",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10364",
+   "date": "2026-10-21",
+   "zh": "全校二年級週會",
+   "en": "Weekly assembly for all sophomores."
+  },
+  {
+   "id": "10365",
+   "date": "2026-10-25",
+   "zh": "臺灣光復暨金門古寧頭大捷紀念日",
+   "en": "Taiwan Retrocession Day and the Anniversary of the Battle of Guningtou."
+  },
+  {
+   "id": "10366",
+   "date": "2026-10-26",
+   "zh": "補假一日(依人事行政總處公告)",
+   "en": "Make-up holiday for the Taiwan Retrocession Day and the Anniversary of the Battle of Guningtou (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10367",
+   "date": "2026-10-27",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "10368",
+   "date": "2026-10-30",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "10369",
+   "date": "2026-11-02",
+   "zh": "期中考試開始",
+   "en": "Midterm examinations begins."
+  },
+  {
+   "id": "10370",
+   "date": "2026-11-08",
+   "zh": "期中考試結束",
+   "en": "Midterm examinations ends."
+  },
+  {
+   "id": "10371",
+   "date": "2026-11-09",
+   "zh": "校外賃居學生訪視開始",
+   "en": "Visitation of students living outside school begins."
+  },
+  {
+   "id": "10372",
+   "date": "2026-11-11",
+   "zh": "全校三年級週會",
+   "en": "Weekly assembly for all juniors."
+  },
+  {
+   "id": "10373",
+   "date": "2026-11-25",
+   "zh": "雲科路跑活動",
+   "en": "YunTech’s road running activity."
+  },
+  {
+   "id": "10374",
+   "date": "2026-11-27",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10375",
+   "date": "2026-11-30",
+   "zh": "115-2身分別學雜費減免第1梯次(舊生及身障類)申請開始",
+   "en": "Application for tuition and fee waivers based on student status (115-2) for the first round (college and disabled students) begins."
+  },
+  {
+   "id": "10376",
+   "date": "2026-12-01",
+   "zh": "弱勢學生生活助學金申請開始",
+   "en": "Application for living grants for disadvantaged students begins."
+  },
+  {
+   "id": "10377",
+   "date": "2026-12-04",
+   "zh": "學期制校外實習甄選結束",
+   "en": "Selection of semester-based off-campus internship ends."
+  },
+  {
+   "id": "10378",
+   "date": "2026-12-05",
+   "zh": "校慶、園遊會",
+   "en": "University anniversary celebration ＆ University fair."
+  },
+  {
+   "id": "10379",
+   "date": "2026-12-09",
+   "zh": "全校四年級週會",
+   "en": "Weekly assembly for all seniors."
+  },
+  {
+   "id": "10380",
+   "date": "2026-12-11",
+   "zh": "英文必修課程重(補)修登記開始",
+   "en": "Registration for English compulsory courses re-(supplementary) courses begins."
+  },
+  {
+   "id": "10381",
+   "date": "2026-12-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester."
+  },
+  {
+   "id": "10382",
+   "date": "2026-12-16",
+   "zh": "應屆畢業生團拍(非在職)",
+   "en": "Group photo of new graduates (Non-working students)."
+  },
+  {
+   "id": "10383",
+   "date": "2026-12-18",
+   "zh": "研究生提前領證申請截止日；學生獎懲建議案申請截止；115-2身分別學雜費減免第1梯次(舊生及身障類)申請截止",
+   "en": "Deadline for graduate students applicate graduation in advance, Application for student’s reward and punishment proposal ends, Application for tuition and fee waivers based on student status (115-2) for the first round (college and disabled students) ends."
+  },
+  {
+   "id": "10384",
+   "date": "2026-12-21",
+   "zh": "弱勢學生生活助學金申請截止",
+   "en": "Application for living grants of the disadvantaged students ends."
+  },
+  {
+   "id": "10385",
+   "date": "2026-12-23",
+   "zh": "全校教師教學會議",
+   "en": "Teaching meeting for all teachers."
+  },
+  {
+   "id": "10386",
+   "date": "2026-12-25",
+   "zh": "行憲紀念日",
+   "en": "Constitution Day."
+  },
+  {
+   "id": "10387",
+   "date": "2026-12-28",
+   "zh": "本學期辦理休退學截止日；校外賃居學生訪視結束",
+   "en": "Application for suspension ends, Visitation of students living outside school ends."
+  },
+  {
+   "id": "10388",
+   "date": "2026-12-31",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  }
+ ],
+ "2027": [
+  {
+   "id": "10389",
+   "date": "2027-01-01",
+   "zh": "開國紀念日；研究生指導教授提報系統開放",
+   "en": "National Founding Day, Advisor login system for graduate students opens."
+  },
+  {
+   "id": "10390",
+   "date": "2027-01-04",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begins, Grades registry system opens."
+  },
+  {
+   "id": "10391",
+   "date": "2027-01-09",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "10392",
+   "date": "2027-01-10",
+   "zh": "學期考試結束；學期操行成績計算截止",
+   "en": "Final examinations ends, Reckoning of semester-based conduct grade ends."
+  },
+  {
+   "id": "10393",
+   "date": "2027-01-11",
+   "zh": "寒假開始；畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日；115-2身分別學雜費 減免第2梯次(不含身障類)申請開始",
+   "en": "Winter vacation begins, School leaving procedure for future graduates starts, Receiving diplomas for graduates of colleges and research institutes begins, Application for tuition and fee waivers based on student status (115-2) for the second round (excluding those with disabilities) begins."
+  },
+  {
+   "id": "10394",
+   "date": "2027-01-15",
+   "zh": "就學貸款申請開始受理「學校聯」繳件",
+   "en": "School acceptance of student loan payments begins."
+  },
+  {
+   "id": "10395",
+   "date": "2027-01-17",
+   "zh": "教師送交學期成績截止(成績登錄系統至24:00關閉)",
+   "en": "Final course grades due from faculty (Grades registry system closes at 24:00)."
+  },
+  {
+   "id": "10396",
+   "date": "2027-01-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes."
+  },
+  {
+   "id": "10397",
+   "date": "2027-01-29",
+   "zh": "博士、碩士學位考試結束",
+   "en": "Doctoral and master’s degree exams ends."
+  },
+  {
+   "id": "10398",
+   "date": "2027-01-31",
+   "zh": "第1學期結束；英檢提報結束",
+   "en": "End of the fall semester, Reporting/uploading of GEPT/TOEIC scores ends."
+  },
+  {
+   "id": "10399",
+   "date": "2027-02-01",
+   "zh": "第2學期開始；學生居住情形登錄作業開始；英檢提報開始",
+   "en": "Spring semester classes begins, Registration of students’ housing begins, Reporting/uploading of GEPT/TOEIC scores begins."
+  },
+  {
+   "id": "10400",
+   "date": "2027-02-04",
+   "zh": "小年夜",
+   "en": "Little New Year."
+  },
+  {
+   "id": "10401",
+   "date": "2027-02-05",
+   "zh": "除夕及農曆春節假期開始(依人事行政總處公告為準)",
+   "en": "Chinese New Year's Eve and Chinese New Year holiday (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10402",
+   "date": "2027-02-10",
+   "zh": "農曆春節假期結束",
+   "en": "Lunar New Year vacation ends."
+  },
+  {
+   "id": "10403",
+   "date": "2027-02-11",
+   "zh": "全校學生第1次預選(網路選課)開始",
+   "en": "The first advance course registration (Course selection online) for all students begins."
+  },
+  {
+   "id": "10404",
+   "date": "2027-02-12",
+   "zh": "全校學生第1次預選(網路選課)截止",
+   "en": "The first advance course registration (Course selection online) for all students ends."
+  },
+  {
+   "id": "10405",
+   "date": "2027-02-15",
+   "zh": "全校學生第2次預選(網路選課)開始；115-2身分別學雜費減免第2梯次(不含身障類)申請截止",
+   "en": "The second advance course registration (Course selection online) for all students begins, Application for tuition and fee waivers based on student status (115-2) for the second round (excluding those with disabilities) ends."
+  },
+  {
+   "id": "10406",
+   "date": "2027-02-17",
+   "zh": "全校學生第2次預選(網路選課)截止",
+   "en": "The second advance course registration (Course selection online) for all students ends."
+  },
+  {
+   "id": "10407",
+   "date": "2027-02-18",
+   "zh": "研究生、大學部延修生領取畢業證書截止日",
+   "en": "Receiving diplomas for graduates of colleges and research institutes ends."
+  },
+  {
+   "id": "10408",
+   "date": "2027-02-19",
+   "zh": "就學貸款對保結束；國際新生報到；國際新生宿舍入住",
+   "en": "Identity verification for student loans ends, New international students check in, New international students check in at the dormitory."
+  },
+  {
+   "id": "10409",
+   "date": "2027-02-20",
+   "zh": "宿舍住宿生入住",
+   "en": "Students check in at the dormitory."
+  },
+  {
+   "id": "10410",
+   "date": "2027-02-21",
+   "zh": "寒假結束；宿舍住宿生入住",
+   "en": "Last day of winter vacation, Students check in at the dormitory."
+  },
+  {
+   "id": "10411",
+   "date": "2027-02-22",
+   "zh": "上課開始，註冊；提早入學者入學成績優異獎學金申請開始；校外表現傑出獎勵申請開始； 輔系、雙主修、抵免申請(含英/華語抵免)開始；學生辦休退學免學雜費截止日； 全校加退選(網路選課)開始；",
+   "en": "Spring semester classes begins, Enrollment, Scholarships for outstanding entrance performance of head starters begins, Application for off-campus outstanding performance grant begins, Application for minor/double majors, credit waivers, and transference (including English/Mandarin) begins, Deadline of applying for tuition and fee waivers due to school suspension/drop out of school for students,  On-line course add/drop begins."
+  },
+  {
+   "id": "10412",
+   "date": "2027-02-22",
+   "zh": "博士、碩士學位考試申請開始；就學貸款「學校聯」繳件及辦理截止；班級幹部系統登錄開始；校內獎助學金申請開始；友善校園週暨防制藥物濫用反毒宣導",
+   "en": "Application for doctoral and master’s exams begins, Delivery of school acceptance of student loan payments ends, Registration of class officers begins, Application for internal scholarships and grants begins, Friendly Campus Week & drug abuse prevention and anti-drug campaign."
+  },
+  {
+   "id": "10413",
+   "date": "2027-02-24",
+   "zh": "導師會議；國際新生入學說明會",
+   "en": "Guidance Counselors' Meeting, Orientation for new international students."
+  },
+  {
+   "id": "10414",
+   "date": "2027-02-28",
+   "zh": "和平紀念日",
+   "en": "Peace Memorial Day."
+  },
+  {
+   "id": "10415",
+   "date": "2027-03-01",
+   "zh": "補假一日(依人事行政總處公告為準)",
+   "en": "Make-up holiday for Peace Memorial Day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10416",
+   "date": "2027-03-02",
+   "zh": "輔系、雙主修、抵免申請(含英/華語抵免)截止",
+   "en": "Application for minor/double majors, credit waivers, and transference (including English/Mandarin) ends."
+  },
+  {
+   "id": "10417",
+   "date": "2027-03-05",
+   "zh": "全校加退選(網路選課)截止(含校際選課)；提早入學者入學成績優異獎學金申請截止；英文必修課程重(補)修登記結束",
+   "en": "On-line course add/drop ends (Application for inter-university course selection), Scholarships for outstanding entrance performance of head starters ends, Registration for English compulsory courses re-(supplementary) courses ends."
+  },
+  {
+   "id": "10418",
+   "date": "2027-03-08",
+   "zh": "校內獎助學金申請截止",
+   "en": "Application for internal scholarships and grants ends."
+  },
+  {
+   "id": "10419",
+   "date": "2027-03-10",
+   "zh": "全校一年級週會",
+   "en": "Weekly assembly for all freshmen."
+  },
+  {
+   "id": "10420",
+   "date": "2027-03-12",
+   "zh": "學生居住情形登錄作業截止",
+   "en": "Registration of students’ housing ends."
+  },
+  {
+   "id": "10421",
+   "date": "2027-03-17",
+   "zh": "學生校外賃居安全處所安全務工作推動小組會議暨賃居安全評核協調會及房東座談會",
+   "en": "Student rental safety evaluation and coordination meeting and meeting with landlords."
+  },
+  {
+   "id": "10422",
+   "date": "2027-03-19",
+   "zh": "班級幹部系統登錄截止",
+   "en": "Registration of class officers ends."
+  },
+  {
+   "id": "10423",
+   "date": "2027-03-22",
+   "zh": "師生創新圓夢計畫活動週",
+   "en": "YunTech Dream Program Week."
+  },
+  {
+   "id": "10424",
+   "date": "2027-03-27",
+   "zh": "全校師生運動會",
+   "en": "Sports Day"
+  },
+  {
+   "id": "10425",
+   "date": "2027-03-31",
+   "zh": "學生辦休退學學雜費退2/3截止日",
+   "en": "Reimbursement of 2/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10426",
+   "date": "2027-04-01",
+   "zh": "教師及學生校慶日補假一日",
+   "en": "One makeup holiday for all teachers and students due to the university anniversary celebration"
+  },
+  {
+   "id": "10427",
+   "date": "2027-04-02",
+   "zh": "全校教職員工生運動會補假一日",
+   "en": "One makeup holiday for all school faculty and staff due to sports day."
+  },
+  {
+   "id": "10428",
+   "date": "2027-04-04",
+   "zh": "兒童節",
+   "en": "Children's Day."
+  },
+  {
+   "id": "10429",
+   "date": "2027-04-05",
+   "zh": "清明節",
+   "en": "Tomb Sweeping Day."
+  },
+  {
+   "id": "10430",
+   "date": "2027-04-06",
+   "zh": "補假一日(依人事行政總處公告為準)",
+   "en": "Make-up holiday for the Children's Day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10431",
+   "date": "2027-04-07",
+   "zh": "轉系(所)申請開始",
+   "en": "Department (graduate school) transfer application starts."
+  },
+  {
+   "id": "10432",
+   "date": "2027-04-12",
+   "zh": "期中考前一週退選申請開始",
+   "en": "Registration of course dropping starts one week before midterm exam."
+  },
+  {
+   "id": "10433",
+   "date": "2027-04-14",
+   "zh": "轉系(所)申請截止；全校三年級週會",
+   "en": "Department (graduate school) transfer application ends, Weekly assembly for all juniors."
+  },
+  {
+   "id": "10434",
+   "date": "2027-04-16",
+   "zh": "期中考前一週退選申請截止",
+   "en": "Registration of course dropping ends one week before midterm exam."
+  },
+  {
+   "id": "10435",
+   "date": "2027-04-19",
+   "zh": "期中考試開始",
+   "en": "Midterm examinations begins."
+  },
+  {
+   "id": "10436",
+   "date": "2027-04-25",
+   "zh": "期中考試結束",
+   "en": "Midterm examinations ends."
+  },
+  {
+   "id": "10437",
+   "date": "2027-04-28",
+   "zh": "校園安全暨交通安全宣導",
+   "en": "On-campus security and traffic safety lecture."
+  },
+  {
+   "id": "10439",
+   "date": "2027-04-30",
+   "zh": "補假一日(依人事行政總處公告為準)",
+   "en": "Make-up holiday for the Labor Day (in accordance with announcements from Directorate-General of Personnel Administration)."
+  },
+  {
+   "id": "10438",
+   "date": "2027-05-01",
+   "zh": "勞動節",
+   "en": "Labor Day."
+  },
+  {
+   "id": "10440",
+   "date": "2027-05-11",
+   "zh": "學生校外賃居安全評核開始",
+   "en": "Student off-campus rental safety evaluation begins."
+  },
+  {
+   "id": "10441",
+   "date": "2027-05-14",
+   "zh": "學生辦休退學學雜費退1/3截止日，日後不予退費",
+   "en": "Reimbursement of 1/3 tuition/miscellaneous fees for suspended/dropout students ends."
+  },
+  {
+   "id": "10442",
+   "date": "2027-05-15",
+   "zh": "博士、碩士學位考試申請截止",
+   "en": "Last day to apply for master's/doctoral thesis defense of fall semester."
+  },
+  {
+   "id": "10443",
+   "date": "2027-05-17",
+   "zh": "116-1身分別學雜費減免第1梯次(舊生)申請開始",
+   "en": "Application for tuition and fee waivers based on student status (116-1) for the first round (college students) begins."
+  },
+  {
+   "id": "10444",
+   "date": "2027-05-19",
+   "zh": "全校二年級週會",
+   "en": "Weekly assembly for all sophomores."
+  },
+  {
+   "id": "10445",
+   "date": "2027-05-26",
+   "zh": "全校教師教學會議；英文必修課程重(補)修登記開始",
+   "en": "Teaching meeting for all teachers, Registration for English compulsory courses re-(supplementary) courses begins."
+  },
+  {
+   "id": "10446",
+   "date": "2027-05-28",
+   "zh": "校外表現傑出獎勵申請截止",
+   "en": "Application for off-campus outstanding performance grant ends."
+  },
+  {
+   "id": "10447",
+   "date": "2027-06-01",
+   "zh": "研究生指導教授提報系統開放；教學傑出及優良教師票選開始",
+   "en": "Advisor login system for graduate students opens, Voting for outstanding teaching & excellent teacher starts."
+  },
+  {
+   "id": "10448",
+   "date": "2027-06-04",
+   "zh": "研究生提前領證申請截止日；學生獎懲建議案申請截止",
+   "en": "Deadline for graduate students applicate graduation in advance, Application for student’s reward and punishment proposal ends."
+  },
+  {
+   "id": "10449",
+   "date": "2027-06-05",
+   "zh": "畢業典禮",
+   "en": "Graduation ceremony."
+  },
+  {
+   "id": "10450",
+   "date": "2027-06-09",
+   "zh": "端午節",
+   "en": "Dragon Boat Festival."
+  },
+  {
+   "id": "10451",
+   "date": "2027-06-11",
+   "zh": "116-1身分別學雜費減免第1梯次(舊生)申請截止",
+   "en": "Application for tuition and fee waivers based on student status (116-1) for the first round (college students) ends."
+  },
+  {
+   "id": "10452",
+   "date": "2027-06-14",
+   "zh": "本學期辦理休退學截止日",
+   "en": "Application for suspension ends."
+  },
+  {
+   "id": "10453",
+   "date": "2027-06-18",
+   "zh": "缺曠課處理截止",
+   "en": "Handling of skipping/absence from class ends."
+  },
+  {
+   "id": "10454",
+   "date": "2027-06-21",
+   "zh": "學期考試開始；成績登錄系統開放",
+   "en": "Final examinations begins, Grades registry system opens."
+  },
+  {
+   "id": "10455",
+   "date": "2027-06-26",
+   "zh": "宿舍離宿",
+   "en": "Dormitory closes."
+  },
+  {
+   "id": "10456",
+   "date": "2027-06-27",
+   "zh": "學期考試結束；學期操行成績計算截止",
+   "en": "Final examinations ends, Reckoning of semester-based conduct grade ends."
+  },
+  {
+   "id": "10457",
+   "date": "2027-06-28",
+   "zh": "暑假開始；畢業生開始辦理離校手續；研究生、大學部學生領取學位證書開始日",
+   "en": "First day of summer vacation, School leaving procedure for future graduates starts, Receiving diplomas for graduates of colleges and research institutes begins."
+  },
+  {
+   "id": "10458",
+   "date": "2027-07-02",
+   "zh": "學生校外賃居安全評核結束",
+   "en": "Student off-campus rental safety evaluation ends."
+  },
+  {
+   "id": "10459",
+   "date": "2027-07-04",
+   "zh": "教師送交學期成績截止(成績登錄系統24:00關閉)",
+   "en": "Final course grades due from faculty (Grades registry system closes at 24:00)."
+  },
+  {
+   "id": "10460",
+   "date": "2027-07-25",
+   "zh": "研究生指導教授提報系統關閉",
+   "en": "Advisor login system for graduate students closes"
+  },
+  {
+   "id": "10461",
+   "date": "2027-07-31",
+   "zh": "第2學期結束；博士、碩士學位考試結束；教學傑出及優良教師票選結束；英檢提報結束",
+   "en": "End of the spring semester, Doctoral and master’s degree exams ends, Voting for outstanding teaching & excellent teacher ends.Reporting/uploading of GEPT/TOEIC scores ends."
+  }
+ ]
+}
