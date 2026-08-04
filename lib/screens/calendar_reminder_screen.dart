@@ -379,12 +379,6 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
   Locale? _loadedLocale;
 
   @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  @override
   void didUpdateWidget(_DebugScheduleInspector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.refreshToken != widget.refreshToken) _load();
@@ -393,9 +387,15 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 換語言後事件名稱會換成另一份，重讀一次才不會停在舊語言的清單上。
+    // 首次載入放在這裡而不是 initState：[_load] 會讀 [AppLocalizations]，那是一次
+    // inherited widget 查找，在 initState 完成前呼叫會直接丟例外 —— 每次進入這一頁
+    // 都會，面板上就只剩一段紅字。didChangeDependencies 保證在 initState 之後、
+    // 第一次 build 之前跑到，是這種查找最早的合法時機。
+    //
+    // 同一個判斷也涵蓋語言變更：換語言後事件名稱會換成另一份，重讀一次才不會停在
+    // 舊語言的清單上。
     final locale = Localizations.localeOf(context);
-    if (_loadedLocale != null && _loadedLocale != locale) _load();
+    if (_loadedLocale != locale) _load();
     _loadedLocale = locale;
   }
 
