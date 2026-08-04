@@ -232,6 +232,55 @@ class CalendarReminderPlanner {
     return paired;
   }
 
+  /// 從一批中英事件學出「中文名稱 → 顯示語言名稱」的對照。
+  ///
+  /// 有些日子結構上就是配不起來 —— 2026-02-22 中文列了 5 筆事件，英文只列了 4 筆，
+  /// 學校漏譯了一筆。那一天的資訊本身就不足，任何在 entry 內部找關係的方法都補不了。
+  /// 唯一的外部證據是**同一個中文名稱在別的年份的翻譯**：事件名稱年年重複，三年
+  /// 123 次命中只用到 40 個相異名稱。
+  ///
+  /// 所以拿**所有配對成功的 entry**（不只會產生提醒的那些）當學習來源。這不是手寫
+  /// 字典，內容全部來自學校自己的英文版。
+  ///
+  /// 閘門：同一個中文名稱的所有已知寫法，忽略頭尾空白、句尾句點與大小寫之後必須
+  /// 完全一致才採用。這是為了擋掉中文名稱相同、英文卻依場合不同的名稱 —— 實例是
+  /// 「補假一天（依人事行政總處公告）」，英文分別是端午、教師節、光復節的補假，
+  /// 拿其中任何一個去套另一天都是錯的。
+  ///
+  /// [events] 與 [displayEvents] 請**由舊年份到新年份**傳入：通過閘門時取最後一筆，
+  /// 也就是最新一年的寫法。
+  static Map<String, String> buildNameMemory(
+    List<CalendarEvent> events,
+    List<CalendarEvent>? displayEvents,
+  ) {
+    final paired = pairDisplayNames(events, displayEvents);
+    if (paired.isEmpty) return const {};
+
+    final byName = <String, List<String>>{};
+    for (final event in events) {
+      final display = paired[event.id];
+      // 配到的就是中文原名時學不到東西（2022 年整批未翻譯的條目就是這樣），
+      // 收進來只會讓閘門誤判成「有兩種寫法」。
+      if (display == null || display == event.name) continue;
+      byName.putIfAbsent(normalizeName(event.name), () => []).add(display);
+    }
+
+    final memory = <String, String>{};
+    byName.forEach((name, values) {
+      if (values.map(_variantKey).toSet().length == 1) {
+        memory[name] = values.last;
+      }
+    });
+    return memory;
+  }
+
+  /// 判斷兩個寫法是否「只差標點」的比對鍵：忽略頭尾空白、句尾句點與大小寫。
+  ///
+  /// 刻意不做得更寬鬆。`Final examinations begin` 與 `begins` 差的是動詞而不是
+  /// 標點，落在閘門外側 —— 少學一個名稱，遠好過學到一個實際上不同的翻譯。
+  static String _variantKey(String value) =>
+      value.trim().replaceAll(RegExp(r'\.+$'), '').trim().toLowerCase();
+
   /// 決定 [zhItems] 每一筆該吃掉幾個顯示語言片段，總數必須剛好是 [total]。
   /// 決定不了就回 `null`，呼叫端據此整組沿用中文。
   static List<int>? _resolveWidths(List<CalendarEvent> zhItems, int total) {
@@ -337,7 +386,11 @@ class CalendarReminderPlanner {
   /// [events] 是**中文**行事曆 —— 分類判斷一律以它為準，與 UI 語言無關：中文版
   /// 是這份資料的正本，英文是翻譯產物，拿翻譯當判斷依據等於把可靠度往下押一層。
   /// [displayEvents] 是顯示語言的同一份行事曆（UI 為中文時傳 null 即可）；顯示
-  /// 用的名稱以事件識別碼配對，配不到就沿用中文原名。
+  /// 用的名稱以事件識別碼配對。
+  ///
+  /// 配不到時退而查 [nameMemory]（見 [buildNameMemory]）—— 那是跨年份學來的
+  /// 「中文名稱 → 顯示語言名稱」對照，專門補「這一天結構上無解」的缺口。兩者都
+  /// 沒有才沿用中文原名。
   ///
   /// [now] 由呼叫端傳入（而非在內部讀時鐘），讓這個模組保持純函式、可測試。
   /// 觸發時間不在 [now] 之後的提醒一律不產出，也不補發。
@@ -350,6 +403,7 @@ class CalendarReminderPlanner {
     required DateTime now,
     required int limit,
     List<CalendarEvent>? displayEvents,
+    Map<String, String>? nameMemory,
   }) {
     if (categories.isEmpty || rules.isEmpty || limit <= 0) return const [];
 
@@ -368,7 +422,11 @@ class CalendarReminderPlanner {
       if (!matchesAny(event.name, categories)) continue;
       byDate
           .putIfAbsent(event.date, () => [])
-          .add(displayNames[event.id] ?? event.name);
+          .add(
+            displayNames[event.id] ??
+                nameMemory?[normalizeName(event.name)] ??
+                event.name,
+          );
     }
 
     final planned = <PlannedReminder>[];

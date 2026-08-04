@@ -222,6 +222,7 @@ class CalendarReminderService {
     return CalendarReminderPlanner.plan(
       events: events,
       displayEvents: await _loadDisplayEvents(l10n.localeName),
+      nameMemory: await _loadNameMemory(l10n.localeName),
       categories: categories,
       rules: await loadRules(),
       now: ServerTimeService.instance.now(),
@@ -447,6 +448,32 @@ class CalendarReminderService {
       ...await _loadYear(year, lang: 'en'),
       ...await _loadYear(year + 1, lang: 'en'),
     ];
+  }
+
+  /// 跨年翻譯記憶：中文名稱 → 顯示語言名稱。UI 是中文時回傳 `null`。
+  ///
+  /// 窗口比排程用的多吃**前一年**。前一年的行事曆已完整公告且不會再變動，是最
+  /// 便宜也最可靠的佐證來源：只靠當年＋次年時，會產生提醒的 75 筆裡有 7 筆在窗口
+  /// 內只出現一次、沒有第二個年份可以對照（多半是次年下半年還沒公告造成的暫時
+  /// 現象）；加上前一年之後歸零。
+  ///
+  /// 分類判斷的資料來源完全不受影響，仍然只有中文的當年與次年
+  /// （見 [_loadClassificationEvents]）—— 這裡多抓的東西只用來翻譯名稱。
+  ///
+  /// 年份**由舊到新**傳入，讓 [CalendarReminderPlanner.buildNameMemory] 在多個
+  /// 年份寫法一致時取到最新的那個。各年份都走既有快取，重複讀到的年份不會重抓。
+  static Future<Map<String, String>?> _loadNameMemory(String localeName) async {
+    if (!localeName.toLowerCase().startsWith('en')) return null;
+
+    final year = ServerTimeService.instance.now().year;
+    final events = <CalendarEvent>[];
+    final displayEvents = <CalendarEvent>[];
+    for (final y in [year - 1, year, year + 1]) {
+      events.addAll(await _loadYear(y));
+      displayEvents.addAll(await _loadYear(y, lang: 'en'));
+    }
+
+    return CalendarReminderPlanner.buildNameMemory(events, displayEvents);
   }
 
   static Future<List<CalendarEvent>> _loadYear(

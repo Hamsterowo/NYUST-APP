@@ -38,6 +38,7 @@ void main() {
     DateTime? now,
     int limit = 64,
     List<CalendarEvent>? displayEvents,
+    Map<String, String>? nameMemory,
   }) => CalendarReminderPlanner.plan(
     events: events,
     categories: categories,
@@ -45,6 +46,7 @@ void main() {
     now: now ?? DateTime(2026, 1, 1),
     limit: limit,
     displayEvents: displayEvents,
+    nameMemory: nameMemory,
   );
 
   group('name normalisation', () {
@@ -606,9 +608,118 @@ void main() {
       expect(result.single.eventNames, ['上課開始']);
     });
 
+    test('a name the group could not resolve is looked up in memory', () {
+      // Two Chinese items against one English piece — no decomposition fits, so
+      // the group falls back. Memory is what rescues it: the same name lined up
+      // in some other year.
+      final result = plan(
+        [
+          event('2026-09-07', '寒假結束', id: '10037-0'),
+          event('2026-09-07', '暑假開始', id: '10037-1'),
+        ],
+        displayEvents: [
+          event('2026-09-07', 'Winter vacation ends', id: '10037-0'),
+        ],
+        nameMemory: {
+          CalendarReminderPlanner.normalizeName('寒假結束'):
+              'Last day of winter vacation',
+        },
+      );
+
+      expect(result.single.eventNames, [
+        'Last day of winter vacation',
+        '暑假開始', // 記憶庫裡沒有，仍退回中文
+      ]);
+    });
+
+    test('memory never overrides a name the group did resolve', () {
+      final result = plan(
+        [event('2026-09-07', '上課開始', id: '9001-0')],
+        displayEvents: [event('2026-09-07', 'Classes begin', id: '9001-0')],
+        nameMemory: {
+          CalendarReminderPlanner.normalizeName('上課開始'): 'From memory',
+        },
+      );
+
+      expect(result.single.eventNames, ['Classes begin']);
+    });
+
     test('no display feed at all leaves every name in Chinese', () {
       final result = plan([event('2026-09-07', '上課開始', id: '9001-0')]);
       expect(result.single.eventNames, ['上課開始']);
+    });
+
+    test('buildNameMemory learns a name that lined up', () {
+      final memory = CalendarReminderPlanner.buildNameMemory(
+        [event('2027-02-21', '寒假結束', id: '10410-0')],
+        [event('2027-02-21', 'Last day of winter vacation', id: '10410-0')],
+      );
+
+      expect(
+        memory[CalendarReminderPlanner.normalizeName('寒假結束')],
+        'Last day of winter vacation',
+      );
+    });
+
+    test(
+      'two spellings that differ only in punctuation take the later one',
+      () {
+        // Real drift: the school added a full stop the following year.
+        final memory = CalendarReminderPlanner.buildNameMemory(
+          [
+            event('2026-01-10', '宿舍離宿', id: '10019-0'),
+            event('2027-01-10', '宿舍離宿', id: '10430-0'),
+          ],
+          [
+            event('2026-01-10', 'Dormitory closes', id: '10019-0'),
+            event('2027-01-10', 'Dormitory closes.', id: '10430-0'),
+          ],
+        );
+
+        expect(
+          memory[CalendarReminderPlanner.normalizeName('宿舍離宿')],
+          'Dormitory closes.',
+        );
+      },
+    );
+
+    test('two spellings that are genuinely different are not learned', () {
+      // 「補假一天（依人事行政總處公告）」 is written identically in Chinese every
+      // time but names a different holiday in English each time. Carrying one of
+      // them over to another date would state the wrong holiday.
+      final memory = CalendarReminderPlanner.buildNameMemory(
+        [
+          event('2025-05-30', '補假一天（依人事行政總處公告）', id: '9690-0'),
+          event('2025-09-29', '補假一天（依人事行政總處公告）', id: '9720-0'),
+        ],
+        [
+          event(
+            '2025-05-30',
+            'Make-up holiday for the Dragon Boat Festival',
+            id: '9690-0',
+          ),
+          event(
+            '2025-09-29',
+            'Make-up holiday for Teachers’ Day',
+            id: '9720-0',
+          ),
+        ],
+      );
+
+      expect(memory, isEmpty);
+    });
+
+    test('an untranslated entry teaches nothing', () {
+      // The 2022 English feed returns the Chinese text for many entries. Pairing
+      // succeeds, but what it pairs is the Chinese name with itself — recording
+      // that would both be useless and make a real translation look like a
+      // second, conflicting spelling.
+      final memory = CalendarReminderPlanner.buildNameMemory(
+        [event('2022-01-10', '學期考試開始', id: '8100-0')],
+        [event('2022-01-10', '學期考試開始', id: '8100-0')],
+      );
+
+      expect(memory, isEmpty);
     });
 
     test('classification reads the Chinese feed, never the display one', () {

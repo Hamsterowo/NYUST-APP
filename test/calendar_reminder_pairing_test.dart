@@ -134,9 +134,42 @@ void main() {
       return (paired, total);
     }
 
-    test('App 實際使用的兩年窗口：75 筆裡 74 筆配到英文', () {
+    test('App 實際使用的兩年窗口：75 筆裡 74 筆靠 entry 內部配對配到英文', () {
       // 唯一的缺口是 2026-02-22「寒假結束」，見上面那個測試。
       expect(coverage(['2026', '2027']), (74, 75));
+    });
+
+    test('接上跨年翻譯記憶後補滿 75/75', () {
+      final rows = [
+        for (final y in ['2026', '2027']) ...byYear[y]!,
+      ];
+      final zh = _eventsFor(rows, english: false);
+      final en = _eventsFor(rows, english: true);
+      final byId = CalendarReminderPlanner.pairDisplayNames(zh, en);
+      final memory = CalendarReminderPlanner.buildNameMemory(zh, en);
+
+      var total = 0;
+      var named = 0;
+      for (final event in zh) {
+        if (!CalendarReminderPlanner.matchesAny(
+          event.name,
+          ReminderCategory.values.toSet(),
+        )) {
+          continue;
+        }
+        total++;
+        final name =
+            byId[event.id] ??
+            memory[CalendarReminderPlanner.normalizeName(event.name)];
+        if (name != null) named++;
+      }
+
+      expect((named, total), (75, 75));
+      // 補上來的那一筆，翻譯來自 2027 年同名事件。
+      expect(
+        memory[CalendarReminderPlanner.normalizeName('寒假結束')],
+        'Last day of winter vacation',
+      );
     });
 
     test('六年合計：279 筆裡 272 筆配到顯示語言', () {
