@@ -513,6 +513,73 @@ void main() {
       expect(result.single.eventNames, ['第2學期結束', '學期考試結束', '暑假開始']);
     });
 
+    test(
+      'a full-width comma the English feed did not split still lines up',
+      () {
+        // 「…截止日，日後不予退費」 is one item in both languages — English keeps
+        // it as a single sentence. The fixed rule counts the comma and expects
+        // two pieces, so only the search layer can resolve this one.
+        final result = plan(
+          [event('2026-09-07', '學生辦休退學學雜費退1/3截止日，日後不予退費', id: '10374-0')],
+          displayEvents: [
+            event(
+              '2026-09-07',
+              'Reimbursement of 1/3 tuition/miscellaneous fees for '
+                  'suspended/dropout students ends.',
+              id: '10374-0',
+            ),
+          ],
+        );
+
+        expect(result.single.eventNames, [
+          'Reimbursement of 1/3 tuition/miscellaneous fees for '
+              'suspended/dropout students ends.',
+        ]);
+      },
+    );
+
+    test('an ideographic comma the English feed did split still lines up', () {
+      // The mirror image of the test above: here 「、」 *is* a split point in
+      // English, which the fixed rule refuses to consider.
+      final result = plan(
+        [
+          event('2026-09-07', '國際新生報到', id: '10337-0'),
+          event('2026-09-07', '註冊、加退選開始', id: '10337-1'),
+        ],
+        displayEvents: [
+          event(
+            '2026-09-07',
+            'New international students check in',
+            id: '10337-0',
+          ),
+          event('2026-09-07', 'Enrollment', id: '10337-1'),
+          event('2026-09-07', 'Course add/drop begins', id: '10337-2'),
+        ],
+      );
+
+      // 只有第二筆命中分類；它必須吃掉兩個英文片段才是對的。
+      expect(result.single.eventNames, ['Enrollment, Course add/drop begins']);
+    });
+
+    test('a group with more than one possible split falls back to Chinese', () {
+      // Two items, each holding one 、, and three English pieces: either item
+      // could be the one that was split. Guessing would be a coin flip, and a
+      // wrong English name reads as authoritative in a way Chinese does not.
+      final result = plan(
+        [
+          event('2026-09-07', '寒假結束、宿舍入住', id: '10037-0'),
+          event('2026-09-07', '註冊、加退選開始', id: '10037-1'),
+        ],
+        displayEvents: [
+          event('2026-09-07', 'Winter vacation ends', id: '10037-0'),
+          event('2026-09-07', 'Dormitory check-in', id: '10037-1'),
+          event('2026-09-07', 'Enrollment, add/drop begins', id: '10037-2'),
+        ],
+      );
+
+      expect(result.single.eventNames, ['寒假結束、宿舍入住', '註冊、加退選開始']);
+    });
+
     test('one group falling back does not affect another that lines up', () {
       final result = plan(
         [

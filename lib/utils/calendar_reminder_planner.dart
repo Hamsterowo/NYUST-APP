@@ -189,13 +189,19 @@ class CalendarReminderPlanner {
   /// 於是該項目底下從那裡開始整排序號錯開一格 —— 配出來的是**前一個事件的
   /// 翻譯**，而不是配不到。逐筆比對擋得住「配不到」，擋不住「配錯」。
   ///
-  /// 所以這裡照結構配：中文每一筆該吃掉幾個英文片段，由它自己含幾個 `，` 決定。
-  /// 加總對得起來才配，對不起來就整組沿用中文原名 —— 寧可顯示中文，也不要顯示
-  /// 錯的英文。以 2026／2027 兩年實測，這樣配的覆蓋率比逐筆比對更高（44/48 與
-  /// 25/27），而且沒有任何一筆配錯。
+  /// 所以這裡照結構配：中文每一筆該吃掉幾個英文片段，由它內部的並列符號決定。
+  /// 問題是**沒有任何一條標點規則是對的** —— 決定切不切的是語意，不是標點：
+  /// - 「上課開始，註冊」英文切成兩段，但「…截止日，日後不予退費」翻成一整句沒切
+  /// - 「輔系、雙主修、抵免申請」英文不切，但「國際新生報到、國際新生宿舍入住」切了
   ///
-  /// 只計全形 `，`：頓號 `、` 是名稱內部的並列（「輔系、雙主修、抵免申請」），
-  /// 英文不會在那裡切開，把它算進去反而會讓整組對不齊。
+  /// 所以分兩層。第一層是固定規則「`，` 算切分點、`、` 不算」，它在「上課開始，
+  /// 註冊」那幾天是對的，必須保留。第一層加總對不起來時才進第二層：把每一筆的
+  /// 寬度放寬成 `1` 到「內部並列符號數 + 1」的區間，窮舉所有加總得起來的組合，
+  /// **只有恰好一組可行時才採用**。
+  ///
+  /// 多組或無解一律沿用中文原名 —— 寧可顯示中文，也不要顯示錯的英文，因為使用者
+  /// 看不出後者是錯的。這也是 2026-02-22 那種「英文版真的少列一筆事件」的下場：
+  /// 中文 5 筆對英文 4 筆，怎麼拆都湊不出來，結構上就是無解。
   static Map<String, String> pairDisplayNames(
     List<CalendarEvent> events,
     List<CalendarEvent>? displayEvents,
@@ -210,11 +216,8 @@ class CalendarReminderPlanner {
       final displayItems = displayGroups[groupId];
       if (displayItems == null) return;
 
-      // 中文每一筆該吃掉幾個英文片段。
-      final widths = [
-        for (final e in zhItems) '，'.allMatches(e.name).length + 1,
-      ];
-      if (widths.fold(0, (sum, w) => sum + w) != displayItems.length) return;
+      final widths = _resolveWidths(zhItems, displayItems.length);
+      if (widths == null) return;
 
       var cursor = 0;
       for (var i = 0; i < zhItems.length; i++) {
@@ -227,6 +230,53 @@ class CalendarReminderPlanner {
       }
     });
     return paired;
+  }
+
+  /// 決定 [zhItems] 每一筆該吃掉幾個顯示語言片段，總數必須剛好是 [total]。
+  /// 決定不了就回 `null`，呼叫端據此整組沿用中文。
+  static List<int>? _resolveWidths(List<CalendarEvent> zhItems, int total) {
+    final fixed = [for (final e in zhItems) _countOf(e.name, '，') + 1];
+    if (fixed.fold(0, (sum, w) => sum + w) == total) return fixed;
+
+    return _uniqueDecomposition([
+      for (final e in zhItems)
+        1 + _countOf(e.name, '，') + _countOf(e.name, '、'),
+    ], total);
+  }
+
+  static int _countOf(String text, String pattern) =>
+      pattern.allMatches(text).length;
+
+  /// 把 [total] 拆成一串各自落在 `1..maxWidths[i]` 的寬度；**恰好一種**拆法時
+  /// 回傳它，零種或多於一種都回 `null`。
+  ///
+  /// 找到第二組就收手 —— 這裡要的不是所有解，而是「解唯一嗎」這個是非題。
+  /// 搜尋空間本來就小：六年真實行事曆裡組合數最多的一天是 24 組。
+  static List<int>? _uniqueDecomposition(List<int> maxWidths, int total) {
+    final current = List<int>.filled(maxWidths.length, 1);
+    List<int>? only;
+    var solutions = 0;
+
+    void search(int index, int remaining) {
+      if (index == maxWidths.length) {
+        if (remaining != 0) return;
+        solutions++;
+        if (solutions == 1) only = List<int>.of(current);
+        return;
+      }
+
+      // 後面每一筆至少還要吃掉一個片段，留不出來就不必再往上加。
+      final reserved = maxWidths.length - index - 1;
+      for (var w = 1; w <= maxWidths[index]; w++) {
+        if (remaining - w < reserved) break;
+        current[index] = w;
+        search(index + 1, remaining - w);
+        if (solutions > 1) return;
+      }
+    }
+
+    search(0, total);
+    return solutions == 1 ? only : null;
   }
 
   /// 依識別碼的項目部分分組，組內按子事件序號排序；重複的識別碼只留第一筆。
