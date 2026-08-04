@@ -40,10 +40,20 @@ class CalendarScraper extends BaseScraper {
       for (final entry in entries)
         ...entry
             .split(_englishSeparator)
-            .map((n) => n.trim())
+            .map((n) => n.replaceAll(_danglingSeparator, ''))
             .where((n) => n.isNotEmpty),
     ];
   }
+
+  /// 片段頭尾殘留的逗號與空白。
+  ///
+  /// 學校偶爾會在一整格的結尾多打一個分隔符 —— 中文結尾的 `；` 被切分自然吃掉，
+  /// 英文結尾的逗號沒有，於是最後一個事件名變成 `On-line course add/drop begins,`。
+  /// 在通知裡它會長成 `begins, / Delivery of...`，讀起來像兩個事件黏在一起。
+  /// 六年真實資料裡有 2 筆（2024-09-06、2026-09-07）。
+  ///
+  /// 只刮逗號，不動句點：`...students ends.` 的句點是句子本身的一部分。
+  static final RegExp _danglingSeparator = RegExp(r'^[,\s]+|[,\s]+$');
 
   static final RegExp _englishSeparator = RegExp(
     r',\s*(?=[A-Z\u4e00-\u9fa5]|\d{3}-\d)|\.(?=[A-Z])',

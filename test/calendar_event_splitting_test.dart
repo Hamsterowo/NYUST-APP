@@ -118,6 +118,29 @@ void main() {
       );
     });
 
+    test('整格結尾多打的逗號不會留在事件名稱上', () {
+      // 學校在 2026-09-07 那一格的結尾多打了一個逗號。中文那邊結尾的 ；被切分
+      // 吃掉了，英文的逗號沒有 —— 留著的話通知裡會長成
+      // `On-line course add/drop begins, / Delivery of...`，像兩個事件黏在一起。
+      final en = rowOn('2026-09-07')['en'] as String;
+
+      expect(en, endsWith('begins,'));
+      expect(
+        CalendarScraper.splitEventNames(en, isEnglish: true).last,
+        'On-line course add/drop begins',
+      );
+    });
+
+    test('句尾的句點是句子的一部分，不能刮掉', () {
+      expect(
+        CalendarScraper.splitEventNames(
+          'Midterm examinations begins.',
+          isEnglish: true,
+        ),
+        ['Midterm examinations begins.'],
+      );
+    });
+
     test('名稱內部的並列不切（逗號＋空格＋小寫）', () {
       expect(
         CalendarScraper.splitEventNames(
