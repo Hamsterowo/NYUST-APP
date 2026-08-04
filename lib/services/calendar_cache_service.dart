@@ -47,7 +47,7 @@ class CalendarCacheService {
   /// 快取存的是已經切分好的事件，不是原始網頁 —— 改了切分規則而不換 key，既有
   /// 使用者最多 30 天還是拿到舊規則的結果，等於修了但看不到。版號進 key 之後，
   /// 舊資料自然 miss、重抓一次就好，不必寫一次性遷移程式。
-  static const _parserVersion = 3;
+  static const _parserVersion = 4;
 
   static String _key(int year, String langCode) =>
       '${year}_${langCode}_v$_parserVersion';

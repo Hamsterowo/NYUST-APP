@@ -38,6 +38,14 @@ List<String> _splitWithPreviousRule(String name) => [
 String _contentOnly(String s) =>
     s.replaceAll(RegExp(r'[^0-9A-Za-z\u4e00-\u9fa5]'), '');
 
+/// 丟掉「中文原文 + tab」的前綴，與切分器的處理一致。
+///
+/// 新規則會**刻意**丟掉這段中文，所以它是「內容一字不差」那條不變式唯一的例外。
+/// 比對時對舊規則的結果套用同一個動作，剩下的差異才純粹來自切分本身。
+final _untranslatedPrefix = RegExp('^[^\t]*[\u4e00-\u9fa5][^\t]*\t');
+
+String _withoutPrefix(String s) => s.replaceAll(_untranslatedPrefix, '');
+
 void main() {
   final entries = _loadEntries();
   final allRows = [for (final rows in entries.values) ...rows];
@@ -141,6 +149,27 @@ void main() {
       );
     });
 
+    test('英文接在中文原文後面時，只留英文（2026-01-11）', () {
+      // 學校偶爾把翻譯直接接在中文原文後面，中間一個 tab。留著的話英文使用者
+      // 會在通知裡看到半句中文。六年裡只有這一筆。
+      final en = rowOn('2026-01-11')['en'] as String;
+
+      expect(en, contains('英文必修課程重(補)修登記結束\t'));
+      expect(CalendarScraper.splitEventNames(en, isEnglish: true), [
+        'Final examinations ends',
+        'Reckoning of semester-based conduct grade ends',
+        'Registration for English compulsory courses re-(supplementary) '
+            'courses ends.',
+      ]);
+    });
+
+    test('整條未翻譯時中文要原樣留著 —— 那是它唯一的內容', () {
+      expect(
+        CalendarScraper.splitEventNames('學期考試開始\t學期考試結束', isEnglish: true),
+        ['學期考試開始\t學期考試結束'],
+      );
+    });
+
     test('名稱內部的並列不切（逗號＋空格＋小寫）', () {
       expect(
         CalendarScraper.splitEventNames(
@@ -201,7 +230,7 @@ void main() {
         // 內容一字不差 —— 沒有漏掉半句，也沒有重複。
         expect(
           _contentOnly(after.join()),
-          _contentOnly(before.join()),
+          _contentOnly(before.map(_withoutPrefix).join()),
           reason: '$where 的內容在切分後改變了',
         );
 

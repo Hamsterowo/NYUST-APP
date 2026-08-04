@@ -41,8 +41,25 @@ class CalendarScraper extends BaseScraper {
         ...entry
             .split(_englishSeparator)
             .map((n) => n.replaceAll(_danglingSeparator, ''))
+            .map(_dropUntranslatedPrefix)
             .where((n) => n.isNotEmpty),
     ];
+  }
+
+  /// 丟掉「中文原文 + tab + 英文」裡的中文那一段。
+  ///
+  /// 學校的英文行事曆偶爾會把翻譯直接接在中文原文後面，中間用一個 tab 隔開，
+  /// 例如 2026-01-11 的
+  /// `英文必修課程重(補)修登記結束\tRegistration for English compulsory courses...`。
+  /// 六年裡只有這 1 筆，但留著的話英文使用者會在通知裡看到半句中文。
+  ///
+  /// 只在 tab 後面真的有拉丁字母時才切 —— 整條未翻譯（2022 年大量如此）的條目
+  /// 要原樣留著中文，那是它唯一的內容。
+  static String _dropUntranslatedPrefix(String name) {
+    final tab = name.lastIndexOf('\t');
+    if (tab < 0) return name;
+    final tail = name.substring(tab + 1).trim();
+    return RegExp('[A-Za-z]').hasMatch(tail) ? tail : name;
   }
 
   /// 片段頭尾殘留的逗號與空白。
