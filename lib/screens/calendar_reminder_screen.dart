@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -422,6 +423,41 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
     }
   }
 
+  /// 把面板上看到的東西原樣複製成純文字。
+  ///
+  /// 排程檢視是拿來回報問題的，而截圖沒辦法搜尋、沒辦法比對、長清單還會被裁掉。
+  /// 所以複製的是**畫面上的內容**，不是另一份為複製而生的格式 —— 貼出來的東西
+  /// 必須就是使用者看到的東西。
+  Future<void> _copyReport() async {
+    final l10n = AppLocalizations.of(context);
+    final buffer = StringBuffer()
+      ..writeln(
+        l10n.devCalendarReminderCounts(_planned.length, _pendingIds.length),
+      );
+
+    if (_planned.isEmpty) {
+      buffer.writeln(l10n.devCalendarReminderEmpty);
+    } else {
+      for (final reminder in _planned) {
+        buffer
+          ..writeln(
+            '${_pendingIds.contains(reminder.id) ? '✓' : '✗'} '
+            '${DateFormat('MM/dd HH:mm').format(reminder.triggerTime)}'
+            '  ·  #${reminder.id}',
+          )
+          ..writeln('    ${reminder.eventNames.join(' / ')}');
+      }
+    }
+
+    await Clipboard.setData(ClipboardData(text: buffer.toString()));
+    if (!mounted) return;
+    showTopSnackBar(
+      context,
+      l10n.devCalendarReminderCopied,
+      type: SnackBarType.info,
+    );
+  }
+
   Future<void> _scheduleTest(Duration delay) async {
     final l10n = AppLocalizations.of(context);
     await CalendarReminderService.debugScheduleTest(l10n, delay);
@@ -452,6 +488,11 @@ class _DebugScheduleInspectorState extends State<_DebugScheduleInspector> {
                 l10n.devCalendarReminderSection,
                 style: textTheme.titleSmall,
               ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.copy_all_outlined, size: 20),
+              tooltip: l10n.devCalendarReminderCopy,
+              onPressed: _loading ? null : _copyReport,
             ),
             IconButton(
               icon: const Icon(Icons.refresh, size: 20),

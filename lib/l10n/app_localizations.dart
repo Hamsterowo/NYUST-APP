@@ -2024,6 +2024,18 @@ abstract class AppLocalizations {
   /// **'目前沒有任何排程'**
   String get devCalendarReminderEmpty;
 
+  /// No description provided for @devCalendarReminderCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'複製排程內容'**
+  String get devCalendarReminderCopy;
+
+  /// No description provided for @devCalendarReminderCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已複製排程內容'**
+  String get devCalendarReminderCopied;
+
   /// No description provided for @devCalendarReminderPendingNote.
   ///
   /// In zh, this message translates to:

@@ -528,6 +528,8 @@
   "devCalendarReminderSection": "[Dev] Schedule inspector",
   "devCalendarReminderCounts": "{planned} planned, {pending} pending in the plugin",
   "devCalendarReminderEmpty": "Nothing scheduled",
+  "devCalendarReminderCopy": "Copy the schedule",
+  "devCalendarReminderCopied": "Schedule copied",
   "devCalendarReminderPendingNote": "\"Pending in the plugin\" is the plugin's own list. It survives a reboot regardless, so it cannot prove that boot rescheduling works — use the 3-minute test below for that.",
   "devCalendarReminderTestNow": "Schedule a test reminder 15 seconds out",
   "devCalendarReminderTestReboot": "Schedule a test reminder 3 minutes out (reboot right after)",

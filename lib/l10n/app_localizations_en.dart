@@ -1088,6 +1088,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get devCalendarReminderEmpty => 'Nothing scheduled';
 
   @override
+  String get devCalendarReminderCopy => 'Copy the schedule';
+
+  @override
+  String get devCalendarReminderCopied => 'Schedule copied';
+
+  @override
   String get devCalendarReminderPendingNote =>
       '\"Pending in the plugin\" is the plugin\'s own list. It survives a reboot regardless, so it cannot prove that boot rescheduling works — use the 3-minute test below for that.';
 

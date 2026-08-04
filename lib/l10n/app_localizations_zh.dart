@@ -1051,6 +1051,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get devCalendarReminderEmpty => '目前沒有任何排程';
 
   @override
+  String get devCalendarReminderCopy => '複製排程內容';
+
+  @override
+  String get devCalendarReminderCopied => '已複製排程內容';
+
+  @override
   String get devCalendarReminderPendingNote =>
       '「外掛待發」是外掛自己記的清單，重開機後一定還在，不能用來證明開機重排有效。要驗證重開機請用下面的 3 分鐘測試。';
 
