@@ -7,7 +7,7 @@ import 'overview_screen.dart';
 import 'schedule_screen.dart';
 import 'info_screen.dart';
 import 'calendar_screen.dart';
-import 'profile_screen.dart';
+import 'settings_screen.dart';
 import '../router/app_router.dart';
 import '../utils/pwa_interop.dart';
 import '../services/calendar_reminder_service.dart';
@@ -30,7 +30,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     const ScheduleScreen(),
     const InfoScreen(),
     const CalendarScreen(),
-    const ProfileScreen(),
+    const SettingsScreen(),
   ];
 
   @override

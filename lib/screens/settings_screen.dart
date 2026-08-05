@@ -19,20 +19,20 @@ import '../services/background_service.dart';
 import '../services/calendar_reminder_service.dart';
 import '../services/grade_notification_service.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _versionStr = '';
 
   // 個人資料卡片刻意採用固定深色底 + 白字，作為淺色介面中的視覺錨點。
   // 集中在此以避免在 build 中散落魔術色碼；要改色只改這兩個常數。
-  static const Color _profileCardBg = Color(0xFF1E293B);
-  static const Color _profileCardFg = Colors.white;
+  static const Color _identityCardBg = Color(0xFF1E293B);
+  static const Color _identityCardFg = Colors.white;
 
   @override
   void initState() {
@@ -315,7 +315,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(24.0),
                             decoration: BoxDecoration(
-                              color: _profileCardBg,
+                              color: _identityCardBg,
                               borderRadius: BorderRadius.circular(16.0),
                               boxShadow: [
                                 BoxShadow(
@@ -357,7 +357,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                             style: textTheme.headlineSmall
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.bold,
-                                                  color: _profileCardFg,
+                                                  color: _identityCardFg,
                                                 ),
                                           ),
                                           const SizedBox(height: 4),
@@ -369,7 +369,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                                 ).profileDepartmentFallback,
                                             style: textTheme.bodyMedium
                                                 ?.copyWith(
-                                                  color: _profileCardFg
+                                                  color: _identityCardFg
                                                       .withValues(alpha: 0.7),
                                                 ),
                                           ),
@@ -714,9 +714,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: _profileCardFg.withValues(alpha: 0.7)),
+        Icon(icon, size: 16, color: _identityCardFg.withValues(alpha: 0.7)),
         const SizedBox(width: 8),
-        Text(text, style: const TextStyle(fontSize: 14, color: _profileCardFg)),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 14, color: _identityCardFg),
+        ),
       ],
     );
   }
@@ -747,7 +750,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Divider(
-          color: _profileCardFg.withValues(alpha: 0.24),
+          color: _identityCardFg.withValues(alpha: 0.24),
           height: 1,
         ),
       ),
@@ -777,10 +780,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               vertical: 8.0,
             ),
             decoration: BoxDecoration(
-              color: _profileCardFg.withValues(alpha: 0.08),
+              color: _identityCardFg.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(
-                color: _profileCardFg.withValues(alpha: 0.12),
+                color: _identityCardFg.withValues(alpha: 0.12),
                 width: 1.0,
               ),
             ),
@@ -791,7 +794,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(width: 8),
                 Text(
                   '$displayLabel: $value',
-                  style: const TextStyle(color: _profileCardFg, fontSize: 12.0),
+                  style: const TextStyle(
+                    color: _identityCardFg,
+                    fontSize: 12.0,
+                  ),
                 ),
               ],
             ),

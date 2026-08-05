@@ -88,7 +88,7 @@ A single teal seed generates the working palette; a small set of committed colou
 - **Campus Amber** (`#FFC107`): The one hand-placed accent, used for highlight and attention that isn't an error — calendar highlights, the profile "extra info" chips, exam markers. Amber earns its place because it reads as "note this" without the alarm of red.
 
 ### Neutral
-- **Portal Slate** (`#1E293B`) with **Slate Ink** (`#FFFFFF`): The single committed non-generated surface — the profile identity card. A deliberate dark anchor in an otherwise light, teal-tinted UI. Centralized as `_profileCardBg` / `_profileCardFg`; it is the one place a fixed dark surface is allowed.
+- **Portal Slate** (`#1E293B`) with **Slate Ink** (`#FFFFFF`): The single committed non-generated surface — the profile identity card. A deliberate dark anchor in an otherwise light, teal-tinted UI. Centralized as `_identityCardBg` / `_identityCardFg`; it is the one place a fixed dark surface is allowed.
 - **Material 3 neutrals**: `surface`, `surfaceContainerHighest`, `onSurface`, `onSurfaceVariant`, `outline` — all tonally generated from the teal seed. Cards, list rows, dividers, and body text use these, never raw greys.
 
 ### Status
