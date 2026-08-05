@@ -350,6 +350,15 @@
   "courseOutline": "Course Outline",
   "courseGrading": "Evaluation Methods",
   "courseSyllabus": "Teaching Plan & Progress",
+  "courseSyllabusWeek": "Week {week}",
+  "@courseSyllabusWeek": {
+    "description": "Week label in the course syllabus table. The school's syllabus page is Chinese-only, so the app translates this column itself.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
   "courseNoData": "No Data",
   "courseNone": "None",
   "courseOpenInBrowser": "Open in Browser",

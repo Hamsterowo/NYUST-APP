@@ -717,6 +717,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseSyllabus => 'Teaching Plan & Progress';
 
   @override
+  String courseSyllabusWeek(int week) {
+    return 'Week $week';
+  }
+
+  @override
   String get courseNoData => 'No Data';
 
   @override

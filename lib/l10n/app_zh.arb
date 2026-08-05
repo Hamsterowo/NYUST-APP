@@ -350,6 +350,15 @@
   "courseOutline": "課程大綱",
   "courseGrading": "成績評量方式",
   "courseSyllabus": "教學計畫與進度",
+  "courseSyllabusWeek": "第{week}週",
+  "@courseSyllabusWeek": {
+    "description": "Week label in the course syllabus table. The school's syllabus page is Chinese-only, so the app translates this column itself.",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
   "courseNoData": "無資料",
   "courseNone": "無",
   "courseOpenInBrowser": "在瀏覽器開啟",

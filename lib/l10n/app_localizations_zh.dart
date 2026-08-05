@@ -694,6 +694,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get courseSyllabus => '教學計畫與進度';
 
   @override
+  String courseSyllabusWeek(int week) {
+    return '第$week週';
+  }
+
+  @override
   String get courseNoData => '無資料';
 
   @override

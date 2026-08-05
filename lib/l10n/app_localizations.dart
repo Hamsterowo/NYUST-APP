@@ -1382,6 +1382,12 @@ abstract class AppLocalizations {
   /// **'教學計畫與進度'**
   String get courseSyllabus;
 
+  /// Week label in the course syllabus table. The school's syllabus page is Chinese-only, so the app translates this column itself.
+  ///
+  /// In zh, this message translates to:
+  /// **'第{week}週'**
+  String courseSyllabusWeek(int week);
+
   /// No description provided for @courseNoData.
   ///
   /// In zh, this message translates to:

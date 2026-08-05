@@ -9,6 +9,7 @@ import '../services/api_service.dart';
 import '../services/course_detail_cache.dart';
 import '../services/scrape_result.dart';
 import '../utils/network_error.dart';
+import '../utils/syllabus_week.dart';
 import '../utils/top_snack_bar.dart';
 import 'map_screen.dart';
 import 'web_view_screen.dart';
@@ -89,6 +90,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  /// 每週進度表的週次欄。學校的課綱頁只有中文版，所以這一欄由 App 這側翻譯；
+  /// 同一列的進度內容／教學方法／備註是老師寫的中文原文，一律原樣顯示。
+  ///
+  /// 抽不到數字時原樣顯示原字串 —— 顯示看不懂的原文，好過顯示空白。
+  String _formatWeek(String raw) {
+    final week = parseSyllabusWeek(raw);
+    if (week == null) return raw;
+    return AppLocalizations.of(context).courseSyllabusWeek(week);
   }
 
   String _formatContent(String text) {
@@ -360,7 +371,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       SizedBox(
                         width: 60,
                         child: Text(
-                          item.week,
+                          _formatWeek(item.week),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.secondary,
