@@ -99,14 +99,14 @@ class AppApiService {
   /// is never used to decide when to refresh.
   DateTime? _tokenExpiry;
 
-  /// Demo/mock mode: the demo account never really hits `/Token`, so we seed a
+  /// Demo mode: the demo account never really hits `/Token`, so we seed a
   /// fake token + expiry (and short-circuit network calls) purely so the
   /// credential settings page has sample data to show.
-  bool _mockMode = false;
+  bool _demoMode = false;
 
-  /// Enables/disables mock mode, seeding or clearing the demo credential.
-  void setMockMode(bool value) {
-    _mockMode = value;
+  /// Enables/disables demo mode, seeding or clearing the demo credential.
+  void setDemoMode(bool value) {
+    _demoMode = value;
     if (value) {
       _accessToken = 'mock-access-token';
       _userId = MockData.demoId;
@@ -129,7 +129,7 @@ class AppApiService {
   /// only (re-seeded each launch from the live session); never overrides an id
   /// already obtained from a real `/Token` response.
   void ensureUserId(String? id) {
-    if (_mockMode) return;
+    if (_demoMode) return;
     if (id == null || id.isEmpty) return;
     if (_userId != null && _userId!.isNotEmpty) return;
     _userId = id;
@@ -148,7 +148,7 @@ class AppApiService {
   /// Whether the password hash is **persisted** (survives restart) — i.e. the
   /// "remember password" setting is currently on.
   Future<bool> isPasswordRemembered() async {
-    if (_mockMode) return _passwordHash != null;
+    if (_demoMode) return _passwordHash != null;
     try {
       final v = await _storage.read(key: _pwdHashKey);
       return v != null && v.isNotEmpty;
@@ -163,7 +163,7 @@ class AppApiService {
   /// returns false so the caller can prompt for the password via
   /// [reloginWithPassword].
   Future<bool> setRememberPassword(bool value) async {
-    if (_mockMode) {
+    if (_demoMode) {
       _passwordHash = value ? 'mock-hash' : null;
       return true;
     }
@@ -223,7 +223,7 @@ class AppApiService {
     String password, {
     bool remember = false,
   }) async {
-    if (_mockMode) {
+    if (_demoMode) {
       _passwordHash = remember ? 'mock-hash' : _passwordHash;
       return true;
     }
@@ -314,7 +314,7 @@ class AppApiService {
     // The demo account has no real token; instead of hitting the network,
     // serve a bundled sample PDF (an easter egg) so the demo shows a real
     // document instead of an error/prompt.
-    if (_mockMode) {
+    if (_demoMode) {
       try {
         final data = await rootBundle.load('assets/demo_yun_report.pdf');
         return data.buffer.asUint8List();
@@ -376,7 +376,7 @@ class AppApiService {
   );
 
   Future<void> clear() async {
-    _mockMode = false;
+    _demoMode = false;
     _accessToken = null;
     _userId = null;
     _passwordHash = null;

@@ -86,7 +86,7 @@ class AuthProvider with ChangeNotifier {
       if (cachedStr != null) {
         final cachedUser = jsonDecode(cachedStr);
         if (cachedUser['user']?['id'] == MockData.demoId) {
-          _apiService.isMockMode = true;
+          _apiService.isDemoMode = true;
           _user = cachedUser;
           _isInitialized = true;
           notifyListeners();
@@ -111,7 +111,7 @@ class AuthProvider with ChangeNotifier {
         final cachedUser = jsonDecode(cachedStr);
         _user = cachedUser;
         if (cachedUser['user']?['id'] == MockData.demoId) {
-          _apiService.isMockMode = true;
+          _apiService.isDemoMode = true;
         }
         _seedAppApiUserId();
         isAlreadyLoggedIn = true;
@@ -275,7 +275,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       if (MockData.isDemoAccount(username)) {
-        _apiService.isMockMode = true;
+        _apiService.isDemoMode = true;
         _user = {
           'success': true,
           'user': Map<String, dynamic>.from(MockData.user),
@@ -454,7 +454,7 @@ class AuthProvider with ChangeNotifier {
     try {
       final result = await _apiService.changePassword(oldPassword, newPassword);
       if (result['success'] == true) {
-        if (!_apiService.isMockMode) {
+        if (!_apiService.isDemoMode) {
           final username = _user?['username']?.toString() ?? '';
           if (username.isNotEmpty) {
             final remember = await _apiService.appApi.isPasswordRemembered();
@@ -491,7 +491,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _apiService.isMockMode = false;
+    _apiService.isDemoMode = false;
     await _apiService.logout();
     await _apiService.appApi.clear();
     await _clearUserCache();

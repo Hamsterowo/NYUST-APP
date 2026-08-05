@@ -18,7 +18,7 @@ import 'scrapers/absent_scraper.dart';
 
 /// 根據 demo 模式狀態，回傳正確的 Service 實作。
 ///
-/// 這是消除散落各處 `if (isMockMode)` 判斷的核心：呼叫端一律透過此 factory
+/// 這是消除散落各處 `if (isDemoMode)` 判斷的核心：呼叫端一律透過此 factory
 /// 取得 Service，由 [isDemoMode] 這個唯一開關決定回傳 Mock 還是真實實作。
 ///
 /// - `demo` 帳號登入 → [isDemoMode] = true → 回傳 Mock 實作

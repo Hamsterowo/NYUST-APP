@@ -149,9 +149,9 @@ void main() {
   group('cache key is a storage contract', () {
     test('refresh stamps CacheMeta under "schedule"', () async {
       final api = ApiService();
-      final wasMock = api.isMockMode;
-      api.isMockMode = true;
-      addTearDown(() => api.isMockMode = wasMock);
+      final wasDemo = api.isDemoMode;
+      api.isDemoMode = true;
+      addTearDown(() => api.isDemoMode = wasDemo);
 
       final result = await repo.refresh(force: true);
       expect(result.outcome, RefreshOutcome.success);

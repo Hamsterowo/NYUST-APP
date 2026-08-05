@@ -92,12 +92,12 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  group('mock mode', () {
+  group('demo mode', () {
     test(
-      'setMockMode seeds a fake credential and short-circuits the network',
+      'setDemoMode seeds a fake credential and short-circuits the network',
       () async {
         final service = AppApiService();
-        service.setMockMode(true);
+        service.setDemoMode(true);
 
         expect(service.hasToken, isTrue);
         expect(service.tokenExpiry, isNotNull);
@@ -111,7 +111,7 @@ void main() {
 
     test('remember toggle works in memory without touching storage', () async {
       final service = AppApiService();
-      service.setMockMode(true);
+      service.setDemoMode(true);
 
       expect(await service.isPasswordRemembered(), isFalse);
       expect(await service.setRememberPassword(true), isTrue);
@@ -121,9 +121,9 @@ void main() {
       expect(store, isEmpty);
     });
 
-    test('clear turns mock mode off', () async {
+    test('clear turns demo mode off', () async {
       final service = AppApiService();
-      service.setMockMode(true);
+      service.setDemoMode(true);
       await service.setRememberPassword(true);
 
       await service.clear();
@@ -221,7 +221,7 @@ void main() {
       service.ensureUserId('');
       expect(await service.reloginWithPassword('pw'), isFalse);
 
-      service.setMockMode(true);
+      service.setDemoMode(true);
       service.ensureUserId('D11012345'); // mock mode keeps its own demo id
       expect(await service.reloginWithPassword('pw'), isTrue);
     });
