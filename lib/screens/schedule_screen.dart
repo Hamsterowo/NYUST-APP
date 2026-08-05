@@ -13,6 +13,7 @@ import '../providers/providers.dart';
 import '../services/scrape_result.dart';
 import '../services/server_time_service.dart';
 import '../theme/course_palette.dart';
+import '../utils/refresh_body_state.dart';
 import '../utils/share_image/share_image.dart';
 import '../utils/timetable_layout.dart';
 import '../utils/top_snack_bar.dart';
@@ -32,6 +33,12 @@ class ScheduleScreen extends ConsumerStatefulWidget {
 
 class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   bool _isMapMode = false;
+
+  /// 使用者主動觸發的更新（重新整理、重試）進行中。
+  /// 與資料層的 `isLoadingSchedule` 並存而不混用：背景預抓也會設那個旗標
+  /// （課表常駐於首頁分頁堆疊，離線恢復連線時資料層會自己重跑預抓），
+  /// 只有這個為真時才蓋上骨架。
+  bool _manualRefreshing = false;
   // 課程方塊淡入的「世代」：每次進到課表分頁或切換學期時 +1，
   // 讓所有方塊重新以隨機錯開的方式淡入一次（見 [FadeInCard]）。
   int _fadeGen = 0;
@@ -89,6 +96,35 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       }
     }
     return null;
+  }
+
+  /// 主動更新：蓋上骨架，失敗時跳提示——那是使用者按的，需要明確的回答。
+  /// 提示長在這個回呼裡而不是監聽資料層的失敗狀態：課表常駐於分頁堆疊，
+  /// 監聽會讓使用者人在行事曆分頁時跳出課表的提示。
+  Future<void> _refresh(DataProvider data) async {
+    setState(() => _manualRefreshing = true);
+    try {
+      final outcome = await data.fetchSchedule(force: true);
+      if (!mounted) return;
+      if (outcome != null && !outcome.isSuccess) {
+        showTopSnackBar(
+          context,
+          _failureMessage(outcome),
+          type: SnackBarType.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _manualRefreshing = false);
+    }
+  }
+
+  /// 連線類錯誤 → 具名「無法連線至課表系統」；其他 → 通用提示。
+  /// 錯誤頁與提示共用同一句，兩種呈現方式才不會像是兩種不同的問題。
+  String _failureMessage(RefreshOutcome? reason) {
+    final l10n = AppLocalizations.of(context);
+    return reason == RefreshOutcome.networkError
+        ? l10n.serviceUnavailable(l10n.serviceSchedule)
+        : l10n.checkNetworkRetry;
   }
 
   Future<void> _shareScheduleImage() async {
@@ -217,7 +253,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).navSchedule,
-        onRefresh: () => data.fetchSchedule(force: true),
+        onRefresh: () => _refresh(data),
         isLoading: data.isLoadingSchedule,
         actions: [
           IconButton(
@@ -358,47 +394,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       );
     }
 
-    if (data.scheduleFailed && data.scheduleData.isEmpty && !switching) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).loadScheduleFailed,
-              style: TextStyle(
-                fontSize: 18,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              // 離線/連不上 → 具名「無法連線至課表系統」;其他 → 通用提示。
-              data.scheduleFailReason == RefreshOutcome.networkError
-                  ? AppLocalizations.of(context).serviceUnavailable(
-                      AppLocalizations.of(context).serviceSchedule,
-                    )
-                  : AppLocalizations.of(context).checkNetworkRetry,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.tonal(
-              onPressed: () => data.fetchSchedule(force: true),
-              child: Text(AppLocalizations.of(context).retry),
-            ),
-          ],
-        ),
-      );
-    }
-
     // 紅色時間線的意思是「現在上到這裡」，只有在看**當前學期**時才成立。切到
     // 其他學期時那條線指的是另一個學期的某一天，是錯的資訊。
     //
@@ -407,16 +402,34 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         data.currentSemester == null ||
         (data.selectedSemester ?? data.currentSemester) == data.currentSemester;
 
-    if ((data.isLoadingSchedule || switching) && !hasData) {
-      return _buildScheduleGrid(
-        const <ScheduleEvent>[],
-        isLoading: true,
-        showNowLine: showNowLine,
-      );
-    }
+    // 課表的資料層沒有可為 null 的集合，「從未載入」與「真的零筆」只能從旗標
+    // 推回來：沒有課且（正在抓或已失敗）＝ 還沒拿到這學期的課表；
+    // 沒有課且兩者皆非 ＝ 真的零筆（例如休學、暑假）。
+    final bool? isEmpty = hasData
+        ? false
+        : (data.isLoadingSchedule || switching || data.scheduleFailed
+              ? null
+              : true);
 
-    if (!hasData) {
-      return Center(child: Text(AppLocalizations.of(context).noScheduleData));
+    switch (resolveRefreshBody(
+      isEmpty: isEmpty,
+      // 切換學期中不算失敗：那條路徑有自己的處理（見上方 semesterLoadFailed
+      // 與下方的半透明遮罩），這裡不能讓當前學期的舊失敗蓋掉它。
+      failed: data.scheduleFailed && !switching,
+      manualRefreshing: _manualRefreshing,
+    )) {
+      case RefreshBodyState.skeleton:
+        return _buildScheduleGrid(
+          const <ScheduleEvent>[],
+          isLoading: true,
+          showNowLine: showNowLine,
+        );
+      case RefreshBodyState.error:
+        return _buildScheduleError(data);
+      case RefreshBodyState.empty:
+        return Center(child: Text(AppLocalizations.of(context).noScheduleData));
+      case RefreshBodyState.list:
+        break;
     }
 
     final grid = _buildScheduleGrid(events, showNowLine: showNowLine);
@@ -456,6 +469,38 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildScheduleError(DataProvider data) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            size: 64,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context).loadScheduleFailed,
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _failureMessage(data.scheduleFailReason),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.tonal(
+            onPressed: () => _refresh(data),
+            child: Text(AppLocalizations.of(context).retry),
+          ),
+        ],
+      ),
     );
   }
 
