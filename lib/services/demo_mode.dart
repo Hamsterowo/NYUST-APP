@@ -1,6 +1,6 @@
 import 'api_client.dart';
 import 'auth/auth_service.dart';
-import 'auth/nyust_auth_service.dart';
+import 'auth/yuntech_auth_service.dart';
 import 'auth/mock_auth_service.dart';
 import 'grades/grades_service.dart';
 import 'grades/graduation_service.dart';
@@ -8,7 +8,7 @@ import 'grades/mock_grades_service.dart';
 import 'grades/mock_graduation_service.dart';
 import 'course/course_service.dart';
 import 'course/mock_course_service.dart';
-import 'calendar/nyust_calendar_service.dart';
+import 'calendar/yuntech_calendar_service.dart';
 import 'absent/absent_service.dart';
 import 'absent/mock_absent_service.dart';
 import 'scrapers/grades_scraper.dart';
@@ -35,7 +35,7 @@ class ServiceFactory {
 
   ServiceFactory(this.client, {this.isDemoMode = false});
 
-  late final NyustAuthService _nyustAuth = NyustAuthService(client);
+  late final YunTechAuthService _yunTechAuth = YunTechAuthService(client);
   late final MockAuthService _mockAuth = MockAuthService();
   late final GradesScraper _gradesScraper = GradesScraper(client.dio);
   late final MockGradesService _mockGrades = MockGradesService();
@@ -45,11 +45,13 @@ class ServiceFactory {
   late final MockGraduationService _mockGraduation = MockGraduationService();
   late final ScheduleScraper _scheduleScraper = ScheduleScraper(client.dio);
   late final MockCourseService _mockCourse = MockCourseService();
-  late final NyustCalendarService _nyustCalendar = NyustCalendarService(client);
+  late final YunTechCalendarService _yunTechCalendar = YunTechCalendarService(
+    client,
+  );
   late final AbsentScraper _absentScraper = AbsentScraper(client.dio);
   late final MockAbsentService _mockAbsent = MockAbsentService();
 
-  AuthService get authService => isDemoMode ? _mockAuth : _nyustAuth;
+  AuthService get authService => isDemoMode ? _mockAuth : _yunTechAuth;
   GradesService get gradesService => isDemoMode ? _mockGrades : _gradesScraper;
   GraduationService get graduationService =>
       isDemoMode ? _mockGraduation : _graduationScraper;
@@ -59,8 +61,8 @@ class ServiceFactory {
 
   /// 行事曆為全校共用的學術行事曆／假日，從公開網頁爬取，與帳號無關，
   /// 因此即使在 demo 模式也一律使用真實實作（只有一個實作，無需介面）。
-  NyustCalendarService get calendarService => _nyustCalendar;
+  YunTechCalendarService get calendarService => _yunTechCalendar;
 
   /// 真實 SSO 認證 Service（供 facade 暴露 scraper getter 使用，永遠為真實實作）。
-  NyustAuthService get nyustAuth => _nyustAuth;
+  YunTechAuthService get yunTechAuth => _yunTechAuth;
 }

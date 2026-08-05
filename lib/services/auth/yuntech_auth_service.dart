@@ -6,12 +6,12 @@ import 'auth_service.dart';
 /// 以 YunTech SSO / eStudent 網頁為後端的 [AuthService] 實作。
 ///
 /// 內部委派給現有的 [SsoScraper]（網頁登入）與 [InfoScraper]（使用者資訊）。
-class NyustAuthService implements AuthService {
+class YunTechAuthService implements AuthService {
   final ApiClient _client;
   late final SsoScraper _ssoScraper;
   late final InfoScraper _infoScraper;
 
-  NyustAuthService(this._client) {
+  YunTechAuthService(this._client) {
     _ssoScraper = SsoScraper(_client.dio);
     _infoScraper = InfoScraper(_client.dio);
   }

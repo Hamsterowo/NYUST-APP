@@ -139,6 +139,6 @@ class ApiService {
 
   // ---- Scraper 存取（維持既有對外 getter；目前無外部使用者）----
 
-  SsoScraper get ssoScraper => _factory.nyustAuth.ssoScraper;
-  InfoScraper get infoScraper => _factory.nyustAuth.infoScraper;
+  SsoScraper get ssoScraper => _factory.yunTechAuth.ssoScraper;
+  InfoScraper get infoScraper => _factory.yunTechAuth.infoScraper;
 }
