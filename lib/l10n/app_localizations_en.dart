@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
-  String get languageSetting => 'Language Settings';
+  String get languageSetting => 'Language';
 
   @override
   String get appPrivacyPolicy => 'YunTool Privacy Policy';
@@ -925,7 +925,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTeacherEducation => 'Teacher Education Program';
 
   @override
-  String get settingsGradeNotification => 'Grade Update Notification';
+  String get settingsGradeNotification => 'Grade Notifications';
 
   @override
   String get settingsGradeNotificationSub =>

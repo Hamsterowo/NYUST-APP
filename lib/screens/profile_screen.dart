@@ -280,6 +280,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
 
+    // 這裡刻意標註型別並轉成 String：map 取值是 dynamic，而 characters 是
+    // extension，套在 dynamic 上不會靜態綁定，執行期會變成找不到的 getter。
+    final String displayName =
+        (user?["user"]?["name"] ??
+                user?["user"]?["姓名"] ??
+                AppLocalizations.of(context).profileNameFallback)
+            .toString();
+    // 頭像顯示姓名的第一個字（中文取單字、英文取首字母），以 characters 取用
+    // 完整的字素叢集，避免把組合字元或表情符號切成半個字。
+    final nameInitial = displayName.trim().characters.isEmpty
+        ? '?'
+        : displayName.trim().characters.first.toUpperCase();
+
     return Scaffold(
       appBar: CustomAppBar(title: AppLocalizations.of(context).settingsTitle),
       body: LayoutBuilder(
@@ -289,7 +302,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
+                  horizontal: 22.0,
                   vertical: 32.0,
                 ),
                 child: Column(
@@ -322,10 +335,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       radius: 40,
                                       backgroundColor:
                                           colorScheme.primaryContainer,
-                                      child: Icon(
-                                        Icons.person,
-                                        size: 40,
-                                        color: colorScheme.onPrimaryContainer,
+                                      child: Text(
+                                        nameInitial,
+                                        style: TextStyle(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.bold,
+                                          color: colorScheme.onPrimaryContainer,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 24),
@@ -337,11 +353,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            user?["user"]?["name"] ??
-                                                user?["user"]?["姓名"] ??
-                                                AppLocalizations.of(
-                                                  context,
-                                                ).profileNameFallback,
+                                            displayName,
                                             style: textTheme.headlineSmall
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.bold,
@@ -441,40 +453,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     Icons.language,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  // 目前語言接在標題右邊而不是放 subtitle：這一列
+                                  // 目前語言放 trailing 而不是 subtitle：這一列
                                   // 因此與卡片內其他列同高，不會單獨長一截。
-                                  title: Row(
-                                    // 兩段字級不同（標題 bodyLarge、語言
-                                    // bodyMedium），置中會讓小字浮在半空中。
-                                    // 對齊基線讓它像坐在同一行字上。
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
+                                  title: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).languageSetting,
+                                  ),
+                                  // 標籤跟 chevron 一起收在 trailing，標題就能
+                                  // 獨佔左側整條寬度，不必跟標籤搶空間而折行。
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Flexible(
-                                        child: Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          ).languageSetting,
+                                      Text(
+                                        _currentLanguageLabel(context),
+                                        overflow: TextOverflow.ellipsis,
+                                        // ListTile 的 subtitle 預設樣式：
+                                        // bodyMedium 配 onSurfaceVariant。
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
-                                      Flexible(
-                                        child: Text(
-                                          _currentLanguageLabel(context),
-                                          overflow: TextOverflow.ellipsis,
-                                          // ListTile 的 subtitle 預設樣式：
-                                          // bodyMedium 配 onSurfaceVariant。
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.chevron_right,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ],
-                                  ),
-                                  trailing: Icon(
-                                    Icons.chevron_right,
-                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                   onTap: _showLanguagePicker,
                                 ),
