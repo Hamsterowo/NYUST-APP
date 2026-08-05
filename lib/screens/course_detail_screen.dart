@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../models/calendar_event.dart';
 import '../models/course_detail_model.dart';
 import '../models/map_building_model.dart';
+import '../providers/providers.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
 import '../services/calendar_export_service.dart';
@@ -14,13 +16,14 @@ import '../services/scrape_result.dart';
 import '../utils/course_time_slot.dart';
 import '../utils/network_error.dart';
 import '../utils/semester_anchor.dart';
+import '../utils/semester_code.dart';
 import '../utils/syllabus_week.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/syllabus_week_calendar_sheet.dart';
 import 'map_screen.dart';
 import 'web_view_screen.dart';
 
-class CourseDetailScreen extends StatefulWidget {
+class CourseDetailScreen extends ConsumerStatefulWidget {
   final String year;
   final String semester;
   final String courseNo;
@@ -35,10 +38,10 @@ class CourseDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<CourseDetailScreen> createState() => _CourseDetailScreenState();
+  ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
 }
 
-class _CourseDetailScreenState extends State<CourseDetailScreen> {
+class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   final _api = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
@@ -483,6 +486,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
     final colorScheme = Theme.of(context).colorScheme;
 
+    // 已經過去的學期整張表都不長加入按鈕：那一週的課早就上完了，把它排進行事曆
+    // 沒有意義，而從歷年成績點進舊課程時那顆按鈕只會是誤觸來源。**隱藏而不是
+    // 停用** —— 18 列各一顆灰按鈕比沒有按鈕更吵，而且「這是舊學期」不需要解釋。
+    //
+    // 注意這只擋「早於」當前學期，未來學期照常顯示（校曆還沒公布的話，錨點推導
+    // 自然會讓它停用並說明原因）。當前學期**已經過去的週次**也照常顯示：那是
+    // 使用者在自己的課綱表上刻意按的，不是誤觸。
+    final isPastSemester = isSemesterBefore(
+      year: widget.year,
+      semester: widget.semester,
+      currentSemester: ref.watch(dataProvider).currentSemester,
+    );
+    final showAddButton = CalendarExportService.isSupported && !isPastSemester;
+
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
@@ -511,7 +528,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             ),
             child: Column(
               children: syllabus.map((item) {
-                final blockedReason = _syllabusAddBlockedReason(item, detail);
+                final blockedReason = showAddButton
+                    ? _syllabusAddBlockedReason(item, detail)
+                    : null;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
@@ -570,7 +589,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                           ],
                         ),
                       ),
-                      if (CalendarExportService.isSupported)
+                      if (showAddButton)
                         IconButton(
                           icon: const Icon(Icons.edit_calendar, size: 20),
                           visualDensity: VisualDensity.compact,
