@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
 import 'overview_screen.dart';
@@ -9,7 +10,9 @@ import 'info_screen.dart';
 import 'calendar_screen.dart';
 import 'settings_screen.dart';
 import '../router/app_router.dart';
+import '../utils/english_notice_policy.dart';
 import '../utils/pwa_interop.dart';
+import '../widgets/notice_dialog.dart';
 import '../services/calendar_reminder_service.dart';
 import '../services/notification_navigator.dart';
 import '../services/notification_payload.dart';
@@ -375,7 +378,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   /// 目前資料是照哪個語系抓的；null = 語言設定還沒讀完。
   String? _appliedLocale;
 
-  /// 換語言後重抓全部資料（成績、畢業審查等頁面是照語系從學校抓回來的）。
+  /// 換語言後重抓全部資料（成績、畢業審查等頁面是照語系從學校抓回來的），
+  /// 並順帶判定要不要跳英文語系提示。
   ///
   /// 只在語言設定讀完之後才開始計較：開機時設定是非同步讀進來的，讀完前畫面上的
   /// 語系只是「跟隨系統」的暫定值，把那一次 settle 當成使用者換語言，等於每次開機
@@ -386,6 +390,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final newLocale = Localizations.localeOf(context).toString();
     final previous = _appliedLocale;
     _appliedLocale = newLocale;
+
+    // 英文提示沿用同一組前後比對，不另建第二套語系追蹤：previous 為 null 就是
+    // 冷啟動的第一次判定，那條路徑由 [EnglishNoticePolicy] 自己分辨。
+    _maybeShowEnglishNotice(previousLocale: previous, currentLocale: newLocale);
+
     if (previous == null || previous == newLocale) return;
 
     if (kDebugMode) {
@@ -398,6 +407,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       // 排進系統的是固定字串，語言換了就得整批換掉。
       _refreshCalendarReminders();
     });
+  }
+
+  /// 已看過英文語系提示的旗標；切換與冷啟動兩條路徑共用同一份記錄。
+  static const String _englishNoticeShownKey = 'english_notice_shown';
+
+  /// 判定並跳出英文語系提示。所有判斷都在 [EnglishNoticePolicy] 裡，這裡只負責
+  /// 讀寫旗標與顯示彈窗。
+  Future<void> _maybeShowEnglishNotice({
+    required String? previousLocale,
+    required String currentLocale,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final decision = EnglishNoticePolicy.decide(
+      previousLocale: previousLocale,
+      currentLocale: currentLocale,
+      alreadyShown: prefs.getBool(_englishNoticeShownKey) ?? false,
+    );
+    // 冷啟動那條要等開場動畫淡出，尚未接上。
+    if (decision.trigger != EnglishNoticeTrigger.switched) return;
+
+    if (decision.shouldPersist) {
+      await prefs.setBool(_englishNoticeShownKey, true);
+    }
+    if (!mounted) return;
+    _showEnglishNoticeDialog();
+  }
+
+  /// 一則單向的聲明，所以只有一顆「Got it」：這裡不放回報捷徑（跳出來的當下
+  /// 使用者還沒遇到任何錯誤），也不放「切回中文」（對真心要用英文的人像在勸退）。
+  ///
+  /// 外觀沿用隱私權更新提示的同一支彈窗；差別只在這則可以點背景關掉。
+  void _showEnglishNoticeDialog() {
+    showNoticeDialog(
+      context,
+      title: AppLocalizations.of(context).englishNoticeTitle,
+      message: AppLocalizations.of(context).englishNoticeBody,
+      buttonLabel: AppLocalizations.of(context).englishNoticeGotIt,
+      barrierLabel: 'EnglishNotice',
+      dismissible: true,
+    );
   }
 
   @override

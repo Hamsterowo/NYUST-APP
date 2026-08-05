@@ -128,6 +128,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Install YunTool to your device to run directly without opening a browser.';
 
   @override
+  String get englishNoticeTitle => 'Notice';
+
+  @override
+  String get englishNoticeBody =>
+      'YunTool is developed in Traditional Chinese, and the English interface is not fully translated yet. You may come across untranslated text, or features that don\'t work as expected.\n\nIf something looks wrong, please tell us via Settings → Report an Issue. Thanks for your understanding!';
+
+  @override
+  String get englishNoticeGotIt => 'Got it';
+
+  @override
   String get vacationLabelWinter => 'Winter Vacation';
 
   @override

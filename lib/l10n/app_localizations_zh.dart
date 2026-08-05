@@ -123,6 +123,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get installDescAndroid => '將 雲科工具箱 安裝到您的裝置，不用開啟瀏覽器即可直接操作。';
 
   @override
+  String get englishNoticeTitle => '提醒';
+
+  @override
+  String get englishNoticeBody =>
+      '雲科工具箱以繁體中文開發，英文介面尚未完全翻譯，您可能會看到未翻譯的文字，或是行為不如預期的功能。\n\n如果發現任何異常，請透過「設定 → 回報問題」告訴我們，感謝您的體諒！';
+
+  @override
+  String get englishNoticeGotIt => '我知道了';
+
+  @override
   String get vacationLabelWinter => '寒假';
 
   @override

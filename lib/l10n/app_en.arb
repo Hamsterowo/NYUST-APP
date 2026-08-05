@@ -48,6 +48,10 @@
   "installDescIos": "Install YunTool shortcut to your device:\n\n1️⃣ Tap the \"Share\" icon at the bottom ⧧\n2️⃣ Scroll down and select \"Add to Home Screen\"\n3️⃣ Tap \"Add\"",
   "installDescAndroid": "Install YunTool to your device to run directly without opening a browser.",
 
+  "englishNoticeTitle": "Notice",
+  "englishNoticeBody": "YunTool is developed in Traditional Chinese, and the English interface is not fully translated yet. You may come across untranslated text, or features that don't work as expected.\n\nIf something looks wrong, please tell us via Settings → Report an Issue. Thanks for your understanding!",
+  "englishNoticeGotIt": "Got it",
+
   "vacationLabelWinter": "Winter Vacation",
   "vacationLabelSummer": "Summer Vacation",
   "vacationError": "Cannot display holiday information",

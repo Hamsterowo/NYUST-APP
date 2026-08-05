@@ -320,6 +320,24 @@ abstract class AppLocalizations {
   /// **'將 雲科工具箱 安裝到您的裝置，不用開啟瀏覽器即可直接操作。'**
   String get installDescAndroid;
 
+  /// No description provided for @englishNoticeTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'提醒'**
+  String get englishNoticeTitle;
+
+  /// No description provided for @englishNoticeBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'雲科工具箱以繁體中文開發，英文介面尚未完全翻譯，您可能會看到未翻譯的文字，或是行為不如預期的功能。\n\n如果發現任何異常，請透過「設定 → 回報問題」告訴我們，感謝您的體諒！'**
+  String get englishNoticeBody;
+
+  /// No description provided for @englishNoticeGotIt.
+  ///
+  /// In zh, this message translates to:
+  /// **'我知道了'**
+  String get englishNoticeGotIt;
+
   /// No description provided for @vacationLabelWinter.
   ///
   /// In zh, this message translates to:
