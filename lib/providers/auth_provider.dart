@@ -442,54 +442,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// 變更 SSO 密碼。成功回傳 true；失敗時把訊息放進 [error] 回傳 false。
-  ///
-  /// 成功後以新密碼靜默重登 App 端點：更新記憶體中的密碼，若使用者開了
-  /// 「記住密碼」也一併把本機的密碼雜湊換成新密碼的，避免日後 token 續期
-  /// 仍用舊密碼而失敗。網頁 session（cookie）於同一 session 變更後通常仍有效。
-  Future<bool> changePassword(String oldPassword, String newPassword) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-    try {
-      final result = await _apiService.changePassword(oldPassword, newPassword);
-      if (result['success'] == true) {
-        if (!_apiService.isDemoMode) {
-          final username = _user?['username']?.toString() ?? '';
-          if (username.isNotEmpty) {
-            final remember = await _apiService.appApi.isPasswordRemembered();
-            await _apiService.appApi.login(
-              username,
-              newPassword,
-              remember: remember,
-            );
-          }
-        }
-        return true;
-      }
-      // rejected(舊密碼錯誤等) → 顯示學校原文;無網路/其他 → 對應通用訊息。
-      final status = result['status']?.toString();
-      final serverMessage = result['serverMessage']?.toString();
-      if (status == 'rejected' &&
-          serverMessage != null &&
-          serverMessage.isNotEmpty) {
-        _error = serverMessage;
-      } else if (status == 'network_error') {
-        _error = 'loginNoNetwork';
-      } else {
-        _error = 'changePasswordFailed';
-      }
-      return false;
-    } catch (e) {
-      final offline = !await ConnectivityService.instance.checkOnline();
-      _error = offline ? 'loginNoNetwork' : 'changePasswordFailed';
-      return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   Future<void> logout() async {
     _apiService.isDemoMode = false;
     await _apiService.logout();

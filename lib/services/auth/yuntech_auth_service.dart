@@ -64,21 +64,6 @@ class YunTechAuthService implements AuthService {
   }
 
   @override
-  Future<Map<String, dynamic>> changePassword(
-    String oldPassword,
-    String newPassword,
-  ) async {
-    try {
-      return await _ssoScraper.changePassword(
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-      );
-    } catch (e) {
-      throw Exception('Change password failed: $e');
-    }
-  }
-
-  @override
   Future<Map<String, dynamic>> getUserInfo() async {
     return _infoScraper.getUserInfo();
   }

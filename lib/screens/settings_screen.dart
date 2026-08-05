@@ -8,7 +8,6 @@ import '../utils/top_snack_bar.dart';
 import 'login_form.dart';
 import 'calendar_reminder_screen.dart';
 import 'credential_screen.dart';
-import 'change_password_screen.dart';
 import '../utils/pwa_interop.dart';
 import 'privacy_policy_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -503,30 +502,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       MaterialPageRoute(
                                         builder: (_) =>
                                             const CredentialScreen(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const Divider(height: 1, indent: 56),
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.password_outlined,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  title: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).changePasswordTitle,
-                                  ),
-                                  trailing: Icon(
-                                    Icons.chevron_right,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const ChangePasswordScreen(),
                                       ),
                                     );
                                   },
