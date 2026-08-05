@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:yun_tool/utils/clock_drift.dart';
+import 'package:yun_tool/utils/clock_skew.dart';
 
 void main() {
   group('parseHttpDate', () {

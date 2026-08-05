@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../utils/clock_drift.dart';
+import '../utils/clock_skew.dart';
 
 /// 全 App 共用的「可信任時間」服務。
 ///
