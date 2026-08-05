@@ -30,7 +30,7 @@ Scraper (Map 判別碼) → ApiService facade → Repository (收斂成 bool) �
 | 課表 (ScheduleScraper) | `status` + `isExpired` | ❌ | ⚠️ 被丟棄 | `CourseRepository` → bool |
 | 請假記錄 (AbsentScraper) | `status` + `isExpired` | ❌ | ⚠️ 被丟棄 | `absent_screen` **直接呼叫,無快取** |
 | 行事曆/假日 (CalendarScraper) | `success` only | ❌ | N/A(公開頁) | 快取服務;內層個別容錯 |
-| SSO 登入/TOTP/改密碼 (SsoScraper) | `success` + `message`(解析自頁面)+ `mfaRequired`/`restart` | 由 AuthProvider 事後補判 | N/A | `AuthProvider` |
+| SSO 登入/TOTP (SsoScraper) | `success` + `message`(解析自頁面)+ `mfaRequired`/`restart` | 由 AuthProvider 事後補判 | N/A | `AuthProvider` |
 | 在學證明 (AppApiService) | `Uint8List?` 或 throw `AppApiAuthRequiredException` | 回 null(不分原因) | 401→靜默 refresh 重試一次;無憑證→throw | `yun_report_screen` |
 
 ### 現行做得對的(保留,不動)
@@ -40,8 +40,18 @@ Scraper (Map 判別碼) → ApiService facade → Repository (收斂成 bool) �
 2. Cache-first:`xxxFailed` 只在「失敗**且**無快取」時為 true,離線仍顯示舊資料
    (`lib/providers/data_provider.dart:249-296`)
 3. App API 401 自癒(靜默 re-mint token + 重試一次)+ 403 明確不當過期
-4. 登入/改密碼 catch 後補查連線,離線顯示 `loginNoNetwork`
-5. `change_password_screen.dart:83-89` 的三態分流(離線/通用/學校真實訊息)——**本計畫的樣板**
+4. 登入 catch 後補查連線,離線顯示 `loginNoNetwork`
+5. 三態錯誤分流(離線/通用/學校真實訊息)——**本計畫的樣板**:
+
+   ```dart
+   final err = auth.error;
+   final msg = err == 'loginNoNetwork'
+       ? l10n.loginNoNetwork
+       : (err == null || err == '<generic>Failed')
+       ? l10n.<generic>Failed
+       : err; // 學校回傳的實際錯誤訊息
+   showTopSnackBar(context, msg, isError: true);
+   ```
 
 ---
 
@@ -109,7 +119,7 @@ Scraper (Map 判別碼) → ApiService facade → Repository (收斂成 bool) �
 - `fetchCaptcha()` 的 `_error = e.toString()` 改為 `'ssoUnavailable'`(A5 根除)
 
 **`login_form.dart`**:
-- 移除 `auth.error!` 原文 fallback;改為 key→l10n 映射 + 學校訊息(比照 change_password 樣板)
+- 移除 `auth.error!` 原文 fallback;改為 key→l10n 映射 + 學校訊息(比照第一部分「現行做得對的」第 5 點的樣板)
 
 ### Phase 3 — 「服務不可用」具名文案(B2、C2)
 
