@@ -5,7 +5,7 @@ import '../models/schedule_event.dart';
 import '../services/api_service.dart';
 import '../services/scrape_result.dart';
 
-/// 一次 [CourseRepository.refresh] 的結果。
+/// 一次 [ScheduleRepository.refresh] 的結果。
 ///
 /// [snapshot] **只在真的發出網路請求時**才非 null；TTL 命中快取而直接成功時為
 /// null。學期清單與當前學期只隨真實抓取而來，這個可空性即是該規則本身。
@@ -18,7 +18,7 @@ typedef ScheduleRefreshResult = ({
 /// 重建時直接還原成型別化的 [ScheduleEvent]。
 ///
 /// 透過 [ApiService] facade 取得資料，使 demo/除錯模式的切換即時生效。
-class CourseRepository {
+class ScheduleRepository {
   final AppDatabase _db;
   final ApiService _api;
 
@@ -32,7 +32,7 @@ class CourseRepository {
   /// [loadCachedSemesters] 明確排除。
   static const String _semesterListKey = '__semesters__';
 
-  CourseRepository(this._db, this._api);
+  ScheduleRepository(this._db, this._api);
 
   Stream<List<ScheduleEvent>> watchSchedule() {
     return _db

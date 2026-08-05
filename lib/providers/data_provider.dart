@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../database/database.dart';
 import '../repositories/grades_repository.dart';
 import '../repositories/graduation_repository.dart';
-import '../repositories/course_repository.dart';
+import '../repositories/schedule_repository.dart';
 import '../services/scrape_result.dart';
 import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
@@ -24,7 +24,7 @@ class DataProvider with ChangeNotifier {
 
   late final GradesRepository _gradesRepo;
   late final GraduationRepository _graduationRepo;
-  late final CourseRepository _courseRepo;
+  late final ScheduleRepository _scheduleRepo;
 
   StreamSubscription<GradeReport?>? _gradesSub;
   StreamSubscription<GraduationReport?>? _graduationSub;
@@ -93,7 +93,7 @@ class DataProvider with ChangeNotifier {
     final db = AppDatabase.instance;
     _gradesRepo = GradesRepository(db, _api);
     _graduationRepo = GraduationRepository(db, _api);
-    _courseRepo = CourseRepository(db, _api);
+    _scheduleRepo = ScheduleRepository(db, _api);
     _subscribe();
     _init();
   }
@@ -111,7 +111,7 @@ class DataProvider with ChangeNotifier {
       _markCacheLoaded();
       notifyListeners();
     });
-    _scheduleSub = _courseRepo.watchSchedule().listen((courses) {
+    _scheduleSub = _scheduleRepo.watchSchedule().listen((courses) {
       scheduleData = courses;
       _markCacheLoaded();
       notifyListeners();
@@ -138,7 +138,7 @@ class DataProvider with ChangeNotifier {
     try {
       // 學期清單：離線／TTL 命中時不會有網路抓取，只能靠這份還原，
       // 否則切換器不會出現，其他學期的課即使有快取也到不了。
-      final meta = await _courseRepo.loadSemesterList();
+      final meta = await _scheduleRepo.loadSemesterList();
       if (meta != null && meta.semesters.isNotEmpty) {
         if (scheduleSemesters.isEmpty) scheduleSemesters = meta.semesters;
         if (currentSemester == null && meta.currentSemester.isNotEmpty) {
@@ -149,7 +149,7 @@ class DataProvider with ChangeNotifier {
 
       // 這支與 prefetchAll 併行執行：只補上還沒有的學期，
       // 避免比較舊的快取蓋掉剛抓回來的資料。
-      final cached = await _courseRepo.loadCachedSemesters();
+      final cached = await _scheduleRepo.loadCachedSemesters();
       for (final entry in cached.entries) {
         _semesterCache.putIfAbsent(entry.key, () => entry.value);
       }
@@ -212,7 +212,7 @@ class DataProvider with ChangeNotifier {
         if (result.isSuccess) {
           final courses = result.data!.courses;
           _semesterCache[value] = courses;
-          await _courseRepo.saveCachedSemester(value, courses);
+          await _scheduleRepo.saveCachedSemester(value, courses);
         } else if (kDebugMode) {
           print('DataProvider: prefetch of semester $value → ${result.status}');
         }
@@ -327,7 +327,7 @@ class DataProvider with ChangeNotifier {
     scheduleFailReason = null;
     notifyListeners();
     try {
-      final result = await _courseRepo.refresh(force: force);
+      final result = await _scheduleRepo.refresh(force: force);
       if (!result.outcome.isSuccess && scheduleData.isEmpty) {
         scheduleFailed = true;
         scheduleFailReason = result.outcome;
@@ -361,7 +361,7 @@ class DataProvider with ChangeNotifier {
   /// 把學期清單存進快取，供離線／TTL 命中時的冷啟動還原（失敗不影響顯示）。
   void _persistSemesterList() {
     if (scheduleSemesters.isEmpty) return;
-    _courseRepo
+    _scheduleRepo
         .saveSemesterList(scheduleSemesters, currentSemester ?? '')
         .catchError((Object e) {
           if (kDebugMode)
@@ -421,7 +421,7 @@ class DataProvider with ChangeNotifier {
       if (result.isSuccess) {
         final courses = result.data!.courses;
         _semesterCache[value] = courses;
-        await _courseRepo.saveCachedSemester(value, courses);
+        await _scheduleRepo.saveCachedSemester(value, courses);
       } else if (selectedSemester == value) {
         // 記錄失敗讓 UI 顯示提示與重試（使用者已切走則不覆蓋）。
         semesterLoadFailed = true;

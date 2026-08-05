@@ -4,8 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yun_tool/database/database.dart';
 import 'package:yun_tool/models/schedule_event.dart';
-import 'package:yun_tool/repositories/course_repository.dart';
+import 'package:yun_tool/repositories/schedule_repository.dart';
 import 'package:yun_tool/services/api_service.dart';
+import 'package:yun_tool/services/scrape_result.dart';
 
 /// The semester switcher only renders when the app knows the semester list.
 /// That list used to live in memory and be filled in only by a live fetch, so
@@ -37,12 +38,13 @@ void main() {
     } catch (_) {}
   });
 
-  late CourseRepository repo;
+  late ScheduleRepository repo;
 
   setUp(() async {
     final db = AppDatabase.instance;
     await db.delete(db.semesterScheduleCacheTable).go();
-    repo = CourseRepository(db, ApiService());
+    await db.delete(db.cacheMeta).go();
+    repo = ScheduleRepository(db, ApiService());
   });
 
   ScheduleEvent course(String name) => ScheduleEvent(
@@ -136,5 +138,32 @@ void main() {
         expect(loaded!.semesters.single.value, '1142');
       },
     );
+  });
+
+  // The class is named for the schedule, and so is everything inside it — but
+  // the dataset key is written to CacheMeta on the user's device. Aligning it
+  // with a sibling ('course', to match some future rename) would compile, pass
+  // every other test, and silently orphan the TTL record of every existing
+  // install, costing them one needless fetch. Hence a test rather than a
+  // comment.
+  group('cache key is a storage contract', () {
+    test('refresh stamps CacheMeta under "schedule"', () async {
+      final api = ApiService();
+      final wasMock = api.isMockMode;
+      api.isMockMode = true;
+      addTearDown(() => api.isMockMode = wasMock);
+
+      final result = await repo.refresh(force: true);
+      expect(result.outcome, RefreshOutcome.success);
+
+      final db = AppDatabase.instance;
+      final meta = await db.select(db.cacheMeta).get();
+
+      expect(
+        meta.map((m) => m.datasetKey),
+        contains('schedule'),
+        reason: 'existing installs look their schedule TTL up under this key',
+      );
+    });
   });
 }
