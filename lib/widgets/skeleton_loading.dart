@@ -6,12 +6,14 @@ class SkeletonBox extends StatefulWidget {
   final double width;
   final double height;
   final double borderRadius;
+  final EdgeInsetsGeometry? margin;
 
   const SkeletonBox({
     super.key,
     this.width = double.infinity,
     this.height = 16,
     this.borderRadius = 8,
+    this.margin,
   });
 
   @override
@@ -51,6 +53,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
         return Container(
           width: widget.width,
           height: widget.height,
+          margin: widget.margin,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.borderRadius),
             color: colorScheme.onSurface.withValues(

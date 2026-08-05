@@ -6,7 +6,7 @@ import '../models/graduation_report.dart';
 import '../providers/providers.dart';
 import '../services/scrape_result.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/shimmer_box.dart';
+import '../widgets/skeleton_loading.dart';
 import 'web_view_screen.dart';
 
 class GraduationContent extends ConsumerWidget {
@@ -139,17 +139,17 @@ class GraduationContent extends ConsumerWidget {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  const ShimmerBox(width: 100, height: 20),
+                  const SkeletonBox(width: 100, height: 20),
                   const SizedBox(height: 8),
-                  const ShimmerBox(width: 80, height: 48),
+                  const SkeletonBox(width: 80, height: 48),
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: const [
-                      ShimmerBox(width: 80, height: 50),
-                      ShimmerBox(width: 80, height: 50),
+                      SkeletonBox(width: 80, height: 50),
+                      SkeletonBox(width: 80, height: 50),
                     ],
                   ),
                 ],
@@ -157,7 +157,7 @@ class GraduationContent extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const ShimmerBox(width: 120, height: 28),
+          const SkeletonBox(width: 120, height: 28),
           const SizedBox(height: 16),
           Card(
             elevation: 0,
@@ -173,7 +173,7 @@ class GraduationContent extends ConsumerWidget {
                     horizontal: 16.0,
                     vertical: 12.0,
                   ),
-                  child: ShimmerBox(width: double.infinity, height: 20),
+                  child: SkeletonBox(width: double.infinity, height: 20),
                 ),
               ),
             ),

@@ -8,7 +8,7 @@ import '../providers/providers.dart';
 import '../models/schedule_event.dart';
 import '../models/calendar_event.dart';
 import '../services/calendar_cache_service.dart';
-import '../widgets/shimmer_box.dart';
+import '../widgets/skeleton_loading.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
 import 'course_detail_screen.dart';
@@ -340,17 +340,17 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            ShimmerBox(
+            SkeletonBox(
               width: 120,
               height: 18,
               margin: EdgeInsets.only(bottom: 12),
             ),
-            ShimmerBox(
+            SkeletonBox(
               width: double.infinity,
               height: 8,
               margin: EdgeInsets.only(bottom: 12),
             ),
-            ShimmerBox(width: 80, height: 14),
+            SkeletonBox(width: 80, height: 14),
           ],
         ),
       );
@@ -886,12 +886,12 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          ShimmerBox(
+                          SkeletonBox(
                             width: 120,
                             height: 16,
                             margin: EdgeInsets.only(bottom: 8),
                           ),
-                          ShimmerBox(width: 180, height: 18),
+                          SkeletonBox(width: 180, height: 18),
                         ],
                       ),
                       const Spacer(),
@@ -914,7 +914,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const ShimmerBox(width: 60, height: 14),
+                            const SkeletonBox(width: 60, height: 14),
                           ],
                         ),
                       ),
@@ -1236,17 +1236,17 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        ShimmerBox(
+        SkeletonBox(
           width: double.infinity,
           height: 18,
           margin: EdgeInsets.only(bottom: 10),
         ),
-        ShimmerBox(
+        SkeletonBox(
           width: double.infinity,
           height: 18,
           margin: EdgeInsets.only(bottom: 10),
         ),
-        ShimmerBox(width: 200, height: 18),
+        SkeletonBox(width: 200, height: 18),
       ],
     );
   }

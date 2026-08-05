@@ -5,7 +5,7 @@ import '../models/absent_record.dart';
 import '../providers/providers.dart';
 import '../services/scrapers/absent_scraper.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/shimmer_box.dart';
+import '../widgets/skeleton_loading.dart';
 import 'web_view_screen.dart';
 
 /// 請假記錄查詢畫面。
@@ -243,7 +243,7 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
     );
   }
 
-  /// 載入中的骨架：沿用 [ShimmerBox]，比照 [_buildCard] 的版面配置，
+  /// 載入中的骨架：沿用 [SkeletonBox]，比照 [_buildCard] 的版面配置，
   /// 讓載入→內容的替換平順、避免空白閃爍。
   Widget _buildSkeleton() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -262,15 +262,15 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
           children: [
             Row(
               children: [
-                Expanded(child: ShimmerBox(width: 140, height: 18)),
+                Expanded(child: SkeletonBox(width: 140, height: 18)),
                 SizedBox(width: 12),
-                ShimmerBox(width: 56, height: 24, borderRadius: 20),
+                SkeletonBox(width: 56, height: 24, borderRadius: 20),
               ],
             ),
             SizedBox(height: 16),
-            ShimmerBox(width: 180, height: 13),
+            SkeletonBox(width: 180, height: 13),
             SizedBox(height: 10),
-            ShimmerBox(width: 120, height: 13),
+            SkeletonBox(width: 120, height: 13),
           ],
         ),
       ),

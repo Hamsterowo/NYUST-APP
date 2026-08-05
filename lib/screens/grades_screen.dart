@@ -10,7 +10,7 @@ import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/grade_notification_sheet.dart';
 import '../widgets/grade_stat_card.dart';
-import '../widgets/shimmer_box.dart';
+import '../widgets/skeleton_loading.dart';
 import 'course_detail_screen.dart';
 import 'semester_grades_detail_screen.dart';
 import 'web_view_screen.dart';
@@ -781,8 +781,8 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    ShimmerBox(width: 120, height: 24),
-                    ShimmerBox(width: 60, height: 24),
+                    SkeletonBox(width: 120, height: 24),
+                    SkeletonBox(width: 60, height: 24),
                   ],
                 ),
               ),
@@ -800,26 +800,26 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: const [
-                            ShimmerBox(
+                            SkeletonBox(
                               width: 150,
                               height: 20,
                               margin: EdgeInsets.only(bottom: 8),
                             ),
                             Row(
                               children: [
-                                ShimmerBox(
+                                SkeletonBox(
                                   width: 40,
                                   height: 16,
                                   margin: EdgeInsets.only(right: 8),
                                 ),
-                                ShimmerBox(width: 60, height: 16),
+                                SkeletonBox(width: 60, height: 16),
                               ],
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const ShimmerBox(width: 40, height: 32),
+                      const SkeletonBox(width: 40, height: 32),
                     ],
                   ),
                 ),
