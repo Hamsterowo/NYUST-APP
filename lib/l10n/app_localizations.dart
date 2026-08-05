@@ -1412,6 +1412,42 @@ abstract class AppLocalizations {
   /// **'第{week}週'**
   String courseSyllabusWeek(int week);
 
+  /// No description provided for @courseSyllabusMethod.
+  ///
+  /// In zh, this message translates to:
+  /// **'教學方法'**
+  String get courseSyllabusMethod;
+
+  /// No description provided for @syllabusAddTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入行事曆'**
+  String get syllabusAddTitle;
+
+  /// No description provided for @syllabusAddCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count, plural, other{將加入 {count} 則事件}}'**
+  String syllabusAddCount(int count);
+
+  /// No description provided for @syllabusAddNoClassStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'找不到本學期的「上課開始」，無法推算這一週是哪一天'**
+  String get syllabusAddNoClassStart;
+
+  /// No description provided for @syllabusAddNoTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'這門課沒有可解析的上課時間'**
+  String get syllabusAddNoTime;
+
+  /// No description provided for @syllabusAddNoWeek.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法辨識這一列的週次'**
+  String get syllabusAddNoWeek;
+
   /// No description provided for @courseNoData.
   ///
   /// In zh, this message translates to:

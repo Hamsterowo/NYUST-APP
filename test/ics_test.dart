@@ -281,4 +281,118 @@ void main() {
       expect(ics.contains('VALARM'), isFalse);
     });
   });
+
+  group('課綱單週 → IcsEvent', () {
+    IcsEvent session({
+      String content = '行程排程演算法',
+      String method = '講述',
+      String remark = '帶課本',
+      String teacher = '陳俊達',
+      String syllabusUrl = 'https://webapp.yuntech.edu.tw/plan',
+    }) => CalendarExportService.fromSyllabusSession(
+      uid: 'u',
+      courseName: '作業系統',
+      weekLabel: '第5週',
+      content: content,
+      method: method,
+      remark: remark,
+      teacher: teacher,
+      syllabusUrl: syllabusUrl,
+      methodLabel: '教學方法',
+      remarkLabel: '備註',
+      teacherLabel: '授課教師',
+      start: DateTime(2026, 3, 16, 10, 10),
+      end: DateTime(2026, 3, 16, 12, 0),
+      room: 'EL101',
+    );
+
+    test('標題是 課名・第N週・進度摘要', () {
+      expect(session().summary, '作業系統・第5週・行程排程演算法');
+    });
+
+    test('摘要取進度內容的第一行', () {
+      expect(session(content: '第一行\n第二行\n第三行').summary, '作業系統・第5週・第一行');
+    });
+
+    test('摘要不截字數 —— 截掉的正是行事曆上唯一看得到的資訊', () {
+      final long = '本週介紹作業系統的行程排程演算法，包含先來先服務、最短工作優先、輪轉法與多層佇列。';
+      expect(session(content: long).summary, '作業系統・第5週・$long');
+    });
+
+    test('進度內容是空的時候標題不留下多餘的分隔符', () {
+      expect(session(content: '').summary, '作業系統・第5週');
+    });
+
+    test('描述含完整進度內容、教學方法、備註、教師與課綱頁連結', () {
+      expect(
+        session().description,
+        '行程排程演算法\n'
+        '教學方法：講述\n'
+        '備註：帶課本\n'
+        '授課教師：陳俊達\n'
+        'https://webapp.yuntech.edu.tw/plan',
+      );
+    });
+
+    test('缺項不留空行', () {
+      expect(
+        session(method: '', remark: '', syllabusUrl: '').description,
+        '行程排程演算法\n授課教師：陳俊達',
+      );
+    });
+
+    test('地點是教室代碼', () {
+      expect(session().location, 'EL101');
+    });
+
+    test('是有起訖時刻的事件，不是全天', () {
+      expect(session().isAllDay, isFalse);
+      expect(session().start, DateTime(2026, 3, 16, 10, 10));
+      expect(session().end, DateTime(2026, 3, 16, 12, 0));
+    });
+
+    test('不帶提醒', () {
+      expect(_build([session()]).contains('VALARM'), isFalse);
+    });
+
+    group('UID', () {
+      String uid({
+        String year = '114',
+        String semester = '2',
+        String courseNo = '30204',
+        int week = 5,
+        int weekday = 4,
+        String startPeriod = 'C',
+      }) => CalendarExportService.uidForSyllabusSession(
+        year: year,
+        semester: semester,
+        courseNo: courseNo,
+        week: week,
+        weekday: weekday,
+        startPeriod: startPeriod,
+      );
+
+      test('穩定：同樣的輸入永遠得到同一個值', () {
+        expect(uid(), uid());
+      });
+
+      test('同一週的不同時段各自一個 UID —— 否則多時段只會進去一筆', () {
+        expect(
+          uid(weekday: 4, startPeriod: 'C'),
+          isNot(uid(weekday: 4, startPeriod: 'G')),
+        );
+        expect(
+          uid(weekday: 4, startPeriod: 'C'),
+          isNot(uid(weekday: 2, startPeriod: 'A')),
+        );
+      });
+
+      test('週次、課程、學期任一不同就是不同的 UID', () {
+        expect(uid(), isNot(uid(week: 6)));
+        expect(uid(), isNot(uid(courseNo: '30201')));
+        expect(uid(), isNot(uid(semester: '1')));
+        expect(uid(), isNot(uid(year: '113')));
+      });
+    });
+  });
 }

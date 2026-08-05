@@ -363,6 +363,19 @@
       }
     }
   },
+  "courseSyllabusMethod": "Teaching method",
+  "syllabusAddTitle": "Add to calendar",
+  "syllabusAddCount": "{count, plural, one{Will add {count} event} other{Will add {count} events}}",
+  "@syllabusAddCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syllabusAddNoClassStart": "The academic calendar has no “classes begin” for this semester, so this week's date cannot be worked out",
+  "syllabusAddNoTime": "This course has no class times that can be read",
+  "syllabusAddNoWeek": "This row's week number could not be read",
   "courseNoData": "No Data",
   "courseNone": "None",
   "courseOpenInBrowser": "Open in Browser",

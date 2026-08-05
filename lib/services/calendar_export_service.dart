@@ -56,6 +56,74 @@ class CalendarExportService {
     );
   }
 
+  /// 課綱某一週的某一個上課時段 → 一則有起訖時刻的事件。
+  ///
+  /// 一週有多個時段時，那一週的進度內容會**複製到每一個時段**上，而不是只掛在
+  /// 第一筆。課綱的「第 N 週」描述的是那一週要上的內容，不是某一堂；而且兩個
+  /// 時段可能在不同教室，合併成一筆地點就會是錯的。
+  ///
+  /// 所有文字都由呼叫端傳入已經在地化的成品 —— 這一層不認識 `AppLocalizations`。
+  static IcsEvent fromSyllabusSession({
+    required String uid,
+    required String courseName,
+    required String weekLabel,
+    required String content,
+    required DateTime start,
+    required DateTime end,
+    required String room,
+    String method = '',
+    String remark = '',
+    String teacher = '',
+    String syllabusUrl = '',
+    String methodLabel = '',
+    String remarkLabel = '',
+    String teacherLabel = '',
+  }) {
+    // 摘要取進度內容的第一行，**不截字數** —— 截掉的那一半正好是使用者在行事曆
+    // 上唯一看得到的資訊。行事曆自己會依欄寬省略，那是它該做的事。
+    final headline = content.split('\n').first.trim();
+    final summary = [
+      courseName,
+      weekLabel,
+      if (headline.isNotEmpty) headline,
+    ].join('・');
+
+    final description = [
+      if (content.trim().isNotEmpty) content.trim(),
+      if (method.trim().isNotEmpty) '$methodLabel：${method.trim()}',
+      if (remark.trim().isNotEmpty) '$remarkLabel：${remark.trim()}',
+      if (teacher.trim().isNotEmpty) '$teacherLabel：${teacher.trim()}',
+      // 已知這個連結需要登入才打得開，仍然附上：使用者自己有帳號，
+      // 而「知道去哪裡找原文」比「連結乾淨」有用。
+      if (syllabusUrl.trim().isNotEmpty) syllabusUrl.trim(),
+    ].join('\n');
+
+    return IcsEvent.timed(
+      uid: uid,
+      summary: summary,
+      description: description,
+      location: room,
+      start: start,
+      end: end,
+    );
+  }
+
+  /// 課綱單週單時段的穩定 UID。
+  ///
+  /// 同一週按兩次不該長出兩筆，所以只由「哪一門課的哪一學期、第幾週、哪一個
+  /// 時段」決定。時段以星期與起始節次識別 —— 同一天的兩個時段起始節次必然不同，
+  /// 否則它們早就被併成同一塊了。
+  static String uidForSyllabusSession({
+    required String year,
+    required String semester,
+    required String courseNo,
+    required int week,
+    required int weekday,
+    required String startPeriod,
+  }) =>
+      'yuntech-syllabus-$year$semester-$courseNo-w$week-d$weekday-$startPeriod'
+      '@nyust-app';
+
   /// 校曆事件的穩定 UID。
   ///
   /// 同一筆事件按兩次不該在行事曆上長出兩則，所以 UID 只能由事件本身決定，不能

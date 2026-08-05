@@ -711,6 +711,31 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get courseSyllabusMethod => '教學方法';
+
+  @override
+  String get syllabusAddTitle => '加入行事曆';
+
+  @override
+  String syllabusAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '將加入 $count 則事件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syllabusAddNoClassStart => '找不到本學期的「上課開始」，無法推算這一週是哪一天';
+
+  @override
+  String get syllabusAddNoTime => '這門課沒有可解析的上課時間';
+
+  @override
+  String get syllabusAddNoWeek => '無法辨識這一列的週次';
+
+  @override
   String get courseNoData => '無資料';
 
   @override

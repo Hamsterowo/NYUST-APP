@@ -363,6 +363,19 @@
       }
     }
   },
+  "courseSyllabusMethod": "教學方法",
+  "syllabusAddTitle": "加入行事曆",
+  "syllabusAddCount": "{count, plural, other{將加入 {count} 則事件}}",
+  "@syllabusAddCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syllabusAddNoClassStart": "找不到本學期的「上課開始」，無法推算這一週是哪一天",
+  "syllabusAddNoTime": "這門課沒有可解析的上課時間",
+  "syllabusAddNoWeek": "無法辨識這一列的週次",
   "courseNoData": "無資料",
   "courseNone": "無",
   "courseOpenInBrowser": "在瀏覽器開啟",

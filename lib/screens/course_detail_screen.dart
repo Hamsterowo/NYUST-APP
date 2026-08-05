@@ -3,14 +3,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../l10n/app_localizations.dart';
+import '../models/calendar_event.dart';
 import '../models/course_detail_model.dart';
 import '../models/map_building_model.dart';
 import '../services/api_service.dart';
+import '../services/calendar_cache_service.dart';
+import '../services/calendar_export_service.dart';
 import '../services/course_detail_cache.dart';
 import '../services/scrape_result.dart';
+import '../utils/course_time_slot.dart';
 import '../utils/network_error.dart';
+import '../utils/semester_anchor.dart';
 import '../utils/syllabus_week.dart';
 import '../utils/top_snack_bar.dart';
+import '../widgets/syllabus_week_calendar_sheet.dart';
 import 'map_screen.dart';
 import 'web_view_screen.dart';
 
@@ -38,10 +44,54 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   String? _errorMessage;
   CourseDetail? _courseDetail;
 
+  /// 本學期第 1 週的週一。`null` = 還沒算出來或行事曆上找不到「上課開始」，
+  /// 此時每週進度的加入行事曆按鈕停用（而不是隱藏，也不是靜靜算錯）。
+  DateTime? _firstWeekMonday;
+
   @override
   void initState() {
     super.initState();
     _fetchDetail();
+    _resolveSemesterAnchor();
+  }
+
+  /// 從學校行事曆推出本學期第 1 週的週一。
+  ///
+  /// **一律取中文行事曆**（`lang: 'zh'`）：判斷依據是「上課開始」這個中文名稱，
+  /// 與 UI 語言無關。英文版是翻譯產物，拿它當判斷依據等於把可靠度往下押一層 ——
+  /// 而且英文介面下就會整個推導失效。
+  ///
+  /// 失敗（離線、學校網站掛了、那一年沒有這筆）一律讓 [_firstWeekMonday] 維持
+  /// null，按鈕停用並說明原因。這裡不顯示錯誤，課程詳細頁本身仍然可看。
+  Future<void> _resolveSemesterAnchor() async {
+    final gregorianYear = gregorianYearOf(
+      year: widget.year,
+      semester: widget.semester,
+    );
+    if (gregorianYear == null) return;
+
+    try {
+      final data = await CalendarCacheService.getOrFetch(
+        gregorianYear,
+        'zh',
+        (year, {lang}) => _api.getCalendar(year, lang: lang),
+      );
+      if (data == null || !mounted) return;
+
+      final events = ((data['events'] as List?) ?? const [])
+          .map((e) => CalendarEvent.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+      final classStart = findClassStart(
+        events,
+        year: widget.year,
+        semester: widget.semester,
+      );
+      if (classStart == null || !mounted) return;
+
+      setState(() => _firstWeekMonday = firstWeekMonday(classStart));
+    } catch (e) {
+      if (kDebugMode) print('CourseDetailScreen: anchor lookup failed: $e');
+    }
   }
 
   Future<void> _fetchDetail() async {
@@ -101,6 +151,106 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     if (week == null) return raw;
     return AppLocalizations.of(context).courseSyllabusWeek(week);
   }
+
+  /// 這一列為什麼不能加入行事曆；`null` = 可以加。
+  ///
+  /// 三個理由都回傳可讀的說明而不是靜靜停用：使用者看到一顆灰掉的按鈕卻沒有
+  /// 任何解釋，只會以為 App 壞了。
+  String? _syllabusAddBlockedReason(CourseSyllabus item, CourseDetail detail) {
+    final l10n = AppLocalizations.of(context);
+    if (_firstWeekMonday == null) return l10n.syllabusAddNoClassStart;
+    if (parseSyllabusWeek(item.week) == null) return l10n.syllabusAddNoWeek;
+    if (parseCourseTimeRooms(detail.timeRoom).isEmpty) {
+      return l10n.syllabusAddNoTime;
+    }
+    return null;
+  }
+
+  /// 算出這一列（這一週）會產生哪些事件。
+  ///
+  /// 國定假日**照放**，不跳過也不順延 —— 完全不讀假日資料。這與學校課綱本身
+  /// 一致：課綱也沒有扣掉放假那一週。
+  List<SyllabusSession> _sessionsFor(CourseSyllabus item, CourseDetail detail) {
+    final monday = _firstWeekMonday;
+    final week = parseSyllabusWeek(item.week);
+    if (monday == null || week == null) return const [];
+
+    return [
+      for (final slot in parseCourseTimeRooms(detail.timeRoom))
+        SyllabusSession(
+          date: dateOfWeek(monday, week: week, weekday: slot.weekday),
+          slot: slot,
+        ),
+    ];
+  }
+
+  /// 確認後把這一週的每一個時段都交給系統日曆。
+  Future<void> _addSyllabusWeek(
+    CourseSyllabus item,
+    CourseDetail detail,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final week = parseSyllabusWeek(item.week)!;
+    final weekLabel = l10n.courseSyllabusWeek(week);
+    final sessions = _sessionsFor(item, detail);
+    if (sessions.isEmpty) return;
+
+    final confirmed = await showSyllabusWeekCalendarSheet(
+      context,
+      courseName: detail.courseName.isEmpty
+          ? widget.courseName
+          : detail.courseName,
+      weekLabel: weekLabel,
+      sessions: sessions,
+    );
+    if (confirmed != true || !mounted) return;
+
+    showTopSnackBar(context, l10n.addToCalendarOpening);
+
+    try {
+      await CalendarExportService.export([
+        for (final session in sessions)
+          CalendarExportService.fromSyllabusSession(
+            uid: CalendarExportService.uidForSyllabusSession(
+              year: widget.year,
+              semester: widget.semester,
+              courseNo: widget.courseNo,
+              week: week,
+              weekday: session.slot.weekday,
+              startPeriod: session.slot.periods.first,
+            ),
+            courseName: detail.courseName.isEmpty
+                ? widget.courseName
+                : detail.courseName,
+            weekLabel: weekLabel,
+            content: item.content,
+            method: item.method,
+            remark: item.remark,
+            teacher: detail.teacher,
+            syllabusUrl: _syllabusUrl,
+            methodLabel: l10n.courseSyllabusMethod,
+            remarkLabel: l10n.courseRemark,
+            teacherLabel: l10n.courseInstructor,
+            start: session.start,
+            end: session.end,
+            room: session.slot.room,
+          ),
+      ], filename: 'yuntech-syllabus-week.ics');
+    } catch (e) {
+      if (kDebugMode) print('CourseDetailScreen: add to calendar failed: $e');
+      if (!mounted) return;
+      showTopSnackBar(
+        context,
+        l10n.addToCalendarFailed,
+        type: SnackBarType.error,
+      );
+    }
+  }
+
+  /// 這門課的課綱頁網址。已知它需要登入才打得開，仍然附進事件描述裡。
+  String get _syllabusUrl =>
+      'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx'
+      '?&${widget.year}&${widget.semester}&${widget.courseNo}';
 
   String _formatContent(String text) {
     if (text.isEmpty) return AppLocalizations.of(context).courseNoData;
@@ -263,10 +413,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AppWebViewScreen(
-                    url:
-                        'https://webapp.yuntech.edu.tw/WebNewCAS/Course/Plan/Query.aspx?&${widget.year}&${widget.semester}&${widget.courseNo}',
-                  ),
+                  builder: (context) => AppWebViewScreen(url: _syllabusUrl),
                 ),
               );
             },
@@ -324,13 +471,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         _buildSectionTitle(AppLocalizations.of(context).courseGrading),
         _buildContentCard(_formatContent(detail.grade)),
         const SizedBox(height: 24),
-        _buildSyllabusPanel(detail.syllabus),
+        _buildSyllabusPanel(detail),
         const SizedBox(height: 32),
       ],
     );
   }
 
-  Widget _buildSyllabusPanel(List<CourseSyllabus> syllabus) {
+  Widget _buildSyllabusPanel(CourseDetail detail) {
+    final syllabus = detail.syllabus;
     if (syllabus.isEmpty) return const SizedBox.shrink();
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -363,6 +511,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             ),
             child: Column(
               children: syllabus.map((item) {
+                final blockedReason = _syllabusAddBlockedReason(item, detail);
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
@@ -421,6 +570,27 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                           ],
                         ),
                       ),
+                      if (CalendarExportService.isSupported)
+                        IconButton(
+                          icon: const Icon(Icons.edit_calendar, size: 20),
+                          visualDensity: VisualDensity.compact,
+                          // 算不出來時畫成停用的樣子，但**仍然可以按** —— 按下去
+                          // 用 snackbar 說明原因。純粹 `onPressed: null` 的話理由
+                          // 只剩 tooltip，而在手機上那要長按才看得到，等於沒說。
+                          color: blockedReason == null
+                              ? colorScheme.primary
+                              : colorScheme.outline,
+                          tooltip:
+                              blockedReason ??
+                              AppLocalizations.of(context).addToCalendar,
+                          onPressed: blockedReason == null
+                              ? () => _addSyllabusWeek(item, detail)
+                              : () => showTopSnackBar(
+                                  context,
+                                  blockedReason,
+                                  type: SnackBarType.warning,
+                                ),
+                        ),
                     ],
                   ),
                 );

@@ -736,6 +736,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get courseSyllabusMethod => 'Teaching method';
+
+  @override
+  String get syllabusAddTitle => 'Add to calendar';
+
+  @override
+  String syllabusAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Will add $count events',
+      one: 'Will add $count event',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syllabusAddNoClassStart =>
+      'The academic calendar has no “classes begin” for this semester, so this week\'s date cannot be worked out';
+
+  @override
+  String get syllabusAddNoTime =>
+      'This course has no class times that can be read';
+
+  @override
+  String get syllabusAddNoWeek => 'This row\'s week number could not be read';
+
+  @override
   String get courseNoData => 'No Data';
 
   @override
