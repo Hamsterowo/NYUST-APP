@@ -399,15 +399,27 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       );
     }
 
+    // 紅色時間線的意思是「現在上到這裡」，只有在看**當前學期**時才成立。切到
+    // 其他學期時那條線指的是另一個學期的某一天，是錯的資訊。
+    //
+    // 還不知道當前學期是哪一個時照常顯示：那時使用者看的必然是預設的當前學期。
+    final showNowLine =
+        data.currentSemester == null ||
+        (data.selectedSemester ?? data.currentSemester) == data.currentSemester;
+
     if ((data.isLoadingSchedule || switching) && !hasData) {
-      return _buildScheduleGrid(const <ScheduleEvent>[], isLoading: true);
+      return _buildScheduleGrid(
+        const <ScheduleEvent>[],
+        isLoading: true,
+        showNowLine: showNowLine,
+      );
     }
 
     if (!hasData) {
       return Center(child: Text(AppLocalizations.of(context).noScheduleData));
     }
 
-    final grid = _buildScheduleGrid(events);
+    final grid = _buildScheduleGrid(events, showNowLine: showNowLine);
 
     // 沒有排定上課時間的課（times 為空）不會出現在格線裡，改用下方列表呈現。
     // 課表維持整頁高度、不被下方列表壓縮，整頁改為可捲動以顯示列表。
@@ -450,6 +462,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   Widget _buildScheduleGrid(
     List<ScheduleEvent> courses, {
     bool isLoading = false,
+    bool showNowLine = true,
   }) {
     final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
     const timeColumnWidth = 20.0;
@@ -545,7 +558,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
           Widget columnWidget = Column(children: cells);
 
           final todayWeekday = ServerTimeService.instance.now().weekday;
-          if (dayIndex + 1 == todayWeekday) {
+          if (showNowLine && dayIndex + 1 == todayWeekday) {
             final lineY = _calculateTimeLineY(activePeriods, cellHeight);
             if (lineY != null) {
               columnWidget = Stack(
