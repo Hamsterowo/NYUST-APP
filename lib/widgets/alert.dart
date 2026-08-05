@@ -28,7 +28,7 @@ Future<void> showAlert(
         child: PopScope(
           canPop: dismissible,
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
             child: Dialog(
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -106,15 +106,6 @@ Future<void> showAlert(
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
                       child: Material(
                         color: Colors.transparent,
