@@ -995,14 +995,24 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                               ),
                                             ),
                                             if (CalendarExportService
-                                                .isSupported)
+                                                .isSupported) ...[
+                                              const SizedBox(width: 8),
                                               IconButton(
                                                 icon: const Icon(
                                                   Icons.edit_calendar,
                                                   size: 20,
                                                 ),
-                                                visualDensity:
-                                                    VisualDensity.compact,
+                                                // 收到與圖示同高。`IconButton` 的
+                                                // 最小點擊尺寸（compact 之後仍有
+                                                // 40）跟圖示畫多大無關，會把只有
+                                                // 一行的事件卡整個撐高 —— 多行卡
+                                                // 因為文字本來就超過 40 而看不出來。
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(
+                                                      minWidth: 24,
+                                                      minHeight: 24,
+                                                    ),
                                                 color: isImportant
                                                     ? Colors.amber.shade900
                                                     : colorScheme
@@ -1013,6 +1023,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                                 onPressed: () =>
                                                     _addEventToCalendar(event),
                                               ),
+                                            ],
                                           ],
                                         ),
                                       ),
