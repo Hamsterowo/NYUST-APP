@@ -998,8 +998,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                                 .isSupported)
                                               IconButton(
                                                 icon: const Icon(
-                                                  Icons
-                                                      .event_available_outlined,
+                                                  Icons.edit_calendar,
                                                   size: 20,
                                                 ),
                                                 visualDensity:
