@@ -6,7 +6,7 @@ import '../models/grade_report.dart';
 import '../models/graduation_report.dart';
 import '../models/schedule_event.dart';
 import 'api_client.dart';
-import 'demo_mode.dart';
+import 'service_factory.dart';
 import 'scrape_result.dart';
 import 'app_api/app_api_service.dart';
 import 'scrapers/sso_scraper.dart';
