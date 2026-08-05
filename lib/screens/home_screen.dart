@@ -12,7 +12,7 @@ import 'settings_screen.dart';
 import '../router/app_router.dart';
 import '../utils/english_notice_policy.dart';
 import '../utils/pwa_interop.dart';
-import '../widgets/notice_dialog.dart';
+import '../widgets/alert.dart';
 import '../services/calendar_reminder_service.dart';
 import '../services/notification_navigator.dart';
 import '../services/notification_payload.dart';
@@ -464,7 +464,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   ///
   /// 外觀沿用隱私權更新提示的同一支彈窗；差別只在這則可以點背景關掉。
   void _showEnglishNoticeDialog() {
-    showNoticeDialog(
+    showAlert(
       context,
       title: AppLocalizations.of(context).englishNoticeTitle,
       message: AppLocalizations.of(context).englishNoticeBody,

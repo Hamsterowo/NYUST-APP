@@ -8,12 +8,12 @@ import 'package:flutter/material.dart';
 ///
 /// [dismissible] 為 false 時點背景與返回鍵都關不掉，只能按按鈕（隱私權更新是這種
 /// 非讀不可的提示）。
-Future<void> showNoticeDialog(
+Future<void> showAlert(
   BuildContext context, {
   required String title,
   required String message,
   required String buttonLabel,
-  String barrierLabel = 'Notice',
+  String barrierLabel = 'Alert',
   IconData icon = Icons.notifications_rounded,
   bool dismissible = false,
 }) async {

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/privacy_policy.dart';
 import '../l10n/app_localizations.dart';
-import '../widgets/notice_dialog.dart';
+import '../widgets/alert.dart';
 
 /// 本地隱私權政策頁面：渲染打包進 assets 的 `PRIVACY.*.md`（無需連網）。
 ///
@@ -17,7 +17,7 @@ class PrivacyPolicyScreen extends StatefulWidget {
 
   /// 政策更新時、於重新同意前顯示的提示彈窗。
   static Future<void> showUpdateAlert(BuildContext context) async {
-    await showNoticeDialog(
+    await showAlert(
       context,
       title: AppLocalizations.of(context).termsUpdateTitle,
       message: AppLocalizations.of(context).termsUpdateAlert,
