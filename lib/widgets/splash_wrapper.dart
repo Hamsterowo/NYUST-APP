@@ -36,6 +36,8 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() => _splashDone = true);
+        // 等著開場結束才肯出現的提示（例如英文語系提示）靠這個訊號放行。
+        ref.read(splashDoneProvider.notifier).state = true;
       }
     });
   }
@@ -112,6 +114,9 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
           Navigator.of(context).popUntil((route) => route.isFirst);
           try {
             ref.read(navIndexProvider.notifier).state = 0;
+            // 登出會把開場動畫倒帶重播，訊號也得跟著收回，否則下次進主畫面時
+            // 它還停在上一輪的 true。
+            ref.read(splashDoneProvider.notifier).state = false;
           } catch (_) {}
         }
       });

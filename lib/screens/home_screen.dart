@@ -391,9 +391,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final previous = _appliedLocale;
     _appliedLocale = newLocale;
 
-    // 英文提示沿用同一組前後比對，不另建第二套語系追蹤：previous 為 null 就是
-    // 冷啟動的第一次判定，那條路徑由 [EnglishNoticePolicy] 自己分辨。
-    _maybeShowEnglishNotice(previousLocale: previous, currentLocale: newLocale);
+    // 英文提示沿用同一組前後比對，不另建第二套語系追蹤。previous 為 null 就是
+    // 冷啟動的第一次判定，那條得先排隊等開場動畫（見 [_maybeShowColdStartNotice]）；
+    // 切換這條不必等，使用者人在設定頁時開場早就結束了。
+    if (previous == null) {
+      _pendingColdStartLocale = newLocale;
+    } else {
+      _maybeShowEnglishNotice(
+        previousLocale: previous,
+        currentLocale: newLocale,
+      );
+    }
 
     if (previous == null || previous == newLocale) return;
 
@@ -412,6 +420,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   /// 已看過英文語系提示的旗標；切換與冷啟動兩條路徑共用同一份記錄。
   static const String _englishNoticeShownKey = 'english_notice_shown';
 
+  /// 冷啟動當下的語系，等著開場動畫結束才判定；`null` = 沒有待處理的。
+  ///
+  /// 語言設定通常在開場動畫還在跑的時候就讀完了，而那一刻的判定不能丟掉：主畫面
+  /// 之後不會再有第二次 `previous == null` 的機會，丟掉就等於冷啟動永遠不跳。
+  String? _pendingColdStartLocale;
+
+  /// 開場動畫結束後補判冷啟動那條路徑。
+  ///
+  /// 每次 build 都問一次，靠 `watch` 在訊號翻成 true 的那一刻回來。
+  void _maybeShowColdStartNotice() {
+    final locale = _pendingColdStartLocale;
+    if (locale == null) return;
+    if (!ref.watch(splashDoneProvider)) return;
+
+    _pendingColdStartLocale = null;
+    _maybeShowEnglishNotice(previousLocale: null, currentLocale: locale);
+  }
+
   /// 判定並跳出英文語系提示。所有判斷都在 [EnglishNoticePolicy] 裡，這裡只負責
   /// 讀寫旗標與顯示彈窗。
   Future<void> _maybeShowEnglishNotice({
@@ -424,8 +450,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       currentLocale: currentLocale,
       alreadyShown: prefs.getBool(_englishNoticeShownKey) ?? false,
     );
-    // 冷啟動那條要等開場動畫淡出，尚未接上。
-    if (decision.trigger != EnglishNoticeTrigger.switched) return;
+    if (decision.trigger == EnglishNoticeTrigger.none) return;
 
     if (decision.shouldPersist) {
       await prefs.setBool(_englishNoticeShownKey, true);
@@ -452,6 +477,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     _refetchOnLanguageChange();
+    // 排在 PWA 安裝提示與 Play 更新提示之後：那兩個在 initState 的第一個
+    // post-frame 就送出，這個要等開場動畫結束、再等旗標從儲存空間讀回來。
+    _maybeShowColdStartNotice();
 
     int currentIndex = ref.watch(navIndexProvider);
 

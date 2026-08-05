@@ -13,6 +13,10 @@ class DesktopScreen extends ConsumerWidget {
   void _continueToApp(BuildContext context, WidgetRef ref) {
     final auth = ref.read(authProvider);
 
+    // 桌面這條路沒有開場動畫，主畫面卻在等它的結束訊號。這裡不送，等著訊號的
+    // 一次性提示在桌面版就永遠不會出現。
+    ref.read(splashDoneProvider.notifier).state = true;
+
     if (!auth.isInitialized) {
       void listener() {
         if (auth.isInitialized) {

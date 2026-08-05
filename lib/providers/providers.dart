@@ -44,6 +44,16 @@ final navIndexProvider = StateProvider<int>((ref) => 0);
 /// 會安靜地跳到別的分頁。
 const int navIndexCalendar = 3;
 
+/// 開場動畫是否已經結束。
+///
+/// 「進到主畫面之後才會看到的一次性提示」用它當閘門，否則彈窗會疊在還沒淡出的
+/// 半透明開場畫面上。做成獨立的應用程式狀態而不是主畫面內部的固定延遲：開場的
+/// 長度、隱私權同意閘門的流程之後怎麼改，時機都不會失準。
+///
+/// **桌面 Web 不經過開場動畫**（從桌面提示頁直接 `pushReplacement` 進主畫面），
+/// 所以那個入口也必須自己送出這個訊號，否則桌面版永遠等不到。
+final splashDoneProvider = StateProvider<bool>((ref) => false);
+
 /// 要行事曆頁跳到並選中的日期；`null` = 沒有待處理的請求。
 ///
 /// 由點擊通知觸發（見 [NotificationNavigator]）。行事曆頁把日期套用完之後會
