@@ -88,7 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDisclaimer =>
-      '※ This page is for reference only and cannot be used as proof of identity.';
+      '※ For reference only — not proof of identity';
 
   @override
   String get cancel => 'Cancel';

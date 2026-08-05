@@ -35,7 +35,7 @@
   "ok": "OK",
   "confirm": "Confirm",
   "install": "Install",
-  "profileDisclaimer": "※ This page is for reference only and cannot be used as proof of identity.",
+  "profileDisclaimer": "※ For reference only — not proof of identity",
   "cancel": "Cancel",
   "logoutConfirmTitle": "Log out?",
   "logoutConfirmMessage": "You'll need to sign in again to view your data.",
