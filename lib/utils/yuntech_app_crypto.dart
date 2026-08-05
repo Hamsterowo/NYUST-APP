@@ -10,10 +10,11 @@ import 'package:pointycastle/export.dart';
 class YuntechAppCrypto {
   YuntechAppCrypto._();
 
-  // AES key/salt for the nonce, reconstructed from HelperBase's split constants
-  // (aesKey = str1 + str3, aesSalt = str2 + str4).
-  static const String _aesKey = '9537730CFB3C11175889F67CF2CD3F09';
-  static const String _aesSalt = 'B2B45FE7D3566B34';
+  // PBKDF2 inputs for the nonce cipher, reconstructed from HelperBase's split
+  // constants (passphrase = str1 + str3, salt = str2 + str4). These are the KDF
+  // inputs, not the AES key itself — see buildNonce for the actual key/IV.
+  static const String _noncePassphrase = '9537730CFB3C11175889F67CF2CD3F09';
+  static const String _nonceKdfSalt = 'B2B45FE7D3566B34';
   static const String _appId = 'yuntechapp';
 
   /// SHA-256 as lowercase hex — matches `CryptUtils.GetSha256Hash` (`x2`).
@@ -44,7 +45,7 @@ class YuntechAppCrypto {
     final ts = (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch / 1000.0;
     final plain = 'appid=$_appId&userid=$userId&ts=$ts&version=$appVersion';
 
-    final derived = _pbkdf2(_aesKey, _aesSalt, 1000, 32);
+    final derived = _pbkdf2(_noncePassphrase, _nonceKdfSalt, 1000, 32);
     final key = Uint8List.sublistView(derived, 0, 16);
     final iv = Uint8List.sublistView(derived, 16, 32);
 

@@ -6,8 +6,8 @@ import 'package:yun_tool/utils/yuntech_app_crypto.dart';
 
 // Reversed constants, duplicated here so the test independently re-derives the
 // key and decrypts the nonce produced by the production code.
-const _aesKey = '9537730CFB3C11175889F67CF2CD3F09';
-const _aesSalt = 'B2B45FE7D3566B34';
+const _noncePassphrase = '9537730CFB3C11175889F67CF2CD3F09';
+const _nonceKdfSalt = 'B2B45FE7D3566B34';
 
 Uint8List _pbkdf2(String password, String salt, int iterations, int length) {
   final d = PBKDF2KeyDerivator(HMac(SHA1Digest(), 64))
@@ -22,7 +22,7 @@ Uint8List _pbkdf2(String password, String salt, int iterations, int length) {
 }
 
 String _decryptNonce(String base64Nonce) {
-  final derived = _pbkdf2(_aesKey, _aesSalt, 1000, 32);
+  final derived = _pbkdf2(_noncePassphrase, _nonceKdfSalt, 1000, 32);
   final cipher =
       PaddedBlockCipherImpl(PKCS7Padding(), CBCBlockCipher(AESEngine()))..init(
         false,
