@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../models/schedule_event.dart';
 import '../services/api_service.dart';
-import 'refresh_outcome.dart';
+import '../services/scrape_result.dart';
 
 /// 一次 [CourseRepository.refresh] 的結果。
 ///

@@ -4,7 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../models/grade_report.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
-import '../repositories/refresh_outcome.dart';
+import '../services/scrape_result.dart';
 import '../utils/status_colors.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';

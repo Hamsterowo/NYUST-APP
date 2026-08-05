@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../models/graduation_report.dart';
 import '../services/api_service.dart';
-import 'refresh_outcome.dart';
+import '../services/scrape_result.dart';
 
 /// 畢業審核資料的 Repository。頂層欄位存 [GraduationInfo]（單列），
 /// 各分組的學分明細以 EAV（[GraduationCredits]）儲存，重建時還原成

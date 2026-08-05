@@ -10,7 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../models/schedule_event.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
-import '../repositories/refresh_outcome.dart';
+import '../services/scrape_result.dart';
 import '../services/server_time_service.dart';
 import '../theme/course_palette.dart';
 import '../utils/share_image/share_image.dart';

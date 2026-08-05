@@ -4,7 +4,7 @@ import '../database/database.dart';
 import '../repositories/grades_repository.dart';
 import '../repositories/graduation_repository.dart';
 import '../repositories/course_repository.dart';
-import '../repositories/refresh_outcome.dart';
+import '../services/scrape_result.dart';
 import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/academic_cache.dart';

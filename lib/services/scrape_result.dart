@@ -2,8 +2,6 @@
 //
 // 這是三個型別化票（成績 / 畢業門檻 / 課表）共用的地基，放在中立的 services 層，
 // 讓 scraper 回傳型別化結果時不必反向依賴 repository 層。
-// RefreshOutcome 原本住在 `repositories/refresh_outcome.dart`，現移至此處，
-// 該檔改為 re-export 並保留 `classifyRefreshFailure`（仍是 repository 職責）。
 
 /// Repository `refresh()` 與 scraper 抓取的結果分類。
 ///

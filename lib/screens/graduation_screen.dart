@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../models/graduation_report.dart';
 import '../providers/providers.dart';
-import '../repositories/refresh_outcome.dart';
+import '../services/scrape_result.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_box.dart';
 import 'web_view_screen.dart';

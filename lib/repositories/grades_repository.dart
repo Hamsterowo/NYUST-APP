@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../database/database.dart';
 import '../models/grade_report.dart';
 import '../services/api_service.dart';
-import 'refresh_outcome.dart';
+import '../services/scrape_result.dart';
 
 /// 成績資料的 Repository：網路 → 正規化寫入 Drift → 由 Drift stream 推給 UI。
 ///
