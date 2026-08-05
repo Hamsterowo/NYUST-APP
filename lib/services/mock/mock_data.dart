@@ -1103,10 +1103,23 @@ class MockData {
 
     final events = <Map<String, dynamic>>[
       // 上半年（第二學期）
+      //
+      // 「第2學期開始」與「上課開始」是**兩件不同的事**，真實行事曆也分開列：
+      // 前者是行政上的學期起日（第 1 學期是 8/1、第 2 學期是 2/1），後者才是
+      // 學生真的開始上課的那一天。任何要從行事曆推學期錨點的功能都只能認後者，
+      // 所以 demo 資料也照這個區分寫 —— 混成一筆的話，錯的推導會在 demo 下被
+      // 驗成「對的」。
+      {
+        'id': 'cal-00',
+        'date': '$y-02-01',
+        'name': isEn ? 'Semester 2 Begins' : '第2學期開始',
+        'link': '',
+        'isImportant': false,
+      },
       {
         'id': 'cal-01',
         'date': '$y-02-17',
-        'name': isEn ? 'Spring Semester Begins' : '第二學期開學',
+        'name': isEn ? 'Classes Begin' : '上課開始',
         'link': '',
         'isImportant': true,
       },
@@ -1175,9 +1188,16 @@ class MockData {
       },
       // 下半年（第一學期）
       {
+        'id': 'cal-10b',
+        'date': '$y-08-01',
+        'name': isEn ? 'Semester 1 Begins' : '第1學期開始',
+        'link': '',
+        'isImportant': false,
+      },
+      {
         'id': 'cal-11',
         'date': '$y-09-09',
-        'name': isEn ? 'Fall Semester Begins' : '第一學期開學',
+        'name': isEn ? 'Classes Begin' : '上課開始',
         'link': '',
         'isImportant': true,
       },
@@ -1292,27 +1312,122 @@ class MockData {
 
   // ── 課程詳情（依 courseNo 查找）────────────────────
 
-  /// 從成績 + 課表中查找課程資訊，找不到就回預設。
+  /// 示範用的每週進度，18 列。
+  ///
+  /// 週次一律用學校的真實格式 `第N週`（阿拉伯數字）—— demo 資料若寫成別的格式，
+  /// 週次解析就會在 demo 下被驗成「對的」，換到真實帳號才發現對不上。
+  ///
+  /// 內容刻意混了幾種形態：有的沒有教學方法、有的沒有備註、也有一列長到會讓
+  /// iCalendar 折行。這些都是後續功能真的會踩到的邊界。
+  static const List<Map<String, String>> _syllabus = [
+    {
+      'week': '第1週',
+      'content': '課程介紹、評分方式與作業規範說明',
+      'method': '講述',
+      'remark': '請於本週前完成加退選',
+    },
+    {'week': '第2週', 'content': '基本概念與專有名詞', 'method': '講述、問答', 'remark': ''},
+    {'week': '第3週', 'content': '系統架構總覽', 'method': '講述', 'remark': ''},
+    {
+      'week': '第4週',
+      'content': '核心資料結構與其取捨',
+      'method': '講述、實作',
+      'remark': '攜帶筆電',
+    },
+    {'week': '第5週', 'content': '演算法設計與複雜度分析', 'method': '講述', 'remark': ''},
+    {
+      'week': '第6週',
+      'content':
+          '本週介紹作業系統的行程排程演算法，包含先來先服務、最短工作優先、輪轉法與多層佇列，'
+          '並比較各自的平均等待時間與飢餓問題。',
+      'method': '講述、討論',
+      'remark': '課前閱讀第 5 章',
+    },
+    {'week': '第7週', 'content': '同步機制與競爭條件', 'method': '講述、實作', 'remark': ''},
+    {'week': '第8週', 'content': '期中複習與問題討論', 'method': '討論', 'remark': ''},
+    {'week': '第9週', 'content': '期中考', 'method': '測驗', 'remark': '閉書'},
+    {'week': '第10週', 'content': '記憶體管理與虛擬記憶體', 'method': '講述', 'remark': ''},
+    {'week': '第11週', 'content': '檔案系統與儲存裝置', 'method': '講述', 'remark': ''},
+    {'week': '第12週', 'content': '輸入輸出與裝置驅動', 'method': '講述、實作', 'remark': ''},
+    {'week': '第13週', 'content': '分散式系統導論', 'method': '講述', 'remark': ''},
+    {'week': '第14週', 'content': '容錯與一致性', 'method': '講述、討論', 'remark': ''},
+    {'week': '第15週', 'content': '效能量測與調校', 'method': '實作', 'remark': '攜帶筆電'},
+    {
+      'week': '第16週',
+      'content': '期末專題進度報告',
+      'method': '口頭報告',
+      'remark': '每組 10 分鐘',
+    },
+    {
+      'week': '第17週',
+      'content': '期末專題成果發表',
+      'method': '口頭報告',
+      'remark': '每組 15 分鐘',
+    },
+    {'week': '第18週', 'content': '期末考', 'method': '測驗', 'remark': '閉書'},
+  ];
+
+  /// 課綱頁的「上課時間/教室」，依 `courseNo` 查。
+  ///
+  /// 格式與學校課綱頁一致（`星期-連續節次/教室`，多個時段以空白分隔，節次之間
+  /// **不加逗號**）。這是課表那一份 `timeRoomStr` 之外**另一個**欄位：課表來自
+  /// 課程查詢頁、這裡來自課綱頁，是兩次不同的抓取。
+  ///
+  /// `30204` 專題實作(二) 是刻意安排的多時段課，涵蓋兩種形態：
+  /// - **同一天不連續**：週四 C,D 與週四 G,H，中間隔著 Y/E/F
+  /// - **跨天且不同教室**：週二 A,B 在 EL205
+  ///
+  /// 其餘的課都是單一時段，`30299`／`30207`／`30208` 則本來就沒有固定上課時間。
+  static const Map<String, String> _timeRooms = {
+    // 114 學年第 2 學期
+    '30299': '',
+    '30201': '1-CD/EL101',
+    '30202': '2-EF/EL205',
+    '30203': '3-AB/EL102',
+    '30204': '4-CD/EL108 4-GH/EL108 2-AB/EL205',
+    '30205': '5-BC/EL301',
+    '30206': '3-EF/EL108',
+    '30207': '',
+    '30208': '',
+    // 114 學年第 1 學期
+    '30101': '1-AB/EL102',
+    '30102': '2-CD/EL201',
+    '30103': '3-AB/EL103',
+    '30104': '4-EF/EL205',
+    '30105': '5-GH/EL108',
+    '30106': '2-EF/EL301',
+    // 113 學年第 2 學期
+    '20201': '1-CD/EL101',
+    '20202': '2-AB/EL102',
+    '20203': '3-EF/EL103',
+    '20204': '4-CD/EL204',
+    '20205': '5-AB/EL301',
+  };
+
+  /// 從課表 + 成績中查找課程資訊，找不到就回預設。
+  ///
+  /// 回傳的鍵名對齊 [CourseDetail] 真正會讀的欄位（`courseName`／`timeRoom`／
+  /// `syllabus`…）。先前這裡回的是 `name`／`description`，兩個都不在 `CourseDetail`
+  /// 的解析範圍內，所以 demo 的課程詳細頁連課名都是空的。
   static Map<String, dynamic> courseDetail({
     required String year,
     required String semester,
     required String courseNo,
   }) {
-    // 先從課表找
-    final scheduleList = (schedule['data']?['schedule'] as List?) ?? const [];
-    for (final c in scheduleList) {
-      if ((c as Map)['courseNo'] == courseNo) {
-        return {
-          'status': 'success',
-          'data': {
-            'courseNo': courseNo,
-            'name': c['name'],
-            'nameEn': c['nameEn'] ?? '',
-            'credits': c['credits'],
-            'teacher': c['teacher'],
-            'description': 'Demo 模式 — ${c['name']}課程詳情。',
-          },
-        };
+    // 先從課表找（三個學期都找，不只當前學期）
+    for (final list in [_courses1142, _courses1141, _courses1132]) {
+      for (final c in list) {
+        if (c['courseNo'] == courseNo) {
+          return _detailPayload(
+            courseNo: courseNo,
+            courseName: c['name'] as String,
+            teacher: c['teacher'] as String,
+            credits: c['credits'] as String,
+            requiredType: c['requiredType'] as String,
+            deptCourseNo: c['deptCourseNo'] as String,
+            courseClass: c['courseClass'] as String,
+          );
+        }
       }
     }
 
@@ -1320,30 +1435,53 @@ class MockData {
     for (final sem in grades['grades'] as List) {
       for (final c in (sem as Map)['courses'] as List) {
         if ((c as Map)['courseNo'] == courseNo) {
-          return {
-            'status': 'success',
-            'data': {
-              'courseNo': courseNo,
-              'name': c['name'],
-              'nameEn': c['name_en'] ?? '',
-              'credits': c['credits'],
-              'teacher': '',
-              'description': 'Demo 模式 — ${c['name']}課程詳情。',
-            },
-          };
+          return _detailPayload(
+            courseNo: courseNo,
+            courseName: c['name'] as String,
+            teacher: '',
+            credits: c['credits'] as String,
+            requiredType: c['type'] as String? ?? '',
+            deptCourseNo: c['code'] as String? ?? '',
+            courseClass: '',
+          );
         }
       }
     }
 
+    return _detailPayload(
+      courseNo: courseNo,
+      courseName: '示範課程',
+      teacher: '示範教授',
+      credits: '3',
+      requiredType: '選修',
+      deptCourseNo: '',
+      courseClass: '',
+    );
+  }
+
+  static Map<String, dynamic> _detailPayload({
+    required String courseNo,
+    required String courseName,
+    required String teacher,
+    required String credits,
+    required String requiredType,
+    required String deptCourseNo,
+    required String courseClass,
+  }) {
     return {
       'status': 'success',
       'data': {
-        'courseNo': courseNo,
-        'name': '示範課程',
-        'nameEn': 'Demo Course',
-        'credits': '3',
-        'teacher': '示範教授',
-        'description': 'Demo 模式的課程詳情範例。',
+        'courseName': courseName,
+        'teacher': teacher,
+        'credits': credits,
+        'timeRoom': _timeRooms[courseNo] ?? '',
+        'requiredType': requiredType,
+        'goal': 'Demo 模式 — $courseName的教學目標範例。',
+        'outline': 'Demo 模式 — $courseName課程詳情。',
+        'grade': '平時作業 30%、期中考 30%、期末專題 40%',
+        'deptCourseNo': deptCourseNo,
+        'courseClass': courseClass,
+        'syllabus': _syllabus,
       },
     };
   }
