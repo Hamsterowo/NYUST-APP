@@ -274,19 +274,27 @@ class DataProvider with ChangeNotifier {
     await AcademicCacheOwner.clearAll();
   }
 
-  Future<void> fetchGrades({bool force = false}) async {
-    if (isLoadingGrades) return;
+  /// 回傳這次更新的結果，供畫面的更新回呼決定要不要跳失敗提示。
+  /// `null` 代表這次沒有真的發起更新（已有一次在進行中），沒有結果可回報。
+  ///
+  /// 失敗旗標（[gradesFailed]）維持只在「從未成功載入」時為真——那是錯誤頁的
+  /// 條件；已有舊資料時的失敗不進旗標，由回呼自己處理。
+  Future<RefreshOutcome?> fetchGrades({bool force = false}) async {
+    if (isLoadingGrades) return null;
     isLoadingGrades = true;
     gradesFailed = false;
     gradesFailReason = null;
     notifyListeners();
+    var result = RefreshOutcome.success;
     try {
       final outcome = await _gradesRepo.refresh(force: force);
+      result = outcome;
       if (!outcome.isSuccess && gradesData == null) {
         gradesFailed = true;
         gradesFailReason = outcome;
       }
     } catch (_) {
+      result = RefreshOutcome.serviceError;
       if (gradesData == null) {
         gradesFailed = true;
         gradesFailReason = RefreshOutcome.serviceError;
@@ -295,21 +303,26 @@ class DataProvider with ChangeNotifier {
       isLoadingGrades = false;
       notifyListeners();
     }
+    return result;
   }
 
-  Future<void> fetchGraduation({bool force = false}) async {
-    if (isLoadingGraduation) return;
+  /// 見 [fetchGrades] 對回傳值的說明。
+  Future<RefreshOutcome?> fetchGraduation({bool force = false}) async {
+    if (isLoadingGraduation) return null;
     isLoadingGraduation = true;
     graduationFailed = false;
     graduationFailReason = null;
     notifyListeners();
+    var result = RefreshOutcome.success;
     try {
       final outcome = await _graduationRepo.refresh(force: force);
+      result = outcome;
       if (!outcome.isSuccess && graduationData == null) {
         graduationFailed = true;
         graduationFailReason = outcome;
       }
     } catch (_) {
+      result = RefreshOutcome.serviceError;
       if (graduationData == null) {
         graduationFailed = true;
         graduationFailReason = RefreshOutcome.serviceError;
@@ -318,22 +331,27 @@ class DataProvider with ChangeNotifier {
       isLoadingGraduation = false;
       notifyListeners();
     }
+    return result;
   }
 
-  Future<void> fetchSchedule({bool force = false}) async {
-    if (isLoadingSchedule) return;
+  /// 見 [fetchGrades] 對回傳值的說明。
+  Future<RefreshOutcome?> fetchSchedule({bool force = false}) async {
+    if (isLoadingSchedule) return null;
     isLoadingSchedule = true;
     scheduleFailed = false;
     scheduleFailReason = null;
     notifyListeners();
+    var result = RefreshOutcome.success;
     try {
-      final result = await _scheduleRepo.refresh(force: force);
-      if (!result.outcome.isSuccess && scheduleData.isEmpty) {
+      final scheduleResult = await _scheduleRepo.refresh(force: force);
+      result = scheduleResult.outcome;
+      if (!scheduleResult.outcome.isSuccess && scheduleData.isEmpty) {
         scheduleFailed = true;
-        scheduleFailReason = result.outcome;
+        scheduleFailReason = scheduleResult.outcome;
       }
-      _captureSemesterMeta(result.snapshot);
+      _captureSemesterMeta(scheduleResult.snapshot);
     } catch (_) {
+      result = RefreshOutcome.serviceError;
       if (scheduleData.isEmpty) {
         scheduleFailed = true;
         scheduleFailReason = RefreshOutcome.serviceError;
@@ -342,6 +360,7 @@ class DataProvider with ChangeNotifier {
       isLoadingSchedule = false;
       notifyListeners();
     }
+    return result;
   }
 
   /// 擷取學期清單。[snapshot] 只在剛完成一次線上抓取時非 null

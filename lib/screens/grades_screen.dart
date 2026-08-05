@@ -5,6 +5,7 @@ import '../models/grade_report.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../services/scrape_result.dart';
+import '../utils/refresh_body_state.dart';
 import '../utils/status_colors.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
@@ -26,7 +27,40 @@ class GradesScreen extends ConsumerStatefulWidget {
 class _GradesScreenState extends ConsumerState<GradesScreen> {
   int _selectedSegment = 0;
 
+  /// 使用者主動觸發的更新（重新整理、重試）進行中。
+  /// 與資料層的 `isLoadingGrades` 並存而不混用：背景預抓也會設那個旗標，
+  /// 只有這個為真時才蓋上骨架。
+  bool _manualRefreshing = false;
+
   final Map<String, bool> _expandedStates = {};
+
+  /// 主動更新：蓋上骨架，失敗時跳提示——那是使用者按的，需要明確的回答。
+  /// 失敗不動資料，骨架一收畫面自己回到原先的形態。
+  Future<void> _refresh(DataProvider data) async {
+    setState(() => _manualRefreshing = true);
+    try {
+      final outcome = await data.fetchGrades(force: true);
+      if (!mounted) return;
+      if (outcome != null && !outcome.isSuccess) {
+        showTopSnackBar(
+          context,
+          _failureMessage(outcome),
+          type: SnackBarType.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _manualRefreshing = false);
+    }
+  }
+
+  /// 連線類錯誤 → 具名「無法連線至成績系統」；其他 → 通用提示。
+  /// 錯誤頁與提示共用同一句，兩種呈現方式才不會像是兩種不同的問題。
+  String _failureMessage(RefreshOutcome? reason) {
+    final l10n = AppLocalizations.of(context);
+    return reason == RefreshOutcome.networkError
+        ? l10n.serviceUnavailable(l10n.serviceGrades)
+        : l10n.checkNetworkRetry;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +161,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).gradesTitle,
-        onRefresh: () => data.fetchGrades(force: true),
+        onRefresh: () => _refresh(data),
         isLoading: data.isLoadingGrades,
         actions: [
           IconButton(
@@ -159,54 +193,52 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
   }
 
   Widget _buildGradesContent(DataProvider data, ColorScheme colorScheme) {
-    if (data.gradesFailed && data.gradesData == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 64,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).loadGradesFailed,
-              style: TextStyle(
-                fontSize: 18,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              // 離線/連不上 → 具名「無法連線至成績系統」;其他失敗 → 通用提示。
-              data.gradesFailReason == RefreshOutcome.networkError
-                  ? AppLocalizations.of(context).serviceUnavailable(
-                      AppLocalizations.of(context).serviceGrades,
-                    )
-                  : AppLocalizations.of(context).checkNetworkRetry,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.tonal(
-              onPressed: () => data.fetchGrades(force: true),
-              child: Text(AppLocalizations.of(context).retry),
-            ),
-          ],
-        ),
-      );
+    final state = resolveRefreshBody(
+      isEmpty: data.gradesData?.semesters.isEmpty,
+      failed: data.gradesFailed,
+      manualRefreshing: _manualRefreshing,
+    );
+    switch (state) {
+      case RefreshBodyState.skeleton:
+        return _buildGradesSkeleton(colorScheme);
+      case RefreshBodyState.error:
+        return _buildGradesError(data, colorScheme);
+      // 零筆與有內容都交給列表建構：它依當前分頁選用不同的空狀態文案。
+      case RefreshBodyState.empty:
+      case RefreshBodyState.list:
+        return _buildGradesList(data.gradesData!, colorScheme);
     }
+  }
 
-    if (data.isLoadingGrades && data.gradesData == null) {
-      return _buildGradesSkeleton(colorScheme);
-    }
-
-    if (data.gradesData == null) {
-      return Center(child: Text(AppLocalizations.of(context).gradesNoData));
-    }
-
-    return _buildGradesList(data.gradesData!, colorScheme);
+  Widget _buildGradesError(DataProvider data, ColorScheme colorScheme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            size: 64,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context).loadGradesFailed,
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _failureMessage(data.gradesFailReason),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.tonal(
+            onPressed: () => _refresh(data),
+            child: Text(AppLocalizations.of(context).retry),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildGradesList(GradeReport gradesData, ColorScheme colorScheme) {

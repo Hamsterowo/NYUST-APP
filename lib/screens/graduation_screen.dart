@@ -3,14 +3,38 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../models/graduation_report.dart';
+import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../services/scrape_result.dart';
+import '../utils/refresh_body_state.dart';
+import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import 'web_view_screen.dart';
 
+/// 連線類錯誤 → 具名「無法連線至畢業審核系統」；其他 → 通用提示。
+/// 錯誤頁與失敗提示共用同一句，兩種呈現方式才不會像是兩種不同的問題。
+String graduationFailureMessage(BuildContext context, RefreshOutcome? reason) {
+  final l10n = AppLocalizations.of(context);
+  return reason == RefreshOutcome.networkError
+      ? l10n.serviceUnavailable(l10n.serviceGraduation)
+      : l10n.checkNetworkRetry;
+}
+
 class GraduationContent extends ConsumerWidget {
-  const GraduationContent({super.key});
+  /// 使用者主動觸發的更新進行中——由持有重新整理按鈕的 [GraduationScreen] 傳入，
+  /// 為真時蓋上骨架。
+  final bool manualRefreshing;
+
+  /// 錯誤頁的重試改走上層的主動更新（才有骨架與失敗提示）；
+  /// 沒有上層時（`/graduation` 深連結）退回直接重抓。
+  final Future<void> Function()? onManualRefresh;
+
+  const GraduationContent({
+    super.key,
+    this.manualRefreshing = false,
+    this.onManualRefresh,
+  });
 
   String _formatCreditsText(BuildContext context, String? rawText) {
     if (rawText == null || rawText.isEmpty) return '-';
@@ -26,54 +50,64 @@ class GraduationContent extends ConsumerWidget {
     final data = ref.watch(dataProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (data.graduationFailed && data.graduationData == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 64,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).gradLoadFailed,
-              style: TextStyle(
-                fontSize: 18,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              // 離線/連不上 → 具名「無法連線至畢業審核系統」;其他 → 通用提示。
-              data.graduationFailReason == RefreshOutcome.networkError
-                  ? AppLocalizations.of(context).serviceUnavailable(
-                      AppLocalizations.of(context).serviceGraduation,
-                    )
-                  : AppLocalizations.of(context).checkNetworkRetry,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.tonal(
-              onPressed: () => data.fetchGraduation(force: true),
-              child: Text(AppLocalizations.of(context).retry),
-            ),
-          ],
-        ),
-      );
+    // 畢業學分是單一份報表，沒有「零筆」這回事：拿到了就是有內容。
+    final state = resolveRefreshBody(
+      isEmpty: data.graduationData == null ? null : false,
+      failed: data.graduationFailed,
+      manualRefreshing: manualRefreshing,
+    );
+    switch (state) {
+      case RefreshBodyState.skeleton:
+        return _buildGraduationSkeleton(context, colorScheme);
+      case RefreshBodyState.error:
+        return _buildGraduationError(context, data, colorScheme);
+      case RefreshBodyState.empty:
+      case RefreshBodyState.list:
+        return _buildReport(context, data.graduationData!, colorScheme);
     }
+  }
 
-    if (data.isLoadingGraduation && data.graduationData == null) {
-      return _buildGraduationSkeleton(context, colorScheme);
-    }
+  Widget _buildGraduationError(
+    BuildContext context,
+    DataProvider data,
+    ColorScheme colorScheme,
+  ) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            size: 64,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context).gradLoadFailed,
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            graduationFailureMessage(context, data.graduationFailReason),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.tonal(
+            onPressed: () =>
+                onManualRefresh?.call() ?? data.fetchGraduation(force: true),
+            child: Text(AppLocalizations.of(context).retry),
+          ),
+        ],
+      ),
+    );
+  }
 
-    final info = data.graduationData;
-    if (info == null) {
-      return Center(child: Text(AppLocalizations.of(context).gradNoData));
-    }
-
+  Widget _buildReport(
+    BuildContext context,
+    GraduationReport info,
+    ColorScheme colorScheme,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -470,16 +504,43 @@ class GraduationContent extends ConsumerWidget {
   }
 }
 
-class GraduationScreen extends ConsumerWidget {
+class GraduationScreen extends ConsumerStatefulWidget {
   const GraduationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GraduationScreen> createState() => _GraduationScreenState();
+}
+
+class _GraduationScreenState extends ConsumerState<GraduationScreen> {
+  /// 使用者主動觸發的更新進行中。與資料層的 `isLoadingGraduation` 並存而不混用：
+  /// 背景預抓也會設那個旗標，只有這個為真時才蓋上骨架。
+  bool _manualRefreshing = false;
+
+  /// 主動更新：蓋上骨架，失敗時跳提示。失敗不動資料，骨架一收畫面自己回到原形態。
+  Future<void> _refresh(DataProvider data) async {
+    setState(() => _manualRefreshing = true);
+    try {
+      final outcome = await data.fetchGraduation(force: true);
+      if (!mounted) return;
+      if (outcome != null && !outcome.isSuccess) {
+        showTopSnackBar(
+          context,
+          graduationFailureMessage(context, outcome),
+          type: SnackBarType.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _manualRefreshing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final data = ref.watch(dataProvider);
     return Scaffold(
       appBar: CustomAppBar(
         title: AppLocalizations.of(context).infoGradTitle,
-        onRefresh: () => data.fetchGraduation(force: true),
+        onRefresh: () => _refresh(data),
         isLoading: data.isLoadingGraduation,
         actions: [
           IconButton(
@@ -500,7 +561,13 @@ class GraduationScreen extends ConsumerWidget {
         ],
       ),
       // 預留底部系統導覽列（三鍵/手勢）高度，避免內容被系統列遮擋。
-      body: const SafeArea(top: false, child: GraduationContent()),
+      body: SafeArea(
+        top: false,
+        child: GraduationContent(
+          manualRefreshing: _manualRefreshing,
+          onManualRefresh: () => _refresh(data),
+        ),
+      ),
     );
   }
 }
