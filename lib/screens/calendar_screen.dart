@@ -6,9 +6,11 @@ import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
 import '../utils/network_error.dart';
+import '../utils/top_snack_bar.dart';
 import '../models/calendar_event.dart';
 import '../services/api_service.dart';
 import '../services/calendar_cache_service.dart';
+import '../services/calendar_export_service.dart';
 import '../services/calendar_reminder_service.dart';
 import '../services/server_time_service.dart';
 import 'calendar_reminder_screen.dart';
@@ -89,6 +91,30 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  /// 把一筆校曆事件交給系統日曆。系統會跳出自己的匯入確認，所以這裡不再多問一次。
+  Future<void> _addEventToCalendar(CalendarEvent event) async {
+    final l10n = AppLocalizations.of(context);
+    showTopSnackBar(context, l10n.addToCalendarOpening);
+
+    try {
+      await CalendarExportService.export([
+        CalendarExportService.fromCalendarEvent(
+          event,
+          sourceNote: l10n.addToCalendarSource,
+        ),
+      ], filename: 'yuntech-event.ics');
+    } catch (e) {
+      // 幾乎都是「這台裝置沒有日曆 App」。不把原始例外字串顯示給使用者。
+      if (kDebugMode) print('CalendarScreen: add to calendar failed: $e');
+      if (!mounted) return;
+      showTopSnackBar(
+        context,
+        l10n.addToCalendarFailed,
+        type: SnackBarType.error,
+      );
+    }
   }
 
   void _showLegendDialog() {
@@ -968,6 +994,26 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                                 ),
                                               ),
                                             ),
+                                            if (CalendarExportService
+                                                .isSupported)
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons
+                                                      .event_available_outlined,
+                                                  size: 20,
+                                                ),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                color: isImportant
+                                                    ? Colors.amber.shade900
+                                                    : colorScheme
+                                                          .onSurfaceVariant,
+                                                tooltip: AppLocalizations.of(
+                                                  context,
+                                                ).addToCalendar,
+                                                onPressed: () =>
+                                                    _addEventToCalendar(event),
+                                              ),
                                           ],
                                         ),
                                       ),

@@ -597,6 +597,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noEventsToday => 'No events today';
 
   @override
+  String get addToCalendar => 'Add to calendar';
+
+  @override
+  String get addToCalendarSource =>
+      'From the YunTech academic calendar, added by YunTool.';
+
+  @override
+  String get addToCalendarOpening => 'Handing it to your calendar…';
+
+  @override
+  String get addToCalendarFailed =>
+      'Could not add to your calendar — this device does not seem to have a calendar app that can import it.';
+
+  @override
   String get legendTooltip => 'Icon Legend';
 
   @override

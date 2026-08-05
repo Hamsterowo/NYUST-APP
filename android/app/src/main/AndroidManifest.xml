@@ -1,6 +1,19 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- open_filex 的 manifest 宣告了四個儲存空間權限，是為了它「開啟使用者從
+         外部儲存空間挑到的檔案」那個用途。這個 App 交給它的 .ics 一律寫在自己的
+         快取目錄裡，走 FileProvider 授權，一個都用不到 —— 留著只會讓 Play 的
+         權限清單多出三個看起來在讀相簿的項目。合併時直接移除。 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"
+        tools:node="remove" />
     <!-- 行事曆提醒是預先排入 AlarmManager 的，重開機會把所有 alarm 清掉。
          flutter_local_notifications 的 boot receiver 會在開機後把已排程的通知
          重新排入，但它需要這個權限才收得到 BOOT_COMPLETED。

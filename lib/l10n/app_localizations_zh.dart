@@ -574,6 +574,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noEventsToday => '本日無行程';
 
   @override
+  String get addToCalendar => '加入行事曆';
+
+  @override
+  String get addToCalendarSource => '來自雲科大學校行事曆，由雲科工具箱加入。';
+
+  @override
+  String get addToCalendarOpening => '正在交給你的行事曆…';
+
+  @override
+  String get addToCalendarFailed => '無法加入行事曆，這台裝置上似乎沒有可以匯入的行事曆 App。';
+
+  @override
   String get legendTooltip => '圖示說明';
 
   @override

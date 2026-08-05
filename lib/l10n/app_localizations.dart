@@ -1166,6 +1166,30 @@ abstract class AppLocalizations {
   /// **'本日無行程'**
   String get noEventsToday;
 
+  /// No description provided for @addToCalendar.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入行事曆'**
+  String get addToCalendar;
+
+  /// No description provided for @addToCalendarSource.
+  ///
+  /// In zh, this message translates to:
+  /// **'來自雲科大學校行事曆，由雲科工具箱加入。'**
+  String get addToCalendarSource;
+
+  /// No description provided for @addToCalendarOpening.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在交給你的行事曆…'**
+  String get addToCalendarOpening;
+
+  /// No description provided for @addToCalendarFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法加入行事曆，這台裝置上似乎沒有可以匯入的行事曆 App。'**
+  String get addToCalendarFailed;
+
   /// No description provided for @legendTooltip.
   ///
   /// In zh, this message translates to:
