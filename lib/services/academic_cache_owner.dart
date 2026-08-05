@@ -15,8 +15,8 @@ import 'course_detail_cache.dart';
 /// [claimFor] 進一步把快取和帳號綁在一起：只要登入的學號與快取記錄的擁有者
 /// 不符（或根本沒記錄），就先清空再開始。如此一來保證不再取決於「每一條登出
 /// 路徑都寫對」。
-class AcademicCache {
-  const AcademicCache._();
+class AcademicCacheOwner {
+  const AcademicCacheOwner._();
 
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
@@ -75,7 +75,7 @@ class AcademicCache {
 
     if (kDebugMode) {
       print(
-        'AcademicCache: cache owner ${current ?? "(none)"} != $accountId '
+        'AcademicCacheOwner: cache owner ${current ?? "(none)"} != $accountId '
         '→ wiping',
       );
     }

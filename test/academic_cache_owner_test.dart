@@ -4,12 +4,12 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yun_tool/database/database.dart';
-import 'package:yun_tool/services/academic_cache.dart';
+import 'package:yun_tool/services/academic_cache_owner.dart';
 
 /// Locks the account-isolation guarantee: cached academic data belongs to
 /// exactly one account, and a different account signing in never inherits it.
 ///
-/// The point of [AcademicCache] is that this works **without** the data layer
+/// The point of [AcademicCacheOwner] is that this works **without** the data layer
 /// being alive — the old behaviour routed clearing through a lazily-created
 /// provider, so a sign-out at startup left the previous account's rows behind.
 /// These tests therefore call it directly, with nothing else constructed.
@@ -85,17 +85,17 @@ void main() {
     test(
       'the first account to claim an empty cache becomes its owner',
       () async {
-        await AcademicCache.claimFor('B11217990');
+        await AcademicCacheOwner.claimFor('B11217990');
 
         expect(storage['cache_owner_id'], 'B11217990');
       },
     );
 
     test('re-claiming by the same account leaves the cache in place', () async {
-      await AcademicCache.claimFor('B11217990');
+      await AcademicCacheOwner.claimFor('B11217990');
       storage['cache_grades'] = '{"success":true}';
 
-      await AcademicCache.claimFor('B11217990');
+      await AcademicCacheOwner.claimFor('B11217990');
 
       expect(
         storage['cache_grades'],
@@ -106,10 +106,10 @@ void main() {
     });
 
     test('a different account wipes the previous account\'s cache', () async {
-      await AcademicCache.claimFor('B11111111');
+      await AcademicCacheOwner.claimFor('B11111111');
       storage['cache_grades'] = '{"success":true,"grades":["previous"]}';
 
-      await AcademicCache.claimFor('B12222222');
+      await AcademicCacheOwner.claimFor('B12222222');
 
       expect(
         storage['cache_grades'],
@@ -125,7 +125,7 @@ void main() {
         // Simulates an install upgraded from a build that never recorded one.
         storage['cache_grades'] = '{"success":true,"grades":["legacy"]}';
 
-        await AcademicCache.claimFor('B11217990');
+        await AcademicCacheOwner.claimFor('B11217990');
 
         expect(storage['cache_grades'], isNull);
         expect(storage['cache_owner_id'], 'B11217990');
@@ -133,10 +133,10 @@ void main() {
     );
 
     test('an unknown account id is a no-op, not a wipe', () async {
-      await AcademicCache.claimFor('B11217990');
+      await AcademicCacheOwner.claimFor('B11217990');
       storage['cache_grades'] = '{"success":true}';
 
-      await AcademicCache.claimFor('');
+      await AcademicCacheOwner.claimFor('');
 
       expect(storage['cache_grades'], isNotNull);
       expect(storage['cache_owner_id'], 'B11217990');
@@ -147,10 +147,10 @@ void main() {
     test(
       'clearAll drops the cached grades copy and the owner record',
       () async {
-        await AcademicCache.claimFor('B11217990');
+        await AcademicCacheOwner.claimFor('B11217990');
         storage['cache_grades'] = '{"success":true}';
 
-        await AcademicCache.clearAll();
+        await AcademicCacheOwner.clearAll();
 
         expect(storage['cache_grades'], isNull);
         expect(storage['cache_owner_id'], isNull);
@@ -170,7 +170,7 @@ void main() {
           );
       expect(await db.select(db.cacheMeta).get(), isNotEmpty);
 
-      await AcademicCache.clearAll();
+      await AcademicCacheOwner.clearAll();
 
       expect(
         await db.select(db.cacheMeta).get(),
@@ -180,11 +180,11 @@ void main() {
     });
 
     test('after clearing, the next account claims a clean cache', () async {
-      await AcademicCache.claimFor('B11111111');
+      await AcademicCacheOwner.claimFor('B11111111');
       storage['cache_grades'] = '{"success":true}';
-      await AcademicCache.clearAll();
+      await AcademicCacheOwner.clearAll();
 
-      await AcademicCache.claimFor('B12222222');
+      await AcademicCacheOwner.claimFor('B12222222');
 
       expect(storage['cache_grades'], isNull);
       expect(storage['cache_owner_id'], 'B12222222');

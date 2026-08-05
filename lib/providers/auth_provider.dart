@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../services/academic_cache.dart';
+import '../services/academic_cache_owner.dart';
 import '../services/api_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/mock/mock_data.dart';
@@ -98,7 +98,7 @@ class AuthProvider with ChangeNotifier {
       // 連同上一個帳號的學業快取一併清掉（此時 DataProvider 尚未建立，
       // 不能依賴它的登出回呼）。
       await _clearUserCache();
-      await AcademicCache.clearAll();
+      await AcademicCacheOwner.clearAll();
       _isInitialized = true;
       notifyListeners();
       return;
@@ -154,7 +154,7 @@ class AuthProvider with ChangeNotifier {
         _user = null;
         await _clearUserCache();
         await _apiService.logout();
-        await AcademicCache.clearAll();
+        await AcademicCacheOwner.clearAll();
       } else {
         // 其他不明錯誤(解析失敗等):無法確定 session 是否還有效,
         // 保守起見保留快取,不要把使用者踢出去。
@@ -195,7 +195,7 @@ class AuthProvider with ChangeNotifier {
   /// 所有登入路徑都走這裡，而不是各自呼叫 [onLoginSuccess] —— 這樣新增路徑時
   /// 不會又漏掉快取歸屬檢查。
   Future<void> _startSession() async {
-    await AcademicCache.claimFor(_currentAccountId());
+    await AcademicCacheOwner.claimFor(_currentAccountId());
     onLoginSuccess?.call();
   }
 
@@ -503,7 +503,7 @@ class AuthProvider with ChangeNotifier {
     _verificationToken = null;
     // 直接清除學業快取，不透過 onLogoutCallback —— DataProvider 是惰性建立的，
     // 回呼可能還沒接上。回呼仍保留，負責重置它自己的記憶體狀態。
-    await AcademicCache.clearAll();
+    await AcademicCacheOwner.clearAll();
     onLogoutCallback?.call();
     notifyListeners();
   }
