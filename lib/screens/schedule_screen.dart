@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/class_periods.dart';
 import '../l10n/app_localizations.dart';
 import '../models/schedule_event.dart';
 import '../providers/data_provider.dart';
@@ -38,24 +39,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
   Timer? _timeLineTimer;
 
-  static const Map<String, List<int>> _periodMinutes = {
-    'X': [430, 480],
-    'A': [490, 540],
-    'B': [550, 600],
-    'C': [610, 660],
-    'D': [670, 720],
-    'Y': [730, 780],
-    'E': [790, 840],
-    'F': [850, 900],
-    'G': [910, 960],
-    'H': [970, 1020],
-    'Z': [1030, 1080],
-    'I': [1105, 1155],
-    'J': [1160, 1210],
-    'K': [1215, 1265],
-    'L': [1270, 1320],
-  };
-
   /// 課表在首頁 `_screens` 中的分頁索引。
   static const int _scheduleTabIndex = 1;
 
@@ -85,11 +68,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final nowMinutes = now.hour * 60 + now.minute;
 
     for (int i = 0; i < activePeriods.length; i++) {
-      final period = activePeriods[i];
-      final times = _periodMinutes[period];
+      final times = ClassPeriods.byCode(activePeriods[i]);
       if (times == null) continue;
-      final start = times[0];
-      final end = times[1];
+      final start = times.startMinutes;
+      final end = times.endMinutes;
 
       if (nowMinutes >= start && nowMinutes <= end) {
         final ratio = (nowMinutes - start) / (end - start);
@@ -97,10 +79,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       }
 
       if (i < activePeriods.length - 1) {
-        final nextPeriod = activePeriods[i + 1];
-        final nextTimes = _periodMinutes[nextPeriod];
+        final nextTimes = ClassPeriods.byCode(activePeriods[i + 1]);
         if (nextTimes != null) {
-          final nextStart = nextTimes[0];
+          final nextStart = nextTimes.startMinutes;
           if (nowMinutes > end && nowMinutes < nextStart) {
             return (i + 1) * cellHeight;
           }
@@ -142,42 +123,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       );
     }
   }
-
-  final List<String> _periods = [
-    'X',
-    'A',
-    'B',
-    'C',
-    'D',
-    'Y',
-    'E',
-    'F',
-    'G',
-    'H',
-    'Z',
-    'I',
-    'J',
-    'K',
-    'L',
-  ];
-
-  final Map<String, String> _periodTimes = {
-    'X': '07:10 - 08:00',
-    'A': '08:10 - 09:00',
-    'B': '09:10 - 10:00',
-    'C': '10:10 - 11:00',
-    'D': '11:10 - 12:00',
-    'Y': '12:10 - 13:00',
-    'E': '13:10 - 14:00',
-    'F': '14:10 - 15:00',
-    'G': '15:10 - 16:00',
-    'H': '16:10 - 17:00',
-    'Z': '17:10 - 18:00',
-    'I': '18:25 - 19:15',
-    'J': '19:20 - 20:10',
-    'K': '20:15 - 21:05',
-    'L': '21:10 - 22:00',
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -514,7 +459,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
     // 擺位規則（顯示哪幾天/哪幾節、每格放什麼課、跨節合併幾格）全部由
     // TimetableLayout 這個純模組決定；這裡只負責畫。
-    final layout = TimetableLayout.from(courses, allPeriods: _periods);
+    final layout = TimetableLayout.from(
+      courses,
+      allPeriods: ClassPeriods.codes,
+    );
     final uniqueCourseNames = layout.courseNames;
     final activeDayIndices = layout.dayIndices;
     final activePeriods = layout.periods;
@@ -730,7 +678,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                   .map(
                                     (period) => InkWell(
                                       onTap: () {
-                                        final time = _periodTimes[period] ?? '';
+                                        final time = ClassPeriods.rangeText(
+                                          period,
+                                        );
                                         showTopSnackBar(
                                           context,
                                           AppLocalizations.of(

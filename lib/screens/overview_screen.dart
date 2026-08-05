@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/class_periods.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
@@ -988,51 +989,13 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
 
     ScheduleEvent? highlightClass;
 
-    final periodEndTimes = {
-      'X': const TimeOfDay(hour: 8, minute: 0),
-      'A': const TimeOfDay(hour: 9, minute: 0),
-      'B': const TimeOfDay(hour: 10, minute: 0),
-      'C': const TimeOfDay(hour: 11, minute: 0),
-      'D': const TimeOfDay(hour: 12, minute: 0),
-      'Y': const TimeOfDay(hour: 13, minute: 0),
-      'E': const TimeOfDay(hour: 14, minute: 0),
-      'F': const TimeOfDay(hour: 15, minute: 0),
-      'G': const TimeOfDay(hour: 16, minute: 0),
-      'H': const TimeOfDay(hour: 17, minute: 0),
-      'Z': const TimeOfDay(hour: 18, minute: 0),
-      'I': const TimeOfDay(hour: 19, minute: 15),
-      'J': const TimeOfDay(hour: 20, minute: 10),
-      'K': const TimeOfDay(hour: 21, minute: 5),
-      'L': const TimeOfDay(hour: 22, minute: 0),
-    };
-
-    final periodTimeRanges = {
-      'X': '07:10 - 08:00',
-      'A': '08:10 - 09:00',
-      'B': '09:10 - 10:00',
-      'C': '10:10 - 11:00',
-      'D': '11:10 - 12:00',
-      'Y': '12:10 - 13:00',
-      'E': '13:10 - 14:00',
-      'F': '14:10 - 15:00',
-      'G': '15:10 - 16:00',
-      'H': '16:10 - 17:00',
-      'Z': '17:10 - 18:00',
-      'I': '18:25 - 19:15',
-      'J': '19:20 - 20:10',
-      'K': '20:15 - 21:05',
-      'L': '21:10 - 22:00',
-    };
-
     final currentMinutes = now.hour * 60 + now.minute;
 
     for (var c in todayClasses) {
       if (c.times.isNotEmpty) {
-        final lastPeriod = c.times.last;
-        final endTime = periodEndTimes[lastPeriod];
-        if (endTime != null) {
-          final endMinutes = endTime.hour * 60 + endTime.minute;
-          if (currentMinutes <= endMinutes) {
+        final lastPeriod = ClassPeriods.byCode(c.times.last);
+        if (lastPeriod != null) {
+          if (currentMinutes <= lastPeriod.endMinutes) {
             highlightClass = c;
             break;
           }
@@ -1051,11 +1014,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
             classState = 'current';
           } else {
             if (c.times.isNotEmpty) {
-              final lastPeriod = c.times.last;
-              final endTime = periodEndTimes[lastPeriod];
-              if (endTime != null) {
-                final endMinutes = endTime.hour * 60 + endTime.minute;
-                if (currentMinutes > endMinutes) {
+              final lastPeriod = ClassPeriods.byCode(c.times.last);
+              if (lastPeriod != null) {
+                if (currentMinutes > lastPeriod.endMinutes) {
                   classState = 'past';
                 }
               }
@@ -1067,13 +1028,10 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           ).classPeriods(c.times.join(", "));
 
           if (c.times.isNotEmpty) {
-            final firstPeriod = c.times.first;
-            final lastPeriod = c.times.last;
-            if (periodTimeRanges.containsKey(firstPeriod) &&
-                periodTimeRanges.containsKey(lastPeriod)) {
-              final startTime = periodTimeRanges[firstPeriod]!.split(' - ')[0];
-              final endTime = periodTimeRanges[lastPeriod]!.split(' - ')[1];
-              timeStr += ' ($startTime - $endTime)';
+            final firstPeriod = ClassPeriods.byCode(c.times.first);
+            final lastPeriod = ClassPeriods.byCode(c.times.last);
+            if (firstPeriod != null && lastPeriod != null) {
+              timeStr += ' (${firstPeriod.startText} - ${lastPeriod.endText})';
             }
           }
 
