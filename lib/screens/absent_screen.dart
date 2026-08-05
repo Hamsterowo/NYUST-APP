@@ -4,6 +4,8 @@ import '../l10n/app_localizations.dart';
 import '../models/absent_record.dart';
 import '../providers/providers.dart';
 import '../services/scrapers/absent_scraper.dart';
+import '../utils/refresh_body_state.dart';
+import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import 'web_view_screen.dart';
@@ -23,11 +25,17 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
   bool _loading = true;
   bool _failed = false;
 
+  /// 使用者主動觸發的更新（重新整理、重試、切換學年期）進行中。
+  /// 與 [_loading] 並存而不混用：只有它為真時才蓋上骨架。
+  bool _manualRefreshing = false;
+
   /// 失敗時是否為連線類錯誤（scraper 回報 network_error），
   /// 供 UI 顯示具名的「無法連線至請假系統」而非通用失敗。
   bool _failedOffline = false;
 
-  List<AbsentRecord> _records = const [];
+  /// `null` 代表從未成功載入過，空 list 代表載入成功但真的零筆——
+  /// 兩者必須分得開，畫面形態才判斷得出來。
+  List<AbsentRecord>? _records;
   List<Map<String, String>> _semesters = const [];
   String? _selectedSemester;
 
@@ -37,9 +45,11 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _fetch());
   }
 
-  Future<void> _fetch({String? semester}) async {
+  /// [manual] 為真時蓋上骨架，並在失敗時跳出提示——那是使用者按的，需要明確的回答。
+  Future<void> _fetch({String? semester, bool manual = false}) async {
     setState(() {
       _loading = true;
+      _manualRefreshing = manual;
       _failed = false;
       _failedOffline = false;
     });
@@ -63,22 +73,39 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
               (data['currentSemester'] as String?) ??
               _selectedSemester;
           _loading = false;
+          _manualRefreshing = false;
         });
       } else {
-        setState(() {
-          _failed = true;
-          _failedOffline = res['status'] == 'network_error';
-          _loading = false;
-        });
+        _onFailed(offline: res['status'] == 'network_error', manual: manual);
       }
     } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _failed = true;
-        _loading = false;
-      });
+      _onFailed(offline: false, manual: manual);
     }
   }
+
+  /// 失敗時只翻旗標、不動 [_records]：骨架一收，畫面自己回到原先的形態。
+  void _onFailed({required bool offline, required bool manual}) {
+    setState(() {
+      _failed = true;
+      _failedOffline = offline;
+      _loading = false;
+      _manualRefreshing = false;
+    });
+    if (manual) {
+      showTopSnackBar(
+        context,
+        _failureMessage(AppLocalizations.of(context)),
+        type: SnackBarType.error,
+      );
+    }
+  }
+
+  /// 連線類錯誤 → 具名「無法連線至請假系統」；其他 → 通用提示。
+  /// 錯誤頁與提示共用同一句，兩種呈現方式才不會像是兩種不同的問題。
+  String _failureMessage(AppLocalizations l10n) => _failedOffline
+      ? l10n.serviceUnavailable(l10n.serviceAbsent)
+      : l10n.checkNetworkRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +113,9 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: l10n.infoAbsentTitle,
-        onRefresh: _loading ? null : () => _fetch(semester: _selectedSemester),
+        onRefresh: _loading
+            ? null
+            : () => _fetch(semester: _selectedSemester, manual: true),
         isLoading: _loading,
         actions: [
           IconButton(
@@ -160,7 +189,14 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
                   ? null
                   : (v) {
                       if (v == null || v == _selectedSemester) return;
-                      _fetch(semester: v);
+                      // 下拉先停在使用者選的學期，記錄清空：這個學期還沒有資料。
+                      // 失敗因此落在錯誤頁（重試會重抓這個學期），而不是掉回
+                      // 舊學期的記錄——下拉與列表配對錯誤比顯示錯誤頁更糟。
+                      setState(() {
+                        _selectedSemester = v;
+                        _records = null;
+                      });
+                      _fetch(semester: v, manual: true);
                     },
             ),
           ),
@@ -170,76 +206,84 @@ class _AbsentScreenState extends ConsumerState<AbsentScreen> {
   }
 
   Widget _buildBody(AppLocalizations l10n) {
-    if (_loading) {
-      return _buildSkeleton();
+    final state = resolveRefreshBody(
+      isEmpty: _records?.isEmpty,
+      failed: _failed,
+      manualRefreshing: _manualRefreshing,
+    );
+    switch (state) {
+      case RefreshBodyState.skeleton:
+        return _buildSkeleton();
+      case RefreshBodyState.error:
+        return _buildError(l10n);
+      case RefreshBodyState.empty:
+        return _buildEmpty(l10n);
+      case RefreshBodyState.list:
+        final records = _records!;
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: records.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
+          itemBuilder: (context, i) => _buildCard(records[i], l10n),
+        );
     }
-    if (_failed) {
-      final colorScheme = Theme.of(context).colorScheme;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 64,
-              color: colorScheme.onSurfaceVariant,
+  }
+
+  Widget _buildError(AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            size: 64,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.absentLoadFailed,
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              _failureMessage(l10n),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.absentLoadFailed,
-              style: TextStyle(
-                fontSize: 18,
-                color: colorScheme.onSurfaceVariant,
-              ),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.tonal(
+            onPressed: () => _fetch(semester: _selectedSemester, manual: true),
+            child: Text(l10n.retry),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmpty(AppLocalizations l10n) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.event_available_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.absentEmpty,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                // 連線類錯誤 → 具名「無法連線至請假系統」;其他 → 通用提示。
-                _failedOffline
-                    ? l10n.serviceUnavailable(l10n.serviceAbsent)
-                    : l10n.checkNetworkRetry,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.tonal(
-              onPressed: () => _fetch(semester: _selectedSemester),
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
-      );
-    }
-    if (_records.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_available_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.absentEmpty,
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: _records.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (context, i) => _buildCard(_records[i], l10n),
+          ),
+        ],
+      ),
     );
   }
 
