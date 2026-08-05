@@ -19,6 +19,7 @@ import '../utils/timetable_layout.dart';
 import '../utils/top_snack_bar.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/fade_in_card.dart';
+import '../widgets/skeleton_loading.dart';
 import '../widgets/triangle_painter.dart';
 import 'course_detail_screen.dart';
 import 'map_screen.dart';
@@ -33,6 +34,10 @@ class ScheduleScreen extends ConsumerStatefulWidget {
 
 class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   bool _isMapMode = false;
+
+  /// 骨架示意課程方塊的亂數種子。每個 State 實例固定一次：骨架顯示期間畫面
+  /// 仍會因為每分鐘的時間線重繪而重建，每次重建都換位置會變成閃爍的雜訊。
+  final int _skeletonSeed = Random().nextInt(1 << 30);
 
   /// 使用者主動觸發的更新（重新整理、重試）進行中。
   /// 與資料層的 `isLoadingSchedule` 並存而不混用：背景預抓也會設那個旗標
@@ -472,6 +477,27 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
   }
 
+  /// 骨架某一天的格子：`(佔用節數, 是否是課程方塊)`。
+  ///
+  /// 約三分之一的節次起一個 1～3 節的方塊，做出真實課表那種疏密不均的樣子。
+  /// 亂數由 [_skeletonSeed] 與 [dayIndex] 決定，同一次顯示中每次重建都相同。
+  List<(int, bool)> _skeletonColumn(int dayIndex, int periodCount) {
+    final rand = Random(_skeletonSeed + dayIndex);
+    final cells = <(int, bool)>[];
+    var i = 0;
+    while (i < periodCount) {
+      if (rand.nextInt(3) == 0) {
+        final span = min(1 + rand.nextInt(3), periodCount - i);
+        cells.add((span, true));
+        i += span;
+      } else {
+        cells.add((1, false));
+        i += 1;
+      }
+    }
+    return cells;
+  }
+
   Widget _buildScheduleError(DataProvider data) {
     final colorScheme = Theme.of(context).colorScheme;
     return Center(
@@ -556,7 +582,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
             translatedDay = AppLocalizations.of(context).weekdaySun;
 
           final label = isLoading
-              ? const SizedBox.shrink()
+              ? const Center(child: SkeletonBox(width: 24, height: 12))
               : Center(
                   child: Text(
                     AppLocalizations.of(context).weekdayHeader(translatedDay),
@@ -568,31 +594,63 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               : Expanded(child: label);
         }
 
+        final cellDecoration = BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+            ),
+            right: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+            ),
+          ),
+        );
+
         Widget buildColumnForDay(int dayIndex) {
           List<Widget> cells = [];
+
+          // 骨架：把一天的格子填成疏密不一的示意課程方塊，讓使用者看得出
+          // 正在載入的是一張課表，而不是一片空格線。
+          if (isLoading) {
+            for (final (span, filled) in _skeletonColumn(
+              dayIndex,
+              activePeriods.length,
+            )) {
+              cells.add(
+                Container(
+                  height: cellHeight * span,
+                  decoration: cellDecoration,
+                  width: needsScroll ? minCellWidth : double.infinity,
+                  child: filled
+                      ? Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: SkeletonBox(
+                            height: cellHeight * span - 4,
+                            borderRadius: 4,
+                          ),
+                        )
+                      : null,
+                ),
+              );
+            }
+            return needsScroll
+                ? SizedBox(
+                    width: minCellWidth,
+                    child: Column(children: cells),
+                  )
+                : Expanded(child: Column(children: cells));
+          }
 
           for (final cell in layout.column(dayIndex)) {
             final event = cell.event;
             final span = cell.span;
 
-            final decoration = BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                ),
-                right: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                ),
-              ),
-            );
-
-            final child = isLoading || event == null
+            final child = event == null
                 ? null
                 : _buildCourseCard(event, uniqueCourseNames);
 
             final cellWidget = Container(
               height: cellHeight * span,
-              decoration: decoration,
+              decoration: cellDecoration,
               width: needsScroll ? minCellWidth : double.infinity,
               child: child,
             );
@@ -688,7 +746,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                       SizedBox(
                         width: timeColumnWidth,
                         child: isLoading
-                            ? const SizedBox.shrink()
+                            ? const Center(
+                                child: SkeletonBox(width: 12, height: 12),
+                              )
                             : Center(
                                 child: Text(
                                   AppLocalizations.of(context).periodHeader,
@@ -764,7 +824,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                           ),
                                         ),
                                         child: isLoading
-                                            ? const SizedBox.shrink()
+                                            ? const Center(
+                                                child: SkeletonBox(
+                                                  width: 11,
+                                                  height: 10,
+                                                ),
+                                              )
                                             : Center(
                                                 child: Text(
                                                   period,

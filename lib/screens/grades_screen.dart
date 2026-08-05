@@ -793,74 +793,170 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
     );
   }
 
+  /// 骨架照著同一個分頁真正會顯示的版面挖空——分頁列在載入期間仍然看得見、
+  /// 也點得動，骨架跟著它換才對得上。
   Widget _buildGradesSkeleton(ColorScheme colorScheme) {
-    return ListView.builder(
+    return _selectedSegment == 0
+        ? _buildSemesterSkeleton(colorScheme)
+        : _buildHistorySkeleton(colorScheme);
+  }
+
+  /// 學期成績分頁：學期標題列 ＋ 四張統計小卡 ＋ 課程卡片列表。
+  Widget _buildSemesterSkeleton(ColorScheme colorScheme) {
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: 2,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: colorScheme.outlineVariant),
+      children: [
+        // 學期標題：左側直立色條的位置也挖成骨架，整份骨架維持單一灰階。
+        const Padding(
+          padding: EdgeInsets.only(bottom: 16, left: 4),
+          child: Row(
+            children: [
+              SkeletonBox(width: 4, height: 18, borderRadius: 2),
+              SizedBox(width: 8),
+              SkeletonBox(width: 120, height: 16),
+            ],
           ),
+        ),
+        _buildStatCardRowSkeleton(colorScheme),
+        const SizedBox(height: 24),
+        Card(
+          elevation: 0,
+          color: colorScheme.surfaceContainerHighest,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: List.generate(
+              5,
+              (_) => _buildCourseRowSkeleton(colorScheme),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 歷年成績分頁：累計儀表板 ＋ 分隔線 ＋ 每學期一張的列表卡。
+  Widget _buildHistorySkeleton(ColorScheme colorScheme) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    SkeletonBox(width: 120, height: 24),
-                    SkeletonBox(width: 60, height: 24),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              for (int i = 0; i < 3; i++) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16.0,
-                    horizontal: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            SkeletonBox(
-                              width: 150,
-                              height: 20,
-                              margin: EdgeInsets.only(bottom: 8),
-                            ),
-                            Row(
-                              children: [
-                                SkeletonBox(
-                                  width: 40,
-                                  height: 16,
-                                  margin: EdgeInsets.only(right: 8),
-                                ),
-                                SkeletonBox(width: 60, height: 16),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const SkeletonBox(width: 40, height: 32),
-                    ],
-                  ),
-                ),
-                if (i < 2) const Divider(height: 1),
-              ],
+              _buildStatCardRowSkeleton(colorScheme),
+              const SizedBox(height: 8),
+              const Divider(height: 24),
             ],
           ),
-        );
-      },
+        ),
+        ...List.generate(4, (_) => _buildSemesterTileSkeleton(colorScheme)),
+      ],
+    );
+  }
+
+  /// 四張並排的統計小卡：保留 [GradeStatCard] 的外框與尺寸，只挖掉圖示與數字。
+  /// 底色與邊框改用中性灰階——骨架不帶主色，免得看起來像已經載好的內容。
+  Widget _buildStatCardRowSkeleton(ColorScheme colorScheme) {
+    Widget card() => Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: colorScheme.onSurface.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorScheme.outlineVariant, width: 1),
+        ),
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SkeletonBox(width: 16, height: 16, borderRadius: 8),
+            SizedBox(height: 4),
+            SkeletonBox(width: 34, height: 14),
+            SizedBox(height: 4),
+            SkeletonBox(width: 26, height: 9),
+          ],
+        ),
+      ),
+    );
+
+    return Row(
+      children: [
+        card(),
+        const SizedBox(width: 8),
+        card(),
+        const SizedBox(width: 8),
+        card(),
+        const SizedBox(width: 8),
+        card(),
+      ],
+    );
+  }
+
+  /// 一列課程：課名 ＋（類別膠囊、學分）＋ 右側分數色塊。
+  Widget _buildCourseRowSkeleton(ColorScheme colorScheme) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBox(width: 160, height: 16),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      SkeletonBox(width: 40, height: 18, borderRadius: 4),
+                      SizedBox(width: 8),
+                      SkeletonBox(width: 52, height: 14),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 16),
+            SkeletonBox(width: 48, height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 一張學期卡：標題 ＋ 單行摘要 ＋ 右側箭頭（ListTile 的形狀）。
+  Widget _buildSemesterTileSkeleton(ColorScheme colorScheme) {
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBox(width: 110, height: 16),
+                  SizedBox(height: 8),
+                  SkeletonBox(height: 13),
+                ],
+              ),
+            ),
+            SizedBox(width: 16),
+            SkeletonBox(width: 20, height: 20, borderRadius: 10),
+          ],
+        ),
+      ),
     );
   }
 }
