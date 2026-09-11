@@ -237,18 +237,21 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final mainBody = Stack(
       children: [
         bodyContent,
+        // 離屏的分享卡。尺寸必須明確——`RepaintBoundary.toImage` 擷取的是已
+        // 完成佈局的 RenderObject，沒有尺寸就沒有圖。高度隨課程內容變動，
+        // 由 `ShareScheduleCard.heightFor` 用與卡片佈局相同的常數算出。
         Positioned(
           left: -9999,
           top: -9999,
-          width: 496,
-          height: 656,
+          width: ShareScheduleCard.cardWidth + 16,
+          height: ShareScheduleCard.heightFor(data.displayedSchedule) + 16,
           child: RepaintBoundary(
             key: _repaintKey,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               // 分享目前「顯示中」的學期，而非固定的當前學期——否則切到其他
               // 學期後分享出來的圖仍是當前學期。
-              child: _ShareScheduleCard(courses: data.displayedSchedule),
+              child: ShareScheduleCard(courses: data.displayedSchedule),
             ),
           ),
         ),
@@ -1079,18 +1082,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
   }
 
-  /// 修別在英文模式時直接翻成英文（只寫英文、不併中文），中文模式維持原文。
-  String _localizedRequiredType(String rawType, bool isEnglish) {
-    final type = rawType.trim();
-    if (!isEnglish) return type;
-    if (type == '必修' || type.toLowerCase() == 'required') return 'Required';
-    if (type == '選修' || type.toLowerCase() == 'elective') return 'Elective';
-    if (type == '通識' || type.toLowerCase().contains('general')) {
-      return 'General Education';
-    }
-    return type;
-  }
-
   /// 無時間課程的橫向小卡片：左側色條 + 課名 / 修別 / 學分 / 系所課號。
   Widget _buildNoTimeCard(ScheduleEvent event, List<String> uniqueCourseNames) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -1256,15 +1247,98 @@ class _SemesterChip extends StatelessWidget {
   }
 }
 
-class _ShareScheduleCard extends StatelessWidget {
+/// 修別在英文模式時直接翻成英文（只寫英文、不併中文），中文模式維持原文。
+///
+/// 放在檔案層級而非畫面 State 裡，是因為分享卡是獨立的 widget，拿不到
+/// `_ScheduleScreenState` 的私有方法，但兩邊要印出一模一樣的修別字樣。
+String _localizedRequiredType(String rawType, bool isEnglish) {
+  final type = rawType.trim();
+  if (!isEnglish) return type;
+  if (type == '必修' || type.toLowerCase() == 'required') return 'Required';
+  if (type == '選修' || type.toLowerCase() == 'elective') return 'Elective';
+  if (type == '通識' || type.toLowerCase().contains('general')) {
+    return 'General Education';
+  }
+  return type;
+}
+
+/// 分享出去的課表圖卡。
+///
+/// 尺寸規則：**寬度固定、高度依內容算出**。高度不是讓 widget 自然撐開的——
+/// 離屏 `RepaintBoundary.toImage` 需要一個已完成佈局的明確尺寸，所以由
+/// [heightFor] 用下方那組常數先算好，外層再把這個數字釘在 `Positioned` 上。
+/// 公式與佈局共用同一組常數，改任何一個都會兩邊一起變。
+///
+/// 之所以不沿用舊的固定 480×640：節次列數本來就會變（只有白天課是 9 列、
+/// 有夜間課是 15 列），固定高度必然讓一部分人被壓扁——15 列時每列只剩 35 px，
+/// 課名一定爆版。
+class ShareScheduleCard extends StatelessWidget {
   final List<ScheduleEvent> courses;
 
-  const _ShareScheduleCard({required this.courses});
+  const ShareScheduleCard({super.key, required this.courses});
+
+  // ── 尺寸常數（[heightFor] 與 build 共用）──────────────────────────
+  static const double cardWidth = 560;
+  static const double _cardPadding = 16;
+  static const double _cardBorder = 4; // 卡片外框上下各 2
+  static const double _headerHeight = 40;
+  static const double _headerGap = 16;
+  static const double _periodColumnWidth = 44;
+  static const double _dayHeaderHeight = 24;
+  static const double _rowHeight = 54;
+  static const double _endStripHeight = 14;
+  static const double _gridBorder = 2; // 外框上下各 1
+  static const double _noTimeGap = 12;
+  static const double _noTimeTitleHeight = 28;
+  static const double _noTimeCardHeight = 36;
+  static const double _noTimeCardGap = 8;
+
+  /// 有排定時段的課才進格線；一門都沒有時回 null，格線整區省略。
+  ///
+  /// 傳進 [TimetableLayout.from] 的仍是完整的 [courses]（含無時間課），因為
+  /// `courseNames` 決定配色順序——無時間課的色條要跟格線裡的課同一套顏色。
+  static TimetableLayout? _layoutFor(List<ScheduleEvent> courses) {
+    final hasScheduled = courses.any(
+      (c) => c.name.isNotEmpty && c.times.isNotEmpty,
+    );
+    if (!hasScheduled) return null;
+    return TimetableLayout.from(courses, allPeriods: ClassPeriods.codes);
+  }
+
+  static List<ScheduleEvent> _noTimeCoursesOf(List<ScheduleEvent> courses) =>
+      courses.where((c) => c.name.isNotEmpty && c.times.isEmpty).toList();
+
+  /// 這批課程畫出來的卡片高度。外層據此設定離屏容器的尺寸。
+  static double heightFor(List<ScheduleEvent> courses) {
+    final layout = _layoutFor(courses);
+    final noTimeCount = _noTimeCoursesOf(courses).length;
+
+    double height = _cardBorder + _cardPadding * 2 + _headerHeight;
+    if (layout != null) {
+      height +=
+          _headerGap +
+          _gridBorder +
+          _dayHeaderHeight +
+          layout.periods.length * _rowHeight +
+          _endStripHeight;
+    }
+    if (noTimeCount > 0) {
+      height +=
+          _noTimeGap +
+          _noTimeTitleHeight +
+          noTimeCount * _noTimeCardHeight +
+          (noTimeCount - 1) * _noTimeCardGap;
+    }
+    return height;
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
+    final layout = _layoutFor(courses);
+    final noTimeCourses = _noTimeCoursesOf(courses);
 
     final uniqueCourseNames =
         courses
@@ -1274,7 +1348,7 @@ class _ShareScheduleCard extends StatelessWidget {
             .toList()
           ..sort();
 
-    // 1. 提取學年與學期
+    // 學年與學期：取第一筆有值的。
     String year = '';
     String semester = '';
     for (var c in courses) {
@@ -1287,7 +1361,7 @@ class _ShareScheduleCard extends StatelessWidget {
       if (year.isNotEmpty && semester.isNotEmpty) break;
     }
 
-    String titleText = '';
+    final String titleText;
     if (year.isNotEmpty && semester.isNotEmpty) {
       titleText = isEnglish
           ? 'Academic Year $year, Sem $semester'
@@ -1300,95 +1374,10 @@ class _ShareScheduleCard extends StatelessWidget {
         ? 'National Yunlin University of Science and Technology'
         : '國立雲林科技大學';
 
-    // 2. 計算活躍的星期與節次
-    final periods = [
-      'X',
-      'A',
-      'B',
-      'C',
-      'D',
-      'Y',
-      'E',
-      'F',
-      'G',
-      'H',
-      'Z',
-      'I',
-      'J',
-      'K',
-      'L',
-    ];
-
-    int minDayIndex = 0;
-    int maxDayIndex = 4;
-    int minPeriodIndex = 1; // 預設 A
-    int maxPeriodIndex = 9; // 預設 H
-
-    if (courses.isNotEmpty) {
-      int minDay = 6;
-      int maxDay = 0;
-      int minP = periods.length;
-      int maxP = 0;
-      bool hasClass = false;
-
-      for (var course in courses) {
-        if (course.name.isNotEmpty) {
-          hasClass = true;
-          int d = int.tryParse(course.weekday ?? '') ?? 1;
-          int dIndex = d - 1;
-          if (dIndex < minDay) minDay = dIndex;
-          if (dIndex > maxDay) maxDay = dIndex;
-
-          for (var t in course.times) {
-            int pIndex = periods.indexOf(t);
-            if (pIndex != -1) {
-              if (pIndex < minP) minP = pIndex;
-              if (pIndex > maxP) maxP = pIndex;
-            }
-          }
-        }
-      }
-
-      if (hasClass) {
-        minDayIndex = min(minDay, 0).clamp(0, 6);
-        maxDayIndex = max(maxDay, 4).clamp(minDayIndex, 6);
-        minPeriodIndex = min(minP, 1).clamp(0, periods.length - 1);
-        maxPeriodIndex = max(maxP, 9).clamp(minPeriodIndex, periods.length - 1);
-      }
-    }
-
-    final activeDayIndices = List.generate(
-      maxDayIndex - minDayIndex + 1,
-      (i) => minDayIndex + i,
-    );
-    final activePeriods = periods.sublist(minPeriodIndex, maxPeriodIndex + 1);
-    final allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
-
-    // 3. 取得某天某節的課
-    ScheduleEvent getEventFor(int dayIndex, String period) {
-      final weekdayStr = (dayIndex + 1).toString();
-      return courses.firstWhere(
-        (c) => c.weekday == weekdayStr && c.times.contains(period),
-        orElse: () => ScheduleEvent(
-          semesterCourseNo: '',
-          deptCourseNo: '',
-          name: '',
-          courseClass: '',
-          classType: '',
-          requiredType: '',
-          credits: '',
-          timeRoomStr: '',
-          teacher: '',
-          remark: '',
-          times: [],
-        ),
-      );
-    }
-
-    return Container(
-      width: 480,
-      height: 640,
-      padding: const EdgeInsets.all(16.0),
+    final card = Container(
+      width: cardWidth,
+      height: heightFor(courses),
+      padding: const EdgeInsets.all(_cardPadding),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border.all(color: colorScheme.outlineVariant, width: 2),
@@ -1397,62 +1386,214 @@ class _ShareScheduleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header 區
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                schoolName,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.primary,
+          SizedBox(
+            height: _headerHeight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  schoolName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  // 行高釘死：header 是固定 [_headerHeight] 高，讓字體度量
+                  // 決定行高的話換一套字型就會爆版。
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.2,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.primary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                titleText,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+                const SizedBox(height: 2),
+                Text(
+                  titleText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18,
+                    height: 1.2,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          // Grid 區
+          if (layout != null) ...[
+            const SizedBox(height: _headerGap),
+            _buildGrid(context, layout, uniqueCourseNames, isEnglish),
+          ],
+          if (noTimeCourses.isNotEmpty) ...[
+            const SizedBox(height: _noTimeGap),
+            _buildNoTimeSection(
+              context,
+              noTimeCourses,
+              uniqueCourseNames,
+              isEnglish,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    // 分享圖的尺寸是算出來的固定值，不能被使用者的系統字級縮放推翻——
+    // 放大字級時整張圖會爆版。截圖一律以標準字級繪製。
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+      child: card,
+    );
+  }
+
+  // ── 格線 ────────────────────────────────────────────────────────
+  Widget _buildGrid(
+    BuildContext context,
+    TimetableLayout layout,
+    List<String> uniqueCourseNames,
+    bool isEnglish,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final periods = layout.periods;
+    final dayIndices = layout.dayIndices;
+    final gridHeight =
+        _gridBorder +
+        _dayHeaderHeight +
+        periods.length * _rowHeight +
+        _endStripHeight;
+
+    const allWeekDays = ['一', '二', '三', '四', '五', '六', '日'];
+    const englishWeekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    final bandColor = colorScheme.surfaceContainerHighest;
+    final lastEndText = ClassPeriods.byCode(periods.last)?.endText ?? '';
+
+    return Container(
+      height: gridHeight,
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 左側節次欄：代碼（主）+ 起始時刻（輔）。
+          //
+          // 時刻是這張圖能被外校的人讀懂的關鍵：App 裡點一下節次會跳出時間，
+          // 圖片上沒有那條路，只剩 A／B／C 這種雲科內部代碼。
+          SizedBox(
+            width: _periodColumnWidth,
+            child: Column(
+              children: [
+                Container(
+                  height: _dayHeaderHeight,
+                  decoration: BoxDecoration(
+                    color: bandColor,
+                    border: Border(
+                      bottom: BorderSide(color: colorScheme.outlineVariant),
+                      right: BorderSide(color: colorScheme.outlineVariant),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      isEnglish ? 'Pd.' : '節',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                for (int i = 0; i < periods.length; i++)
+                  Container(
+                    height: _rowHeight,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: i == periods.length - 1
+                            ? BorderSide.none
+                            : BorderSide(color: colorScheme.outlineVariant),
+                        right: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            periods[i],
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            ClassPeriods.byCode(periods[i])?.startText ?? '',
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                // 收尾列：最後一節的結束時刻。其他列的結束時刻可以從下一列的
+                // 起始時刻讀出來，只有最後一列沒有下一列。
+                Container(
+                  height: _endStripHeight,
+                  decoration: BoxDecoration(
+                    color: bandColor,
+                    border: Border(
+                      top: BorderSide(color: colorScheme.outlineVariant),
+                      right: BorderSide(color: colorScheme.outlineVariant),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      lastEndText,
+                      style: TextStyle(
+                        fontSize: 8.5,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 右側星期欄與課程格。
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: colorScheme.outlineVariant),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Row(
-                children: [
-                  // 左側節次欄
-                  SizedBox(
-                    width: 32,
-                    child: Column(
-                      children: [
-                        // 左上角空白格
-                        Container(
-                          height: 24,
+            child: Column(
+              children: [
+                Container(
+                  height: _dayHeaderHeight,
+                  decoration: BoxDecoration(
+                    color: bandColor,
+                    border: Border(
+                      bottom: BorderSide(color: colorScheme.outlineVariant),
+                    ),
+                  ),
+                  child: Row(
+                    children: dayIndices.map((i) {
+                      final displayDay = isEnglish
+                          ? englishWeekDays[i]
+                          : '週${allWeekDays[i]}';
+                      return Expanded(
+                        child: Container(
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
                             border: Border(
-                              bottom: BorderSide(
-                                color: colorScheme.outlineVariant,
-                              ),
-                              right: BorderSide(
-                                color: colorScheme.outlineVariant,
-                              ),
+                              right: i == dayIndices.last
+                                  ? BorderSide.none
+                                  : BorderSide(
+                                      color: colorScheme.outlineVariant,
+                                    ),
                             ),
                           ),
                           child: Center(
                             child: Text(
-                              isEnglish ? 'Pd.' : '節',
+                              displayDay,
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -1461,251 +1602,274 @@ class _ShareScheduleCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // 節次列表
-                        Expanded(
-                          child: Column(
-                            children: activePeriods.map((period) {
-                              return Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: period == activePeriods.last
-                                          ? BorderSide.none
-                                          : BorderSide(
-                                              color: colorScheme.outlineVariant,
-                                            ),
-                                      right: BorderSide(
-                                        color: colorScheme.outlineVariant,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      period,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                SizedBox(
+                  height: periods.length * _rowHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: dayIndices.map((dayIndex) {
+                      return Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _dayCells(
+                            context,
+                            layout,
+                            dayIndex,
+                            uniqueCourseNames,
+                            isEnglish,
                           ),
                         ),
-                      ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Container(
+                  height: _endStripHeight,
+                  decoration: BoxDecoration(
+                    color: bandColor,
+                    border: Border(
+                      top: BorderSide(color: colorScheme.outlineVariant),
                     ),
                   ),
-                  // 右側星期與課程
-                  Expanded(
-                    child: Column(
-                      children: [
-                        // 頂部星期欄
-                        Container(
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
-                            border: Border(
-                              bottom: BorderSide(
-                                color: colorScheme.outlineVariant,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: activeDayIndices.map((i) {
-                              String day = allWeekDays[i];
-                              String displayDay = day;
-                              if (isEnglish) {
-                                if (day == '一')
-                                  displayDay = 'Mon';
-                                else if (day == '二')
-                                  displayDay = 'Tue';
-                                else if (day == '三')
-                                  displayDay = 'Wed';
-                                else if (day == '四')
-                                  displayDay = 'Thu';
-                                else if (day == '五')
-                                  displayDay = 'Fri';
-                                else if (day == '六')
-                                  displayDay = 'Sat';
-                                else if (day == '日')
-                                  displayDay = 'Sun';
-                              } else {
-                                displayDay = '週$day';
-                              }
-                              return Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      right: i == activeDayIndices.last
-                                          ? BorderSide.none
-                                          : BorderSide(
-                                              color: colorScheme.outlineVariant,
-                                            ),
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      displayDay,
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        // 課程內容網格
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: activeDayIndices.map((dayIndex) {
-                              List<Widget> dayColumnCells = [];
-                              for (int i = 0; i < activePeriods.length; i++) {
-                                final period = activePeriods[i];
-                                final event = getEventFor(dayIndex, period);
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                                int span = 1;
-                                if (event.name.isNotEmpty) {
-                                  while (i + span < activePeriods.length) {
-                                    final nextPeriod = activePeriods[i + span];
-                                    final nextEvent = getEventFor(
-                                      dayIndex,
-                                      nextPeriod,
-                                    );
-                                    if (nextEvent.name == event.name &&
-                                        nextEvent.semesterCourseNo ==
-                                            event.semesterCourseNo) {
-                                      span++;
-                                    } else {
-                                      break;
-                                    }
-                                  }
-                                }
+  /// 一天的格子。擺位（哪一格放什麼課、跨節合併幾格）由 [TimetableLayout]
+  /// 決定，這裡只負責把它畫成固定列高的方塊。
+  List<Widget> _dayCells(
+    BuildContext context,
+    TimetableLayout layout,
+    int dayIndex,
+    List<String> uniqueCourseNames,
+    bool isEnglish,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final cells = layout.column(dayIndex);
+    final isLastDay = dayIndex == layout.dayIndices.last;
 
-                                final hasCourse = event.name.isNotEmpty;
-                                Widget cellChild;
-                                if (hasCourse) {
-                                  final displayName =
-                                      (isEnglish &&
-                                          event.nameEn != null &&
-                                          event.nameEn!.trim().isNotEmpty)
-                                      ? event.nameEn!
-                                      : event.name;
+    final widgets = <Widget>[];
+    int consumed = 0;
+    for (final cell in cells) {
+      consumed += cell.span;
+      final isLastRow = consumed >= layout.periods.length;
+      final event = cell.event;
 
-                                  final courseIndex = uniqueCourseNames.indexOf(
-                                    event.name,
-                                  );
-                                  final courseColor = getCourseColor(
-                                    context,
-                                    courseIndex,
-                                  );
+      Widget child = const SizedBox.shrink();
+      if (event != null) {
+        final displayName =
+            (isEnglish &&
+                event.nameEn != null &&
+                event.nameEn!.trim().isNotEmpty)
+            ? event.nameEn!
+            : event.name;
+        final courseColor = getCourseColor(
+          context,
+          uniqueCourseNames.indexOf(event.name),
+        );
 
-                                  cellChild = Container(
-                                    margin: const EdgeInsets.all(2.0),
-                                    padding: const EdgeInsets.all(4.0),
-                                    decoration: BoxDecoration(
-                                      color: courseColor.backgroundColor,
-                                      borderRadius: BorderRadius.circular(6.0),
-                                      border: Border.all(
-                                        color: courseColor.borderColor,
-                                        width: 0.5,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text(
-                                          displayName,
-                                          maxLines: span > 1 ? 4 : 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: span > 1 ? 13.5 : 12.5,
-                                            fontWeight: FontWeight.bold,
-                                            color: courseColor.textColor,
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                        if (event.room != null &&
-                                            event.room!.isNotEmpty) ...[
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            event.room!,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 10.5,
-                                              color: courseColor.textColor
-                                                  .withValues(alpha: 0.75),
-                                              height: 1.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  );
-                                } else {
-                                  cellChild = const SizedBox.shrink();
-                                }
-
-                                dayColumnCells.add(
-                                  Expanded(
-                                    flex: span,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom:
-                                              i + span >= activePeriods.length
-                                              ? BorderSide.none
-                                              : BorderSide(
-                                                  color: colorScheme
-                                                      .outlineVariant
-                                                      .withValues(alpha: 0.5),
-                                                ),
-                                          right:
-                                              dayIndex == activeDayIndices.last
-                                              ? BorderSide.none
-                                              : BorderSide(
-                                                  color: colorScheme
-                                                      .outlineVariant
-                                                      .withValues(alpha: 0.5),
-                                                ),
-                                        ),
-                                      ),
-                                      child: cellChild,
-                                    ),
-                                  ),
-                                );
-                                i += span - 1;
-                              }
-
-                              return Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: dayColumnCells,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
+        child = Container(
+          margin: const EdgeInsets.all(2.0),
+          padding: const EdgeInsets.all(4.0),
+          decoration: BoxDecoration(
+            color: courseColor.backgroundColor,
+            borderRadius: BorderRadius.circular(6.0),
+            border: Border.all(color: courseColor.borderColor, width: 0.5),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                displayName,
+                maxLines: cell.span > 1 ? 4 : 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: cell.span > 1 ? 13.5 : 12.5,
+                  fontWeight: FontWeight.bold,
+                  color: courseColor.textColor,
+                  height: 1.1,
+                ),
+              ),
+              if (event.room != null && event.room!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  event.room!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: courseColor.textColor.withValues(alpha: 0.75),
+                    height: 1.0,
                   ),
-                ],
+                ),
+              ],
+            ],
+          ),
+        );
+      }
+
+      widgets.add(
+        Container(
+          height: cell.span * _rowHeight,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: isLastRow
+                  ? BorderSide.none
+                  : BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+              right: isLastDay
+                  ? BorderSide.none
+                  : BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+            ),
+          ),
+          child: child,
+        ),
+      );
+    }
+    return widgets;
+  }
+
+  // ── 無安排上課時間的課程 ──────────────────────────────────────────
+  //
+  // 這些課在格線上沒有任何落點，舊版分享圖等於把它們整批丟掉——分享出去的
+  // 課表少了幾門課，而且沒有任何跡象。
+  Widget _buildNoTimeSection(
+    BuildContext context,
+    List<ScheduleEvent> noTimeCourses,
+    List<String> uniqueCourseNames,
+    bool isEnglish,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: _noTimeTitleHeight,
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                AppLocalizations.of(context).scheduleNoTimeTitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '(${noTimeCourses.length})',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        for (var i = 0; i < noTimeCourses.length; i++) ...[
+          if (i > 0) const SizedBox(height: _noTimeCardGap),
+          _buildNoTimeCard(
+            context,
+            noTimeCourses[i],
+            uniqueCourseNames,
+            isEnglish,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildNoTimeCard(
+    BuildContext context,
+    ScheduleEvent event,
+    List<String> uniqueCourseNames,
+    bool isEnglish,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final displayName =
+        (isEnglish && event.nameEn != null && event.nameEn!.trim().isNotEmpty)
+        ? event.nameEn!
+        : event.name;
+    final courseColor = getCourseColor(
+      context,
+      uniqueCourseNames.indexOf(event.name),
+    );
+
+    final meta = <String>[
+      if (event.requiredType.isNotEmpty)
+        _localizedRequiredType(event.requiredType, isEnglish),
+      if (event.credits.isNotEmpty)
+        AppLocalizations.of(context).courseCreditsFormat(event.credits),
+    ].join(' · ');
+
+    return Container(
+      height: _noTimeCardHeight,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(width: 5, color: courseColor.borderColor),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
           ),
+          if (meta.isNotEmpty) ...[
+            const SizedBox(width: 6),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                meta,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(width: 10),
         ],
       ),
     );
