@@ -1085,11 +1085,15 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final borderColor = isCurrent
         ? Colors.transparent
         : colorScheme.outlineVariant;
+    // 已上課的課程整體褪成淺灰，和「尚未上課」拉開差距（兩者的卡片底色與
+    // 邊框相同，只靠文字深淺分辨）。
+    final pastInk = colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+
     final titleColor = isPast
-        ? colorScheme.onSurfaceVariant
+        ? pastInk
         : (isCurrent ? colorScheme.onPrimaryContainer : colorScheme.onSurface);
     final subtitleColor = isPast
-        ? colorScheme.onSurfaceVariant
+        ? pastInk
         : (isCurrent
               ? colorScheme.onPrimaryContainer
               : colorScheme.onSurfaceVariant);
@@ -1099,7 +1103,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               ? colorScheme.primary.withValues(alpha: 0.1)
               : colorScheme.surfaceContainerHighest);
     final iconColor = isPast
-        ? colorScheme.onSurfaceVariant
+        ? pastInk
         : (isCurrent ? colorScheme.primary : colorScheme.onSurfaceVariant);
 
     return Card(
