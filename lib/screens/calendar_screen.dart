@@ -18,6 +18,13 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/timeline_painter.dart';
 
+/// 事件卡片的最小高度（卡片本身，不含外層間距與 `Card` 的 margin）。
+///
+/// 高度平常是內容撐出來的：上下內距 6 + 單行文字約 21 = 33，名稱換行就更高。
+/// 這個下限只在內容比它矮的時候生效，讓每張卡不會塌到太扁；預設 40 剛好等於
+/// 加入行事曆按鈕的觸控範圍，按鈕因此整個落在卡片內。調小到 33 以下就等於關掉。
+const double _kEventCardMinHeight = 40.0;
+
 class CalendarScreen extends ConsumerStatefulWidget {
   final bool embed;
   final ValueChanged<bool>? onLoadingChanged;
@@ -966,65 +973,86 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                               : Colors.transparent,
                                         ),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0,
-                                          vertical: 8.0,
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          minHeight: _kEventCardMinHeight,
                                         ),
-                                        child: Row(
-                                          children: [
-                                            if (isImportant) ...[
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.amber.shade700,
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 8),
-                                            ],
-                                            Expanded(
-                                              child: Text(
-                                                event.name,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.normal,
-                                                  fontSize: 15,
-                                                  color: isImportant
-                                                      ? Colors.amber.shade900
-                                                      : colorScheme
-                                                            .onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ),
-                                            if (CalendarExportService
-                                                .isSupported) ...[
-                                              const SizedBox(width: 8),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.edit_calendar,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0,
+                                            vertical: 6.0,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              if (isImportant) ...[
+                                                Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber.shade700,
                                                   size: 20,
                                                 ),
-                                                // 收到與圖示同高。`IconButton` 的
-                                                // 最小點擊尺寸（compact 之後仍有
-                                                // 40）跟圖示畫多大無關，會把只有
-                                                // 一行的事件卡整個撐高 —— 多行卡
-                                                // 因為文字本來就超過 40 而看不出來。
-                                                padding: EdgeInsets.zero,
-                                                constraints:
-                                                    const BoxConstraints(
-                                                      minWidth: 24,
-                                                      minHeight: 24,
-                                                    ),
-                                                color: isImportant
-                                                    ? Colors.amber.shade900
-                                                    : colorScheme
-                                                          .onSurfaceVariant,
-                                                tooltip: AppLocalizations.of(
-                                                  context,
-                                                ).addToCalendar,
-                                                onPressed: () =>
-                                                    _addEventToCalendar(event),
+                                                const SizedBox(width: 8),
+                                              ],
+                                              Expanded(
+                                                child: Text(
+                                                  event.name,
+                                                  style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                    fontSize: 15,
+                                                    color: isImportant
+                                                        ? Colors.amber.shade900
+                                                        : colorScheme
+                                                              .onSurfaceVariant,
+                                                  ),
+                                                ),
                                               ),
+                                              if (CalendarExportService
+                                                  .isSupported) ...[
+                                                const SizedBox(width: 8),
+                                                // 佔位只有 40x20（跟圖示同高），
+                                                // 所以按鈕不會把一行的事件卡撐高；
+                                                // `OverflowBox` 再把實際的按鈕放大
+                                                // 到 40x40，讓觸控範圍溢出到卡片的
+                                                // 內距上，點得到又不影響版面高度。
+                                                SizedBox(
+                                                  width: 40,
+                                                  height: 20,
+                                                  child: OverflowBox(
+                                                    minWidth: 40,
+                                                    maxWidth: 40,
+                                                    minHeight: 40,
+                                                    maxHeight: 40,
+                                                    child: IconButton(
+                                                      icon: const Icon(
+                                                        Icons.edit_calendar,
+                                                        size: 20,
+                                                      ),
+                                                      padding: EdgeInsets.zero,
+                                                      constraints:
+                                                          const BoxConstraints(
+                                                            minWidth: 40,
+                                                            minHeight: 40,
+                                                          ),
+                                                      color: isImportant
+                                                          ? Colors
+                                                                .amber
+                                                                .shade900
+                                                          : colorScheme
+                                                                .onSurfaceVariant,
+                                                      tooltip:
+                                                          AppLocalizations.of(
+                                                            context,
+                                                          ).addToCalendar,
+                                                      onPressed: () =>
+                                                          _addEventToCalendar(
+                                                            event,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ],
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     ),
