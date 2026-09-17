@@ -100,3 +100,6 @@ reverse-engineering/
 **/android/key.properties
 *.jks
 *.keystore
+
+# Local scratch notes
+.scratch/
