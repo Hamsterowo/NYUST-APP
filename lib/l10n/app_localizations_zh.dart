@@ -656,6 +656,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get courseCredits => '學分數';
 
   @override
+  String courseCreditsBreakdown(String lecture, String lab, String credits) {
+    return '講授 $lecture · 實習 $lab · 學分 $credits';
+  }
+
+  @override
   String get courseScheduleClassroom => '上課時間教室';
 
   @override

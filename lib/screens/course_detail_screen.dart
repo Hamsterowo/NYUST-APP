@@ -659,7 +659,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
             const Divider(height: 8),
             _buildInfoRow(
               AppLocalizations.of(context).courseCredits,
-              detail.credits,
+              _formatCredits(detail.credits),
             ),
             const Divider(height: 8),
             _buildInfoRow(
@@ -724,6 +724,16 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
         ),
       ),
     );
+  }
+
+  /// 校方的學分欄是「講授-實習-學分」（如 `3-0-3`），轉成帶標籤的文字；
+  /// 格式不符時照原字串顯示。
+  String _formatCredits(String raw) {
+    final parts = raw.split('-').map((s) => s.trim()).toList();
+    if (parts.length != 3) return raw;
+    return AppLocalizations.of(
+      context,
+    ).courseCreditsBreakdown(parts[0], parts[1], parts[2]);
   }
 
   Widget _buildInfoRow(

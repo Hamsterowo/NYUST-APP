@@ -348,6 +348,14 @@
   "courseSerialNo": "Course No.",
   "courseCurriculumNo": "Curriculum No.",
   "courseCredits": "Credits",
+  "courseCreditsBreakdown": "Lecture {lecture} · Lab {lab} · Credits {credits}",
+  "@courseCreditsBreakdown": {
+    "placeholders": {
+      "lecture": {"type": "String"},
+      "lab": {"type": "String"},
+      "credits": {"type": "String"}
+    }
+  },
   "courseScheduleClassroom": "Schedule/Classroom",
   "courseClass": "Class",
   "scheduleNoTimeTitle": "Unscheduled",

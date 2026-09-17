@@ -1304,6 +1304,12 @@ abstract class AppLocalizations {
   /// **'學分數'**
   String get courseCredits;
 
+  /// No description provided for @courseCreditsBreakdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'講授 {lecture} · 實習 {lab} · 學分 {credits}'**
+  String courseCreditsBreakdown(String lecture, String lab, String credits);
+
   /// No description provided for @courseScheduleClassroom.
   ///
   /// In zh, this message translates to:

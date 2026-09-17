@@ -679,6 +679,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseCredits => 'Credits';
 
   @override
+  String courseCreditsBreakdown(String lecture, String lab, String credits) {
+    return 'Lecture $lecture · Lab $lab · Credits $credits';
+  }
+
+  @override
   String get courseScheduleClassroom => 'Schedule/Classroom';
 
   @override

@@ -348,6 +348,14 @@
   "courseSerialNo": "課號",
   "courseCurriculumNo": "系所課號",
   "courseCredits": "學分數",
+  "courseCreditsBreakdown": "講授 {lecture} · 實習 {lab} · 學分 {credits}",
+  "@courseCreditsBreakdown": {
+    "placeholders": {
+      "lecture": {"type": "String"},
+      "lab": {"type": "String"},
+      "credits": {"type": "String"}
+    }
+  },
   "courseScheduleClassroom": "上課時間教室",
   "courseClass": "開課班級",
   "scheduleNoTimeTitle": "無安排上課時間",
