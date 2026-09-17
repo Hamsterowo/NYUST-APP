@@ -5,6 +5,7 @@ import '../models/grade_report.dart';
 import '../providers/data_provider.dart';
 import '../providers/providers.dart';
 import '../services/scrape_result.dart';
+import '../services/server_time_service.dart';
 import '../utils/refresh_body_state.dart';
 import '../utils/status_colors.dart';
 import '../utils/top_snack_bar.dart';
@@ -256,7 +257,7 @@ class _GradesScreenState extends ConsumerState<GradesScreen> {
     }
 
     // 計算當前真實世界的台灣學年與學期
-    final now = DateTime.now();
+    final now = ServerTimeService.instance.now();
     int currentYear = now.year - 1911;
     int currentSem = 1;
     if (now.month >= 2 && now.month <= 7) {

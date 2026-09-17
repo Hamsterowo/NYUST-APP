@@ -47,6 +47,12 @@ class ServerTimeService with WidgetsBindingObserver {
 
   bool _observing = false;
 
+  /// 回到前景時用來重新取得伺服器時間的 hook（由 `ApiService` 註冊，發一個輕量
+  /// 請求讓 client 的 `onResponse` 餵回 `Date` header）。錨點在背景／恢復時會被
+  /// 作廢，若沒有這個 hook，就得等使用者剛好觸發下一個網路請求才會重新校準——
+  /// 例如使用者去系統設定改時間再回來，整段期間都不會校正也不會跳橫幅。
+  Future<void> Function()? resync;
+
   /// 開始監聽 App 生命週期，於背景／恢復時作廢陳舊錨點。由 `main()` 呼叫一次即可
   /// （重複呼叫為 no-op）。單調時鐘在背景凍結期間不前進，恢復後舊錨點會失準而
   /// 造成時間誤差橫幅假陽性——這裡在切換前後清掉錨點以避免之。
@@ -64,6 +70,10 @@ class ServerTimeService with WidgetsBindingObserver {
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.resumed) {
       _invalidateAnchor();
+    }
+    // 恢復後主動重新校準（作廢在前、請求在後，新錨點必定是恢復後量到的）。
+    if (state == AppLifecycleState.resumed) {
+      unawaited(resync?.call());
     }
   }
 

@@ -61,6 +61,22 @@ class ApiClient {
     return await cookieJar.loadForRequest(uri);
   }
 
+  /// 對學校伺服器發一個輕量 `HEAD` 請求，只為了讓 [LanguageInterceptor] 從回應的
+  /// `Date` header 重新校準伺服器時間。失敗（離線等）一律忽略。
+  Future<void> pingServerTime() async {
+    try {
+      await dio.head(
+        'https://webapp.yuntech.edu.tw/',
+        options: Options(followRedirects: false),
+      );
+    } on DioException catch (e) {
+      // 5xx 不會進 onResponse，但回應本身仍帶有效的 Date header。
+      ServerTimeService.instance.reportServerDate(
+        e.response?.headers.value('date'),
+      );
+    } catch (_) {}
+  }
+
   /// 清除所有 Cookies（登出時使用）
   Future<void> clearCookies() async {
     await cookie_mgr.clearCookies();

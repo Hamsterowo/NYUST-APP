@@ -8,6 +8,7 @@ import '../models/schedule_event.dart';
 import 'api_client.dart';
 import 'service_factory.dart';
 import 'scrape_result.dart';
+import 'server_time_service.dart';
 import 'app_api/app_api_service.dart';
 import 'scrapers/sso_scraper.dart';
 import 'scrapers/info_scraper.dart';
@@ -29,7 +30,13 @@ class ApiService {
 
   factory ApiService() => _shared;
 
-  ApiService._();
+  ApiService._() {
+    // App 回到前景時重新校準伺服器時間；demo 模式不打網路。
+    ServerTimeService.instance.resync = () async {
+      if (isDemoMode) return;
+      await _client.pingServerTime();
+    };
+  }
 
   final ApiClient _client = ApiClient();
   late final ServiceFactory _factory = ServiceFactory(_client);
