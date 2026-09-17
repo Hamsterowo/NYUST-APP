@@ -8,6 +8,7 @@ import '../providers/providers.dart';
 import '../models/schedule_event.dart';
 import '../models/calendar_event.dart';
 import '../services/calendar_cache_service.dart';
+import '../services/server_time_service.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/top_snack_bar.dart';
@@ -69,7 +70,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
   Future<void> _fetchTodayCalendar() async {
     final lang = _calendarLanguageCode ?? 'zh';
     try {
-      final now = DateTime.now();
+      final now = ServerTimeService.instance.now();
       final api = ref.read(authProvider).api;
 
       final response = await CalendarCacheService.getOrFetch(
@@ -550,7 +551,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     _syncCalendarWithLocale();
 
     final colorScheme = Theme.of(context).colorScheme;
-    final now = DateTime.now();
+    final now = ServerTimeService.instance.now();
 
     return Scaffold(
       appBar: CustomAppBar(title: AppLocalizations.of(context).navOverview),
@@ -626,6 +627,13 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         colorScheme,
                         isFirst: i == 0,
                         isLast: i == _upcomingEvents!.length - 1,
+                        // 同一天的多筆事件只在第一筆顯示日期。
+                        showDate:
+                            i == 0 ||
+                            !_isSameDay(
+                              _upcomingEvents![i - 1].getDateTime(),
+                              _upcomingEvents![i].getDateTime(),
+                            ),
                       ),
                     ),
                   ),
@@ -635,13 +643,18 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     );
   }
 
-  /// 近期行事曆的時間軸單列：左側日期、中間圓點連接線、右側事件名。
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  /// 近期行事曆的時間軸單列：左側日期與相對時間、中間圓點連接線、右側事件名。
+  /// [showDate] 為 false 時（與上一筆同一天）左側留白。
   /// 有連結的事件整列可點擊，用 WebView 開啟。
   Widget _buildCalendarEventRow(
     CalendarEvent e,
     ColorScheme colorScheme, {
     required bool isFirst,
     required bool isLast,
+    required bool showDate,
   }) {
     final hasLink = e.link.isNotEmpty;
     final date = e.getDateTime();
@@ -651,7 +664,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final Color dotColor = e.isImportant ? _warmAccent : colorScheme.primary;
     final Color lineColor = colorScheme.outlineVariant;
 
-    final now = DateTime.now();
+    final now = ServerTimeService.instance.now();
     final today = DateTime(now.year, now.month, now.day);
     final eventDay = DateTime(date.year, date.month, date.day);
     final diffDays = eventDay.difference(today).inDays;
@@ -667,20 +680,41 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 日期
+          // 日期與相對時間（同一天的後續事件留白）
           SizedBox(
-            width: 44,
-            child: Center(
-              child: Text(
-                dateStr,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurfaceVariant,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ),
+            width: 64,
+            child: showDate
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          dateStr,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurfaceVariant,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          relativeStr,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSoon
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: isSoon
+                                ? dotColor
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : null,
           ),
           // 時間軸：上連接線、圓點、下連接線
           SizedBox(
@@ -711,16 +745,40 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               ],
             ),
           ),
-          // 事件名稱與相對時間
+          // 事件名稱（相對時間已移到左側日期下方）
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
               child: Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // 隱形的佔位（一行名稱 + 原本的相對時間行）撐出最小高度，
+                    // 讓單行名稱的列維持原本間距；名稱換行時則不再額外加高。
+                    child: Stack(
+                      alignment: AlignmentDirectional.centerStart,
                       children: [
+                        Visibility(
+                          visible: false,
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                ' ',
+                                maxLines: 1,
+                                style: TextStyle(height: 1.3, fontSize: 14),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                ' ',
+                                maxLines: 1,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
                         Row(
                           children: [
                             if (e.isImportant)
@@ -737,19 +795,6 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          relativeStr,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSoon
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: isSoon
-                                ? dotColor
-                                : colorScheme.onSurfaceVariant,
-                          ),
                         ),
                       ],
                     ),
@@ -791,7 +836,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
     );
 
-    final now = DateTime.now();
+    final now = ServerTimeService.instance.now();
     final todayStr =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     final isTodayHoliday = _holidays?.contains(todayStr) ?? false;
@@ -856,7 +901,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       );
     }
 
-    final now = DateTime.now();
+    final now = ServerTimeService.instance.now();
     final todayWeekday = now.weekday.toString();
     final isLoading =
         !data.isCacheLoaded ||
