@@ -670,7 +670,17 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                 final rooms = _extractRoomCodes(detail.timeRoom);
                 if (rooms.isEmpty) return null;
                 return IconButton(
-                  icon: const Icon(Icons.map_outlined),
+                  icon: const Icon(Icons.map_outlined, size: 20),
+                  // 標準 IconButton 的 48×48 點擊區會把這列撐得比其他列高，
+                  // 這裡縮小讓列高跟其他列一致（點擊區約 32×28）。
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 28,
+                  ),
+                  style: const ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   tooltip: AppLocalizations.of(context).mapModeTooltip,
                   onPressed: () {
                     if (rooms.length == 1) {
