@@ -642,6 +642,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get courseContactInfo => '聯絡資訊';
 
   @override
+  String get courseSerialNo => '課號';
+
+  @override
   String get courseCurriculumNo => '系所課號';
 
   @override

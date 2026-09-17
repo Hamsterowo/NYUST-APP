@@ -334,6 +334,7 @@
   },
   "courseInstructor": "授課教師",
   "courseContactInfo": "聯絡資訊",
+  "courseSerialNo": "課號",
   "courseCurriculumNo": "系所課號",
   "courseCredits": "學分數",
   "courseScheduleClassroom": "上課時間教室",

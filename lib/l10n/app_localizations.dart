@@ -1280,6 +1280,12 @@ abstract class AppLocalizations {
   /// **'聯絡資訊'**
   String get courseContactInfo;
 
+  /// No description provided for @courseSerialNo.
+  ///
+  /// In zh, this message translates to:
+  /// **'課號'**
+  String get courseSerialNo;
+
   /// No description provided for @courseCurriculumNo.
   ///
   /// In zh, this message translates to:

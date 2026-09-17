@@ -334,6 +334,7 @@
   },
   "courseInstructor": "Instructor",
   "courseContactInfo": "Contact Info",
+  "courseSerialNo": "Course No.",
   "courseCurriculumNo": "Curriculum No.",
   "courseCredits": "Credits",
   "courseScheduleClassroom": "Schedule/Classroom",

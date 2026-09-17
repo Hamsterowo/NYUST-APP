@@ -665,6 +665,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseContactInfo => 'Contact Info';
 
   @override
+  String get courseSerialNo => 'Course No.';
+
+  @override
   String get courseCurriculumNo => 'Curriculum No.';
 
   @override

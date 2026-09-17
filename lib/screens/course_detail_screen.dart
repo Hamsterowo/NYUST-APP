@@ -641,6 +641,13 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                 detail.teacherEmailAndTel!,
               ),
             ],
+            if (widget.courseNo.isNotEmpty) ...[
+              const Divider(height: 8),
+              _buildInfoRow(
+                AppLocalizations.of(context).courseSerialNo,
+                widget.courseNo,
+              ),
+            ],
             if (detail.deptCourseNo != null &&
                 detail.deptCourseNo!.isNotEmpty) ...[
               const Divider(height: 8),
