@@ -58,7 +58,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportViaEmail => 'Report via Email';
 
   @override
-  String get reportViaDiscord => 'Report via Discord community';
+  String get reportViaGithub => 'Report via GitHub Issues';
 
   @override
   String get reportEmailSubject => '[YunTool] Issue Report';
@@ -66,6 +66,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String reportEmailBody(String version, String platform) {
     return '[What happened]\n(Describe the problem you ran into)\n\n[Steps you took]\n1. \n2. \n3. \n\n[When it happened]\n\n------ Diagnostic info, please keep ------\nApp version: $version\nPlatform: $platform';
+  }
+
+  @override
+  String reportGithubBody(String version, String platform) {
+    return '> ⚠️ Issues are public. Do not post your student ID, password, grades, or screenshots containing personal data.\n\n### What happened\n(Describe the problem you ran into)\n\n### Steps you took\n1. \n2. \n3. \n\n### When it happened\n\n---\nDiagnostic info, please keep\n- App version: $version\n- Platform: $platform';
   }
 
   @override

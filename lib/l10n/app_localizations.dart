@@ -194,11 +194,11 @@ abstract class AppLocalizations {
   /// **'以 Email 回報'**
   String get reportViaEmail;
 
-  /// No description provided for @reportViaDiscord.
+  /// No description provided for @reportViaGithub.
   ///
   /// In zh, this message translates to:
-  /// **'加入 Discord 社群回報'**
-  String get reportViaDiscord;
+  /// **'透過 GitHub Issues 回報'**
+  String get reportViaGithub;
 
   /// No description provided for @reportEmailSubject.
   ///
@@ -211,6 +211,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'【問題描述】\n（請描述您遇到的狀況）\n\n【操作步驟】\n1. \n2. \n3. \n\n【發生時間】\n\n------ 以下為協助排查的資訊，請勿刪除 ------\nApp 版本：{version}\n平台：{platform}'**
   String reportEmailBody(String version, String platform);
+
+  /// No description provided for @reportGithubBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'> ⚠️ Issue 內容會公開，請勿貼上學號、密碼、成績或含個人資料的截圖。\n\n### 問題描述\n（請描述您遇到的狀況）\n\n### 操作步驟\n1. \n2. \n3. \n\n### 發生時間\n\n---\n以下為協助排查的資訊，請勿刪除\n- App 版本：{version}\n- 平台：{platform}'**
+  String reportGithubBody(String version, String platform);
 
   /// No description provided for @reportLaunchError.
   ///

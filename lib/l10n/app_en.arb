@@ -16,10 +16,21 @@
   "reportIssue": "Report an Issue",
   "reportChannelTitle": "Choose how to report",
   "reportViaEmail": "Report via Email",
-  "reportViaDiscord": "Report via Discord community",
+  "reportViaGithub": "Report via GitHub Issues",
   "reportEmailSubject": "[YunTool] Issue Report",
   "reportEmailBody": "[What happened]\n(Describe the problem you ran into)\n\n[Steps you took]\n1. \n2. \n3. \n\n[When it happened]\n\n------ Diagnostic info, please keep ------\nApp version: {version}\nPlatform: {platform}",
   "@reportEmailBody": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "reportGithubBody": "> ⚠️ Issues are public. Do not post your student ID, password, grades, or screenshots containing personal data.\n\n### What happened\n(Describe the problem you ran into)\n\n### Steps you took\n1. \n2. \n3. \n\n### When it happened\n\n---\nDiagnostic info, please keep\n- App version: {version}\n- Platform: {platform}",
+  "@reportGithubBody": {
     "placeholders": {
       "version": {
         "type": "String"

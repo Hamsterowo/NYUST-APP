@@ -57,7 +57,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportViaEmail => '以 Email 回報';
 
   @override
-  String get reportViaDiscord => '加入 Discord 社群回報';
+  String get reportViaGithub => '透過 GitHub Issues 回報';
 
   @override
   String get reportEmailSubject => '【雲科工具箱】問題回報';
@@ -65,6 +65,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String reportEmailBody(String version, String platform) {
     return '【問題描述】\n（請描述您遇到的狀況）\n\n【操作步驟】\n1. \n2. \n3. \n\n【發生時間】\n\n------ 以下為協助排查的資訊，請勿刪除 ------\nApp 版本：$version\n平台：$platform';
+  }
+
+  @override
+  String reportGithubBody(String version, String platform) {
+    return '> ⚠️ Issue 內容會公開，請勿貼上學號、密碼、成績或含個人資料的截圖。\n\n### 問題描述\n（請描述您遇到的狀況）\n\n### 操作步驟\n1. \n2. \n3. \n\n### 發生時間\n\n---\n以下為協助排查的資訊，請勿刪除\n- App 版本：$version\n- 平台：$platform';
   }
 
   @override

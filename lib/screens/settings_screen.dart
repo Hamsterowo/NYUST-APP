@@ -160,11 +160,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.forum_outlined),
-                title: Text(AppLocalizations.of(sheetContext).reportViaDiscord),
+                leading: const Icon(Icons.bug_report_outlined),
+                title: Text(AppLocalizations.of(sheetContext).reportViaGithub),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  _openDiscord();
+                  _openGithubIssue();
                 },
               ),
               const SizedBox(height: 8),
@@ -193,13 +193,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _openDiscord() async {
-    final uri = Uri.parse('https://discord.gg/jdaKepXgP2');
+  Future<void> _openGithubIssue() async {
+    final l10n = AppLocalizations.of(context);
+    final platform = kIsWeb ? 'Web' : defaultTargetPlatform.name;
+    final version = _versionStr.isNotEmpty ? _versionStr : '-';
+    final uri = Uri.https('github.com', '/Hamsterowo/NYUST-APP/issues/new', {
+      'title': l10n.reportEmailSubject,
+      'body': l10n.reportGithubBody(version, platform),
+    });
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
         mounted) {
       showTopSnackBar(
         context,
-        AppLocalizations.of(context).reportLaunchError,
+        l10n.reportLaunchError,
         type: SnackBarType.warning,
       );
     }
