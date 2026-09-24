@@ -1,30 +1,80 @@
 name: Setup project
-description: Set up Flutter with pub and Gradle caches, then run pub get.
+description: Set up Flutter (with pub cache), optionally the Gradle caches, then run pub get.
+
+inputs:
+  gradle:
+    description: Restore the Gradle caches and enable the Gradle build cache. Set to 'false' for jobs that never run Gradle.
+    required: false
+    default: 'true'
+  save-gradle-cache:
+    description: Save the Gradle caches at the end of the job. Only the cache-seeding workflow on main should set this; every other job restores read-only.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
   steps:
+    # cache: true 同時快取 Flutter SDK 與 ~/.pub-cache，不需要另外快取 pub。
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: 3.44.8
         channel: stable
         cache: true
 
-    - name: Cache pub packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.pub-cache
-        key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-        restore-keys: pub-${{ runner.os }}-
-
-    - name: Cache Gradle
+    # Gradle 快取拆成兩份：
+    # - 依賴（modules、wrapper、transforms…）：key 跟著 Gradle 設定檔的 hash，很少變。
+    # - build cache（R8、Kotlin 編譯等 task 輸出）：key 跟著 commit，每次預熱都存新的一份，
+    #   tag 上的 build 透過 restore-keys 讀到 main 最新的那份。
+    # 只有 save-gradle-cache 的 job 會寫入；其他 job 用 actions/cache/restore 唯讀。
+    - name: Restore & save Gradle dependency cache
+      if: inputs.gradle == 'true' && inputs.save-gradle-cache == 'true'
       uses: actions/cache@v4
       with:
         path: |
-          ~/.gradle/caches
+          ~/.gradle/caches/*
           ~/.gradle/wrapper
-        key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
-        restore-keys: gradle-${{ runner.os }}-
+          !~/.gradle/caches/build-cache-1
+        key: gradle-deps-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+        restore-keys: gradle-deps-${{ runner.os }}-
+
+    - name: Restore Gradle dependency cache
+      if: inputs.gradle == 'true' && inputs.save-gradle-cache != 'true'
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~/.gradle/caches/*
+          ~/.gradle/wrapper
+          !~/.gradle/caches/build-cache-1
+        key: gradle-deps-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+        restore-keys: gradle-deps-${{ runner.os }}-
+
+    - name: Restore & save Gradle build cache
+      if: inputs.gradle == 'true' && inputs.save-gradle-cache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/caches/build-cache-1
+        key: gradle-build-cache-${{ runner.os }}-${{ github.sha }}
+        restore-keys: gradle-build-cache-${{ runner.os }}-
+
+    - name: Restore Gradle build cache
+      if: inputs.gradle == 'true' && inputs.save-gradle-cache != 'true'
+      uses: actions/cache/restore@v4
+      with:
+        path: ~/.gradle/caches/build-cache-1
+        key: gradle-build-cache-${{ runner.os }}-${{ github.sha }}
+        restore-keys: gradle-build-cache-${{ runner.os }}-
+
+    # CI 專用的 Gradle 設定寫在 ~/.gradle/gradle.properties，不動 android/gradle.properties，
+    # 本機 build 不受影響。
+    - name: Enable Gradle build cache & parallel execution
+      if: inputs.gradle == 'true'
+      shell: bash
+      run: |
+        mkdir -p ~/.gradle
+        cat >> ~/.gradle/gradle.properties <<'EOF'
+        org.gradle.caching=true
+        org.gradle.parallel=true
+        EOF
 
     - name: Install dependencies
       shell: bash

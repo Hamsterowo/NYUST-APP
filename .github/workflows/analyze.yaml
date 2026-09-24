@@ -15,7 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # analyze 不跑 Gradle，不需要還原 Gradle 快取。
       - uses: ./.github/actions/setup-project
+        with:
+          gradle: 'false'
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
