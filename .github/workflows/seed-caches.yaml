@@ -3,6 +3,12 @@ name: Seed Caches
 on:
   schedule:
     - cron: "0 0 * * 0" # 每週日 00:00 UTC
+  # 依賴或 Android 設定一變就重新預熱，讓下次發版能命中 build cache。
+  push:
+    branches: [main]
+    paths:
+      - pubspec.lock
+      - android/**
   workflow_dispatch:
 
 jobs:
@@ -16,7 +22,8 @@ jobs:
         with:
           save-gradle-cache: 'true'
 
-      # 跑一次 debug build 把 Gradle / Android SDK 快取暖起來，
-      # 之後 analyze / build 就能吃到熱快取、跑得更快。
-      - name: Warm Gradle and Android SDK caches
-        run: flutter build apk --debug
+      # 跑一次 release build，把 R8、Kotlin 編譯、lintVital 等 task 的輸出存進
+      # Gradle build cache，發版（tag）時的 build 就能直接沿用。
+      # 沒有 keystore 會退回 debug 簽章，簽章不影響這些 task 的快取。
+      - name: Warm Gradle caches with a release build
+        run: flutter build apk --release --dart-define=USE_FIREBASE=true
