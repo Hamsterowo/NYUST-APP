@@ -1006,29 +1006,11 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       );
     }
 
-    final periods = [
-      'M',
-      'A',
-      '1',
-      '2',
-      '3',
-      '4',
-      'B',
-      '5',
-      '6',
-      '7',
-      '8',
-      'C',
-      'D',
-      'E',
-      'F',
-      'G',
-    ];
     todayClasses.sort((a, b) {
       final aFirst = a.times.isNotEmpty ? a.times.first : '';
       final bFirst = b.times.isNotEmpty ? b.times.first : '';
-      final aIdx = periods.indexOf(aFirst);
-      final bIdx = periods.indexOf(bFirst);
+      final aIdx = ClassPeriods.indexOf(aFirst);
+      final bIdx = ClassPeriods.indexOf(bFirst);
       return aIdx.compareTo(bIdx);
     });
 
@@ -1056,7 +1038,15 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         ...todayClasses.map((c) {
           String classState = 'future';
           if (c == highlightClass) {
-            classState = 'current';
+            // 標記的這堂若還沒到第一節的開始時間，就是「下一堂」而不是上課中。
+            final firstPeriod = c.times.isNotEmpty
+                ? ClassPeriods.byCode(c.times.first)
+                : null;
+            classState =
+                (firstPeriod != null &&
+                    currentMinutes < firstPeriod.startMinutes)
+                ? 'next'
+                : 'current';
           } else {
             if (c.times.isNotEmpty) {
               final lastPeriod = ClassPeriods.byCode(c.times.last);
@@ -1122,14 +1112,16 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     final isCurrent = state == 'current';
+    final isNext = state == 'next';
     final isPast = state == 'past';
 
     final cardColor = isCurrent
         ? const Color.fromARGB(255, 172, 255, 251)
         : colorScheme.surface;
+    // 「下一堂」（還沒開始）只把邊框換成主色外框，其餘與尚未上課相同。
     final borderColor = isCurrent
         ? Colors.transparent
-        : colorScheme.outlineVariant;
+        : (isNext ? colorScheme.primary : colorScheme.outlineVariant);
     // 已上課的課程整體褪成淺灰，和「尚未上課」拉開差距（兩者的卡片底色與
     // 邊框相同，只靠文字深淺分辨）。
     final pastInk = colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
@@ -1156,7 +1148,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       color: cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: borderColor),
+        side: BorderSide(color: borderColor, width: isNext ? 2 : 1),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
